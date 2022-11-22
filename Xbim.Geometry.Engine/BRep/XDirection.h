@@ -1,5 +1,6 @@
 #pragma once
 #include <gp_Vec.hxx>
+#include <gp_Vec2d.hxx>
 #include "../Exceptions/XbimGeometryFactoryException.h"
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
@@ -14,12 +15,12 @@ namespace Xbim
 			{
 
 			private:
-				double x;
-				double y;
-				double z;
+				double x = double::NaN;
+				double y = double::NaN;
+				double z = double::NaN;
 
 			public:
-				XDirection() : x(0), y(0), z(1) {};
+				XDirection() {};
 				//Create a normalised unit vector in the direction of x, y, z 
 				XDirection(double x, double y, double z)
 				{
@@ -31,16 +32,35 @@ namespace Xbim
 						this->y = v.Y();
 						this->z = v.Z();
 					}
-					catch (...)
+					catch (const Standard_Failure& )
 					{
-						throw gcnew XbimGeometryFactoryException("Invalid unit vector definition");
+						x = double::NaN;
+						y = double::NaN;
+						z = double::NaN;
 					}
-
+				};
+				XDirection(double x, double y) : z(double::NaN)
+				{
+					try
+					{
+						gp_Vec2d v(x, y);
+						v.Normalize();
+						this->x = v.X();
+						this->y = v.Y();
+					}
+					catch (const Standard_Failure& )
+					{
+						
+						x = double::NaN;
+						y = double::NaN;
+					}
 				};
 				// Create a normalised unit vector with direction of d 
 				XDirection(const gp_Dir& d) : x(d.X()), y(d.Y()), z(d.Z()) { };
-				virtual property bool IsNull { bool get() { return ((x * x) + (y * y) + (z * z)) <= 0; }; };
-				virtual property bool Is3d { bool get() { return true; }; };
+				XDirection(const gp_Dir2d& d) : x(d.X()), y(d.Y()), z(double::NaN) { };
+				virtual property bool IsNull { bool get() { return double::IsNaN(x) || double::IsNaN(y); }};
+
+				virtual property bool Is3d { bool get() { return !double::IsNaN(z); }; };
 				virtual property double X { double get() { return x; }; void set(double v) { x = v; }};
 				virtual property double Y { double get() { return y; }; void set(double v) { y = v; }};
 				virtual property double Z { double get() { return z; }; void set(double v) { z = v; }};

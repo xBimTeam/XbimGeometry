@@ -23,58 +23,54 @@ namespace Xbim
 		{
 			public ref class GeometryFactory : FactoryBase<NGeometryFactory>, IXGeometryFactory
 			{
-			
+
 			public:
 				GeometryFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NGeometryFactory()) {}
-				
+
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
-				gp_Pnt BuildPoint(IIfcCartesianPoint^ ifcPoint);
+				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
+
 
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
-				gp_Pnt2d BuildPoint2d(IIfcCartesianPoint^ ifcPoint);
+				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
 
-				//builds a 3d direction, if the Ifc Direction is 2d the Z component is 0
-				gp_Dir BuildDirection(IIfcDirection^ ifcDir);
+				
+				bool BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& pnt);
 
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
-				gp_Dir2d BuildDirection2d(IIfcDirection^ ifcDir);
+				bool BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir);
 
 				//builds a 3d vector, if the Ifc Vector is 2d the Z component is 0
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
-				gp_Vec BuildVector(IIfcVector^ ifcVec);
+				bool BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec);
 
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
-				gp_Vec2d BuildVector2d(IIfcVector^ ifcVec);
+				bool BuildVector2d(IIfcVector^ ifcVec, gp_Vec2d& vec);
 
-				gp_Ax2 BuildAxis2Placement(IIfcAxis2Placement3D^ axis2);
-				gp_Ax22d BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis);
+				bool BuildAxis2Placement3d(IIfcAxis2Placement3D^ axis2, gp_Ax2& ax2);
+				bool BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis, gp_Ax22d& ax22d);
 
-				virtual IXAxis2Placement2d^ GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
-
-				void GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
-				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
-				TopLoc_Location ToLocation(IIfcAxis2Placement2D^ axis2D);
+				bool ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& loc);
 				gp_Trsf ToTransform(Xbim::Common::Geometry::XbimMatrix3D m3D);
-				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
-				virtual IXDirection^ BuildDirection(double x, double y, double z);
-				
-				virtual IXPoint^ BuildPoint(double x, double y, double z);
 				
 
+				void GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
+				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
+
+
+				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
+				virtual IXAxis2Placement2d^ GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
+				virtual IXDirection^ BuildDirection3d(double x, double y, double z);
+				virtual IXDirection^ BuildDirection2d(double x, double y);
+				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
+				virtual IXPoint^ BuildPoint2d(double x, double y);
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);
 				virtual IXDirection^ NormalAt(IXFace^ face, IXPoint^ position, double tolerance);
-				
-				// Inherited via IXGeometryProcedures
-				virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling);
 
-				virtual Xbim::Geometry::Abstractions::IXVisualMaterial^ BuildVisualMaterial(System::String^ name);
-				// Inherited via IXGeometryProcedures
-				virtual Xbim::Geometry::Abstractions::IXColourRGB^ BuildColourRGB(double red, double green, double blue);
-				virtual Xbim::Geometry::Abstractions::IXShapeColour^ BuildShapeColour(System::String^ name, IIfcSurfaceStyleElementSelect^ surfaceStyle);
-				virtual Xbim::Geometry::Abstractions::IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
+				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 			};
 		}
 	}

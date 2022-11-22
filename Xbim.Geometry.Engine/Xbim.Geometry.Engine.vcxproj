@@ -213,6 +213,7 @@
     <ClInclude Include="Factories\EdgeFactory.h" />
     <ClInclude Include="Factories\FaceFactory.h" />
     <ClInclude Include="Factories\GeometryFactory.h" />
+    <ClInclude Include="Factories\ProfileFactory.h" />
     <ClInclude Include="Factories\ShapeFactory.h" />
     <ClInclude Include="Factories\ShellFactory.h" />
     <ClInclude Include="Factories\SolidFactory.h" />
@@ -293,6 +294,7 @@
     <ClCompile Include="Factories\EdgeFactory.cpp" />
     <ClCompile Include="Factories\FaceFactory.cpp" />
     <ClCompile Include="Factories\GeometryFactory.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.cpp" />
     <ClCompile Include="Factories\ShapeFactory.cpp" />
     <ClCompile Include="Factories\ShellFactory.cpp" />
     <ClCompile Include="Factories\SolidFactory.cpp" />

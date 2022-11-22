@@ -2,6 +2,32 @@
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeEdge2d.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <BRepLib.hxx>
+
+std::stringstream NEdgeFactory::GetError(BRepLib_EdgeError edgeError)
+{
+	std::stringstream strm;
+	switch (edgeError)
+	{
+	case BRepLib_PointProjectionFailed:
+		strm << "Edge Maker: Point Projection Failed";
+	case BRepLib_ParameterOutOfRange:
+		strm << "Edge Maker: Parameter Out Of Range";
+	case BRepLib_DifferentPointsOnClosedCurve:
+		strm << "Edge Maker: Different Points On Closed Curve";
+	case BRepLib_PointWithInfiniteParameter:
+		strm << "Edge Maker: Point With Infinite Parameter";
+	case BRepLib_DifferentsPointAndParameter:
+		strm << "Edge Maker: Differents Point And Parameter";
+	case BRepLib_LineThroughIdenticPoints:
+		strm << "Edge Maker: Line Through Identical Points";
+	default:
+		strm << "Edge Maker: Unknown Error";
+	}
+	return strm;
+}
+
+
 TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom_Curve)  hCurve)
 {
 	try
@@ -9,50 +35,16 @@ TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom_Curve)  hCurve)
 		BRepLib_MakeEdge edgeMaker;
 		edgeMaker.Init(hCurve);
 		if (!edgeMaker.IsDone())
-		{
-			BRepLib_EdgeError edgeError = edgeMaker.Error();
-			switch (edgeError)
-			{			
-			case BRepLib_PointProjectionFailed:
-				Standard_Failure::Raise("Edge Maker: Point Projection Failed");
-			case BRepLib_ParameterOutOfRange:
-				Standard_Failure::Raise("Edge Maker: Parameter Out Of Range");
-			case BRepLib_DifferentPointsOnClosedCurve:
-				Standard_Failure::Raise("Edge Maker: Different Points On Closed Curve");
-			case BRepLib_PointWithInfiniteParameter:
-				Standard_Failure::Raise("Edge Maker: Point With Infinite Parameter");
-			case BRepLib_DifferentsPointAndParameter:
-				Standard_Failure::Raise("Edge Maker: Differents Point And Parameter");
-			case BRepLib_LineThroughIdenticPoints:
-				Standard_Failure::Raise("Edge Maker: Line Through Identical Points");
-			case BRepLib_EdgeDone:
-				return edgeMaker.Edge();
-			default:
-				Standard_Failure::Raise("Edge Maker: Unknown Error");
-			}
-			return edgeMaker.Edge();
-		}
+			Standard_Failure::Raise(GetError(edgeMaker.Error()));
 		else
 			return edgeMaker.Edge();
 
 	}
 	catch (const Standard_Failure& sf)
 	{
-		std::stringstream strm;
-		sf.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(sf);
 	}
 	return TopoDS_Edge();
-}
-
-TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt& start, const gp_Pnt& end)
-{
-	//make the curve then call standard edge builder funtion to handle any errors
-	Handle(Geom_TrimmedCurve) tc = _curveFactory.BuildBoundedLine3d(start, end);
-	if (!tc.IsNull())
-		return BuildEdge(tc);
-	else
-		return _emptyEdge;
 }
 
 TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom2d_Curve)  hCurve2d)
@@ -61,37 +53,61 @@ TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom2d_Curve)  hCurve2d)
 	{
 		BRepLib_MakeEdge2d edgeMaker(hCurve2d);
 		if (!edgeMaker.IsDone())
-		{
-			BRepLib_EdgeError edgeError = edgeMaker.Error();
-			switch (edgeError)
-			{
-			case BRepLib_PointProjectionFailed:
-				Standard_Failure::Raise("Edge Maker: Point Projection Failed");
-			case BRepLib_ParameterOutOfRange:
-				Standard_Failure::Raise("Edge Maker: Parameter Out Of Range");
-			case BRepLib_DifferentPointsOnClosedCurve:
-				Standard_Failure::Raise("Edge Maker: Different Points On Closed Curve");
-			case BRepLib_PointWithInfiniteParameter:
-				Standard_Failure::Raise("Edge Maker: Point With Infinite Parameter");
-			case BRepLib_DifferentsPointAndParameter:
-				Standard_Failure::Raise("Edge Maker: Differents Point And Parameter");
-			case BRepLib_LineThroughIdenticPoints:
-				Standard_Failure::Raise("Edge Maker: Line Through Identical Points");
-			case BRepLib_EdgeDone:
-				break;
-			default:
-				Standard_Failure::Raise("Edge Maker: Unknown Error");
-			}
-			return edgeMaker.Edge();
-		}
+			Standard_Failure::Raise(GetError(edgeMaker.Error()));
 		else
-			Standard_Failure::Raise("Edge Maker: Unknown Error");
+		{
+			bool ok = BRepLib::BuildCurve3d(edgeMaker.Edge());
+			if (!ok)
+				Standard_Failure::Raise("Error building 3d curves for edge");
+			else
+				return edgeMaker.Edge();
+		}
 	}
 	catch (const Standard_Failure& sf)
 	{
-		std::stringstream strm;
-		sf.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(sf);
 	}
-	return _emptyEdge;
+	return TopoDS_Edge();
+}
+
+
+TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt2d& start, const gp_Pnt2d& end)
+{
+	try
+	{
+		BRepLib_MakeEdge2d edgeMaker(start, end);
+		if (!edgeMaker.IsDone())
+			Standard_Failure::Raise(GetError(edgeMaker.Error()));
+		else
+		{
+			bool ok = BRepLib::BuildCurve3d(edgeMaker.Edge());
+			if (!ok)
+				Standard_Failure::Raise("Error building 3d curves for edge");
+			else
+				return edgeMaker.Edge();
+		}
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Edge();
+}
+
+TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt& start, const gp_Pnt& end)
+{
+	try
+	{
+		BRepLib_MakeEdge edgeMaker(start, end);
+		if (!edgeMaker.IsDone())
+			Standard_Failure::Raise(GetError(edgeMaker.Error()));
+		else
+			return edgeMaker.Edge();
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+
+	}
+	return TopoDS_Edge();
 }

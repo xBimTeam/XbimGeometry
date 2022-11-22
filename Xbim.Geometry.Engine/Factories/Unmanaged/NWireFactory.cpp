@@ -41,6 +41,24 @@
 #include <ShapeFix_Edge.hxx>
 #include <BRepLib.hxx>
 #include <Geom_Plane.hxx>
+
+TopoDS_Wire NWireFactory::BuildWire(const TopoDS_Edge& edge)
+{
+	try
+	{
+		BRep_Builder builder;
+		TopoDS_Wire wire;
+		builder.MakeWire(wire);
+		builder.Add(wire, edge);
+		return wire;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+		return TopoDS_Wire();
+	}
+}
+
 TopoDS_Wire NWireFactory::Build2dPolyline(
 	const NCollection_Vector<KeyedPnt2d>& pointSeq,
 	double tolerance, bool buildRaw)

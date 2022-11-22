@@ -31,6 +31,7 @@ namespace Xbim
 			ref class CompoundFactory;
 			ref class BooleanFactory;
 			ref class ShapeFactory;
+			ref class ProfileFactory;
 		}
 	}
 }
@@ -66,6 +67,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::CompoundFactory^ _compoundFactory;
 				Xbim::Geometry::Factories::BooleanFactory^ _booleanFactory;
 				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
+				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
 			internal:
 				//Factories
 
@@ -80,6 +82,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::CompoundFactory^ GetCompoundFactory();
 				Xbim::Geometry::Factories::BooleanFactory^ GetBooleanFactory();
 				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
+				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
 			public:
 
 				ModelService(IModel^ model, ILogger^ logger);
@@ -119,6 +122,7 @@ namespace Xbim
 				virtual property IXCompoundFactory^ CompoundFactory {IXCompoundFactory^ get(); }
 				virtual property IXBooleanFactory^ BooleanFactory {IXBooleanFactory^ get(); }
 				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
+				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
 			};
 		}
 	}

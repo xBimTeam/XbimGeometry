@@ -16,13 +16,13 @@ namespace Xbim
 				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(gp_Pnt(start->X, start->Y, start->Z), gp_Pnt(end->X, end->Y, end->Z));
 				if (edge.IsNull())
 					RaiseGeometryFactoryException("Failed to build edge, invalid points, see logs");
-				else
-					return gcnew XEdge(edge);
+				return gcnew XEdge(edge);
 			}
 
 			IXEdge^ EdgeFactory::Build(IIfcCurve^ curve)
 			{
-				return gcnew XEdge(BuildCurve(curve));
+
+				return gcnew XEdge(BuildEdge(curve));
 			}
 
 			IXEdge^ EdgeFactory::BuildEdge(IXCurve^ curve)
@@ -30,11 +30,10 @@ namespace Xbim
 				if (curve->Is3d)
 				{
 					Handle(Geom_Curve) hCurve = XCurve::GeomCurve(curve);
-					TopoDS_Edge edge =EXEC_NATIVE->BuildEdge(hCurve);
+					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve);
 					if (edge.IsNull())
 						RaiseGeometryFactoryException("Failed to build edge, invalid curve 3D");
-					else
-						return gcnew XEdge(edge);
+					return gcnew XEdge(edge);
 				}
 				else
 				{
@@ -42,35 +41,40 @@ namespace Xbim
 					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve);
 					if (edge.IsNull())
 						RaiseGeometryFactoryException("Failed to build edge, invalid curve 2D");
-					else
-						return gcnew XEdge(edge);
+					return gcnew XEdge(edge);
 				}
 			}
 #pragma region  Methods returning Opencascade native types, internal use only
 
-			TopoDS_Edge EdgeFactory::BuildCurve(IIfcCurve^ curve)
+			TopoDS_Edge EdgeFactory::BuildEdge(IIfcCurve^ curve)
 			{
 				XCurveType curveType;
 				int dim = (int)curve->Dim;
 				if (dim == 2)
 				{
-					Handle(Geom2d_Curve) hCurve2d = CURVE_FACTORY->BuildGeom2d(curve, curveType); //throws an excpetion if failure
-					
-					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve2d);
-					if (edge.IsNull())
-						RaiseGeometryFactoryException("Failed to build edge, invalid curve 2D", curve);
-					else
-						return edge;
+					Handle(Geom2d_Curve) hCurve2d = CURVE_FACTORY->BuildCurve2d(curve, curveType); //throws an exception if failure				
+					return BuildEdge(hCurve2d);
 				}
 				else
 				{
-					Handle(Geom_Curve) hCurve = CURVE_FACTORY->BuildGeom3d(curve, curveType); //throws an excpetion if failure					
-					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve);
-					if (edge.IsNull())
-						throw gcnew XbimGeometryFactoryException("Failed to build edge, invalid curve 3D", curve);
-					else
-						return edge;
+					Handle(Geom_Curve) hCurve3d = CURVE_FACTORY->BuildCurve3d(curve, curveType); //throws an exception if failure					
+					return BuildEdge(hCurve3d);
 				}
+			}
+
+			TopoDS_Edge EdgeFactory::BuildEdge(Handle(Geom2d_Curve) hCurve2d)
+			{
+				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve2d);
+				if (edge.IsNull())
+					RaiseGeometryFactoryException("Failed to build edge, invalid curve 2D");
+				return edge;
+			}
+			TopoDS_Edge EdgeFactory::BuildEdge(Handle(Geom_Curve) hCurve3d)
+			{
+				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve3d);
+				if (edge.IsNull())
+					RaiseGeometryFactoryException("Failed to build edge, invalid curve 3D");
+				return edge;
 			}
 
 #pragma endregion

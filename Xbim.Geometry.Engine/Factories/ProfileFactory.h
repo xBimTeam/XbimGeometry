@@ -1,15 +1,8 @@
-#include "../XbimHandle.h"
-#include <TopoDS_Shape.hxx>
-#include <TopoDS_Compound.hxx>
+#pragma once
+
 #include "./Unmanaged/NProfileFactory.h"
-#include "../Services/LoggingService.h"
-#include "GeometryProcedures.h"
-#include "CurveFactory.h"
-#include "WireFactory.h"
-using namespace Xbim::Geometry::Services;
-using namespace Xbim::Common;
-using namespace Xbim::Ifc4::Interfaces;
-using namespace Xbim::Geometry::Abstractions;
+#include "FactoryBase.h"
+
 
 namespace Xbim
 {
@@ -17,31 +10,18 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class ProfileFactory : XbimHandle<NProfileFactory>, IXProfileService
-			{
-			private:
-				IXLoggingService^ LoggerService;				
-				IXModelService^ _ifcModel;				
-				GeometryProcedures^ GPFactory;
-				IXCurveFactory^ _curveFactory;
-				WireFactory^ _wireFactory;
+			public ref class ProfileFactory : FactoryBase<NProfileFactory>, IXProfileService
+			{	
 			public:
-				ProfileFactory(IXLoggingService^ loggingService, IXModelService^ modelService, IXWireFactory^ wireFactory, IXCurveFactory^ curveFactory) : XbimHandle(new NProfileFactory())
-				{
-					LoggerService = loggingService;									
-					_ifcModel = modelService;
-					GPFactory = gcnew GeometryProcedures(loggingService, modelService);
-					_wireFactory = dynamic_cast<WireFactory^>(wireFactory);
-					_curveFactory = curveFactory;
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);
-				}
-				virtual IXShape^ Build(IIfcProfileDef^ profileDef);
+				ProfileFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NProfileFactory()) {};
 
-				//Returns a compound where the CURVE profiles that have more than one wire, a wire for profiles that are defined as CURVES with one wire or a face for AREA types
-				TopoDS_Shape BuildShape(IIfcProfileDef^ profileDef);
-				TopoDS_Shape BuildShape(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
+				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
+				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);
+				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
+			internal:
+				TopoDS_Shape BuildProfile(IIfcProfileDef^ profileDef);
+			protected:
+				TopoDS_Shape BuildProfile(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 			};
 		}
 	}

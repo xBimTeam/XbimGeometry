@@ -29,44 +29,47 @@ namespace Xbim
 #pragma endregion
 
 #pragma region OCC
-			Handle(Geom_Surface) SurfaceFactory::BuildOccSurface(IIfcSurface^ ifcSurface)
+			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface)
 			{
 				if (dynamic_cast<IIfcPlane^>(ifcSurface))
-					return BuildOccPlane((IIfcPlane^)ifcSurface);
+					return BuildPlane((IIfcPlane^)ifcSurface);
 				else if (dynamic_cast<IIfcSurfaceOfRevolution^>(ifcSurface))
-					return BuildOccSurfaceOfRevolution((IIfcSurfaceOfRevolution^)ifcSurface);
+					return BuildSurfaceOfRevolution((IIfcSurfaceOfRevolution^)ifcSurface);
 				else if (dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(ifcSurface))
-					return BuildOccSurfaceOfLinearExtrusion((IIfcSurfaceOfLinearExtrusion^)ifcSurface);
+					return BuildSurfaceOfLinearExtrusion((IIfcSurfaceOfLinearExtrusion^)ifcSurface);
 				else if (dynamic_cast<IIfcCurveBoundedPlane^>(ifcSurface))
-					return BuildOccCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
+					return BuildCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
+				else if (dynamic_cast<IIfcCurveBoundedSurface^>(ifcSurface))
+					return BuildCurveBoundedSurface((IIfcCurveBoundedSurface^)ifcSurface);
 				else if (dynamic_cast<IIfcRectangularTrimmedSurface^>(ifcSurface))
-					return BuildOccRectangularTrimmedSurface((IIfcRectangularTrimmedSurface^)ifcSurface);
-				else if (dynamic_cast<IIfcBSplineSurface^>(ifcSurface))
-					return BuildOccBSplineSurface((IIfcBSplineSurface^)ifcSurface);
+					return BuildRectangularTrimmedSurface((IIfcRectangularTrimmedSurface^)ifcSurface);
+				else if (dynamic_cast<IIfcBSplineSurfaceWithKnots^>(ifcSurface))
+					return BuildBSplineSurfaceWithKnots((IIfcBSplineSurfaceWithKnots^)ifcSurface);
+				else if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(ifcSurface))
+					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
 				else if (dynamic_cast<IIfcCylindricalSurface^>(ifcSurface))
-					return BuildOccCylindricalSurface((IIfcCylindricalSurface^)ifcSurface);
-				else
-				{
-					System::Type^ type = ifcSurface->GetType();
-					throw(gcnew System::NotImplementedException(System::String::Format("XbimFace. BuildSurfaceof type {0} is not implemented", type->Name)));
-				}
+					return BuildCylindricalSurface((IIfcCylindricalSurface^)ifcSurface);
+				else			
+					RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
 			}
 
 
-			Handle(Geom_Surface) SurfaceFactory::BuildOccPlane(IIfcPlane^ ifcPlane)
+			Handle(Geom_Plane) SurfaceFactory::BuildPlane(IIfcPlane^ ifcPlane)
 			{
 				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint(ifcPlane->Position->Location);
 				gp_Dir normal = GEOMETRY_FACTORY->BuildDirection(ifcPlane->Position->Axis);
-				return EXEC_NATIVE->BuildPlane(origin, normal);
+				Handle(Geom_Plane) plane =  EXEC_NATIVE->BuildPlane(origin, normal);
+				if (plane.IsNull())
+					RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
 			}
 
-			Handle(Geom_Surface) SurfaceFactory::BuildOccSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
+			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
 			{
 				if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 					RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of revolution.", ifcSurfaceOfRevolution->SweptCurve);
 				
 
-				TopoDS_Edge sweptEdge = CURVE_FACTORY->BuildProfileDef(ifcSurfaceOfRevolution->SweptCurve);
+				TopoDS_Edge sweptEdge = PROFILE_FACTORY->BuildProfileDef(ifcSurfaceOfRevolution->SweptCurve);
 				
 				if (!edge->IsValid)
 				{
@@ -95,25 +98,32 @@ namespace Xbim
 
 			}
 
-			Handle(Geom_Surface) SurfaceFactory::BuildOccSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
+			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
 			{
 
 			}
 
-			Handle(Geom_Surface) SurfaceFactory::BuildOccCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
+			Handle(Geom_Plane) SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
 			{
 
 			}
-
-			Handle(Geom_Surface) SurfaceFactory::BuildOccRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
+Handle(Geom_Surface) SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
 			{
 
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildOccBSplineSurface(IIfcBSplineSurface^ ifcBSplineSurface)
+			Handle(Geom_Surface) SurfaceFactory::BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
 			{
 
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildOccCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
+			Handle(Geom_Surface) SurfaceFactory::BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots)
+			{
+
+			}
+			Handle(Geom_Surface) SurfaceFactory::BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots)
+			{
+
+			}
+			Handle(Geom_Surface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
 
 			}

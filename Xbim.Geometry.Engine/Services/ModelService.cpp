@@ -14,7 +14,7 @@
 #include "../Factories/SolidFactory.h"
 #include "../Factories/CompoundFactory.h"
 #include "../Factories/BooleanFactory.h"
-
+#include "../Factories/ProfileFactory.h"
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
@@ -165,6 +165,12 @@ namespace Xbim
 				return _shapeFactory;
 			}
 
+			ProfileFactory^ ModelService::GetProfileFactory()
+			{
+				if (_profileFactory == nullptr) _profileFactory = gcnew Xbim::Geometry::Factories::ProfileFactory(this);
+				return _profileFactory;
+			}
+
 
 			IXGeometryFactory^ ModelService::GeometryFactory::get() { return GetGeometryFactory(); }
 			IXCurveFactory^ ModelService::CurveFactory::get() { return GetCurveFactory(); }
@@ -177,6 +183,7 @@ namespace Xbim
 			IXCompoundFactory^ ModelService::CompoundFactory::get() { return GetCompoundFactory(); }
 			IXBooleanFactory^ ModelService::BooleanFactory::get() { return GetBooleanFactory(); }
 			IXShapeFactory^ ModelService::ShapeFactory::get() { return GetShapeFactory(); }
+			IXProfileFactory^ ModelService::ProfileFactory::get() { return GetProfileFactory(); }
 		}
 
 

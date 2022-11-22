@@ -1,5 +1,8 @@
 #include "CurveFactory.h"
 #include "GeometryFactory.h"
+#include "SurfaceFactory.h"
+
+
 #include <GeomLib_Tool.hxx>
 
 #include "../BRep/XLine.h"
@@ -12,6 +15,13 @@
 #include "../BRep/XTrimmedCurve2d.h"
 #include "../BRep/XBSplineCurve.h"
 
+#include "TColgp_Array1OfPnt2d.hxx"
+#include "TColStd_Array1OfReal.hxx"
+#include "TColStd_Array1OfInteger.hxx"
+#include <TColGeom2d_SequenceOfCurve.hxx>
+#include <ShapeConstruct_ProjectCurveOnSurface.hxx>
+#include <TColGeom_SequenceOfBoundedCurve.hxx>
+
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -22,7 +32,7 @@ Managed code is used to navigate the definitions and provide the framework for t
 All validation is done is managed code
 All operations where an OCC exception will be thrown are implemented in unmanaged code. (NCurveFactory)
 These exceptions are caught and logged in the managed code
-Unmanaged build methods reurn a null handle to the specified geometry type when a critical or error exception has been thrown
+Unmanaged build methods return a null handle to the specified geometry type when a standard failure condition has been thrown
 */
 using namespace System;
 using namespace Xbim::Geometry::Exceptions;
@@ -41,7 +51,7 @@ namespace Xbim
 
 			IXCurve^ CurveFactory::Build(IIfcCurve^ curve)
 			{
-				//IDisposable^ scope = Logger->BeginScope(String::Format("Building #{0}={1}", curve->EntityLabel, curve->GetType()->Name));
+
 				int dim = (int)curve->Dim;
 
 				XCurveType curveType;
@@ -60,8 +70,6 @@ namespace Xbim
 
 #pragma region 2d Curve builders
 
-
-
 			Handle(Geom2d_Curve) CurveFactory::BuildCurve2d(IIfcCurve^ curve, XCurveType% curveType)
 			{
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
@@ -69,32 +77,30 @@ namespace Xbim
 
 				switch (curveType)
 				{
-					/*case XCurveType::BoundaryCurve:
-						return  Build2d(static_cast<IIfcBoundedCurve^>(curve));
-					case XCurveType::BSplineCurveWithKnots:
-						return Build2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+				case XCurveType::IfcBSplineCurveWithKnots:
+					return BuildCurve2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));
 				case XCurveType::IfcCircle:
 					return BuildCurve2d(static_cast<IIfcCircle^>(curve));
-					/*	case XCurveType::CompositeCurve:
-							return Build2d(static_cast<IIfcCompositeCurve^>(curve)));
-						case XCurveType::CompositeCurveOnSurface:
-							return Build2d(static_cast<IIfcCompositeCurveOnSurface^>(curve)));*/
+				case XCurveType::IfcCompositeCurve:
+					return BuildCurve2d(static_cast<IIfcCompositeCurve^>(curve));
+				case XCurveType::IfcCompositeCurveOnSurface:
+					return BuildCurve2d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
 				case XCurveType::IfcEllipse:
 					return BuildCurve2d(static_cast<IIfcEllipse^>(curve));
-					/*case XCurveType::IndexedPolyCurve:
-						return Build2d(static_cast<IIfcIndexedPolyCurve^>(curve)));*/
+				case XCurveType::IfcIndexedPolyCurve:
+					return BuildCurve2d(static_cast<IIfcIndexedPolyCurve^>(curve));
 				case XCurveType::IfcLine:
 					return BuildCurve2d(static_cast<IIfcLine^>(curve));
-					/*case XCurveType::OffsetCurve2D:
-						return Build2d(static_cast<IIfcOffsetCurve2D^>(curve));
-					case XCurveType::Pcurve:
-						return Build2d(static_cast<IIfcPcurve^>(curve)) ;
-					case XCurveType::Polyline:
-						return Build2d(static_cast<IIfcPolyline^>(curve));
-					case XCurveType::RationalBSplineCurveWithKnots:
-						return Build2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case XCurveType::SurfaceCurve:
-						return Build2d(static_cast<IIfcSurfaceCurve^>(curve));*/
+				case XCurveType::IfcOffsetCurve2D:
+					return BuildCurve2d(static_cast<IIfcOffsetCurve2D^>(curve));
+					/*case XCurveType::IfcPcurve:
+						return BuildCurve2d(static_cast<IIfcPcurve^>(curve));*/
+				case XCurveType::IfcPolyline:
+					return BuildCurve2d(static_cast<IIfcPolyline^>(curve));
+				case XCurveType::IfcRationalBSplineCurveWithKnots:
+					return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+					/*case XCurveType::IfcSurfaceCurve:
+						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
 					return BuildCurve2d(static_cast<IIfcTrimmedCurve^>(curve));
 				default:
@@ -103,101 +109,618 @@ namespace Xbim
 
 			}
 
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
+			{
+				//all control points shall have the same dimensionality of 2
+				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
+				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
+				int numKnotMultiplicities = ifcBSplineCurveWithKnots->KnotMultiplicities->Count;
+
+				if (numKnots != numKnotMultiplicities)
+					RaiseGeometryFactoryException("Rule CorrespondingKnotLists: The number of elements in the knot multiplicities list shall be equal to the number of elements in the knots list", ifcBSplineCurveWithKnots);
+
+				TColgp_Array1OfPnt2d poles(1, numPoles);
+				TColStd_Array1OfReal knots(1, numKnots);
+				TColStd_Array1OfInteger knotMultiplicities(1, numKnotMultiplicities);
+
+				int i = 1;
+				for each (IIfcCartesianPoint ^ cp in ifcBSplineCurveWithKnots->ControlPointsList)
+				{
+					if ((int)cp->Dim != 2)
+						RaiseGeometryFactoryException("Rule SameDim: All control points shall have the same dimensionality.", ifcBSplineCurveWithKnots);
+					poles.SetValue(i, gp_Pnt2d(cp->X, cp->Y));
+					i++;
+				}
+
+				i = 1;
+				for each (double knot in ifcBSplineCurveWithKnots->Knots)
+				{
+					knots.SetValue(i, knot);
+					i++;
+				}
+				i = 1;
+				for each (int multiplicity in ifcBSplineCurveWithKnots->KnotMultiplicities)
+				{
+					knotMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildBSplineCurve2d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
+				if (bSpline.IsNull())
+					RaiseGeometryFactoryException("Failed to build IfcBSplineCurveWithKnots", ifcBSplineCurveWithKnots);
+				return bSpline;
+			}
+
 			Handle(Geom2d_Circle) CurveFactory::BuildCurve2d(IIfcCircle^ ifcCircle)
 			{
-				if (ifcCircle->Radius <= 0) 
+				if (ifcCircle->Radius <= 0)
 					RaiseGeometryFactoryException("Circle radius cannot be <= 0.", ifcCircle);
-				if (2 != (int)ifcCircle->Dim) 
+				if (2 != (int)ifcCircle->Dim)
 					RaiseGeometryFactoryException("Cannot build a 2D circle from a 3D circle", ifcCircle);
 				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircle->Position);
-				if (axis2d == nullptr) 
+				if (axis2d == nullptr)
 					RaiseGeometryFactoryException("Cannot build a 2D curve with 3D placement", ifcCircle->Position);
-				gp_Ax22d pos = GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d); //this will raise an exception if it fails
-				Handle(Geom2d_Circle) circle2d = EXEC_NATIVE->BuildCircle2d(pos, ifcCircle->Radius);
+				gp_Ax22d ax22d;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d, ax22d))
+					RaiseGeometryFactoryException("Cannot build IIfcAxis2Placement2D, see logs", ifcCircle);
+				Handle(Geom2d_Circle) circle2d = EXEC_NATIVE->BuildCircle2d(ax22d, ifcCircle->Radius);
 				if (circle2d.IsNull())
 					RaiseGeometryFactoryException("Cannot build 2D circle, see logs", ifcCircle);
 				return circle2d;
+			}
+
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcCompositeCurve^ ifcCompositeCurve)
+			{
+				XCurveType curveType;
+				TColGeom2d_SequenceOfBoundedCurve segments;
+				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
+				{
+					IIfcReparametrisedCompositeCurveSegment^ reparameterisedSegment = dynamic_cast<IIfcReparametrisedCompositeCurveSegment^>(segment);
+					if (reparameterisedSegment != nullptr && (double)reparameterisedSegment->ParamLength != 1.)
+						RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
+					if (!IsBoundedCurve(segment->ParentCurve))
+						RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
+					Handle(Geom2d_Curve) hSegment = BuildCurve2d(segment->ParentCurve, curveType);
+					if (hSegment.IsNull())
+						RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
+					Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(hSegment);
+					if (boundedCurve.IsNull())
+						RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
+					if (!segment->SameSense)
+						boundedCurve->Reverse();
+					segments.Append(boundedCurve);
+				}
+				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				if (bSpline.IsNull())
+					RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
+				else
+					return bSpline;
+			}
+
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcCompositeCurveOnSurface^ ifcCompositeCurve)
+			{
+				RaiseGeometryFactoryException("IIfcCompositeCurveOnSurface is currently not supported", ifcCompositeCurve);
+			}
+
+			Handle(Geom2d_Ellipse) CurveFactory::BuildCurve2d(IIfcEllipse^ ifcEllipse)
+			{
+				if (2 != (int)ifcEllipse->Dim) RaiseGeometryFactoryException("Cannot build a 2D curve from a 3D curve", ifcEllipse);
+				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcEllipse->Position);
+				if (axis2d == nullptr)
+					RaiseGeometryFactoryException("Cannot build a 2D curve with 3D placement", ifcEllipse->Position);
+				gp_Ax22d ax22d;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d, ax22d))
+					RaiseGeometryFactoryException("Cannot build IIfcAxis2Placement2D", axis2d);
+				Handle(Geom2d_Ellipse) elipse = EXEC_NATIVE->BuildEllipse2d(ax22d, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+				if (elipse.IsNull())
+					RaiseGeometryFactoryException("Cannot build a Elipse", ifcEllipse);
+				return elipse;
+
+			}
+
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve)
+			{
+				Handle(TColGeom2d_SequenceOfBoundedCurve) segments = GetIndexPolyCurveSegments2d(ifcIndexedPolyCurve); //this may throw exceptions
+				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve2d(segments, ModelService->MinimumGap);
+				if (bspline.IsNull())
+					RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+				return bspline;
+			}
+
+			Handle(TColGeom2d_SequenceOfBoundedCurve) CurveFactory::GetIndexPolyCurveSegments2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve)
+			{
+
+				IIfcCartesianPointList2D^ pointList2D = dynamic_cast<IIfcCartesianPointList2D^>(ifcIndexedPolyCurve->Points);
+				if (pointList2D == nullptr)
+					RaiseGeometryFactoryException("IIfcIndexedPolyCurve point list is not 2D", ifcIndexedPolyCurve->Points);
+
+
+				//get a index of all the points
+				int pointCount = pointList2D->CoordList->Count;
+				TColgp_Array1OfPnt2d poles(1, pointCount);
+				int i = 1;
+				for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in pointList2D->CoordList)
+				{
+					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+					enumer->MoveNext();
+					gp_Pnt2d p;
+					p.SetX((double)enumer->Current);
+					enumer->MoveNext();
+					p.SetY((double)enumer->Current);
+					poles.SetValue(i, p);
+					i++;
+				}
+				Handle(TColGeom2d_SequenceOfBoundedCurve) segments = new TColGeom2d_SequenceOfBoundedCurve();
+				if (ifcIndexedPolyCurve->Segments != nullptr && Enumerable::Any(ifcIndexedPolyCurve->Segments))
+				{
+
+
+					for each (IIfcSegmentIndexSelect ^ segment in  ifcIndexedPolyCurve->Segments)
+					{
+						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+						Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+						if (arcIndex != nullptr)
+						{
+
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+							if (indices->Count != 3)
+								RaiseGeometryFactoryException("There should be three indices in an arc index segment", ifcIndexedPolyCurve);
+							gp_Pnt2d start = poles.Value((int)indices[0]);
+							gp_Pnt2d mid = poles.Value((int)indices[1]);
+							gp_Pnt2d end = poles.Value((int)indices[2]);
+							Handle(Geom2d_Circle) circle = EXEC_NATIVE->BuildCircle2d(start, mid, end);
+							if (!circle.IsNull()) //it is a valid arc
+							{
+								Handle(Geom2d_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve2d(circle, start, end, ModelService->MinimumGap);
+								if (arcSegment.IsNull())
+									RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
+								segments->Append(arcSegment);
+							}
+							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
+							{
+								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(start, end);
+								if (lineSegment.IsNull())
+									RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+								segments->Append(lineSegment);
+
+							}
+						}
+						else if (lineIndex != nullptr)
+						{
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+
+							if (indices->Count < 2)
+								RaiseGeometryFactoryException("There should be at least two indices in a line index segment", ifcIndexedPolyCurve);
+
+							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
+							{
+								Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
+								if (lineSegment.IsNull())
+									RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+								segments->Append(lineSegment);
+							}
+						}
+					}
+				}
+				else
+				{
+					// To be compliant with:
+					// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+					for (Standard_Integer p = 1; p < pointCount; p++)
+					{
+						Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(poles.Value(p), poles.Value(p + 1));
+						if (lineSegment.IsNull())
+							RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+						segments->Append(lineSegment);
+					}
+				}
 			}
 
 			Handle(Geom2d_LineWithMagnitude) CurveFactory::BuildCurve2d(IIfcLine^ ifcLine)
 			{
 				if (2 != (int)ifcLine->Dim)
 					RaiseGeometryFactoryException("Cannot build a 2D curve from a 3D curve", ifcLine);
-				gp_Pnt2d origin = GEOMETRY_FACTORY->BuildPoint2d(ifcLine->Pnt);
-				gp_Dir2d direction = GEOMETRY_FACTORY->BuildDirection2d(ifcLine->Dir->Orientation);
+				gp_Pnt2d origin;
+				if (!GEOMETRY_FACTORY->BuildPoint2d(ifcLine->Pnt, origin))
+					RaiseGeometryFactoryException("Cannot build a 2D point from a 3D point", ifcLine->Pnt);
+				gp_Vec2d direction;
+				if (!GEOMETRY_FACTORY->BuildDirection2d(ifcLine->Dir->Orientation, direction))
+					RaiseGeometryFactoryException("Cannot build a 2D direction", ifcLine->Dir->Orientation);
 				Handle(Geom2d_LineWithMagnitude) line = EXEC_NATIVE->BuildLine2d(origin, direction, ifcLine->Dir->Magnitude);
 				if (line.IsNull())
 					RaiseGeometryFactoryException("Cannot build 2D line, see logs", ifcLine);
 				return line;
 			}
 
+			Handle(Geom2d_OffsetCurve) CurveFactory::BuildCurve2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D)
+			{
+				XCurveType curveType;
+				Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcOffsetCurve2D->BasisCurve, curveType); //throws exceptiom
+				Handle(Geom2d_OffsetCurve) offsetCurve = EXEC_NATIVE->BuildOffsetCurve2d(basisCurve, ifcOffsetCurve2D->Distance);
+				if (offsetCurve.IsNull())
+					RaiseGeometryFactoryException("Cannot build offset curve, see logs", ifcOffsetCurve2D);
+				return offsetCurve;
+			}
+
+			Handle(Geom2d_Curve) CurveFactory::BuildCurve2d(IIfcPcurve^ ifcPcurve)
+			{
+				throw gcnew NotImplementedException("IIfcPcurve is not implemented");
+				//Handle(Geom_Surface) basisSurface = SURFACE_FACTORY->BuildSurface(ifcPcurve->BasisSurface); //throws Exceptions
+				//Handle(Geom2d_Curve) referenceCurve = CURVE_FACTORY->BuildCurve2d(ifcPcurve->ReferenceCurve, curveType); //throws Exceptions
+				//Handle(Geom_Curve) curve3d = EXEC_NATIVE->BuildCurveOnSurface(referenceCurve, basisSurface);
+			}
+
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcPolyline^ ifcPolyline)
+			{
+				int pointCount = ifcPolyline->Points->Count;
+				if (pointCount < 2)
+					RaiseGeometryFactoryException("IfcPolyline has less than 2 points. It cannot be built", ifcPolyline);
+				TColgp_Array1OfPnt2d points(1, pointCount);
+				GEOMETRY_FACTORY->GetPolylinePoints2d(ifcPolyline, points);
+
+				Handle(Geom2d_BSplineCurve) polyline = EXEC_NATIVE->BuildPolyline2d(points, ModelService->Precision);
+				if (polyline.IsNull())
+					RaiseGeometryFactoryException("Failed to build IfcPolyline", ifcPolyline);
+				return polyline;
+			}
+
+			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots)
+			{
+				TColgp_Array1OfPnt2d poles(1, ifcRationalBSplineCurveWithKnots->ControlPointsList->Count);
+				TColStd_Array1OfReal knots(1, ifcRationalBSplineCurveWithKnots->Knots->Count);
+				TColStd_Array1OfInteger knotMultiplicities(1, ifcRationalBSplineCurveWithKnots->Knots->Count);
+				TColStd_Array1OfReal weights(1, ifcRationalBSplineCurveWithKnots->ControlPointsList->Count);
+				int i = 1;
+				for each (IIfcCartesianPoint ^ cp in ifcRationalBSplineCurveWithKnots->ControlPointsList)
+				{
+					poles.SetValue(i, gp_Pnt2d(cp->X, cp->Y));
+					i++;
+				}
+
+				i = 1;
+				for each (double knot in ifcRationalBSplineCurveWithKnots->Knots)
+				{
+					knots.SetValue(i, knot);
+					i++;
+				}
+				i = 1;
+				for each (int multiplicity in ifcRationalBSplineCurveWithKnots->KnotMultiplicities)
+				{
+					knotMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+				i = 1;
+				for each (double weight in ifcRationalBSplineCurveWithKnots->Weights)
+				{
+					weights.SetValue(i, weight);
+					i++;
+				}
+
+				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildRationalBSplineCurve2d(poles, weights, knots, knotMultiplicities, (int)ifcRationalBSplineCurveWithKnots->Degree);
+				if (bspline.IsNull())
+					RaiseGeometryFactoryException("IIfcRationalBSplineCurveWithKnots could not be built.", ifcRationalBSplineCurveWithKnots);
+				return bspline;
+			}
+
+			void CurveFactory::BuildSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfCurve& resultSegments, bool sameSense)
+			{
+
+				TColGeom2d_SequenceOfCurve segments;
+				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
+				{
+					Handle(Geom2d_Curve) segmentGeom = BuildCompositeCurveSegment2d(segment->ParentCurve, segment->SameSense);
+					segments.Append(segmentGeom);
+				}
+				//if this is a nested composite curve ensure sense is applied
+				for (auto it = segments.cbegin(); it != segments.cend(); ++it)
+				{
+					if (!it->IsNull())
+					{
+						if (sameSense)
+							resultSegments.Append(*it);
+						else
+						{
+							Handle(Geom2d_Curve) seg = *it;
+							seg->Reverse();
+							resultSegments.Append(seg);
+						}
+					}
+				}
+			}
+
+			template <typename IfcType>
+			Handle(Geom2d_Curve) CurveFactory::BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense)
+			{
+				Handle(Geom2d_Curve) curve = BuildCurve2d(ifcCurve);
+				if (isTrimmedCurve) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
+				{
+					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
+					if (!sameSense)
+					{
+						if (tc->SenseAgreement) curve->Reverse();
+					}
+					else
+					{
+						if (!tc->SenseAgreement) curve->Reverse();
+					}
+				}
+				else
+					if (!sameSense) curve->Reverse();
+				return curve;
+			}
+
 #pragma endregion
+
+#pragma region 3d Curve builders
+
+
 
 
 			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcCurve^ curve, XCurveType% curveType)
 			{
 				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
-					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type: " + curve->ExpressType->ExpressName);
+					RaiseGeometryFactoryException("Unsupported curve type.", curve);
 
 				switch (curveType)
 				{
-					/*case XCurveType::IfcBoundaryCurve:
-						return Build3d(static_cast<IIfcBoundaryCurve^>(curve));
-					case XCurveType::BSplineCurveWithKnots:
-						return Build3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
+				case XCurveType::IfcBSplineCurveWithKnots:
+					return BuildCurve3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));
 				case XCurveType::IfcCircle:
-					return BuildGeom3d(static_cast<IIfcCircle^>(curve));
+					return BuildCurve3d(static_cast<IIfcCircle^>(curve));
 				case XCurveType::IfcCompositeCurve:
-					return BuildGeom3d(static_cast<IIfcCompositeCurve^>(curve));
-					/*	case XCurveType::CompositeCurveOnSurface:
-							return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));*/
+					return BuildCurve3d(static_cast<IIfcCompositeCurve^>(curve));
+				case XCurveType::IfcCompositeCurveOnSurface:
+					return BuildCurve3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
 				case XCurveType::IfcEllipse:
-					return BuildGeom3d(static_cast<IIfcEllipse^>(curve));
-					/*	case XCurveType::IndexedPolyCurve:
-							return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));*/
+					return BuildCurve3d(static_cast<IIfcEllipse^>(curve));
+				case XCurveType::IfcIndexedPolyCurve:
+					return BuildCurve3d(static_cast<IIfcIndexedPolyCurve^>(curve));
 				case XCurveType::IfcLine:
-					return BuildGeom3d(static_cast<IIfcLine^>(curve));
-					/*
-					case XCurveType::OffsetCurve3D:
-						return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
-					case XCurveType::Pcurve:
-						return Build3d(static_cast<IIfcPcurve^>(curve));*/
+					return BuildCurve3d(static_cast<IIfcLine^>(curve));
+				case XCurveType::IfcOffsetCurve3D:
+					return BuildCurve3d(static_cast<IIfcOffsetCurve3D^>(curve));
+					/*case XCurveType::Pcurve:
+					return Build3d(static_cast<IIfcPcurve^>(curve));*/
 				case XCurveType::IfcPolyline:
-					return BuildGeom3d(static_cast<IIfcPolyline^>(curve));
+					return BuildCurve3d(static_cast<IIfcPolyline^>(curve));
 					/*case XCurveType::RationalBSplineCurveWithKnots:
 						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
 					case XCurveType::SurfaceCurve:
 						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
-					return BuildGeom3d(static_cast<IIfcTrimmedCurve^>(curve));
+					return BuildCurve3d(static_cast<IIfcTrimmedCurve^>(curve));
 
 				default:
-					break;
+					RaiseGeometryFactoryException("Curve type not implemented.", curve);
 				}
-				throw gcnew XbimGEOMETRY_FACTORYException("Not implemented. Curve type: " + curveType.ToString());
+
 			}
 
+			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve3d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
+			{
+				//all control points shall have the same dimensionality of 3
+				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
+				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
+				int numKnotMultiplicities = ifcBSplineCurveWithKnots->KnotMultiplicities->Count;
+
+				if (numKnots != numKnotMultiplicities)
+					RaiseGeometryFactoryException("Rule CorrespondingKnotLists: The number of elements in the knot multiplicities list shall be equal to the number of elements in the knots list", ifcBSplineCurveWithKnots);
+
+				TColgp_Array1OfPnt poles(1, numPoles);
+				TColStd_Array1OfReal knots(1, numKnots);
+				TColStd_Array1OfInteger knotMultiplicities(1, numKnotMultiplicities);
+
+				int i = 1;
+				for each (IIfcCartesianPoint ^ cp in ifcBSplineCurveWithKnots->ControlPointsList)
+				{
+					if ((int)cp->Dim != 3)
+						RaiseGeometryFactoryException("Rule SameDim: All control points shall have the same dimensionality.", ifcBSplineCurveWithKnots);
+					poles.SetValue(i, gp_Pnt(cp->X, cp->Y, cp->Z));
+					i++;
+				}
+
+				i = 1;
+				for each (double knot in ifcBSplineCurveWithKnots->Knots)
+				{
+					knots.SetValue(i, knot);
+					i++;
+				}
+				i = 1;
+				for each (int multiplicity in ifcBSplineCurveWithKnots->KnotMultiplicities)
+				{
+					knotMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildBSplineCurve3d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
+				if (bSpline.IsNull())
+					RaiseGeometryFactoryException("Failed to build IfcBSplineCurveWithKnots", ifcBSplineCurveWithKnots);
+				return bSpline;
+			}
+
+			Handle(Geom_Circle) CurveFactory::BuildCurve3d(IIfcCircle^ ifcCircle)
+			{
+				if (ifcCircle->Radius <= 0) RaiseGeometryFactoryException("Circle radius cannot be <= 0.", ifcCircle);
+				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcCircle->Position);
+				if (axis3d == nullptr) RaiseGeometryFactoryException("Cannot build a 3D curve with 2D placement", ifcCircle->Position);
+				gp_Ax2 pos;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(axis3d, pos))
+					RaiseGeometryFactoryException("Failed to build IIfcAxis2Placement3D", axis3d);
+				Handle(Geom_Circle) circle = EXEC_NATIVE->BuildCircle3d(pos, ifcCircle->Radius);
+				if (circle.IsNull())
+					RaiseGeometryFactoryException("Failed to build IIfcCircle", ifcCircle);
+				return circle;
+			}
+
+			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve3d(IIfcCompositeCurve^ ifcCompositeCurve)
+			{
+				XCurveType curveType;
+				TColGeom_SequenceOfBoundedCurve segments;
+				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
+				{
+					IIfcReparametrisedCompositeCurveSegment^ reparameterisedSegment = dynamic_cast<IIfcReparametrisedCompositeCurveSegment^>(segment);
+					if (reparameterisedSegment != nullptr && (double)reparameterisedSegment->ParamLength != 1.)
+						RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
+					if (!IsBoundedCurve(segment->ParentCurve))
+						RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
+					Handle(Geom_Curve) hSegment = BuildCurve3d(segment->ParentCurve, curveType);
+					if (hSegment.IsNull())
+						RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
+					Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
+					if (boundedCurve.IsNull())
+						RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
+					if (!segment->SameSense)
+						boundedCurve->Reverse();
+					segments.Append(boundedCurve);
+				}
+				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve3d(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				if (bSpline.IsNull())
+					RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
+				else
+					return bSpline;
+			}
+
+			
+
+			Handle(Geom_Ellipse) CurveFactory::BuildCurve3d(IIfcEllipse^ ifcEllipse)
+			{
+				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcEllipse->Position);
+				if (axis3d == nullptr) RaiseGeometryFactoryException("Cannot build a 3D curve with 2D placement");
+
+				//SELF\IfcConic.Position.Position.P[1] is the direction of the SemiAxis1. 
+				gp_Ax2 pos;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(axis3d, pos))
+					RaiseGeometryFactoryException("Failed to build IIfcAxis2Placement3D", ifcEllipse->Position);
+				Handle(Geom_Ellipse) elipse = EXEC_NATIVE->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+				if (elipse.IsNull())
+					RaiseGeometryFactoryException("Failed to build IfcEllipse", ifcEllipse);
+				return elipse;
+			}
+
+			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve)
+			{
+				Handle(TColGeom_SequenceOfBoundedCurve) segments = GetIndexPolyCurveSegments3d(ifcIndexedPolyCurve); //this may throw exceptions
+				Handle(Geom_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve3d(segments, ModelService->MinimumGap);
+				if (bspline.IsNull())
+					RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+				return bspline;
+			}
+
+			Handle(TColGeom_SequenceOfBoundedCurve) CurveFactory::GetIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve)
+			{
+
+				IIfcCartesianPointList3D^ pointList3D = dynamic_cast<IIfcCartesianPointList3D^>(ifcIndexedPolyCurve->Points);
+				if (pointList3D == nullptr)
+					RaiseGeometryFactoryException("IIfcIndexedPolyCurve point list is not 3D", ifcIndexedPolyCurve->Points);
+
+
+				//get a index of all the points
+				int pointCount = pointList3D->CoordList->Count;
+				TColgp_Array1OfPnt poles(1, pointCount);
+				int i = 1;
+				for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in pointList3D->CoordList)
+				{
+					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+					enumer->MoveNext();
+					gp_Pnt p;
+					p.SetX((double)enumer->Current);
+					enumer->MoveNext();
+					p.SetY((double)enumer->Current);
+					poles.SetValue(i, p);
+					i++;
+				}
+				Handle(TColGeom_SequenceOfBoundedCurve) segments = new TColGeom_SequenceOfBoundedCurve();
+				if (ifcIndexedPolyCurve->Segments != nullptr && Enumerable::Any(ifcIndexedPolyCurve->Segments))
+				{
+
+					for each (IIfcSegmentIndexSelect ^ segment in  ifcIndexedPolyCurve->Segments)
+					{
+						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+						Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+						if (arcIndex != nullptr)
+						{
+
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+							if (indices->Count != 3)
+								RaiseGeometryFactoryException("There should be three indices in an arc index segment", ifcIndexedPolyCurve);
+							gp_Pnt start = poles.Value((int)indices[0]);
+							gp_Pnt mid = poles.Value((int)indices[1]);
+							gp_Pnt end = poles.Value((int)indices[2]);
+							Handle(Geom_Circle) circle = EXEC_NATIVE->BuildCircle3d(start, mid, end);
+							if (!circle.IsNull()) //it is a valid arc
+							{
+								Handle(Geom_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve3d(circle, start, end, ModelService->MinimumGap);
+								if (arcSegment.IsNull())
+									RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
+								segments->Append(arcSegment);
+							}
+							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
+							{
+								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(start, end);
+								if (lineSegment.IsNull())
+									RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+								segments->Append(lineSegment);
+
+							}
+						}
+						else if (lineIndex != nullptr)
+						{
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+
+							if (indices->Count < 2)
+								RaiseGeometryFactoryException("There should be at least two indices in a line index segment", ifcIndexedPolyCurve);
+
+							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
+							{
+								Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
+								if (lineSegment.IsNull())
+									RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+								segments->Append(lineSegment);
+							}
+						}
+					}
+				}
+				else
+				{
+					// To be compliant with:
+					// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+					for (Standard_Integer p = 1; p < pointCount; p++)
+					{
+						Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(poles.Value(p), poles.Value(p + 1));
+						if (lineSegment.IsNull())
+							RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+						segments->Append(lineSegment);
+					}
+				}
+			}
+
+			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcSurfaceCurve^ ifcPolyline)
+			{
+				throw gcnew NotImplementedException("IIfcSurfaceCurve is not implemented");
+			}
 
 			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
 			{
 				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
 				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
-					throw gcnew XbimGEOMETRY_FACTORYException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
+					RaiseGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
 				if (3 != (int)curve->Dim)
-					throw gcnew XbimGEOMETRY_FACTORYException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
+					RaiseGeometryFactoryException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
 
-				Handle(Geom_Curve) geomCurve = BuildGeom3d(curve, curveType);
+				Handle(Geom_Curve) geomCurve = BuildCurve3d(curve, curveType); //throws Exception
 
 				if (geomCurve.IsNull())
-					throw gcnew XbimGEOMETRY_FACTORYException("Directrix is invalid");
+					RaiseGeometryFactoryException("Directrix is invalid");
 				//trimming
 				if (startParam != -1 || endParam != -1)
 				{
 					if (startParam == -1) startParam = geomCurve->FirstParameter();
 					if (endParam == -1) endParam = geomCurve->LastParameter();
-					Handle(Geom_Curve)  geomCurveTrimmed = Ptr()->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
+					Handle(Geom_Curve)  geomCurveTrimmed = EXEC_NATIVE->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
 					if (geomCurve.IsNull())
-						throw gcnew XbimGEOMETRY_FACTORYException("Directrix could not be trimmed");
+						RaiseGeometryFactoryException("Directrix could not be trimmed");
 					return geomCurveTrimmed;
 				}
 				return geomCurve;
@@ -247,9 +770,9 @@ namespace Xbim
 					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
-					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
+					RaiseGeometryFactoryException("Unsupported curve type");
 				}
-				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
+				RaiseGeometryFactoryException("Unsupported curve type");
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType)
@@ -286,9 +809,9 @@ namespace Xbim
 					return gcnew XTrimmedCurve2d(Handle(Geom2d_TrimmedCurve)::DownCast(curve));
 					break;
 				default:
-					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported 2d curve type");
+					RaiseGeometryFactoryException("Unsupported 2d curve type");
 				}
-				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported 2d curve type");
+				RaiseGeometryFactoryException("Unsupported 2d curve type");
 			}
 
 			IXCurve^ CurveFactory::BuildXDirectrix(IIfcCurve^ curve, double startParam, double endParam)
@@ -328,61 +851,45 @@ namespace Xbim
 					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(directix));
 					break;
 				default:
-					throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
+					RaiseGeometryFactoryException("Unsupported curve type");
 				}
-				throw gcnew XbimGEOMETRY_FACTORYException("Unsupported curve type");
+				RaiseGeometryFactoryException("Unsupported curve type");
 			}
 
-			Handle(Geom_LineWithMagnitude) CurveFactory::BuildGeom3d(IIfcLine^ ifcLine)
+			Handle(Geom_LineWithMagnitude) CurveFactory::BuildCurve3d(IIfcLine^ ifcLine)
 			{
-				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint(ifcLine->Pnt);
-				gp_Dir direction = GEOMETRY_FACTORY->BuildDirection(ifcLine->Dir->Orientation);
+				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcLine->Pnt);
+
+				gp_Vec direction;
+				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcLine->Dir->Orientation, direction))
+					RaiseGeometryFactoryException("Line orientation could not be built", ifcLine->Dir->Orientation);
 				return Ptr()->BuildLine3d(origin, direction, ifcLine->Dir->Magnitude);
 
 			}
 
-
-
-			Handle(Geom_Circle) CurveFactory::BuildGeom3d(IIfcCircle^ ifcCircle)
+			Handle(Geom_OffsetCurve) CurveFactory::BuildCurve3d(IIfcOffsetCurve3D^ ifcOffsetCurve3D)
 			{
-				if (ifcCircle->Radius <= 0) throw gcnew XbimGEOMETRY_FACTORYException("Circle radius cannot be <= 0.");
-				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcCircle->Position);
-				if (axis3d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 3D curve with 2D placement");
-				gp_Ax2 pos = GEOMETRY_FACTORY->BuildAxis2Placement(axis3d);
-				return Ptr()->BuildCircle3d(pos, ifcCircle->Radius);
-
+				XCurveType curveType;
+				Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcOffsetCurve3D->BasisCurve, curveType); //throws exception
+				gp_Vec refDir;
+				if(!GEOMETRY_FACTORY->BuildDirection3d(ifcOffsetCurve3D->RefDirection,refDir))
+					RaiseGeometryFactoryException("Cannot build offset curve reference direction", ifcOffsetCurve3D->RefDirection);			
+				Handle(Geom_OffsetCurve) offsetCurve = EXEC_NATIVE->BuildOffsetCurve3d(basisCurve,refDir, ifcOffsetCurve3D->Distance);
+				if (offsetCurve.IsNull())
+					RaiseGeometryFactoryException("Cannot build offset curve, see logs", ifcOffsetCurve3D);
+				return offsetCurve;
 			}
 
-			
 
-			Handle(Geom_Ellipse) CurveFactory::BuildGeom3d(IIfcEllipse^ ifcEllipse)
-			{
-				IIfcAxis2Placement3D^ axis3d = dynamic_cast<IIfcAxis2Placement3D^>(ifcEllipse->Position);
-				if (axis3d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 3D curve with 2D placement");
-
-				//SELF\IfcConic.Position.Position.P[1] is the direction of the SemiAxis1. 
-				gp_Ax2 pos = GEOMETRY_FACTORY->BuildAxis2Placement(axis3d);
-				return Ptr()->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
-			}
-
-			Handle(Geom2d_Ellipse) CurveFactory::BuildCurve2d(IIfcEllipse^ ifcEllipse)
-			{
-				if (2 != (int)ifcEllipse->Dim) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 2D curve from a 3D curve");
-				IIfcAxis2Placement2D^ axis2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcEllipse->Position);
-				if (axis2d == nullptr) throw gcnew XbimGEOMETRY_FACTORYException("Cannot build a 2D curve with 3D placement");
-				gp_Ax22d pos = GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d);
-				return Ptr()->BuildEllipse2d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
-			}
-
-			Handle(Geom_TrimmedCurve) CurveFactory::BuildGeom3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
+			Handle(Geom_TrimmedCurve) CurveFactory::BuildCurve3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
 				try
 				{
 					//Validation
 					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
+						RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.", ifcTrimmedCurve);
 					XCurveType curveType;
-					Handle(Geom_Curve) basisCurve = BuildGeom3d(ifcTrimmedCurve->BasisCurve, curveType);
+					Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
 					if (!basisCurve.IsNull())
 					{
 						bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
@@ -413,15 +920,15 @@ namespace Xbim
 							(cp1 != nullptr && cp2 != nullptr &&
 								(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
 						{
-							gp_Pnt p1 = XbimConvert::GetPoint3d(cp1);
-							gp_Pnt p2 = XbimConvert::GetPoint3d(cp2);
+							gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
+							gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
 							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
-								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point1 is not on the basis curve");
+								RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
 							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
-								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point2 is not on the basis curve");
+								RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
 						}
 						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-							throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
+							RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
 						else //we prefer to use parameters but need to adjust
 						{
 							if (isConic)
@@ -433,22 +940,22 @@ namespace Xbim
 						}
 
 						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-							throw gcnew XbimGEOMETRY_FACTORYException("Error converting Ifc Trim Points");
+							RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
 
 						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
 						{
 							if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-							throw gcnew XbimGEOMETRY_FACTORYException("Parametric Trim Points are equal and will result in an empty curve");
+							RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve", ifcTrimmedCurve->BasisCurve);
 						}
 						else
 							return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
 					}
 					else
-						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build Trimmed Basis Curve");
+						RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve", ifcTrimmedCurve->BasisCurve);
 				}
 				catch (Exception^ ex)
 				{
-					LoggerService->LogInformation(String::Format("Trimmed Curve #{0} failed: {1}", ifcTrimmedCurve->EntityLabel, ex->Message));
+					LogInformation(ex, "Trimmed curve failed", ifcTrimmedCurve);
 					return nullptr;
 				}
 			}
@@ -460,7 +967,7 @@ namespace Xbim
 
 					//Validation
 					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
+						RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
 					XCurveType curveType;
 					Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcTrimmedCurve->BasisCurve, curveType);
 					if (!basisCurve.IsNull())
@@ -493,15 +1000,19 @@ namespace Xbim
 							(cp1 != nullptr && cp2 != nullptr &&
 								(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
 						{
-							gp_Pnt2d p1 = XbimConvert::GetPoint2d(cp1);
-							gp_Pnt2d p2 = XbimConvert::GetPoint2d(cp2);
+							gp_Pnt2d p1;
+							gp_Pnt2d p2;
+							if (!GEOMETRY_FACTORY->BuildPoint2d(cp1, p1))
+								RaiseGeometryFactoryException("Trim Point1 is not a 2d point", cp1);
+							if (!GEOMETRY_FACTORY->BuildPoint2d(cp2, p2))
+								RaiseGeometryFactoryException("Trim Point2 is not a 2d point", cp1);
 							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
-								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point1 is not on the basis curve");
+								RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
 							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
-								throw gcnew XbimGEOMETRY_FACTORYException("Trim Point2 is not on the basis curve");
+								RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
 						}
 						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-							throw gcnew XbimGEOMETRY_FACTORYException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
+							RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
 						else //we prefer to use parameters but need to adjust
 						{
 							if (isConic)
@@ -511,81 +1022,53 @@ namespace Xbim
 							}
 						}
 						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-							throw gcnew XbimGEOMETRY_FACTORYException("Error converting Ifc Trim Points");
+							RaiseGeometryFactoryException("Error converting Ifc Trim Points");
 						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
 						{
 							if (isConic) return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-							throw gcnew XbimGEOMETRY_FACTORYException("Parametric Trim Points are equal and will result in an empty curve");
+							RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
 						}
 						else
 							return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, sense);
 					}
 					else
-						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build Trimmed Basis Curve");
+						RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve");
 				}
 				catch (Exception^ ex)
 				{
-					LoggerService->LogInformation(String::Format("Trimmed Curve #{0} failed: {1}", ifcTrimmedCurve->EntityLabel, ex->Message));
+					LogInformation(ex, "Trimmed Curve failed", ifcTrimmedCurve);
 					return nullptr;
 				}
 
 			}
 
-			Handle(Geom_Curve) CurveFactory::BuildGeom3d(IIfcPolyline^ ifcPolyline)
+			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcPolyline^ ifcPolyline)
 			{
 				//validate
 				int pointCount = ifcPolyline->Points->Count;
 				if (pointCount < 2)
-					throw gcnew XbimGEOMETRY_FACTORYException("IfcPolyline has less than 2 points. It cannot be built");
+					RaiseGeometryFactoryException("IfcPolyline has less than 2 points. It cannot be built", ifcPolyline);
 				if (pointCount == 2) //just build a line
 				{
-					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint(ifcPolyline->Points[0]);
-					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelService->Precision))
-						throw gcnew XbimGEOMETRY_FACTORYException(String::Format("IfcPolyline has only 2 identical points( #{0} and #{1}. It cannot be built", ifcPolyline->Points[0]->EntityLabel, ifcPolyline->Points[1]->EntityLabel));
-					Handle(Geom_TrimmedCurve) lineSeg = Ptr()->BuildBoundedLine3d(start, end);
+					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[0]);
+					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
+					if (start.IsEqual(end, ModelService->MinimumGap))
+						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
+					Handle(Geom_TrimmedCurve) lineSeg = Ptr()->BuildTrimmedLine3d(start, end);
 					if (lineSeg.IsNull())
-						throw gcnew XbimGEOMETRY_FACTORYException("Invalid IfcPolyline definition");
+						RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
 					return lineSeg;
 				}
 				else
 				{
 					TColgp_Array1OfPnt points(1, pointCount);
-					GEOMETRY_FACTORY->GetPolylinePoints(ifcPolyline, points);
-					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline(points, ModelService->Precision);
+					GEOMETRY_FACTORY->GetPolylinePoints3d(ifcPolyline, points);
+					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline3d(points, ModelService->Precision);
 					if (polyline.IsNull())
-						throw gcnew XbimGEOMETRY_FACTORYException("Failed to build IfcPolyline");
+						RaiseGeometryFactoryException("Failed to build IfcPolyline", ifcPolyline);
 					return polyline;
 				}
 
-			}
-
-
-
-
-
-			Handle(Geom_BSplineCurve) CurveFactory::BuildGeom3d(IIfcCompositeCurve^ ifcCompositeCurve)
-			{
-				XCurveType curveType;
-				TColGeom_SequenceOfCurve segments;
-
-				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
-				{
-					if (!IsBoundedCurve(segment->ParentCurve))
-						throw gcnew XbimGEOMETRY_FACTORYException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
-					Handle(Geom_Curve) hSegment = BuildGeom3d(segment->ParentCurve, curveType);
-					Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
-					if (boundedCurve.IsNull())
-						gcnew XbimGEOMETRY_FACTORYException(String::Format("Compound curve segments must be bounded curves #{0}", segment->EntityLabel));
-					if (hSegment.IsNull())
-						throw gcnew XbimGEOMETRY_FACTORYException(String::Format("Composite curve is invalid, curve segment #{0} is null", segment->EntityLabel));
-					segments.Append(boundedCurve);
-				}
-				Handle(Geom_BSplineCurve) bSpline = Ptr()->BuildCompositeCurve(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with cirves and line tolerance errors
-				if (bSpline.IsNull())
-					throw gcnew XbimGEOMETRY_FACTORYException(String::Format("Composite curve #{0} could not be built", ifcCompositeCurve->EntityLabel));
-				else
-					return bSpline;
 			}
 
 
@@ -598,6 +1081,7 @@ namespace Xbim
 				if (dynamic_cast<IIfcSurfaceCurve^>(curve)) return false;
 				return true;
 			}
+#pragma endregion
 		}
 	}
 }

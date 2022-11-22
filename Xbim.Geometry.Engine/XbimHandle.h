@@ -19,14 +19,14 @@ public ref class XbimHandle : SH
 internal:
 	T* Ptr() { return static_cast<T*>(handle.ToPointer()); }
 	T& Ref() { return (*(this->Ptr())); }
-protected:
+	T* Exec() { return static_cast<T*>(handle.ToPointer()); }
 	XbimHandle(T* p) : SH(PtrType::Zero, true)
 	{
 		handle = PtrType(p);
 	}
 
 	
-
+protected:
 	bool ReleaseHandle() override
 	{
 		if (!IsInvalid)

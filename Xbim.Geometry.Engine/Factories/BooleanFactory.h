@@ -1,22 +1,16 @@
 #pragma once
-#include "../XbimHandle.h"
-#include <TopoDS_Solid.hxx>
-#include "../Services/LoggingService.h"
+
 #include "./Unmanaged/NBooleanFactory.h"
+#include "FactoryBase.h"
 #include "SolidFactory.h"
 
-
-using namespace Xbim::Geometry::Services;
-using namespace Xbim::Common;
-using namespace Xbim::Ifc4::Interfaces;
-using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Factories
 		{
-			public ref class BooleanFactory : XbimHandle<NBooleanFactory>, IXBooleanFactory
+			public ref class BooleanFactory : FactoryBase<NBooleanFactory>, IXBooleanFactory
 			{
 			private:
 				//GeometryProcedures^ GpFactory;
@@ -27,16 +21,7 @@ namespace Xbim
 				IXModelService^ _modelService;
 							
 			public:
-				BooleanFactory(ModelService^ modelService) : XbimHandle(new NBooleanFactory())
-				{					
-					_modelService = modelService;
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);
-					
-				}
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _loggerService; }};
+				BooleanFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService,new NBooleanFactory()){	}
 				virtual IXShape^ Build(IIfcBooleanResult^ boolResult);
 				TopoDS_Shape BuildBooleanResult(IIfcBooleanResult^ boolResult);
 				TopoDS_Shape BuildOperand(IIfcBooleanOperand^ boolOp);

@@ -1,6 +1,6 @@
 #include "NGeometryFactory.h"
 
-TopLoc_Location NGeometryFactory::ToLocation(gp_Pnt2d location, gp_XY xDirection)
+bool NGeometryFactory::ToLocation(gp_Pnt2d location, gp_XY xDirection, TopLoc_Location& topLoc)
 {
 	try
 	{
@@ -13,26 +13,73 @@ TopLoc_Location NGeometryFactory::ToLocation(gp_Pnt2d location, gp_XY xDirection
 		gp_Trsf2d trsf;
 		trsf.SetTransformation(axis2d);
 		trsf.Invert();
-		return TopLoc_Location(trsf);
+		topLoc = TopLoc_Location(trsf);
+		return true;
 	}
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
 	}
-	return TopLoc_Location();
+	return false;
 }
 
-gp_Dir2d NGeometryFactory::BuildDirection2d(double x, double y, bool& isValid)
+
+
+bool NGeometryFactory::BuildDirection2d(double x, double y, gp_Vec2d& dir2d)
 {
 	try
 	{
-		isValid = true;
-		return gp_Dir2d(x,y);
+		dir2d.SetXY(gp_XY(x, y)); //this throws an exception if the vector is invalid
+		return true;
 	}
 	catch (const Standard_Failure& e)
 	{
-		isValid = false;
 		LogStandardFailure(e);
+
 	}
-	return gp_Dir2d();
+	return false;
+}
+bool NGeometryFactory::BuildDirection3d(double x, double y, double z, gp_Vec& dir2d)
+{
+	try
+	{
+		dir2d.SetXYZ(gp_XYZ(x, y, z)); //this throws an exception if the vector is invalid
+		return true;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+
+	}
+	return false;
+}
+
+bool NGeometryFactory::BuildAxis2Placement3d(const gp_Pnt& location, const gp_Vec& axis, const gp_Vec& refDir, gp_Ax2& ax2)
+{
+	try 
+	{
+		ax2 = gp_Ax2(location, axis, refDir);
+		return true;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+
+	}
+	return false;
+}
+
+bool NGeometryFactory::BuildAxis2Placement2d(const gp_Pnt2d& location,  const gp_Vec2d& refDir, gp_Ax22d& ax2)
+{
+	try
+	{
+		ax2 = gp_Ax22d(location, refDir);
+		return true;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+
+	}
+	return false;
 }

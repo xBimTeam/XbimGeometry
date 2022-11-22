@@ -1,4 +1,5 @@
 #pragma once
+#include "NFactoryBase.h"
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Builder.hxx>
 #include "../../Services/Unmanaged/NLoggingService.h"
@@ -14,23 +15,13 @@
 #include <TColGeom2d_SequenceOfCurve.hxx>
 
 
-class NWireFactory
+class NWireFactory : NFactoryBase
 {
-private:
-	NLoggingService* pLoggingService;
-	
+
 public:
-	NWireFactory()
-	{
-		pLoggingService = new NLoggingService();
-		
-	};
-	~NWireFactory()
-	{
-		if (pLoggingService != nullptr) delete pLoggingService;
-		pLoggingService = nullptr;
-	};
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+	
+	TopoDS_Wire BuildWire(const TopoDS_Edge& edge);
+
 	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
 	TopoDS_Wire Build2dPolyline(
 		const NCollection_Vector<KeyedPnt2d>& pointSeq,		

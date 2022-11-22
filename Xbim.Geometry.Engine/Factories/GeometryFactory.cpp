@@ -1,3 +1,6 @@
+///TODO: Replace all exceptions with RaisGeoemtryFactoryException
+//fix the raising of excpetions for vectors and directions 
+
 #include "GeometryFactory.h"
 #include "../Services//ModelService.h"
 #include <gp_Ax2.hxx>
@@ -12,6 +15,7 @@
 #include <BRepGProp_Face.hxx>
 #include <Geom_Plane.hxx>
 #include <gp_Ax3.hxx>
+#include <gp_Dir2d.hxx>
 #include <math.h>
 
 
@@ -33,119 +37,122 @@
 #include <GeomLProp_SLProps.hxx>
 using namespace Xbim::Geometry::BRep;
 
-using namespace Xbim::Geometry::Visual;
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Factories
 		{
-			
-			IXDirection^ GeometryFactory::BuildDirection(double x, double y, double z)
+
+			IXDirection^ GeometryFactory::BuildDirection3d(double x, double y, double z)
 			{
 				return gcnew Xbim::Geometry::BRep::XDirection(x, y, z);
 			};
+			IXDirection^ GeometryFactory::BuildDirection2d(double x, double y)
+			{
+				return gcnew Xbim::Geometry::BRep::XDirection(x, y);
+			};
 
-			IXPoint^ GeometryFactory::BuildPoint(double x, double y, double z)
+			IXPoint^ GeometryFactory::BuildPoint3d(double x, double y, double z)
 			{
 				return gcnew XPoint(x, y, z);
 			};
+			IXPoint^ GeometryFactory::BuildPoint2d(double x, double y)
+			{
+				return gcnew XPoint(x, y);
+			};
 
-			
 
-			gp_Pnt GeometryFactory::BuildPoint(IIfcCartesianPoint^ ifcPoint)
+			gp_Pnt GeometryFactory::BuildPoint3d(IIfcCartesianPoint^ ifcPoint)
 			{
 				return gp_Pnt(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1], (int)ifcPoint->Dim == 3 ? (double)ifcPoint->Coordinates[2] : 0.0);
 			}
 
-			gp_Pnt2d GeometryFactory::BuildPoint2d(IIfcCartesianPoint^ ifcPoint)
+			bool GeometryFactory::BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d)
 			{
-				if ((int)ifcPoint->Dim == 3) throw gcnew XbimGeometryFactoryException("Illegal attempt to build a 2d point from a 3d point. ");
-				return gp_Pnt2d(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1]);
+				if ((int)ifcPoint->Dim == 2)
+				{
+					pnt2d.SetXY(gp_XY(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1]));
+					return true;
+				}
+				else
+					return false;
 			}
 
-			
-
-			gp_Dir2d GeometryFactory::BuildDirection2d(IIfcDirection^ ifcDir)
-			{			
-					if ((int)ifcDir->Dim == 3) 
-						RaiseGeometryFactoryException("Illegal attempt to build a 2d direction from a 3d direction.", ifcDir);
-					bool isValid;
-					gp_Dir2d dir2d = EXEC_NATIVE->BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], bool &isValid);
-					if (!isValid)
-						RaiseGeometryFactoryException("Invalid direction ratios. See logs", ifcDir);
-					return dir2d;
-			}
-
-
-
-
-
-			gp_Dir GeometryFactory::BuildDirection(IIfcDirection^ ifcDir)
+			bool GeometryFactory::BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir2d)
 			{
-				try
-				{
-					return gp_Dir(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], (int)ifcDir->Dim == 3 ? (double)ifcDir->DirectionRatios[2] : 0.0);
-				}
-				catch (...) //this will only fail if the normal is zero
-				{
-					throw gcnew XbimGeometryFactoryException("Input direction has zero normal");
-				}
+				if ((int)ifcDir->Dim != 2) return false;
+				return EXEC_NATIVE->BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], dir2d);
 			}
 
-			gp_Vec GeometryFactory::BuildVector(IIfcVector^ ifcVec)
+
+			bool GeometryFactory::BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& dir)
 			{
-				try
-				{
-					gp_Vec vec(ifcVec->Orientation->DirectionRatios[0], ifcVec->Orientation->DirectionRatios[1], (int)ifcVec->Dim == 3 ? (double)ifcVec->Orientation->DirectionRatios[2] : 0.0);
-					vec.Multiply(ifcVec->Magnitude);
-					return vec;
-				}
-				catch (...) //this will only fail if the normal is zero
-				{
-					throw gcnew XbimGeometryFactoryException("Input vector has zero normal");
-				}
+				return EXEC_NATIVE->BuildDirection3d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], ifcDir->DirectionRatios[2], dir);
 			}
 
-			gp_Vec2d GeometryFactory::BuildVector2d(IIfcVector^ ifcVec)
+			bool GeometryFactory::BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec)
 			{
-				try
+				if ((double)ifcVec->Magnitude <= 0) return false;
+				if (BuildDirection3d(ifcVec->Orientation, vec))
 				{
-					if ((int)ifcVec->Dim == 3) throw gcnew XbimGeometryFactoryException("Illegal attempt to build a 2d vector from a 3d vector. ");
-					gp_Vec2d vec(ifcVec->Orientation->DirectionRatios[0], ifcVec->Orientation->DirectionRatios[1]);
-					vec.Multiply(ifcVec->Magnitude);
-					return vec;
+					vec *= (double)ifcVec->Magnitude;
+					return true;
 				}
-				catch (...) //this will only fail if the normal is zero
-				{
-					throw gcnew XbimGeometryFactoryException("Input vector has zero normal");
-				}
+				else
+					return false;
 			}
 
-			gp_Ax2 GeometryFactory::BuildAxis2Placement(IIfcAxis2Placement3D^ axis2)
+			bool GeometryFactory::BuildVector2d(IIfcVector^ ifcVec, gp_Vec2d& vec)
+			{
+				if ((double)ifcVec->Magnitude <= 0) return false;
+				if (BuildDirection2d(ifcVec->Orientation, vec))
+				{
+					vec *= (double)ifcVec->Magnitude;
+					return true;
+				}
+				else
+					return false;
+			}
+
+			bool GeometryFactory::BuildAxis2Placement3d(IIfcAxis2Placement3D^ axis2, gp_Ax2& ax2)
 			{
 				if (axis2->Axis == nullptr || axis2->RefDirection == nullptr) //both have to be given if one is null use the defaults
-					return gp_Ax2(BuildPoint(axis2->Location), gp::DZ(), gp::DX());
-				else return gp_Ax2(
-					BuildPoint(axis2->Location),
-					BuildDirection(axis2->Axis),
-					BuildDirection(axis2->RefDirection)
-				);
+				{
+					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), gp::DZ(), gp::DX(), ax2))
+						return true;
+				}
+				else
+				{
+					gp_Vec axis;
+					gp_Vec refDir;
+					if (!BuildDirection3d(axis2->Axis, axis)) return false;
+					if (!BuildDirection3d(axis2->RefDirection, refDir)) return false;
+					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), axis, refDir, ax2))
+						return true;
+				}
+				return false;
 			}
 
-			gp_Ax22d GeometryFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d)
+			bool GeometryFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d, gp_Ax22d& ax22)
 			{
-				if (axis2d->RefDirection == nullptr)
-					return gp_Ax22d(BuildPoint2d(axis2d->Location), gp::DX2d());
+				gp_Pnt2d loc;
+				if (!BuildPoint2d(axis2d->Location, loc))
+					return false;
+				if (axis2d->RefDirection == nullptr) //both have to be given if one is null use the defaults
+				{
+					return EXEC_NATIVE->BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
+				}
 				else
-					return gp_Ax22d(
-						BuildPoint2d(axis2d->Location),
-						BuildDirection2d(axis2d->RefDirection)
-					);
+				{
+					gp_Vec2d refDir;
+					if (!BuildDirection2d(axis2d->RefDirection, refDir)) return false;
+					return EXEC_NATIVE->BuildAxis2Placement2d(loc, refDir, ax22);
+				}
 			}
+
 			IXAxis2Placement2d^ GeometryFactory::GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection)
 			{
-
 				gp_Ax2d axis = gp_Ax2d(
 					gp_Pnt2d(location->X, location->Y),
 					gp_Dir2d(XaxisDirection->X, XaxisDirection->Y)
@@ -153,12 +160,12 @@ namespace Xbim
 				Handle(Geom2d_AxisPlacement) hPlacement = new Geom2d_AxisPlacement(axis);
 				return gcnew XAxisPlacement2d(hPlacement);
 			}
-			void GeometryFactory::GetPolylinePoints(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
+			void GeometryFactory::GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
 			{
 				int i = 1;
 				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
 				{
-					gp_Pnt pnt = BuildPoint(ifcPoint);
+					gp_Pnt pnt = BuildPoint3d(ifcPoint);
 					points.SetValue(i, pnt);
 					i++;
 				}
@@ -168,20 +175,25 @@ namespace Xbim
 				int i = 1;
 				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
 				{
-					gp_Pnt2d pnt = BuildPoint2d(ifcPoint);
-					points.SetValue(i, pnt);
+					gp_Pnt2d pnt2d;
+					if (!BuildPoint2d(ifcPoint, pnt2d))
+						RaiseGeometryFactoryException("Polyline points must all be 2d", ifcPolyline);
+					points.SetValue(i, pnt2d);
 					i++;
 				}
 			}
 
-			TopLoc_Location GeometryFactory::ToLocation(IIfcAxis2Placement2D^ axis2D)
+			bool GeometryFactory::ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& location)
 			{
-				gp_Pnt2d loc = BuildPoint2d(axis2D->Location);
+				gp_Pnt2d pnt2d;
+				if (!BuildPoint2d(axis2D->Location, pnt2d))
+					RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", axis2D);
 				gp_XY xDir(1, 0);
 				if (axis2D->RefDirection != nullptr)
 					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
-				return Ptr()->ToLocation(loc, xDir);
+				return EXEC_NATIVE->ToLocation(pnt2d, xDir, location);
 			}
+
 			gp_Trsf GeometryFactory::ToTransform(XbimMatrix3D m3D)
 			{
 				gp_Trsf trsf;
@@ -208,7 +220,9 @@ namespace Xbim
 
 			IXPlane^ GeometryFactory::BuildPlane(IIfcPlane^ plane)
 			{
-				gp_Ax2 axis = BuildAxis2Placement(plane->Position);
+				gp_Ax2 axis;
+				if(!BuildAxis2Placement3d(plane->Position,axis))
+					RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", plane->Position);
 				gp_Ax3 ax3(axis);
 				Handle(Geom_Plane) geomPlane = new Geom_Plane(ax3);
 				return gcnew XPlane(geomPlane);
@@ -237,22 +251,7 @@ namespace Xbim
 				gp_Dir normal = props.Normal();
 				return gcnew Xbim::Geometry::BRep::XDirection(normal);
 			}
-			Xbim::Geometry::Abstractions::IXVisualMaterial^ GeometryFactory::BuildVisualMaterial(System::String^ name, Xbim::Ifc4::Interfaces::IIfcSurfaceStyleElementSelect^ styling)
-			{
-				return gcnew VisualMaterial(name, styling);
-			}
-			Xbim::Geometry::Abstractions::IXVisualMaterial^ GeometryFactory::BuildVisualMaterial(System::String^ name)
-			{
-				return gcnew VisualMaterial(name);
-			}
-			Xbim::Geometry::Abstractions::IXColourRGB^ GeometryFactory::BuildColourRGB(double red, double green, double blue)
-			{
-				return gcnew ColourRGB(red, green, blue);
-			}
-			Xbim::Geometry::Abstractions::IXShapeColour^ GeometryFactory::BuildShapeColour(System::String^ name, IIfcSurfaceStyleElementSelect^ surfaceStyle)
-			{
-				return gcnew XbimShapeColour(name,surfaceStyle);
-			}
+
 			Xbim::Geometry::Abstractions::IXLocation^ GeometryFactory::BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz)
 			{
 				return gcnew Xbim::Geometry::BRep::XLocation(tx, ty, tz, sc, qw, qx, qy, qz);

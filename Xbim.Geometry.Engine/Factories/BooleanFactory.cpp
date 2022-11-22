@@ -17,12 +17,12 @@ namespace Xbim
 			{
 				TopoDS_Shape result = BuildBooleanResult(boolResult);
 				if (result.IsNull() || result.NbChildren()==0)
-					throw gcnew XbimGeometryFactoryException("Solid result is an empty shape");
+					RaiseGeometryFactoryException("Solid result is an empty shape", boolResult);
 				//find the actual type and return appropriately
 				switch (result.ShapeType())
 				{
 				case TopAbs_COMPSOLID:
-					throw gcnew XbimGeometryFactoryException("Solid result type Compound Solid is not implemented");
+					RaiseGeometryFactoryException("Solid result type Compound Solid is not implemented", boolResult);
 				case TopAbs_COMPOUND:
 					return gcnew XCompound(TopoDS::Compound(result));
 				case TopAbs_EDGE:
@@ -36,7 +36,7 @@ namespace Xbim
 				case TopAbs_VERTEX:
 					return gcnew XVertex(TopoDS::Vertex(result));
 				default:
-					throw gcnew XbimGeometryFactoryException("Solid result type is not implemented");
+					RaiseGeometryFactoryException("Solid result type is not implemented", boolResult);
 				}				
 			}
 
@@ -54,7 +54,7 @@ namespace Xbim
 				case IfcBooleanOperator::INTERSECTION:
 					return _shapeFactory->NUnifyDomain(Ptr()->Intersect(firstSolid, secondSolid, _modelService->MinimumGap));
 				default:
-					throw gcnew XbimGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString());
+					RaiseGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString(), boolResult);
 					//break;
 				}
 			}
@@ -69,10 +69,9 @@ namespace Xbim
 				IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
 				if (csgPrim != nullptr) return _solidFactory->BuildCsgPrimitive3D(csgPrim);
 				IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
-				if (boolRes != nullptr) return BuildBooleanResult(boolRes);
-			
-				//case XBooleanOperandType::IfcTessellatedFaceSet:					
-				throw gcnew XbimGeometryFactoryException("Not implemented. BooleanOperand type: " + boolOp->GetType()->Name);
+				if (boolRes != nullptr) return BuildBooleanResult(boolRes);				
+				RaiseGeometryFactoryException("Not implemented. BooleanOperand type", boolOp);
+				return TopoDS_Solid();
 			}
 
 			TopoDS_Solid BooleanFactory::BuildHalfSpace(IIfcHalfSpaceSolid^ halfSpace)

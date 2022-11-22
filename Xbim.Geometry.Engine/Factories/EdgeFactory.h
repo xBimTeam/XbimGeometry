@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Unmanaged/NEdgeFactory.h"
+#include "Unmanaged/NCurveFactory.h"
 #include "FactoryBase.h"
 
 namespace Xbim
@@ -16,17 +17,25 @@ namespace Xbim
 #pragma region IX..... interface methods. exposed publicly		
 
 			public:
+				
 				virtual IXEdge^ BuildEdge(IXPoint^ start, IXPoint^ end);
 				virtual IXEdge^ Build(IIfcCurve^ curve);
 				virtual IXEdge^ BuildEdge(IXCurve^ curve);
-
+				
 #pragma endregion
 
 
 #pragma region  Methods returning Opencascade native types, internal use only
 
+			protected:
+				
 			internal:
-				TopoDS_Edge BuildCurve(IIfcCurve^ curve);
+				TopoDS_Edge BuildEdge(IIfcCurve^ curve);
+
+				TopoDS_Edge BuildEdge(Handle(Geom2d_Curve) hCurve2d);
+
+				TopoDS_Edge BuildEdge(Handle(Geom_Curve) hCurve3d);
+
 
 #pragma endregion
 
