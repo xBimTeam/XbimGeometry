@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Unmanaged/NEdgeFactory.h"
-#include "Unmanaged/NCurveFactory.h"
 #include "FactoryBase.h"
 
 namespace Xbim
@@ -30,6 +29,7 @@ namespace Xbim
 			protected:
 				
 			internal:
+				
 				TopoDS_Edge BuildEdge(IIfcCurve^ curve);
 
 				TopoDS_Edge BuildEdge(Handle(Geom2d_Curve) hCurve2d);

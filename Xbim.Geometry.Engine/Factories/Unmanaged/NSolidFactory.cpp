@@ -191,7 +191,7 @@ TopoDS_Solid NSolidFactory::BuildBlock(gp_Ax2 ax2, double xLength, double yLengt
 		pLoggingService->LogError(strm.str().c_str());
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgBlock");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 TopoDS_Solid NSolidFactory::BuildRectangularPyramid(gp_Ax2 ax2, double xLength, double yLength, double height)
@@ -278,7 +278,7 @@ TopoDS_Solid NSolidFactory::BuildRectangularPyramid(gp_Ax2 ax2, double xLength, 
 		pLoggingService->LogError(strm.str().c_str());
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRectangularPyramid");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 TopoDS_Solid NSolidFactory::BuildRightCircularCone(gp_Ax2 ax2, double radius, double height)
@@ -295,7 +295,7 @@ TopoDS_Solid NSolidFactory::BuildRightCircularCone(gp_Ax2 ax2, double radius, do
 		pLoggingService->LogError(strm.str().c_str());
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRightCircularCone");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 TopoDS_Solid NSolidFactory::BuildRightCylinder(gp_Ax2 ax2, double radius, double height)
@@ -312,7 +312,7 @@ TopoDS_Solid NSolidFactory::BuildRightCylinder(gp_Ax2 ax2, double radius, double
 		pLoggingService->LogError(strm.str().c_str());
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRightCylinder");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
@@ -329,7 +329,7 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 		pLoggingService->LogError(strm.str().c_str());
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgSphere");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 //if inner radius is not required it has a value of -1
@@ -423,7 +423,7 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogError("Could not build SweptDiskSolid");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth)
@@ -442,7 +442,7 @@ TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_D
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogError("Could not build ExtrudedAreaSolid");
-	return _emptySolid;
+	return TopoDS_Solid();
 }
 
 /// <summary>

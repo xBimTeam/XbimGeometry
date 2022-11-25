@@ -2,6 +2,8 @@
 #include "./Unmanaged/NCurveFactory.h"
 #include "FactoryBase.h"
 
+#include <TColGeom2d_SequenceOfBoundedCurve.hxx>
+#include <TColGeom_SequenceOfBoundedCurve.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -24,7 +26,7 @@ namespace Xbim
 				virtual IXCurve^ Build(IIfcCurve^ curve);
 
 
-				void BuildSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfCurve& resultSegments, bool sameSense);
+				
 
 				template <typename IfcType>
 				Handle(Geom2d_Curve) BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense);
@@ -44,15 +46,18 @@ namespace Xbim
 
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
 
-				Handle(TColGeom2d_SequenceOfBoundedCurve) GetIndexPolyCurveSegments2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
+				void BuildIndexPolyCurveSegments2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom2d_SequenceOfBoundedCurve& segments);
+
 
 				Handle(Geom2d_OffsetCurve) BuildCurve2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D);
 
 				Handle(Geom2d_Curve) BuildCurve2d(IIfcPcurve^ ifcPcurve);
 
-				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcPolyline^ ifcPolyline);
+				Handle(Geom2d_Curve) BuildCurve2d(IIfcPolyline^ ifcPolyline);
 
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots);
+
+				void BuildCompositeCurveSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments);
 
 
 				Handle(Geom_Curve) BuildCurve3d(IIfcCurve^ curve, XCurveType% curveType);
@@ -60,14 +65,17 @@ namespace Xbim
 				Handle(Geom_Circle) BuildCurve3d(IIfcCircle^ ifcCircle);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcCompositeCurve^ ifcCompositeCurve);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcCompositeCurveOnSurface^ ifcCompositeCurve);
+				template <typename IfcType>
+				Handle(Geom_Curve) BuildCompositeCurveSegment3d(IfcType ifcCurve, bool sameSense);
 				Handle(Geom_Ellipse) BuildCurve3d(IIfcEllipse^ ifcEllipse);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
-				Handle(TColGeom_SequenceOfBoundedCurve) GetIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
+				void BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments);
+
 				Handle(Geom_LineWithMagnitude) BuildCurve3d(IIfcLine^ ifcLine);
 				Handle(Geom_OffsetCurve) CurveFactory::BuildCurve3d(IIfcOffsetCurve3D^ ifcOffsetCurve3D);
+				Handle(Geom_Curve) BuildCurve3d(IIfcPolyline^ ifcPolyline);
+				void BuildCompositeCurveSegments3d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom_SequenceOfBoundedCurve& segments);
 
-
-				
 				virtual IXCurve^ BuildDirectrix(IIfcCurve^ curve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 
 				Handle(Geom_Curve) BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType);
@@ -77,7 +85,7 @@ namespace Xbim
 				Handle(Geom_TrimmedCurve) BuildCurve3d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 				Handle(Geom2d_TrimmedCurve) BuildCurve2d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 
-				Handle(Geom_Curve) BuildCurve3d(IIfcPolyline^ ifcPolyline);
+
 				Handle(Geom_Curve) BuildCurve3d(IIfcSurfaceCurve^ ifcPolyline);
 
 				bool IsBoundedCurve(IIfcCurve^ curve);

@@ -40,7 +40,7 @@
 #include "XbimSolid.h"
 #include "XbimShell.h"
 #include "XbimFace.h"
-#include "XbimGeometryCreator.h"
+
 #include "XbimGeometryObjectSet.h"
 #include "XbimSolidSet.h"
 #include "XbimVertexSet.h"

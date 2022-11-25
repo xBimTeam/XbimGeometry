@@ -1,6 +1,6 @@
 // This is the main DLL file.
 
-
+#include "XbimGeometryCreator.h"
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
 #include <Poly_Triangulation.hxx>
@@ -23,7 +23,7 @@
 #include <IntAna2d_AnaIntersection.hxx>
 #include <GeomLib.hxx>
 #include "XbimMesh.h"
-#include "XbimGeometryCreator.h"
+
 
 #include "XbimFace.h"
 #include "XbimSolid.h"

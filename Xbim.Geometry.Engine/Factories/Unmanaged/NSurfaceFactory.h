@@ -2,7 +2,7 @@
 #include "NFactoryBase.h"
 #include <Geom_Plane.hxx>
 
-class NSurfaceFactory : NFactoryBase
+class NSurfaceFactory : public NFactoryBase
 {
 
 public:

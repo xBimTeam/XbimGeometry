@@ -45,7 +45,7 @@ namespace Xbim
 				}
 			}
 #pragma region  Methods returning Opencascade native types, internal use only
-
+			
 			TopoDS_Edge EdgeFactory::BuildEdge(IIfcCurve^ curve)
 			{
 				XCurveType curveType;

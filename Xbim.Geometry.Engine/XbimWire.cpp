@@ -75,7 +75,7 @@
 #include "XbimVertexSet.h"
 #include "XbimCompound.h"
 #include "BRep/OccExtensions/KeyedPnt2d.h"
-#include "Factories/Unmanaged/NWireFactory.h"
+#include "Factories/WireFactory.h"
 #include "Factories/FaceFactory.h"
 using namespace Xbim::Geometry::Factories;
 using namespace Xbim::Common;
@@ -401,13 +401,9 @@ namespace Xbim
 				//as generally it needs to be a compound of edges and vertices, only as a brep edge do we use the curve methodology
 				//std::map<int, gp_Pnt2d> mapOfPoints; //the key is the ifc entity label
 				//get a list of points but remove duplicates by using the tolerance
-				NCollection_Vector<KeyedPnt2d> pointSeq(pline->Points->Count);
-				for each (IIfcCartesianPoint ^ cp  in pline->Points) //these should be 2d points
-				{
-					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
-				}
-
-				TopoDS_Wire wire = wireFactory.Build2dPolyline(pointSeq, ActiveModelService(pline)->MinimumGap);
+				
+				TopoDS_Wire wire = ActiveModelService(pline)->GetWireFactory()->BuildWire2d(pline, false);
+				
 				//we have a wire and it will be planar as it was defined in 2d
 				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
 				//For example if the wire is to be used as an outer bound to a face it should be closed and contiguous
@@ -422,12 +418,8 @@ namespace Xbim
 				//validate
 				if (!Enumerable::Any(pline->Points))
 					throw gcnew XbimGeometryException("IfcPolyline has zero points");
-				NCollection_Vector<KeyedPnt> pointSeq(pline->Points->Count);
-				for each (IIfcCartesianPoint ^ cp  in pline->Points) //these should be 3d points
-				{
-					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), cp->EntityLabel));
-				}
-				TopoDS_Wire wire = wireFactory.BuildPolyline(pointSeq, -1, -1, ActiveModelService(pline)->MinimumGap);
+				
+				TopoDS_Wire wire = ActiveModelService(pline)->GetWireFactory()->BuildWire3d(pline,false);
 				if (!wire.IsNull())
 				{
 					pWire = new TopoDS_Wire();
@@ -768,7 +760,7 @@ namespace Xbim
 		void XbimWire::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 			
-			TopoDS_Wire w = ActiveModelService(cCurve)->GetWireFactory()->BuildWire(cCurve);
+			TopoDS_Wire w = ActiveModelService(cCurve)->GetWireFactory()->BuildWire(cCurve, false);
 			pWire = new TopoDS_Wire();
 			*pWire = w;
 		

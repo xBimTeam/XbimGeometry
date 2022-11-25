@@ -1,25 +1,11 @@
 #pragma once
-#include "../../Services/Unmanaged/NLoggingService.h"
+#include "NFactoryBase.h"
 #include <BRep_Builder.hxx>
 #include <gp_Pln.hxx>
 
-class NFaceFactory
+class NFaceFactory : public NFactoryBase
 {
-private:
-	NLoggingService* pLoggingService;
-	
-public:
-	NFaceFactory()
-	{
-		pLoggingService = nullptr;
-	
-	};
-	~NFaceFactory()
-	{
-		if (pLoggingService != nullptr) delete pLoggingService;
-		pLoggingService = nullptr;
-	};
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+public:	
 	TopoDS_Face BuildProfileDef(gp_Pln plane, const TopoDS_Wire& wire);
 	gp_Vec Normal(const TopoDS_Face& face);
 };

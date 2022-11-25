@@ -6,25 +6,16 @@
 #include "../BRep/XSurface.h"
 #include "../BRep/XPlane.h"
 #include "../BRep/XFace.h"
+#include "../BRep/XWire.h"
+using namespace Xbim::Geometry::BRep;
 using namespace System;
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Linq;
-TopoDS_Face Xbim::Geometry::Factories::FaceFactory::BuildProfileDef(IIfcProfileDef^ profileDef)
-{
-	TopoDS_Wire wire = _modelService->GetWireFactory()->BuildProfile(profileDef); //this will throw an exception if it fails
-	//all profile defs are 2D with Z = 0,0,1
-	gp_Pnt origin = gp::Origin();
-	gp_Dir zDir = gp::DZ();
-	gp_Pln surface(origin, zDir);
-	TopoDS_Face face = Ptr()->BuildProfileDef(surface, wire);
-	if (face.IsNull() || face.NbChildren() == 0)
-		throw gcnew XbimGeometryFactoryException("Could not build face from profile definition");
-	return face;
-}
+
 
 gp_Vec Xbim::Geometry::Factories::FaceFactory::Normal(const TopoDS_Face& face)
 {
-	return Ptr()->Normal(face);
+	return EXEC_NATIVE->Normal(face);
 }
 
 TopoDS_Face Xbim::Geometry::Factories::FaceFactory::BuildPlanarFace(IXPlane^ planeDef)

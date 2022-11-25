@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "FactoryBase.h"
 #include <TopoDS_Shell.hxx>
 #include "./Unmanaged/NShellFactory.h"
 #include "../Services/LoggingService.h"
@@ -15,21 +15,13 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class ShellFactory : XbimHandle<NShellFactory>, IXShellFactory
+			public ref class ShellFactory : FactoryBase<NShellFactory>, IXShellFactory
 			{
 				
 				IXModelService^ _modelService;
 			public:
-				ShellFactory(ModelService^ modelService) : XbimHandle(new NShellFactory())
-				{
-						
-					_modelService = modelService;
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);
-				}
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
+				ShellFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NShellFactory()){}
+				
 				TopoDS_Shell BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet);
 			};
 		}

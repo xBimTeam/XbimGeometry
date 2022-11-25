@@ -1,19 +1,8 @@
 #pragma once
-#include "../XbimHandle.h"
-#include <TopoDS_Solid.hxx>
+#include "FactoryBase.h"
 #include "./Unmanaged/NCompoundFactory.h"
-#include "../Services/LoggingService.h"
-#include "GeometryFactory.h"
-#include "CurveFactory.h"
-#include "WireFactory.h"
-#include "FaceFactory.h"
-#include "ShellFactory.h"
-#include "ShapeFactory.h"
-using namespace Xbim::Geometry::Services;
-using namespace Xbim::Common;
-using namespace Xbim::Ifc4::Interfaces;
-using namespace Xbim::Geometry::Abstractions;
-using namespace System::Linq;
+
+
 
 namespace Xbim
 {
@@ -21,18 +10,14 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class CompoundFactory : XbimHandle<NCompoundFactory>, IXCompoundFactory
+			public ref class CompoundFactory : public FactoryBase<NCompoundFactory>, IXCompoundFactory
 			{
-				IXModelService^ _modelService;
+
 			public:
-				CompoundFactory(ModelService^ modelService) : XbimHandle(new NCompoundFactory())
-				{					
-					_modelService = modelService;
-				}
+				
 				virtual IXCompound^ CreateEmpty();
-				virtual IXCompound^ CreateFrom(IEnumerable<IXShape^>^shapes);
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
+				virtual IXCompound^ CreateFrom(IEnumerable<IXShape^>^ shapes);
+				CompoundFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NCompoundFactory()) {}
 			};
 		}
 	}

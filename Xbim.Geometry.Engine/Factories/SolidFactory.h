@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "FactoryBase.h"
 #include <TopoDS_Solid.hxx>
 #include "./Unmanaged/NSolidFactory.h"
 #include "../Services/LoggingService.h"
@@ -21,32 +21,23 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class SolidFactory : IXSolidFactory, XbimHandle<NSolidFactory>
+			public ref class SolidFactory : IXSolidFactory, FactoryBase<NSolidFactory>
 			{
-					
-				IXModelService^ _modelService;		
-				virtual property double ModelTolerance  {double get() sealed { return ModelService->Precision; } };
+
+				virtual property double ModelTolerance {double get() sealed { return ModelService->Precision; } };
 			public:
-				SolidFactory(ModelService^ modelService) : XbimHandle(new NSolidFactory())
-				{
-						
-					_modelService = modelService;					
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);
-				}
+				SolidFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NSolidFactory()) {}
 				//Builds all IfcSolidModels
 				//throws XbimGeometryFactoryException if the solid cannot be built
-				
+
 				bool TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape);
 
 				virtual IXShape^ Build(IIfcSolidModel^ ifcSolid);
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
-				
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
+
+
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
 
@@ -59,7 +50,7 @@ namespace Xbim
 				TopoDS_Solid BuildRightCircularCone(IIfcRightCircularCone^ ifcRightCircularCone);
 				TopoDS_Solid BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder));
 				TopoDS_Solid BuildSphere(IIfcSphere^ ifcSphere);
-				
+
 #pragma endregion
 
 #pragma region Swept solids
@@ -72,7 +63,7 @@ namespace Xbim
 
 				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
 
-				
+
 			};
 		}
 	}

@@ -14,63 +14,30 @@ namespace Xbim
 				
 			internal:
 				//The distance between two points at which they are determined to be equal points
-	
-				TopoDS_Wire Build3d(IIfcCurve^ ifcCurve);
-				TopoDS_Wire Build2d(IIfcCurve^ ifcCurve);
-				TopoDS_Wire Build2dCircle(IIfcCircle^ ifcCircle);
-				TopoDS_Wire Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve);
-				TopoDS_Wire Build2dCompositeCurve(IIfcCompositeCurve^ ifcCompositeCurve);
-
-				TopoDS_Wire Build2dPolyline(IIfcPolyline^ ifcPolyline);
-				//builds a trimmed 3d polyline param values of -1 are taken as no trim
-				TopoDS_Wire Build3D(IIfcPolyline^ ifcPolyline, double startParam, double endParam);
-				void BuildSegments(IIfcCompositeCurve^ ifcCurve, TColGeom_SequenceOfCurve& segments, bool sameSense);
-				void BuildSegments(IIfcCompositeCurve^ ifcCurve, TColGeom_SequenceOfCurve& segments) { BuildSegments(ifcCurve, segments, true); };
-				void Build2dSegments(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfCurve& resultSegments, bool sameSense);
-				void Build2dSegments(IIfcCompositeCurve^ ifcCurve, TColGeom2d_SequenceOfCurve& segments) { Build2dSegments(ifcCurve, segments, true); };
-
-				TopoDS_Wire MakeWire(Handle(Geom_Curve) curve);
-				template<typename IfcType>
-				Handle(Geom_Curve)  BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve);
-				template<typename IfcType>
-				Handle(Geom_Curve)  BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense) { return BuildCompositeCurveSegment(ifcCurve, sameSense, false); };
-
-				template<typename IfcType>
-				Handle(Geom2d_Curve)  Build2dCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve);
-				template<typename IfcType>
-				Handle(Geom2d_Curve)  Build2dCompositeCurveSegment(IfcType ifcCurve, bool sameSense) { return Build2dCompositeCurveSegment(ifcCurve, sameSense, false); };
-
-				TopoDS_Wire BuildDirectrix(IIfcLine^ curve, double startParam, double endParam);
-				TopoDS_Wire BuildDirectrix(IIfcCircle^ curve, double startParam, double endParam);
-				TopoDS_Wire BuildDirectrix(IIfcEllipse^ curve, double startParam, double endParam);
-				TopoDS_Wire BuildDirectrix(IIfcTrimmedCurve^ curve, double startParam, double endParam);
-				TopoDS_Wire BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam);
-				TopoDS_Wire BuildDirectrix(IIfcCompositeCurve^ curve, double startParam, double endParam);
-
-
-				TopoDS_Wire BuildProfileDef(IIfcRectangleProfileDef^ profile);
-
-				TopoDS_Wire BuildProfileDef(IIfcCircleProfileDef^ circleProfile);
-
-				bool GetNormal(const TopoDS_Wire& wire, gp_Vec& normal);
-				double Area(const TopoDS_Wire& wire);
-
-			
-				TopoDS_Wire BuildDirectrix(IIfcCurve^ curve, System::Nullable<double> startParam, System::Nullable<double> endParam);
-				TopoDS_Wire BuildProfile(IIfcProfileDef^ profileDef);
-				//Builds an IfcCurve as a TopoDS_Wire
-				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve);
-
-				/*void GetCurves(IIfcPolyline^ polyline, TColGeom_SequenceOfCurve& curves);
-				void GetCurves(IIfcCompositeCurve^ compCurve, TColGeom_SequenceOfCurve& curves);
-				void GetCurves(IIfcCompositeCurveOnSurface^ compCurve, TColGeom_SequenceOfCurve& curves);
-				void GetCurves(IIfcIndexedPolyCurve^ compCurve, TColGeom_SequenceOfCurve& curves);
-				void GetCurves(IIfcCurve^ curve, TColGeom_SequenceOfCurve& curves);*/
-				/*General wire properties*/
 				
-				static double GetDeterminant(double x1, double y1, double x2, double y2);
-				static double Area(const TColgp_SequenceOfPnt2d& points2d);
+				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, bool asSingleEdge);
 
+				
+				TopoDS_Wire BuildWire2d(IIfcCurve^ ifcCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
+				TopoDS_Wire BuildWire(IIfcCircle^ ifcCircle);
+				TopoDS_Wire BuildWire2d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcEllipse^ ifcEllipse);
+				TopoDS_Wire BuildWire2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcLine^ ifcLine);
+				TopoDS_Wire BuildWire2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge);
+				TopoDS_Wire BuildWire2d(IIfcPolyline^ ifcPolyline, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots);
+				TopoDS_Wire BuildWire(IIfcTrimmedCurve^ ifcTrimmedCurve, bool asSingleEdge);
+
+				TopoDS_Wire BuildWire3d(IIfcCurve^ ifcCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire3d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
+
+				TopoDS_Wire BuildWire3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
+
+				
+				TopoDS_Wire BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam);
+				//void AdjustDirectrixTrimParameters(IIfcCurve^ ifcCurve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, double& start, double& end);
 			public:
 				WireFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NWireFactory()) {}				
 				virtual IXWire^ BuildWire(array<IXPoint^>^  points);

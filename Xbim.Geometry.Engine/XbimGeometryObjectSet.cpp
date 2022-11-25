@@ -3,7 +3,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRep_Builder.hxx>
-
+#include "./Services/ModelService.h"
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Section.hxx>
@@ -23,7 +23,6 @@
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
-#include "XbimGeometryCreator.h"
 using namespace System::ComponentModel;
 namespace Xbim
 {

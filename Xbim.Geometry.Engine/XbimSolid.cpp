@@ -1338,11 +1338,12 @@ namespace Xbim
 			else //it is a simple Half space
 			{
 	
-				Handle(Geom_Surface) geomSurface = ActiveModelService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
-				//XbimFace^ face = gcnew XbimFace(surface, logger);
-				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
+				//Handle(Geom_Surface) geomSurface = ActiveModelService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
+				////XbimFace^ face = gcnew XbimFace(surface, logger);
+				//Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
 
-				
+				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
+				XbimFace^ face = gcnew XbimFace(surface, logger);
 
 				BRepGProp_Face prop(face);
 				gp_Pnt c;

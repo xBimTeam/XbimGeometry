@@ -1,4 +1,6 @@
 #include "BooleanFactory.h"
+#include "ShapeFactory.h"
+#include "SolidFactory.h"
 #include "../BRep/XEdge.h"
 #include "../BRep/XSolid.h"
 #include "../BRep/XFace.h"
@@ -17,12 +19,12 @@ namespace Xbim
 			{
 				TopoDS_Shape result = BuildBooleanResult(boolResult);
 				if (result.IsNull() || result.NbChildren()==0)
-					RaiseGeometryFactoryException("Solid result is an empty shape", boolResult);
+					throw RaiseGeometryFactoryException("Solid result is an empty shape", boolResult);
 				//find the actual type and return appropriately
 				switch (result.ShapeType())
 				{
 				case TopAbs_COMPSOLID:
-					RaiseGeometryFactoryException("Solid result type Compound Solid is not implemented", boolResult);
+					throw RaiseGeometryFactoryException("Solid result type Compound Solid is not implemented", boolResult);
 				case TopAbs_COMPOUND:
 					return gcnew XCompound(TopoDS::Compound(result));
 				case TopAbs_EDGE:
@@ -36,7 +38,7 @@ namespace Xbim
 				case TopAbs_VERTEX:
 					return gcnew XVertex(TopoDS::Vertex(result));
 				default:
-					RaiseGeometryFactoryException("Solid result type is not implemented", boolResult);
+					throw RaiseGeometryFactoryException("Solid result type is not implemented", boolResult);
 				}				
 			}
 
@@ -48,13 +50,13 @@ namespace Xbim
 				switch (boolResult->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					return _shapeFactory->NUnifyDomain(Ptr()->Union(firstSolid, secondSolid, _modelService->MinimumGap));					
+					return SHAPE_FACTORY->NUnifyDomain(Ptr()->Union(firstSolid, secondSolid, _modelService->MinimumGap));					
 				case IfcBooleanOperator::DIFFERENCE:
-					return _shapeFactory->NUnifyDomain(Ptr()->Cut(firstSolid, secondSolid, _modelService->MinimumGap));
+					return SHAPE_FACTORY->NUnifyDomain(Ptr()->Cut(firstSolid, secondSolid, _modelService->MinimumGap));
 				case IfcBooleanOperator::INTERSECTION:
-					return _shapeFactory->NUnifyDomain(Ptr()->Intersect(firstSolid, secondSolid, _modelService->MinimumGap));
+					return SHAPE_FACTORY->NUnifyDomain(Ptr()->Intersect(firstSolid, secondSolid, _modelService->MinimumGap));
 				default:
-					RaiseGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString(), boolResult);
+					throw RaiseGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString(), boolResult);
 					//break;
 				}
 			}
@@ -63,14 +65,14 @@ namespace Xbim
 			{
 			
 				IIfcSolidModel^ solidModel = dynamic_cast<IIfcSolidModel^>(boolOp);
-				if (solidModel != nullptr) return _solidFactory->BuildSolidModel(solidModel);
+				if (solidModel != nullptr) return SOLID_FACTORY->BuildSolidModel(solidModel);
 				IIfcHalfSpaceSolid^ halfSpace = dynamic_cast<IIfcHalfSpaceSolid^>(boolOp);
 				if (halfSpace != nullptr) return BuildHalfSpace(halfSpace); //not really a solid, do it in this factory
 				IIfcCsgPrimitive3D^ csgPrim = dynamic_cast<IIfcCsgPrimitive3D^>(boolOp);
-				if (csgPrim != nullptr) return _solidFactory->BuildCsgPrimitive3D(csgPrim);
+				if (csgPrim != nullptr) return SOLID_FACTORY->BuildCsgPrimitive3D(csgPrim);
 				IIfcBooleanResult^ boolRes = dynamic_cast<IIfcBooleanResult^>(boolOp);
 				if (boolRes != nullptr) return BuildBooleanResult(boolRes);				
-				RaiseGeometryFactoryException("Not implemented. BooleanOperand type", boolOp);
+				throw RaiseGeometryFactoryException("Not implemented. BooleanOperand type", boolOp);
 				return TopoDS_Solid();
 			}
 

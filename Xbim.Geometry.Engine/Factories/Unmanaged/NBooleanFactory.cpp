@@ -63,7 +63,7 @@ TopoDS_Shape NBooleanFactory::Union(const TopoDS_Shape& left, const TopoDS_Shape
 	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Union two empty solids. Result is an empty solid");
-		return _emptySolid;
+		return TopoDS_Shape();
 	}
 	if (IsEmpty(right))
 	{
@@ -107,7 +107,7 @@ TopoDS_Shape NBooleanFactory::Union(const TopoDS_Shape& left, const TopoDS_Shape
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Failed to union solids");
-	return _emptySolid; //return empty so we fire a managed exception
+	return TopoDS_Shape(); //return empty so we fire a managed exception
 }
 
 TopoDS_Shape NBooleanFactory::Union(const TopTools_ListOfShape& shapes, double fuzzyTolerance)
@@ -161,7 +161,7 @@ TopoDS_Shape NBooleanFactory::Union(const TopTools_ListOfShape& shapes, double f
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Failed to union solids");
-	return _emptySolid; //return empty so we fire a managed exception
+	return TopoDS_Shape(); //return empty so we fire a managed exception
 }
 
 TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance)
@@ -171,7 +171,7 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& 
 	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two empty solids. Result is an empty solid");
-		return _emptySolid;
+		return TopoDS_Shape();
 	}
 	if (IsEmpty(right))
 	{
@@ -181,7 +181,7 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& 
 	if (IsEmpty(left))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two solids, the left one is empty. Result is an empty solid");
-		return _emptySolid;
+		return TopoDS_Shape();
 	}
 	//try and cut
 	try
@@ -210,12 +210,10 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& 
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogWarning("Failed to cut solids");
-	return _emptySolid; //return empty so we fire a managed exception
+	return TopoDS_Shape(); //return empty so we fire a managed exception
 }
 
 TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance)
@@ -225,7 +223,7 @@ TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_S
 	if (IsEmpty(left) || IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Intersect one or more empty solids. Result is an empty solid");
-		return _emptySolid;
+		return TopoDS_Shape();
 	}
 	//try and intersect
 	try
@@ -259,5 +257,5 @@ TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_S
 		pLoggingService->LogError(strm.str().c_str());
 	}
 	pLoggingService->LogWarning("Failed to intersect solids");
-	return _emptySolid; //return empty so we fire a managed exception
+	return TopoDS_Shape(); //return empty so we fire a managed exception
 }

@@ -1,4 +1,6 @@
 #include "NShellFactory.h"
+
+#include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopTools_SequenceOfShape.hxx>
@@ -239,10 +241,8 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 	}
 	catch (const Standard_Failure& sf)
 	{
-		std::stringstream strm;
-		sf.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
-		return EmptyShell();
-	}
+		LogStandardFailure(sf);
 
+	}
+	return TopoDS_Shell();
 }

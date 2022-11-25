@@ -90,9 +90,9 @@ Handle(Geom2d_Circle) NCurveFactory::BuildCircle2d(const gp_Pnt2d& start, const 
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e, "Incorrectly defined circle");
-		return Handle(Geom2d_Circle)(); //return null handle for checking
-	}
 
+	}
+	return Handle(Geom2d_Circle)(); //return null handle for checking
 }
 
 Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance)
@@ -118,13 +118,13 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 
 }
 
-Handle(Geom2d_BSplineCurve) NCurveFactory::BuildIndexedPolyCurve2d(const Handle(TColGeom2d_SequenceOfBoundedCurve)& segments, double tolerance)
+Handle(Geom2d_BSplineCurve) NCurveFactory::BuildIndexedPolyCurve2d(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance)
 {
 
 	try
 	{
 		Geom2dConvert_CompCurveToBSplineCurve converter;
-		for (auto&& segment : *segments)
+		for (auto&& segment : segments)
 		{
 			if (!converter.Add(segment, tolerance))
 				Standard_Failure::Raise("Could not add segment to IndexPolyCurve2d");
@@ -137,12 +137,12 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildIndexedPolyCurve2d(const Handle(
 		return Handle(Geom2d_BSplineCurve)(); //return null handle for checking
 	}
 }
-Handle(Geom_BSplineCurve) NCurveFactory::BuildIndexedPolyCurve3d(const Handle(TColGeom_SequenceOfBoundedCurve)& segments, double tolerance)
+Handle(Geom_BSplineCurve) NCurveFactory::BuildIndexedPolyCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance)
 {
 	try
 	{
 		GeomConvert_CompCurveToBSplineCurve converter;
-		for (auto&& segment : *segments)
+		for (auto&& segment : segments)
 		{
 			if (!converter.Add(segment, tolerance))
 				Standard_Failure::Raise("Could not add segment to IndexPolyCurve2d");
@@ -236,9 +236,9 @@ Handle(Geom_Circle) NCurveFactory::BuildCircle3d(const gp_Pnt& start, const gp_P
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e, "Incorrectly defined circle");
-		return Handle(Geom_Circle)(); //return null handle for checking
-	}
 
+	}
+	return Handle(Geom_Circle)(); //return null handle for checking
 }
 
 Handle(Geom_EllipseWithSemiAxes) NCurveFactory::BuildEllipse3d(const gp_Ax2& axis, double semi1, double semi2)
@@ -250,8 +250,9 @@ Handle(Geom_EllipseWithSemiAxes) NCurveFactory::BuildEllipse3d(const gp_Ax2& axi
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e, "Incorrectly defined elipse");
-		return Handle(Geom_EllipseWithSemiAxes)(); //return null handle for checking
+
 	}
+	return Handle(Geom_EllipseWithSemiAxes)(); //return null handle for checking
 }
 
 Handle(Geom2d_EllipseWithSemiAxes) NCurveFactory::BuildEllipse2d(const gp_Ax22d& axis, double semi1, double semi2)
@@ -263,8 +264,9 @@ Handle(Geom2d_EllipseWithSemiAxes) NCurveFactory::BuildEllipse2d(const gp_Ax22d&
 	catch (const Standard_Failure& e) //only happens with semi axis errors
 	{
 		LogStandardFailure(e, "Incorrectly defined elipse");
-		return Handle(Geom2d_EllipseWithSemiAxes)(); //return null handle for checking
+
 	}
+	return Handle(Geom2d_EllipseWithSemiAxes)(); //return null handle for checking
 }
 
 
@@ -307,8 +309,9 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e, "Incorrectly defined trimmed curve");
-		return Handle(Geom_TrimmedCurve)(); //return null handle for checking
+		
 	}
+	return Handle(Geom_TrimmedCurve)(); //return null handle for checking
 }
 
 Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_Curve)& basisCurve, const gp_Pnt& start, const gp_Pnt& end, double tolerance)

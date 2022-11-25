@@ -10,7 +10,7 @@
 #include "XbimShellSet.h"
 #include "XbimSolid.h"
 #include "XbimSolidSet.h"
-#include "XbimGeometryCreator.h"
+
 #include "XbimGeometryObjectSet.h"
 #include "XbimConvert.h"
 namespace Xbim

@@ -21,19 +21,21 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class GeometryFactory : FactoryBase<NGeometryFactory>, IXGeometryFactory
+			
+			public ref class GeometryFactory : public FactoryBase<NGeometryFactory>, IXGeometryFactory
 			{
 
 			public:
+
 				GeometryFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NGeometryFactory()) {}
 
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
-
+				gp_Pnt BuildPoint3d(IXPoint^ xPoint);
 
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
 				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
-
+				gp_Pnt2d BuildPoint2d(IIfcCartesianPoint^ ifcPoint);
 				
 				bool BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& pnt);
 
@@ -71,6 +73,9 @@ namespace Xbim
 				virtual IXDirection^ NormalAt(IXFace^ face, IXPoint^ position, double tolerance);
 
 				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
+
+				static double GetDeterminant(double x1, double y1, double x2, double y2);
+				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 			};
 		}
 	}

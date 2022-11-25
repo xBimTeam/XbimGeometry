@@ -2,7 +2,7 @@
 #include "XbimVertex.h"
 #include "XbimVertex.h"
 #include "XbimEdge.h"
-#include "Services//ModelService.h"
+
 using namespace System::IO;
 using namespace Xbim::Common;
 using namespace Xbim::Common::Geometry;
@@ -87,7 +87,7 @@ namespace Xbim
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
-			virtual IXModelService^ CreateModelService(IModel^ model) { return gcnew Services::ModelService(model, _logger);}
+			virtual IXModelService^ CreateModelService(IModel^ model) { throw gcnew System::NotSupportedException(); }
 			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ logger);
 			

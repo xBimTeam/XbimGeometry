@@ -1,5 +1,5 @@
 #include "ShapeFactory.h"
-
+#include "GeometryFactory.h"
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
 #include <HLRBRep_PolyAlgo.hxx>
@@ -18,19 +18,20 @@
 #include "../Brep/XPlane.h"
 
 #include "../Exceptions/XbimGeometryServiceException.h"
-#include "../Version 5/XbimConvert.h"
-#include "../Version 5/XbimVertex.h"
-#include "../Version 5/XbimEdge.h"
-#include "../Version 5/XbimWire.h"
-#include "../Version 5/XbimFace.h"
-#include "../Version 5/XbimShell.h"
-#include "../Version 5/XbimSolid.h"
-#include "../Version 5/XbimCompound.h"
-#include "../../BRep/OccExtensions/LineSegment2d.h"
+#include "../XbimConvert.h"
+#include "../XbimVertex.h"
+#include "../XbimEdge.h"
+#include "../XbimWire.h"
+#include "../XbimFace.h"
+#include "../XbimShell.h"
+#include "../XbimSolid.h"
+#include "../XbimCompound.h"
+#include "../BRep/OccExtensions/LineSegment2d.h"
 #include "../Factories/Unmanaged/NBooleanFactory.h"
 
 #include "../BRep/XPolyLoop2d.h"
-#include "../Storage/Unmanaged/NWexBimMesh.h"
+#include "../XbimGeometryObject.h"
+//#include "../Storage/Unmanaged/NWexBimMesh.h"
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -42,7 +43,8 @@ namespace Xbim
 			
 			IXbimGeometryObject^ ShapeFactory::ConvertToV5(System::String^ brepStr)
 			{
-				return _geometryEngine->FromBrep(brepStr);
+				
+				return _modelService->GetV5GeometryEngine()->FromBrep(brepStr);
 			}
 			IXbimGeometryObject^ ShapeFactory::ConvertToV5(IXShape^ shape)
 			{
@@ -52,22 +54,22 @@ namespace Xbim
 					switch (topoShape.ShapeType())
 					{
 					case TopAbs_VERTEX:
-						return gcnew XbimVertexV5(TopoDS::Vertex(topoShape));
+						return gcnew XbimVertex(TopoDS::Vertex(topoShape));
 					case TopAbs_EDGE:
-						return gcnew XbimEdgeV5(TopoDS::Edge(topoShape));
+						return gcnew XbimEdge(TopoDS::Edge(topoShape));
 					case TopAbs_WIRE:
-						return gcnew XbimWireV5(TopoDS::Wire(topoShape));
+						return gcnew XbimWire(TopoDS::Wire(topoShape));
 					case TopAbs_FACE:
-						return gcnew XbimFaceV5(TopoDS::Face(topoShape));
+						return gcnew XbimFace(TopoDS::Face(topoShape));
 					case TopAbs_SHELL:
-						return gcnew XbimShellV5(TopoDS::Shell(topoShape));
+						return gcnew XbimShell(TopoDS::Shell(topoShape));
 					case TopAbs_SOLID:
-						return gcnew XbimSolidV5(TopoDS::Solid(topoShape));
+						return gcnew XbimSolid(TopoDS::Solid(topoShape));
 					case TopAbs_COMPOUND:
-						return  gcnew XbimCompoundV5(TopoDS::Compound(topoShape), true, _modelService->Precision);
+						return  gcnew XbimCompound(TopoDS::Compound(topoShape), true, _modelService->Precision);
 					case TopAbs_COMPSOLID:
 					default:
-						_logger->LogError("Unsupported Shape Type, Compound Solid");
+						LogError("Unsupported Shape Type, Compound Solid");
 					}
 				}
 				catch (...)
@@ -110,7 +112,7 @@ namespace Xbim
 
 			IXShape^ ShapeFactory::Build(IIfcGeometricRepresentationItem^ geomRep)
 			{
-				IXbimGeometryObject^ brepV5 = _geometryEngine->Create(geomRep, _logger->Logger);
+				IXbimGeometryObject^ brepV5 = _modelService->GetV5GeometryEngine()->Create(geomRep, Logger());
 				if (brepV5 != nullptr && brepV5->IsValid)
 				{
 					XbimSetObject^ geomSet = dynamic_cast<XbimSetObject^>(brepV5); //do we have a set
@@ -213,7 +215,7 @@ namespace Xbim
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 
 				if (s.IsNull()) return nullptr;
-				s.Location(XbimConvert::ToLocation(placement, _logger->Logger));
+				s.Location(XbimConvert::ToLocation(placement, Logger()));
 				return  GetXbimShape(s);
 			}
 
@@ -222,9 +224,9 @@ namespace Xbim
 			{
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 				if (invertPlacement)
-					s.Move(XbimConvert::ToLocation(placement, _logger->Logger).Inverted());
+					s.Move(XbimConvert::ToLocation(placement, Logger()).Inverted());
 				else
-					s.Move(XbimConvert::ToLocation(placement, _logger->Logger));
+					s.Move(XbimConvert::ToLocation(placement, Logger()));
 				return  GetXbimShape(s);
 			}
 
@@ -264,7 +266,7 @@ namespace Xbim
 
 			TopoDS_Shape ShapeFactory::Transform(TopoDS_Shape& shape, XbimMatrix3D matrix)
 			{
-				gp_Trsf trans = _geomProcs->ToTransform(matrix);
+				gp_Trsf trans = GEOMETRY_FACTORY->ToTransform(matrix);
 				BRepBuilderAPI_Transform gTran(shape, trans, Standard_True);
 				return gTran.Shape();
 			}
@@ -325,7 +327,8 @@ namespace Xbim
 
 			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves)
 			{
-				NWexBimMesh mesh = NWexBimMesh::CreateMesh(topoShape, tolerance, checkEdges);
+				throw gcnew System::NotImplementedException("Need to port WexbimMesh");
+				/*NWexBimMesh mesh = NWexBimMesh::CreateMesh(topoShape, tolerance, checkEdges);
 				hasCurves = mesh.HasCurves;
 				std::ostringstream byteStream;
 				mesh.WriteToStream(byteStream);
@@ -336,7 +339,7 @@ namespace Xbim
 				array<System::Byte>^ byteArray = gcnew array<System::Byte>(len);
 				System::IntPtr ptr(cstr);
 				Marshal::Copy(ptr, byteArray, 0, len);
-				return byteArray;
+				return byteArray;*/
 			}
 
 		}

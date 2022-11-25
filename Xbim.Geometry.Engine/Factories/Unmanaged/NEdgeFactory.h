@@ -6,7 +6,7 @@
 #include <Geom2d_Curve.hxx>
 #include <BRep_Builder.hxx>
 
-class NEdgeFactory : NFactoryBase
+class NEdgeFactory : public NFactoryBase
 {
 public:
 

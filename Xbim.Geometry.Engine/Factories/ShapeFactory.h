@@ -1,5 +1,5 @@
 #pragma once
-#include "../XbimHandle.h"
+#include "FactoryBase.h"
 #include <TopoDS_Shell.hxx>
 #include "./Unmanaged/NShapeFactory.h"
 #include "../Services/LoggingService.h"
@@ -16,20 +16,13 @@ namespace Xbim
 	{
 		namespace Factories
 		{ 
-			public ref class ShapeFactory : XbimHandle<NShapeFactory>, IXShapeFactory
+			public ref class ShapeFactory : FactoryBase<NShapeFactory>, IXShapeFactory
 			{
 			private:				
-				IXModelService^ _modelService;			
 				TopoDS_Shape Transform(TopoDS_Shape& shape, XbimMatrix3D matrix);
 				array<System::Byte>^ CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves);
 			public:
-				ShapeFactory(ModelService^ modelService) : XbimHandle(new NShapeFactory(modelService->Timeout))
-				{
-					_modelService = modelService;
-					NLoggingService* logService = new NLoggingService();
-					logService->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
-					Ptr()->SetLogger(logService);				
-				};
+				ShapeFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NShapeFactory(modelService->Timeout)) {}
 
 				
 				TopoDS_Shape NUnifyDomain(const TopoDS_Shape& toFix);
@@ -37,8 +30,6 @@ namespace Xbim
 
 				static IXShape^ GetXbimShape(const TopoDS_Shape& shape);
 
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }};
-				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }};
 				virtual IXShape^ Convert(System::String^ shape);
 				virtual IXbimGeometryObject^ ConvertToV5(System::String^ brepStr);
 				virtual IXbimGeometryObject^ ConvertToV5(IXShape^ shape);

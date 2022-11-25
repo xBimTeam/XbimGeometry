@@ -9,7 +9,7 @@
 #include <gp_Ax2.hxx>
 #include <gp_Ax22d.hxx>
 
-class NGeometryFactory : NFactoryBase
+class NGeometryFactory : public NFactoryBase
 {
 public:
 

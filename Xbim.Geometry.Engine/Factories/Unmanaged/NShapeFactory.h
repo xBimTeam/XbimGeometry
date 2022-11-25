@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Services/Unmanaged/NLoggingService.h"
+#include "NFactoryBase.h"
 
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Builder.hxx>
@@ -17,11 +17,10 @@
 #include "../../Services/Unmanaged/NLoggingService.h"
 #include <ShapeExtend_Status.hxx>
 
-class NShapeFactory
+class NShapeFactory : public NFactoryBase
 {
 private:
-	NLoggingService* pLoggingService;
-	TopoDS_Shape _emptyShape;
+	
 	double _timeout;
 	
 public:
@@ -30,7 +29,7 @@ public:
 			
 	}
 	static bool Triangulate(const TopoDS_Shape& aShape, const IMeshTools_Parameters& meshParams);
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+	
 	TopoDS_Shape UnifyDomain(const TopoDS_Shape& toFix, double linearTolerance, double angularTolerance);
 	TopoDS_Solid UnifyDomain(const TopoDS_Solid& toFix, double linearTolerance, double angularTolerance);
 	TopoDS_Shape Convert(const char* brepString);

@@ -64,7 +64,7 @@
 #include "XbimNativeApi.h"
 
 #include "XbimCompound.h"
-#include "XbimGeometryCreator.h"
+
 #include "XbimGeometryObjectSet.h"
 #include "XbimOccWriter.h"
 #include "XbimSolidSet.h"

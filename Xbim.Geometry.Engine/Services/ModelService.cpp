@@ -101,6 +101,10 @@ namespace Xbim
 				auto mapLocation = sourceTransform * targetTransform;
 				return gcnew XbimLocation(mapLocation);*/
 			}
+			IXLoggingService^ ModelService::LoggingService::get()
+			{
+				return _loggingService;
+			}
 
 			GeometryFactory^ ModelService::GetGeometryFactory()
 			{
@@ -169,6 +173,15 @@ namespace Xbim
 			{
 				if (_profileFactory == nullptr) _profileFactory = gcnew Xbim::Geometry::Factories::ProfileFactory(this);
 				return _profileFactory;
+			}
+
+			XbimGeometryCreator^ ModelService::GetV5GeometryEngine()
+			{
+				if (_v5GeometryEngine == nullptr)
+				{
+					_v5GeometryEngine = gcnew XbimGeometryCreator(_loggingService->Logger, this);
+				}
+				return _v5GeometryEngine;
 			}
 
 

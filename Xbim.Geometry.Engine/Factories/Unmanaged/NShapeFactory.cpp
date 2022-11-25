@@ -27,9 +27,7 @@ TopoDS_Shape NShapeFactory::UnifyDomain(const TopoDS_Shape& toFix, double linear
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogWarning("Failed to unify shape domain");
 	return toFix;
@@ -48,9 +46,7 @@ TopoDS_Solid NShapeFactory::UnifyDomain(const TopoDS_Solid& toFix, double linear
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogWarning("Failed to unify domain");
 	return toFix;
@@ -80,11 +76,10 @@ TopoDS_Shape NShapeFactory::Convert(const char* brepString)
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		pLoggingService->LogError("Failed convert Brep string");
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogError("Failed convert Brep string");
+	
 	return TopoDS_Shape();
 }
 
@@ -150,11 +145,9 @@ TopoDS_Shape NShapeFactory::Cut(const TopoDS_Shape& body, const TopTools_ListOfS
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	return _emptyShape;
+	return TopoDS_Shell();;
 }
 TopoDS_Shape NShapeFactory::Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double minumGap)
 {
@@ -197,11 +190,9 @@ TopoDS_Shape NShapeFactory::Union(const TopoDS_Shape& body, const TopTools_ListO
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	return _emptyShape;
+	return TopoDS_Shape();
 }
 
 ShapeExtend_Status NShapeFactory::FixFace(const TopoDS_Face& face, TopTools_ListOfShape& result)
@@ -231,9 +222,7 @@ ShapeExtend_Status NShapeFactory::FixFace(const TopoDS_Face& face, TopTools_List
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogWarning("Failed to fix face");
 	return status;

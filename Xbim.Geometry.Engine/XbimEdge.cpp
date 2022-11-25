@@ -49,7 +49,7 @@
 #include <GeomLib_Tool.hxx>
 
 #include "XbimEdge.h"
-#include "XbimGeometryCreator.h"
+
 #include "XbimVertex.h"
 #include "XbimConvert.h"
 #include "XbimCurve.h"

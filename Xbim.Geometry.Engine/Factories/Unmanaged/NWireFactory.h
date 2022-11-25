@@ -11,43 +11,48 @@
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include "../../BRep/OccExtensions/KeyedPnt.h"
 #include <Geom_BSplineCurve.hxx>
+#include <TColGeom_SequenceOfBoundedCurve.hxx>
+#include <TColGeom2d_SequenceOfBoundedCurve.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
-#include <TColGeom2d_SequenceOfCurve.hxx>
 
 
-class NWireFactory : NFactoryBase
+class NWireFactory : public NFactoryBase
 {
 
 public:
 	
+	bool IsClosed(const TopoDS_Wire& wire, double tolerance);
+
 	TopoDS_Wire BuildWire(const TopoDS_Edge& edge);
 
 	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
-	TopoDS_Wire Build2dPolyline(
-		const NCollection_Vector<KeyedPnt2d>& pointSeq,		
-		double tolerance,bool buildRaw = false);
-	TopoDS_Wire BuildPolyline(
-		const NCollection_Vector<KeyedPnt>& pointSeq, double startParam, double endParam,
-		double tolerance);
+	TopoDS_Wire BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
+	TopoDS_Wire BuildPolyline3d(const TColgp_Array1OfPnt& points, double startParam, double endParam, double tolerance);
 
-	void GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeom_SequenceOfCurve& curves, double tolerance);
+	
 
-	void GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TColGeom2d_SequenceOfCurve& curves, double tolerance);
 
-	TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance, double gapSize);
-	TopoDS_Wire Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
+	void GetPolylineSegments3d(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& curves);
 
-	TopoDS_Wire BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance, double gapSize);
+	void GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, double tolerance, TColGeom2d_SequenceOfBoundedCurve& curves);
+
+	TopoDS_Wire BuildDirectrixWire(const TopoDS_Wire& wire, double trimStart, double trimEnd, double tolerance, double gapSize);
+	
+	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance);
+
+	TopoDS_Wire BuildWire(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance, double gapSize);
+
+	TopoDS_Wire BuildWire(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance, double gapSize);
 
 	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
 	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax22d& position);
-	/// <summary>
-	/// calucates the normal of the wire
-	/// </summary>
-	/// <param name="wire"></param>
-	/// <param name="normal"></param>
-	/// <returns>true if the normal is valid and has a magnitude, otherwise false</returns>
+	TopoDS_Wire BuildOffset(TopoDS_Wire basisWire, double distance);
+
+	//TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
+
+
+	bool GetParameter(const TopoDS_Wire& wire, gp_Pnt pnt, double tolerance, double& val);
 	bool GetNormal(const TopoDS_Wire& wire, gp_Vec& normal);
 	
 	double Area(const TopoDS_Wire& wire);

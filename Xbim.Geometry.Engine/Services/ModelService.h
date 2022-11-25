@@ -2,11 +2,13 @@
 #pragma warning( disable : 4691 )
 #include "MeshFactors.h"
 #include "LoggingService.h"
+#include "../XbimGeometryCreator.h"
 
 #define ActiveModelService(ifcEntity) static_cast<ModelService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
 
 
 using namespace Xbim::Common;
+using namespace Xbim::Geometry;
 using namespace Xbim::Geometry::Abstractions;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace System::Linq;
@@ -17,6 +19,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
+		ref class GeometryCreator;
 		namespace Factories
 		{
 			//forward declare all factories
@@ -68,6 +71,8 @@ namespace Xbim
 				Xbim::Geometry::Factories::BooleanFactory^ _booleanFactory;
 				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
 				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
+
+				Xbim::Geometry::XbimGeometryCreator^ _v5GeometryEngine;
 			internal:
 				//Factories
 
@@ -83,6 +88,8 @@ namespace Xbim
 				Xbim::Geometry::Factories::BooleanFactory^ GetBooleanFactory();
 				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
 				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
+
+				Xbim::Geometry::XbimGeometryCreator^ GetV5GeometryEngine();
 			public:
 
 				ModelService(IModel^ model, ILogger^ logger);

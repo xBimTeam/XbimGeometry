@@ -1,9 +1,12 @@
 #include "SurfaceFactory.h"
 #include "GeometryFactory.h"
 #include "CurveFactory.h"
+#include "EdgeFactory.h"
 #include <Geom_Plane.hxx>
 #include "../BRep//XPlane.h"
 #include <TopoDS_Edge.hxx>
+#include <BRepPrimAPI_MakeRevol.hxx>
+#include <TopoDS.hxx>
 
 using namespace Xbim::Geometry::BRep;
 
@@ -49,83 +52,85 @@ namespace Xbim
 					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
 				else if (dynamic_cast<IIfcCylindricalSurface^>(ifcSurface))
 					return BuildCylindricalSurface((IIfcCylindricalSurface^)ifcSurface);
-				else			
-					RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
+				throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
+				return Handle(Geom_Surface)();
 			}
 
 
 			Handle(Geom_Plane) SurfaceFactory::BuildPlane(IIfcPlane^ ifcPlane)
 			{
-				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint(ifcPlane->Position->Location);
-				gp_Dir normal = GEOMETRY_FACTORY->BuildDirection(ifcPlane->Position->Axis);
-				Handle(Geom_Plane) plane =  EXEC_NATIVE->BuildPlane(origin, normal);
+				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcPlane->Position->Location);
+				gp_Vec normal;
+				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
+					throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
+				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal);
 				if (plane.IsNull())
-					RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
+					throw RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
+				return plane;
 			}
 
 			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
 			{
-				if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
-					RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of revolution.", ifcSurfaceOfRevolution->SweptCurve);
-				
+				throw RaiseGeometryFactoryException("BuildSurfaceOfRevolution is not implemented");
+				//if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
+				//	throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of revolution.", ifcSurfaceOfRevolution->SweptCurve);
 
-				TopoDS_Edge sweptEdge = PROFILE_FACTORY->BuildProfileDef(ifcSurfaceOfRevolution->SweptCurve);
-				
-				if (!edge->IsValid)
-				{
-					XbimGeometryCreator::LogWarning(logger, sRev, "Invalid Swept Curve for IfcSurfaceOfRevolution, face discarded");
-					return;
-				}
-				TopoDS_Edge startEdge = edge;
+				//
+				//TopoDS_Edge sweptEdge = EDGE_FACTORY->BuildEdge(ifcSurfaceOfRevolution->SweptCurve); //throws exception
 
-				gp_Pnt origin(sRev->AxisPosition->Location->X, sRev->AxisPosition->Location->Y, sRev->AxisPosition->Location->Z);
-				gp_Dir axisDir(0, 0, 1);
-				if (sRev->AxisPosition->Axis != nullptr)
-					axisDir = gp_Dir(sRev->AxisPosition->Axis->X, sRev->AxisPosition->Axis->Y, sRev->AxisPosition->Axis->Z);
-				gp_Ax1 axis(origin, axisDir);
 
-				BRepPrimAPI_MakeRevol revolutor(startEdge, axis, M_PI * 2);
-				if (revolutor.IsDone())
-				{
-					pFace = new TopoDS_Face();
-					*pFace = TopoDS::Face(revolutor.Shape());
-					pFace->EmptyCopy();
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, sRev, "Invalid IfcSurfaceOfRevolution, face discarded");
-				}
+				//TopoDS_Edge startEdge = sweptEdge;
 
+				//gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcSurfaceOfRevolution->AxisPosition->Location);
+				//gp_Vec axisDir(0, 0, 1);
+				//if (ifcSurfaceOfRevolution->AxisPosition->Axis != nullptr)
+				//{
+				//	if (!GEOMETRY_FACTORY->BuildDirection3d(ifcSurfaceOfRevolution->Position->Axis, axisDir))
+				//		throw RaiseGeometryFactoryException("IIfcSurfaceOfRevolution axis is incorrectly defined", ifcSurfaceOfRevolution->Position->Axis);
+				//}
+				//gp_Ax1 axis(origin, axisDir);
+
+				//BRepPrimAPI_MakeRevol revolutor(startEdge, axis, M_PI * 2);
+				//if (!revolutor.IsDone() && revolutor.Shape().ShapeType() == TopAbs_FACE)
+				//{
+				//	TopoDS_Face face = TopoDS::Face(revolutor.Shape());
+				//	return BRep_Tool::Surface(face);
+				//}
+				//else
+				//{
+				//	throw RaiseGeometryFactoryException("Invalid IfcSurfaceOfRevolution", ifcSurfaceOfRevolution);
+				//}
+				return Handle(Geom_Surface)();
 			}
 
 			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 
 			Handle(Geom_Plane) SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
 			{
-
+				throw gcnew NotImplementedException();
 			}
-Handle(Geom_Surface) SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
+			Handle(Geom_Surface) SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 			Handle(Geom_Surface) SurfaceFactory::BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 			Handle(Geom_Surface) SurfaceFactory::BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 			Handle(Geom_Surface) SurfaceFactory::BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 			Handle(Geom_Surface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
-
+				throw gcnew NotImplementedException();
 			}
 
 #pragma endregion

@@ -1,6 +1,8 @@
 #include "ProfileFactory.h"
+#include "CurveFactory.h"
 #include "WireFactory.h"
 #include <TopoDS.hxx>
+#include <Geom_Plane.hxx>
 #include "../BRep/XWire.h"
 #include "../BRep/XFace.h"
 #include "../BRep/XEdge.h"
@@ -16,7 +18,7 @@ namespace Xbim
 			/*IXShape^ ProfileFactory::Build(IIfcProfileDef^ profileDef)
 			{
 				TopoDS_Shape shape = BuildProfile(profileDef);
-				
+
 				switch (shape.ShapeType())
 				{
 				case TopAbs_COMPOUND:
@@ -38,9 +40,9 @@ namespace Xbim
 				case TopAbs_SHAPE:
 					break;
 				default:
-					RaiseGeometryFactoryException("ProfileDef return type not supported", profileDef);
+					throw RaiseGeometryFactoryException("ProfileDef return type not supported", profileDef);
 				}
-				
+
 			}*/
 			IXFace^ ProfileFactory::BuildFace(IIfcProfileDef^ profileDef)
 			{
@@ -57,91 +59,149 @@ namespace Xbim
 				throw gcnew System::NotImplementedException();
 				// TODO: insert return statement here
 			}
+			
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcParameterizedProfileDef^ ifcParameterizedProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcLShapeProfileDef^ ifcLShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcUShapeProfileDef^ ifcUShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcEllipseProfileDef^ ifcEllipseProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcIShapeProfileDef^ ifcIShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcZShapeProfileDef^ ifcZShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCShapeProfileDef^ ifcCShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTShapeProfileDef^ ifcTShapeProfileDef)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
+			{
+				return TopoDS_Face();
+			}
+
+			TopoDS_Face ProfileFactory::BuildProfileFace(double x, double y, double tolerance, bool centre)
+			{
+				return TopoDS_Face();
+			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
+			{
+				TopoDS_Face face =  EXEC_NATIVE->MakeFace(wire);
+				if(face.IsNull())
+					throw RaiseGeometryFactoryException("Profile cound not be built from wire");
+				return face;
+			}
 			//NB all profiles are 2d
-			TopoDS_Shape ProfileFactory::BuildProfile(IIfcProfileDef^ profileDef)
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcProfileDef^ profileDef)
 			{
 				XProfileDefType profileType;
 				////WR1 The curve used for the outer curve definition shall have the dimensionality of 2.
 				//if (2 != (int)profileDef.->OuterCurve->Dim)
 				//	throw gcnew XbimGeometryFactoryException("WR1 The curve used for the outer curve definition shall have the dimensionality of 2");
 				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
-					RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
 				switch (profileType)
 				{
 				case XProfileDefType::IfcArbitraryClosedProfileDef:
-					return BuildProfile(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));
+					return BuildProfileFace(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));
 				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
-					break;
+					return BuildProfileFace(static_cast<IIfcArbitraryProfileDefWithVoids^>(profileDef));
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcArbitraryOpenProfileDef^>(profileDef));
 				case XProfileDefType::IfcCenterLineProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcCenterLineProfileDef^>(profileDef));
 				case XProfileDefType::IfcCompositeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcCompositeProfileDef^>(profileDef));
 				case XProfileDefType::IfcDerivedProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcDerivedProfileDef^>(profileDef));
 				case XProfileDefType::IfcMirroredProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcMirroredProfileDef^>(profileDef));
 				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcCShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcCircleProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
 				case XProfileDefType::IfcCircleHollowProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcCircleHollowProfileDef^>(profileDef));
 				case XProfileDefType::IfcEllipseProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcEllipseProfileDef^>(profileDef));
 				case XProfileDefType::IfcIShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcIShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcLShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcLShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcRectangleProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcRectangleProfileDef^>(profileDef));
 				case XProfileDefType::IfcRectangleHollowProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcRectangleHollowProfileDef^>(profileDef));
 				case XProfileDefType::IfcRoundedRectangleProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
 				case XProfileDefType::IfcTShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcTShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcTrapeziumProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
 				case XProfileDefType::IfcUShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcUShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcZShapeProfileDef:
-					break;
+					return BuildProfileFace(static_cast<IIfcZShapeProfileDef^>(profileDef));
 				default:
-					RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
 				}
-				
+
 			}
 
-			TopoDS_Shape ProfileFactory::BuildProfile(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
 			{
 				//validation
 				//WR1 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
 				//WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve.
 				if (dynamic_cast<IIfcLine^>(arbitraryClosedProfile->OuterCurve) != nullptr)
-					RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", arbitraryClosedProfile);
+					throw RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", arbitraryClosedProfile);
 				//WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve.
 				if (dynamic_cast<IIfcOffsetCurve2D^>(arbitraryClosedProfile->OuterCurve) != nullptr)
-					RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
+					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
+
+				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire); 
 				
-
-				TopoDS_Wire wire = WIRE_FACTORY->Build2d(arbitraryClosedProfile->OuterCurve);
-				if (wire.IsNull())
-					throw gcnew XbimGeometryFactoryException(String::Format("Failed to create: #{0}={1}", arbitraryClosedProfile->EntityLabel, arbitraryClosedProfile->GetType()->Name));
-
-				if (arbitraryClosedProfile->ProfileType == IfcProfileTypeEnum::AREA) //we will need to make a face
-				{
-					TopoDS_Face face = Ptr()->MakeFace(wire, hSurface);
-					if (face.IsNull())
-						throw gcnew XbimGeometryFactoryException(String::Format("Failed to create: #{0}={1}", arbitraryClosedProfile->EntityLabel, arbitraryClosedProfile->GetType()->Name));
-					else
-						return face;
-				}
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create IfcArbitraryClosedProfileDef", arbitraryClosedProfile);
 				else
-					return wire;
+					return face;
+
 			}
 		}
 	}

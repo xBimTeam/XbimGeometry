@@ -20,7 +20,7 @@
 #include <Geom_OffsetCurve.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 
-public class NCurveFactory : NFactoryBase
+public class NCurveFactory : public NFactoryBase
 {
 
 public:
@@ -33,7 +33,7 @@ public:
 	Handle(Geom2d_Circle) BuildCircle2d(const gp_Pnt2d &start, const gp_Pnt2d& mid, const gp_Pnt2d& end);
 	Handle(Geom2d_BSplineCurve) BuildCompositeCurve2d(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom2d_EllipseWithSemiAxes) BuildEllipse2d(const gp_Ax22d& axis, double major, double minor);
-	Handle(Geom2d_BSplineCurve) BuildIndexedPolyCurve2d(const Handle(TColGeom2d_SequenceOfBoundedCurve)& segments, double tolerance);
+	Handle(Geom2d_BSplineCurve) BuildIndexedPolyCurve2d(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom2d_LineWithMagnitude) BuildLine2d(const gp_Pnt2d& pnt, const gp_Vec2d& dir, double magnitude);
 	Handle(Geom2d_OffsetCurve) BuildOffsetCurve2d(const Handle(Geom2d_Curve)& basisCurve, double offset);
 	Handle(Geom2d_BSplineCurve) BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
@@ -50,7 +50,7 @@ public:
 	Handle(Geom_Circle) BuildCircle3d(const gp_Pnt& start, const gp_Pnt& mid, const gp_Pnt& end);
 	Handle(Geom_BSplineCurve) BuildCompositeCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom_EllipseWithSemiAxes) BuildEllipse3d(const gp_Ax2& axis, double major, double minor);
-	Handle(Geom_BSplineCurve) BuildIndexedPolyCurve3d(const Handle(TColGeom_SequenceOfBoundedCurve)& segments, double tolerance);
+	Handle(Geom_BSplineCurve) BuildIndexedPolyCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom_LineWithMagnitude) BuildLine3d(const gp_Pnt& pnt, const gp_Vec& dir, double magnitude);
 	Handle(Geom_OffsetCurve) BuildOffsetCurve3d(const Handle(Geom_Curve)& basisCurve, const gp_Vec& refDir, double offset);
 	Handle(Geom_BSplineCurve) BuildPolyline3d(const TColgp_Array1OfPnt& points, double tolerance);

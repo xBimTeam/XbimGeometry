@@ -39,7 +39,10 @@ namespace Xbim
 					}
 					faceMesh.push_back(faceLoops);
 				}
-				return Ptr()->BuildConnectedFaceSet(faceMesh, ModelService->Precision, ModelService->OneMillimeter);
+				TopoDS_Shell shell =  EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, ModelService->Precision, ModelService->OneMillimeter);
+				if (shell.IsNull())
+					throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
+				return shell;
 			}
 		}
 	}

@@ -16,6 +16,8 @@
 #include <Geom_Plane.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Dir2d.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+
 #include <math.h>
 
 
@@ -62,10 +64,16 @@ namespace Xbim
 				return gcnew XPoint(x, y);
 			};
 
+			
 
 			gp_Pnt GeometryFactory::BuildPoint3d(IIfcCartesianPoint^ ifcPoint)
 			{
 				return gp_Pnt(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1], (int)ifcPoint->Dim == 3 ? (double)ifcPoint->Coordinates[2] : 0.0);
+			}
+
+			gp_Pnt GeometryFactory::BuildPoint3d(IXPoint^ xPoint)
+			{
+				return gp_Pnt(xPoint->X, xPoint->Y, (int)xPoint->Is3d ? xPoint->Z : 0.0);
 			}
 
 			bool GeometryFactory::BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d)
@@ -77,6 +85,11 @@ namespace Xbim
 				}
 				else
 					return false;
+			}
+
+			gp_Pnt2d GeometryFactory::BuildPoint2d(IIfcCartesianPoint^ ifcPoint)
+			{
+				return gp_Pnt2d(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1]);
 			}
 
 			bool GeometryFactory::BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir2d)
@@ -160,8 +173,10 @@ namespace Xbim
 				Handle(Geom2d_AxisPlacement) hPlacement = new Geom2d_AxisPlacement(axis);
 				return gcnew XAxisPlacement2d(hPlacement);
 			}
+
 			void GeometryFactory::GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
 			{
+				
 				int i = 1;
 				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
 				{
@@ -169,25 +184,29 @@ namespace Xbim
 					points.SetValue(i, pnt);
 					i++;
 				}
+				
 			}
+
 			void GeometryFactory::GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points)
 			{
+				
 				int i = 1;
 				for each (IIfcCartesianPoint ^ ifcPoint in ifcPolyline->Points)
 				{
 					gp_Pnt2d pnt2d;
 					if (!BuildPoint2d(ifcPoint, pnt2d))
-						RaiseGeometryFactoryException("Polyline points must all be 2d", ifcPolyline);
+						throw RaiseGeometryFactoryException("Polyline points must all be 2d", ifcPolyline);
 					points.SetValue(i, pnt2d);
 					i++;
 				}
+				
 			}
 
 			bool GeometryFactory::ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& location)
 			{
 				gp_Pnt2d pnt2d;
 				if (!BuildPoint2d(axis2D->Location, pnt2d))
-					RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", axis2D);
+					throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", axis2D);
 				gp_XY xDir(1, 0);
 				if (axis2D->RefDirection != nullptr)
 					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
@@ -222,7 +241,7 @@ namespace Xbim
 			{
 				gp_Ax2 axis;
 				if(!BuildAxis2Placement3d(plane->Position,axis))
-					RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", plane->Position);
+					throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Location must be 2D", plane->Position);
 				gp_Ax3 ax3(axis);
 				Handle(Geom_Plane) geomPlane = new Geom_Plane(ax3);
 				return gcnew XPlane(geomPlane);
@@ -256,6 +275,28 @@ namespace Xbim
 			{
 				return gcnew Xbim::Geometry::BRep::XLocation(tx, ty, tz, sc, qw, qx, qy, qz);
 			}
+
+			double GeometryFactory::GetDeterminant(double x1, double y1, double x2, double y2)
+			{
+				return x1 * y2 - x2 * y1;
+			}
+
+			double GeometryFactory::Area(const TColgp_SequenceOfPnt2d& points2d)
+			{
+				if (points2d.Length() < 3)
+				{
+					return 0;
+				}
+				int nbPoints = (int)points2d.Length();
+				double area = GetDeterminant(points2d.Value(nbPoints).X(), points2d.Value(nbPoints).Y(), points2d.Value(1).X(), points2d.Value(1).Y());
+
+				for (int i = 2; i <= nbPoints; i++)
+				{
+					area += GetDeterminant(points2d.Value(i - 1).X(), points2d.Value(i - 1).Y(), points2d.Value(i).X(), points2d.Value(i).Y());
+				}
+				return (area / 2);
+			}
+
 		}
 	}
 }

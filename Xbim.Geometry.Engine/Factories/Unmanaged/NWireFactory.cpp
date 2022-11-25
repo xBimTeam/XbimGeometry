@@ -41,7 +41,26 @@
 #include <ShapeFix_Edge.hxx>
 #include <BRepLib.hxx>
 #include <Geom_Plane.hxx>
+#include <BRepOffsetAPI_MakeOffset.hxx>
+#include <GeomLib_Tool.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 
+bool NWireFactory::IsClosed(const TopoDS_Wire& wire, double tolerance)
+{
+	try
+	{
+		BRepAdaptor_CompCurve cc(wire, Standard_True);
+		gp_Pnt p1 = cc.Value(cc.FirstParameter());
+		gp_Pnt p2 = cc.Value(cc.LastParameter());
+		return p1.IsEqual(p2, tolerance);
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+		return false;
+	}
+}
 TopoDS_Wire NWireFactory::BuildWire(const TopoDS_Edge& edge)
 {
 	try
@@ -59,15 +78,20 @@ TopoDS_Wire NWireFactory::BuildWire(const TopoDS_Edge& edge)
 	}
 }
 
-TopoDS_Wire NWireFactory::Build2dPolyline(
-	const NCollection_Vector<KeyedPnt2d>& pointSeq,
-	double tolerance, bool buildRaw)
+TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance)
 {
 	//we need to ensure that no points are technically duplicate, i.e. < tolerance of the model apart
 	//the method of removing duplicates that are tolerance away from each other is flawed when the polyline is used
 	//in a shared vertex context such as a brep definition, using cell filters and controlling precision is better
 	try
 	{
+		int id = 0;
+		NCollection_Vector<KeyedPnt2d> pointSeq;
+		for (auto&& point : points)
+		{
+			pointSeq.Append(KeyedPnt2d(point.XY(), ++id));
+		}
+
 		BRep_Builder builder;
 		NCollection_CellFilter<BRepMesh_VertexInspector> theCells(tolerance, new NCollection_IncAllocator);
 		gp_Pnt2d start = pointSeq.cbegin()->myPnt2d;
@@ -160,19 +184,17 @@ TopoDS_Wire NWireFactory::Build2dPolyline(
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 
-	pLoggingService->LogWarning("Could not build polyline");
 	return TopoDS_Wire();
 
 }
 
+
 //trims the polyline to the parameters, if they are >=0, nb this method does not check for intersecting or notched lines
-TopoDS_Wire NWireFactory::BuildPolyline(
-	const NCollection_Vector<KeyedPnt>& pointSeq, double startParam, double endParam,
+TopoDS_Wire NWireFactory::BuildPolyline3d(
+	const TColgp_Array1OfPnt& points, double startParam, double endParam,
 	double tolerance)
 {
 	//3d polylines don't necessarily sit on a surface, they may in the case of an brep face, 
@@ -180,6 +202,13 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 	//no checks ar eperformed here apart from stopping zero length edges
 	try
 	{
+		int id = 0;
+		NCollection_Vector<KeyedPnt> pointSeq;
+		for (auto&& point : points)
+		{
+			pointSeq.Append(KeyedPnt(point.XYZ(), ++id));
+		}
+
 		BRep_Builder builder;
 
 		//make the polygon
@@ -304,9 +333,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 
 	pLoggingService->LogWarning("Could not build polyline");
@@ -314,7 +341,7 @@ TopoDS_Wire NWireFactory::BuildPolyline(
 
 }
 //turns the point list into a set of trimmed line segments, segments with a length less than tolerance are skipped
-void NWireFactory::GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeom_SequenceOfCurve& curves, double tolerance)
+void NWireFactory::GetPolylineSegments3d(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& curves)
 {
 	try
 	{
@@ -357,18 +384,16 @@ void NWireFactory::GetPolylineSegments(const TColgp_Array1OfPnt& points, TColGeo
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		pLoggingService->LogWarning("Could not build polyline");
+		LogStandardFailure(e);
 	}
 
-	pLoggingService->LogWarning("Could not build polyline");
-	return;
 }
 
 //turns the point list into a set of trimmed line segments, segments with a length less than tolerance are skipped
-void NWireFactory::GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TColGeom2d_SequenceOfCurve& curves, double tolerance)
+void NWireFactory::GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, double tolerance, TColGeom2d_SequenceOfBoundedCurve& curves)
 {
+
 	try
 	{
 		int pointCount = points.Length();
@@ -410,16 +435,15 @@ void NWireFactory::GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, TCo
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		pLoggingService->LogWarning("Could not build polyline");
+		LogStandardFailure(e);
 	}
 
-	pLoggingService->LogWarning("Could not build polyline");
-	return;
+
+
 }
 //Builds a wire a collection of segments and trims it
-TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance, double gapSize)
+TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double trimStart, double trimEnd, double tolerance, double gapSize)
 {
 
 	TopTools_SequenceOfShape edges;
@@ -440,11 +464,16 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 		//}
 
 		//myfile.close();
-		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
+		;
+		for (auto wireExplorer = BRepTools_WireExplorer(wire); wireExplorer.More(); wireExplorer.Next())
 		{
-			Handle(Geom_Curve) segment = *it;
-
-			double segLength = Abs(segment->LastParameter() - segment->FirstParameter());
+			TopoDS_Edge edge = wireExplorer.Current();
+			Standard_Real start = 0, end = 0;
+			TopLoc_Location loc;
+			bool useExistingEdge = false;
+			Handle(Geom_Curve) segment = BRep_Tool::Curve(edge, loc, start, end);
+			
+			double segLength = Abs(end - start);
 			if (segLength < trimStart) //don't need this
 				trimStart -= segLength;
 			else
@@ -475,6 +504,7 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 					}
 					else //add the segment
 					{
+						useExistingEdge = true;
 						parametricLength += (segment->LastParameter() - segment->FirstParameter());
 					}
 				}
@@ -482,10 +512,15 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 				TopoDS_Edge anEdge;
 				if (edges.Length() == 0) //just add the first one
 				{
-					BRepBuilderAPI_MakeEdge edgeMaker(segment);
-					anEdge = edgeMaker.Edge();
+					if (useExistingEdge)
+						anEdge = edge;
+					else
+					{
+						BRepBuilderAPI_MakeEdge edgeMaker(segment);
+						anEdge = edgeMaker.Edge();
+					}
 				}
-				else //we need to add this segment to the start of end of the edges
+				else //we need to add this segment to the start or end of the edges
 				{
 
 					const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());
@@ -493,33 +528,32 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 
 					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
 					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
-					
+
 					double gap = segStartPoint.Distance(lastEdgeEndPoint);
 
 					if (gap > gapSize)
 					{
-						//Standard_Failure::Raise("Segments are not contiguous");
+						Standard_Failure::Raise("Directrix Segments are not contiguous");
 						//this segment is not connected to the previous one, make a new start vertex and create a discontinuous wire
-						TopoDS_Vertex segEndVertex;
-						builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
-						TopoDS_Vertex segStartVertex;
-						builder.MakeVertex(segStartVertex, segStartPoint, tolerance);
-						BRepBuilderAPI_MakeEdge edgeMaker(segment, segStartVertex, segEndVertex);
-						anEdge = edgeMaker.Edge();
 					}
 					else //connect to previous segment it is in tolerance
 					{
 						AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 						TopoDS_Vertex segEndVertex;
 						builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
-						BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
-						if (!edgeMaker.IsDone())
+						if (useExistingEdge)
+							anEdge = edge;
+						else
 						{
-							std::stringstream msg;
-							msg << "Error building edge: Error Code: " << edgeMaker.Error();
-							Standard_Failure::Raise(msg);
+							BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+							if (!edgeMaker.IsDone())
+							{
+								std::stringstream msg;
+								msg << "Error building edge: Error Code: " << edgeMaker.Error();
+								Standard_Failure::Raise(msg);
+							}
+							anEdge = edgeMaker.Edge();
 						}
-						anEdge = edgeMaker.Edge();
 					}
 				}
 				if (!anEdge.IsNull())
@@ -528,144 +562,160 @@ TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, dou
 
 		}
 		builder.MakeWire(wire);
-		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
-		{
-			builder.Add(wire, *it);
-		}
+		for (auto&& edge : edges)
+			builder.Add(wire, edge);
 		return wire;
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		pLoggingService->LogWarning("Could not build directrix");
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogWarning("Could not build directrix");
+
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::Build2dDirectrix(TColGeom2d_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
+
+TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance)
 {
-	TopTools_SequenceOfShape edges;
 	try
 	{
-		BRep_Builder builder;
-		double parametricLength = 0;
-		TopoDS_Wire wire;
-		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
-		{
-			Handle(Geom2d_Curve) segment = *it;
 
-			double segLength = Abs(segment->LastParameter() - segment->FirstParameter());
-			if (segLength < trimStart) //don't need this
-				trimStart -= segLength;
+		//BRepAdaptor_CompCurve cc(basisWire, Standard_True, first, last, tolerance); TODO: test if we can trim here and remove complexity
+		BRepAdaptor_CompCurve cc(basisWire, Standard_True);
+		GeomAbs_Shape continuity = cc.Continuity();
+		int numIntervals = cc.NbIntervals(continuity);
+
+		//calcualte the start and end parameters
+		double first = u1, last = u2;
+		if (preferCartesian)
+		{
+			if (!GetParameter(basisWire, p1, tolerance, first))
+				Standard_Failure::Raise("Trim Point1 is not on the wire");
+			if (!GetParameter(basisWire, p2, tolerance, last))
+				Standard_Failure::Raise("Trim Point2 is not on the wire");
+		}
+		if (numIntervals == 1)
+		{
+			TopoDS_Edge edge; // the edge we are interested in
+			Standard_Real uoe; // parameter U on the edge (not used)
+			cc.Edge(last, edge, uoe);
+			Standard_Real l, f; // the parameter range is returned in f and l
+			Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, f, l);
+			Handle(Geom_TrimmedCurve) trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+			while (!trimmedCurve.IsNull()) //remove trims
+			{
+				curve = trimmedCurve->BasisCurve();
+				trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(curve);
+			}
+			if (curve->IsPeriodic()) //stay in bounds for splines etc, keep orientation for periodics, 
+			{
+				l = f + last;
+				f = f + first;
+			}
 			else
 			{
-				if (trimStart < segLength) //need a trimmed version of this segment
-				{
-					if (trimEnd <= parametricLength + segLength) //need no more after this
-					{
-						segment = new Geom2d_TrimmedCurve(segment, trimStart, trimEnd - parametricLength);
-						parametricLength += (trimEnd - parametricLength);
-						//stop concatenating
-					}
-					else //trimStart to end seg					
-					{
-						if (trimStart > 0)
-							segment = new Geom2d_TrimmedCurve(segment, trimStart, segment->LastParameter());
-						parametricLength += (segment->LastParameter() - segment->FirstParameter());
-					}
-					trimStart = 0; //we have the first segment at 0
-				}
-				else //take the whole segment up to end trim
-				{
-					if (trimEnd <= parametricLength + segLength)
-					{
-						segment = new Geom2d_TrimmedCurve(segment, 0, trimEnd - parametricLength);
-						parametricLength += (trimEnd - parametricLength);
-						//stop concatenating
-					}
-					else //add the segment
-					{
-						parametricLength += (segment->LastParameter() - segment->FirstParameter());
-					}
-				}
-				//make the segment an edge
-
-				if (edges.Length() == 0) //just add the first one
-				{
-					BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
-					TopoDS_Edge edgeToAdd = edgeMaker.Edge();
-					edges.Append(edgeToAdd);
-				}
-				else //we need to add this segment ot the start of end of the edges
-				{
-
-					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
-					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
-					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
-
-					TopoDS_Edge firstEdge = TopoDS::Edge(edges.First());
-					TopoDS_Vertex vFirst = TopExp::FirstVertex(firstEdge); //get the vertex at the start of the wire
-					gp_Pnt firstPoint = BRep_Tool::Pnt(vFirst); //the first point
-
-					gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
-					gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
-					gp_Pnt segStartPoint(segStartPoint2d.X(), segStartPoint2d.Y(), 0);
-					gp_Pnt segEndPoint(segEndPoint2d.X(), segEndPoint2d.Y(), 0);
-					double lastGap = lastPoint.Distance(segStartPoint);
-					double firstGap = firstPoint.Distance(segEndPoint);
-
-					if (lastGap < firstGap) //we can just add it on the end
-					{
-						if (lastGap > tolerance)
-							Standard_Failure::Raise("Segments are not contiguous");
-						AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
-						TopoDS_Vertex segEndVertex;
-						builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
-						BRepBuilderAPI_MakeEdge2d edgeMaker(segment, vLast, segEndVertex);
-						edges.Append(edgeMaker.Edge());
-					}
-					else //we neeed to add it on the start
-					{
-						if (firstGap > tolerance)
-							Standard_Failure::Raise("Segments are not contiguous");
-						AdjustVertexTolerance(vFirst, firstPoint, segEndPoint, firstGap);
-						TopoDS_Vertex segStartVertex;
-						builder.MakeVertex(segStartVertex, segStartPoint, Precision::Confusion());
-						BRepBuilderAPI_MakeEdge2d edgeMaker(segment, segStartVertex, vFirst);
-						edges.Append(edgeMaker.Edge());
-					}
-				}
-
-
-
+				f = System::Math::Max(f, first);
+				l = System::Math::Min(l, last);
 			}
-
+			if (System::Math::Abs(f - l) > Precision::Confusion())
+			{
+				Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, f, l);
+				BRepBuilderAPI_MakeWire wm;
+				wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+				return wm.Wire();
+			}
+			else
+				return TopoDS_Wire(); //empty wire
 		}
-		//add the edges to the wire
-		builder.MakeWire(wire);
-		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+		else
 		{
-			builder.Add(wire, *it);
+			BRepBuilderAPI_MakeWire wm;
+			TColStd_Array1OfReal res(1, numIntervals + 1);
+			cc.Intervals(res, GeomAbs_C0);
+			for (Standard_Integer i = 1; i <= numIntervals; i++) //process all but the end interval point
+			{
+				Standard_Real fp = res.Value(i);
+				Standard_Real lp = res.Value(i + 1);
+				//if the first point is > lp then we do not want this edge at all
+				if (first > lp)
+					continue;
+				//if the last point is < fp then we do not want it
+				if (last < fp)
+					continue;
+
+				//we are going to need an edge
+				TopoDS_Edge edge; // the edge we are interested in
+				Standard_Real uoe; // parameter U on the edge (not used)
+				cc.Edge(fp, edge, uoe);
+				Standard_Real lEdge, fEdge; // the parameter range is returned in f and l
+				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, fEdge, lEdge);
+
+				// if first is < lp and last < lp then we need to do both trims on this edge
+				if (first > fp && first < lp && last < lp)
+				{
+					gp_Pnt pFirst = cc.Value(first);
+					double uOnEdgeFirst;
+					gp_Pnt pLast = cc.Value(last);
+					double uOnEdgeLast;
+					double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
+					GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
+					GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
+					if (System::Math::Abs(uOnEdgeFirst - uOnEdgeLast) > Precision::Confusion())
+					{
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, uOnEdgeLast);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+					}
+				}
+				// if first is < lp  then we need to trim to end of this edge unless first is zero or has already been used
+				else if (first > 0 && first < lp)
+				{
+					gp_Pnt pFirst = cc.Value(first);
+					double uOnEdgeFirst;
+					double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
+					GeomLib_Tool::Parameter(curve, pFirst, maxTolerance, uOnEdgeFirst);
+					if (System::Math::Abs(uOnEdgeFirst - lEdge) > Precision::Confusion())
+					{
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, uOnEdgeFirst, lEdge);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+					}
+					first = -1; //it has been done
+				}
+				//if last  < lp need to trim from beginning to last
+				else if (last < lp)
+				{
+					//get the point required
+
+					gp_Pnt pLast = cc.Value(last);
+					double uOnEdgeLast;
+					double maxTolerance = BRep_Tool::MaxTolerance(edge, TopAbs_VERTEX);
+					GeomLib_Tool::Parameter(curve, pLast, maxTolerance, uOnEdgeLast);
+					if (std::abs(uOnEdgeLast - fEdge) > Precision::Confusion())
+					{
+						Handle(Geom_TrimmedCurve) trimmed = new Geom_TrimmedCurve(curve, fEdge, uOnEdgeLast);
+						wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
+					}
+				}
+				else //we want the whole edge
+					wm.Add(edge);
+
+				if (!wm.IsDone()) Standard_Failure::Raise("Error trimming wire, see logs");
+			}
+			return wm.Wire();
 		}
-		return wire;
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogWarning("Could not build directrix");
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double tolerance, double gapSize)
+TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance, double gapSize)
 {
 	TopTools_SequenceOfShape edges;
 	try
-	{  
+	{
 		BRep_Builder builder;
 		TopoDS_Wire wire;
 		TopoDS_Edge anEdge;
@@ -682,9 +732,9 @@ TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double
 		//}
 		//
 		//myfile.close();
-		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
+		for (auto&& segIt : segments)
 		{
-			Handle(Geom2d_Curve) segment = *it; 
+			Handle(Geom2d_Curve) segment = segIt;
 
 			if (edges.Length() == 0) //just add the first one
 			{
@@ -694,22 +744,22 @@ TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double
 			else //we need to add this segment to the start of end of the edges
 			{
 
-				const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());				
+				const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());
 				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(lastEdge)); //the last point
 
 				gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
 				gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
 				gp_Pnt segStartPoint(segStartPoint2d.X(), segStartPoint2d.Y(), 0);
 				gp_Pnt segEndPoint(segEndPoint2d.X(), segEndPoint2d.Y(), 0);
-				
+
 				double gap = segStartPoint.Distance(lastEdgeEndPoint);
-				
+
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
 				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
 				builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
-			
+
 				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
 				if (!edgeMaker.IsDone())
 				{
@@ -743,11 +793,83 @@ TopoDS_Wire NWireFactory::BuildWire(TColGeom2d_SequenceOfCurve& segments, double
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogWarning("Could not build curve segments");
+
+	return TopoDS_Wire();
+}
+
+TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance, double gapSize)
+{
+	TopTools_SequenceOfShape edges;
+	try
+	{
+		BRep_Builder builder;
+		TopoDS_Wire wire;
+		TopoDS_Edge anEdge;
+
+		for (auto&& segIt : segments)
+		{
+			Handle(Geom_Curve) segment = segIt;
+
+			if (edges.Length() == 0) //just add the first one
+			{
+				BRepBuilderAPI_MakeEdge edgeMaker(segment);
+				anEdge = edgeMaker.Edge();
+			}
+			else //we need to add this segment to the start of end of the edges
+			{
+
+				const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());
+				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(lastEdge)); //the last point
+
+				gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
+				gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+
+				double gap = segStartPoint.Distance(lastEdgeEndPoint);
+
+				if (gap > gapSize)
+					Standard_Failure::Raise("Segments are not contiguous");
+				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
+				TopoDS_Vertex segEndVertex;
+				builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
+
+				BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+				if (!edgeMaker.IsDone())
+				{
+					Standard_Real cf = segment->FirstParameter();
+					Standard_Real cl = segment->LastParameter();
+					gp_Pnt P1 = segment->Value(cf);
+					gp_Pnt P2 = segment->Value(cl);
+					double dist = P1.Distance(P2);
+					std::stringstream msg;
+					msg << "Error building edge: Error Code: " << edgeMaker.Error();
+					Standard_Failure::Raise(msg);
+				}
+				anEdge = edgeMaker.Edge();
+			}
+			/*bool ok = BRepLib::BuildCurve3d(anEdge, tolerance);
+			if (ok)*/
+			edges.Append(anEdge);
+			/*else
+				Standard_Failure::Raise("Could not create 3d PCurves in NWireFactory::BuildWire");*/
+		}
+		//add the edges to the wire
+		builder.MakeWire(wire);
+		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+		{
+			builder.Add(wire, *it);
+		}
+		double closingGap = segments.First()->Value(segments.First()->FirstParameter()).Distance(segments.Last()->Value(segments.First()->LastParameter()));
+		if (closingGap < gapSize)
+			wire.Closed(true);
+		return wire;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+
 	return TopoDS_Wire();
 }
 
@@ -815,12 +937,143 @@ TopoDS_Wire NWireFactory::BuildCircleProfileDef(double radius, const gp_Ax22d& p
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogWarning("Could not build circle profile def");
+
 	return TopoDS_Wire();
+}
+
+TopoDS_Wire NWireFactory::BuildOffset(TopoDS_Wire basisWire, double distance)
+{
+	try
+	{
+		BRepOffsetAPI_MakeOffset offsetMaker(basisWire);
+		offsetMaker.Perform(distance);
+		if (!offsetMaker.IsDone() || offsetMaker.Shape().ShapeType() != TopAbs_WIRE)
+			Standard_Failure::Raise("Error building offset curve as a wire");
+		return TopoDS::Wire(offsetMaker.Shape());
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	return TopoDS_Wire();
+}
+//
+//TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
+//{
+//	TopTools_SequenceOfShape edges;
+//	try
+//	{
+//		BRep_Builder builder;
+//		double parametricLength = 0;
+//		TopoDS_Wire wire;
+//		for (auto&& segment : segments)
+//		{
+//			double segLength = Abs(segment->LastParameter() - segment->FirstParameter());
+//			if (segLength < trimStart) //don't need this
+//				trimStart -= segLength;
+//			else
+//			{
+//				if (trimStart < segLength) //need a trimmed version of this segment
+//				{
+//					if (trimEnd <= parametricLength + segLength) //need no more after this
+//					{
+//						segment = new Geom_TrimmedCurve(segment, trimStart, trimEnd - parametricLength);
+//						parametricLength += (trimEnd - parametricLength);
+//						//stop concatenating
+//					}
+//					else //trimStart to end seg					
+//					{
+//						if (trimStart > 0)
+//							segment = new Geom_TrimmedCurve(segment, trimStart, segment->LastParameter());
+//						parametricLength += (segment->LastParameter() - segment->FirstParameter());
+//					}
+//					trimStart = 0; //we have the first segment at 0
+//				}
+//				else //take the whole segment up to end trim
+//				{
+//					if (trimEnd <= parametricLength + segLength)
+//					{
+//						segment = new Geom_TrimmedCurve(segment, 0, trimEnd - parametricLength);
+//						parametricLength += (trimEnd - parametricLength);
+//						//stop concatenating
+//					}
+//					else //add the segment
+//					{
+//						parametricLength += (segment->LastParameter() - segment->FirstParameter());
+//					}
+//				}
+//				//make the segment an edge
+//
+//				if (edges.Length() == 0) //just add the first one
+//				{
+//					BRepBuilderAPI_MakeEdge edgeMaker(segment);
+//					TopoDS_Edge edgeToAdd = edgeMaker.Edge();
+//					edges.Append(edgeToAdd);
+//				}
+//				else //we need to add this segment ot the start of end of the edges
+//				{
+//					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
+//					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
+//					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
+//
+//					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
+//					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
+//
+//					double lastGap = lastPoint.Distance(segStartPoint);
+//					
+//					if (lastGap > tolerance)
+//						Standard_Failure::Raise("Segments are not contiguous");
+//					AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
+//					TopoDS_Vertex segEndVertex;
+//					builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
+//					BRepBuilderAPI_MakeEdge edgeMaker(segment, vLast, segEndVertex);
+//					edges.Append(edgeMaker.Edge());
+//				}
+//			}
+//		}
+//		builder.MakeWire(wire);
+//		for (auto&& edge: edges)
+//			builder.Add(wire, edge);
+//		return wire;
+//	}
+//	catch (const Standard_Failure& e)
+//	{
+//		pLoggingService->LogWarning("Could not build directrix");
+//		LogStandardFailure(e);
+//	}
+//	
+//	return TopoDS_Wire();
+//}
+
+bool NWireFactory::GetParameter(const TopoDS_Wire& wire, gp_Pnt pnt, double tolerance, double& val)
+{
+	try
+	{
+		double paramOffset = 0;
+		for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+		{
+			Standard_Real u = 0;
+			Standard_Real fpar = 0, lpar = 0;
+			TopLoc_Location aLoc;
+			const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
+			Handle(Geom_Curve) aCurve = BRep_Tool::Curve(edge, aLoc, fpar, lpar);
+			if (GeomLib_Tool::Parameter(aCurve, pnt, tolerance, u))
+			{
+				val = paramOffset + u;
+				return true;
+			}
+			GProp_GProps gProps;
+			BRepGProp::LinearProperties(edge, gProps);
+			paramOffset += gProps.Mass();
+		}
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	return false;
 }
 
 bool NWireFactory::GetNormal(const TopoDS_Wire& wire, gp_Vec& normal)

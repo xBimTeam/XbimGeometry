@@ -22,578 +22,532 @@
 #include <ShapeAnalysis_Wire.hxx>
 #include <TColGeom2d_SequenceOfCurve.hxx>
 #include "../BRep/XWire.h"
+#include <GeomLib_Tool.hxx>
+
 using namespace System;
 using namespace System::Linq;
 using namespace Xbim::Geometry::BRep;
+using namespace Xbim::Ifc4::MeasureResource;
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Factories
 		{
-			IXWire^ WireFactory::BuildWire(array<IXPoint^>^ points)
-			{ 
-				//validate
-				if (points->Length == 0)
-					RaiseGeometryFactoryException("Points has zero length");
-				NCollection_Vector<KeyedPnt> pointSeq;
-				int id = 0;
-				IXPoint^ first = nullptr;
-				IXPoint^ last = nullptr;
-				for each (IXPoint ^ cp in points)
+
+
+			//There is a slight mis-alignment between OCC and IFC class structures
+			//A curve in Ifc could comprise multiple segments (IfcPolyline). We can convert this to either a wire with a single edge that is an OCC Bspline curve 
+			//or it can be converted to an edge for each polyline segment
+			//Mostly, multiple segments are implemented in IFC by BIM vendors for most situations, but some sweeps require a single segment
+			//The asSingleEdge boolean controls this behaviour
+			TopoDS_Wire WireFactory::BuildWire(IIfcCurve^ ifcCurve, bool asSingleEdge)
+			{
+
+				if ((int)ifcCurve->Dim == 2)
 				{
-					if (first == nullptr) first = cp;
-					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), id++));
-					last = cp;
+					return BuildWire2d(ifcCurve, asSingleEdge);
 				}
-				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline(pointSeq, -1, -1, ModelService->Precision);
+				else
+				{
+					return BuildWire3d(ifcCurve, asSingleEdge);
+				}
+			}
+
+			TopoDS_Wire WireFactory::BuildWire2d(IIfcCurve^ ifcCurve, bool asSingleEdge)
+			{
+				XCurveType curveType;
+				if (!Enum::TryParse<XCurveType>(ifcCurve->ExpressType->ExpressName, curveType))
+					throw RaiseGeometryFactoryException("Unsupported curve type", ifcCurve);
+
+				switch (curveType)
+				{
+				case XCurveType::IfcBSplineCurveWithKnots:
+					return BuildWire(static_cast<IIfcBSplineCurveWithKnots^>(ifcCurve));
+				case XCurveType::IfcCircle:
+					return BuildWire(static_cast<IIfcCircle^>(ifcCurve));
+				case XCurveType::IfcCompositeCurve:
+					return BuildWire2d(static_cast<IIfcCompositeCurve^>(ifcCurve), asSingleEdge);
+					/*case XCurveType::IfcCompositeCurveOnSurface:
+						return BuildWire2d(static_cast<IIfcCompositeCurveOnSurface^>(ifcCurve), asSingleEdge);*/
+				case XCurveType::IfcEllipse:
+					return BuildWire(static_cast<IIfcEllipse^>(ifcCurve));
+				case XCurveType::IfcIndexedPolyCurve:
+					return BuildWire2d(static_cast<IIfcIndexedPolyCurve^>(ifcCurve), asSingleEdge);
+				case XCurveType::IfcLine:
+					return BuildWire(static_cast<IIfcLine^>(ifcCurve));
+				case XCurveType::IfcOffsetCurve2D:
+					return BuildWire(static_cast<IIfcOffsetCurve^>(ifcCurve), asSingleEdge);
+					/*case XCurveType::IfcPcurve:
+						return BuildCurve2d(static_cast<IIfcPcurve^>(curve));*/
+				case XCurveType::IfcPolyline:
+					return BuildWire2d(static_cast<IIfcPolyline^>(ifcCurve), asSingleEdge);
+				case XCurveType::IfcRationalBSplineCurveWithKnots:
+					return BuildWire(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcCurve));
+					/*case XCurveType::IfcSurfaceCurve:
+						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
+				case XCurveType::IfcTrimmedCurve:
+					return BuildWire(static_cast<IIfcTrimmedCurve^>(ifcCurve), asSingleEdge);
+				default:
+					throw RaiseGeometryFactoryException("Unsupported 2d curve type", ifcCurve);
+				}
+				
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
+			{
+				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcBSplineCurveWithKnots); //throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Circle could not be built as a wire", ifcBSplineCurveWithKnots);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcCircle^ ifcCircle)
+			{
+				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCircle); //throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Circle could not be built as a wire", ifcCircle);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire2d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge)
+			{
+				if (asSingleEdge)
+				{
+					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCompositeCurve); //throws exception
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+					return wire;
+				}
+				else
+				{
+					TColGeom2d_SequenceOfBoundedCurve segments;
+					CURVE_FACTORY->BuildCompositeCurveSegments2d(ifcCompositeCurve, segments);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+					return wire;
+				}
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcEllipse^ ifcEllipse)
+			{
+				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcEllipse); //throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcEllipse could not be built as a wire", ifcEllipse);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge)
+			{
+				if (asSingleEdge)
+				{
+					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcIndexedPolyCurve); //throws exception
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+					return wire;
+				}
+				else
+				{
+					TColGeom2d_SequenceOfBoundedCurve segments;
+					CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+					return wire;
+				}
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcLine^ ifcLine)
+			{
+				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcLine); //throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcLine could not be built as a wire", ifcLine);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge)
+			{
+				TopoDS_Wire basisWire = BuildWire(ifcOffsetCurve2D->BasisCurve, asSingleEdge);//throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildOffset(basisWire, ifcOffsetCurve2D->Distance);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcOffsetCurve2D could not be built as a wire", ifcOffsetCurve2D);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire2d(IIfcPolyline^ ifcPolyline, bool asSingleEdge)
+			{
+				if (asSingleEdge)
+				{
+					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcPolyline); //throws exception
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
+					return wire;
+				}
+				else
+				{
+					TColgp_Array1OfPnt2d points(1, ifcPolyline->Points->Count);
+					int id = 0;
+
+					for each (IIfcCartesianPoint ^ cp in ifcPolyline->Points)
+					{
+						points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint2d(cp));
+					}
+					TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelService->Precision);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
+					return wire;
+				}
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots)
+			{
+				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcRationalBSplineCurveWithKnots); //throws exception
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcLine could not be built as a wire", ifcRationalBSplineCurveWithKnots);
+				return wire;
+			}
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcTrimmedCurve^ ifcTrimmedCurve, bool asSingleEdge)
+			{
+				TopoDS_Wire basisWire = BuildWire(ifcTrimmedCurve->BasisCurve, asSingleEdge);//throws exception
+				bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+				bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+				bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+				bool sense = ifcTrimmedCurve->SenseAgreement;
+				//get the parametric values
+				IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+
+				bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+
+				double u1 = double::NegativeInfinity;
+				double u2 = double::PositiveInfinity;
+				IIfcCartesianPoint^ cp1 = nullptr;
+				IIfcCartesianPoint^ cp2 = nullptr;
+				gp_Pnt p1;
+				gp_Pnt p2;
+				for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
+				{
+					if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
+					else u1 = (double)(IfcParameterValue)trim; //its parametric	
+				}
+				for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
+				{
+					if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
+					else u2 = (double)(IfcParameterValue)trim; //its parametric	
+				}
+
+				if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
+					(cp1 != nullptr && cp2 != nullptr &&
+						(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
+				{
+					p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
+					p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
+				}
+				else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
+					throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
+				else //we prefer to use parameters but need to adjust
+				{
+					trim_cartesian = false;
+					if (isConic)
+					{
+						u1 *= ModelService->RadianFactor; //correct to radians
+						u2 *= ModelService->RadianFactor; //correct to radians
+					}
+				}
+
+				if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail we cannot support periodic wires conic curve
+				{
+					throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty wire", ifcTrimmedCurve->BasisCurve);
+				}
+				else
+				{
+					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelService->MinimumGap);
+					if (trimmedWire.IsNull())
+						throw RaiseGeometryFactoryException("IfcTrimmedCurve could not be built as a wire", ifcTrimmedCurve);
+					return trimmedWire;
+				}
+			}
+
+
+#pragma region Interface implementation
+
+
+
+			IXWire^ WireFactory::BuildWire(array<IXPoint^>^ xPoints)
+			{
+				//validate
+				if (xPoints->Length == 0)
+					throw RaiseGeometryFactoryException("Points has zero length");
+				TColgp_Array1OfPnt points(1, xPoints->Length);
+				int id = 0;
+
+				for each (IXPoint ^ cp in xPoints)
+				{
+					points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint3d(cp));
+				}
+				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, -1, -1, ModelService->Precision);
 				if (wire.IsNull() || wire.NbChildren() == 0)
-					RaiseGeometryFactoryException("Resulting wire is empty");
-				if (GEOMETRY_FACTORY->IsEqual(first, last, ModelService->MinimumGap))
+					throw RaiseGeometryFactoryException("Resulting wire is empty");
+
+				if (EXEC_NATIVE->IsClosed(wire, ModelService->Precision))
 					wire.Closed(true);
 				return gcnew XWire(wire);
 			}
+
+
 			IXWire^ WireFactory::Build(IIfcCurve^ ifcCurve)
 			{
-				TopoDS_Wire wire = BuildWire(ifcCurve);
+				TopoDS_Wire wire = BuildWire(ifcCurve, false); //asume all compund edges are implemented as segments, not bsplines
 				if (wire.IsNull() || wire.NbChildren() == 0)
-					RaiseGeometryFactoryException("Resulting wire is empty", ifcCurve);
+					throw RaiseGeometryFactoryException("Resulting wire is empty", ifcCurve);
 				return gcnew XWire(wire);
 			}
 
 			IXWire^ WireFactory::Build(IIfcProfileDef^ ifcProfileDef)
 			{
-				TopoDS_Wire wire = BuildProfile(ifcProfileDef);
-				return gcnew XWire(wire);
-			}
-
-			TopoDS_Wire WireFactory::BuildWire(IIfcCurve^ ifcCurve)
-			{
-
-				if ((int)ifcCurve->Dim == 2)
-					return Build2d(ifcCurve);
-				else
-					return Build3d(ifcCurve);
-			}
-
-			double WireFactory::GetDeterminant(double x1, double y1, double x2, double y2)
-			{
-				return x1 * y2 - x2 * y1;
-			}
-
-			double WireFactory::Area(const TColgp_SequenceOfPnt2d& points2d)
-			{
-				if (points2d.Length() < 3)
-				{
-					return 0;
-				}
-				int nbPoints = (int)points2d.Length();
-				double area = GetDeterminant(points2d.Value(nbPoints).X(), points2d.Value(nbPoints).Y(), points2d.Value(1).X(), points2d.Value(1).Y());
-
-				for (int i = 2; i <= nbPoints; i++)
-				{
-					area += GetDeterminant(points2d.Value(i - 1).X(), points2d.Value(i - 1).Y(), points2d.Value(i).X(), points2d.Value(i).Y());
-				}
-				return (area / 2);
-			}
-
-			TopoDS_Wire WireFactory::Build2d(IIfcCurve^ ifcCurve)
-			{
-				//validate
-				if ((int)ifcCurve->Dim != 2)
-					RaiseGeometryFactoryException("Illegal attempt to build a 2d curve from a 3d definition", ifcCurve);
-				//a wire can only be built from a bounded or closed curve, we check below
-
-				XCurveType curveType;
-				if (!Enum::TryParse<XCurveType>(ifcCurve->ExpressType->ExpressName, curveType))
-					RaiseGeometryFactoryException("Unsupported curve type: " + ifcCurve->ExpressType->ExpressName);
-				switch (curveType)
-				{
-				case XCurveType::IfcBoundaryCurve:
-					break;
-				case XCurveType::IfcBSplineCurveWithKnots:
-					break;
-				case XCurveType::IfcCircle:
-					return Build2dCircle(static_cast<IIfcCircle^>(ifcCurve));
-				case XCurveType::IfcCompositeCurve:
-					return Build2dCompositeCurve(static_cast<IIfcCompositeCurve^>(ifcCurve));
-				case XCurveType::IfcCompositeCurveOnSurface:
-					break;
-				case XCurveType::IfcEllipse:
-					break;
-				case XCurveType::IfcIndexedPolyCurve:
-					break;
-				case XCurveType::IfcOffsetCurve2D:
-					break;
-				case XCurveType::IfcPcurve:
-					break;
-				case XCurveType::IfcPolyline:
-					return Build2dPolyline(static_cast<IIfcPolyline^>(ifcCurve));
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-					break;
-				case XCurveType::IfcSurfaceCurve: //this is a 3D curve
-					break;
-				case XCurveType::IfcTrimmedCurve:
-					return Build2dTrimmedCurve(static_cast<IIfcTrimmedCurve^>(ifcCurve));
-				case XCurveType::IfcLine:
-				default:
-					RaiseGeometryFactoryException("A wire cannot be built.", ifcCurve);
-					break;
-				}
-			}
-			
-
-			TopoDS_Wire WireFactory::Build2dCircle(IIfcCircle^ ifcCircle)
-			{
-				Handle(Geom2d_Circle) hCircle = CURVE_FACTORY->BuildCurve2d(ifcCircle); //throws exception
-				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(hCircle);			
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
-				if (wire.IsNull())
-					RaiseGeometryFactoryException("Circle could not be built as a wire", ifcCircle);
-				return wire;
-			}
-
-			TopoDS_Wire WireFactory::Build2dTrimmedCurve(IIfcTrimmedCurve^ ifcTrimmedCurve)
-			{
-				Handle(Geom2d_TrimmedCurve) hTrimmedCurve = CURVE_FACTORY->BuildCurve2d(ifcTrimmedCurve); //throws exception
-				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(hTrimmedCurve);
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
-				if (wire.IsNull())
-					RaiseGeometryFactoryException("Trimmed Curve could not be built as a wire", ifcTrimmedCurve);
-				return wire;
-			}
-
-			TopoDS_Wire WireFactory::Build2dCompositeCurve(IIfcCompositeCurve^ ifcCompositeCurve)
-			{
-				TColGeom2d_SequenceOfCurve segments;
-				Build2dSegments(ifcCompositeCurve, segments);
-				if (segments.Size() > 0)
-					return Ptr()->BuildWire(segments, _modelService->Precision, _modelService->MinimumGap);
-				else
-					return TopoDS_Wire();
-			}
-
-			TopoDS_Wire WireFactory::Build2dPolyline(IIfcPolyline^ ifcPolyline)
-			{
-				//validate
-				if (!Enumerable::Any(ifcPolyline->Points))
-					throw gcnew XbimGeometryFactoryException("IfcPolyline has zero points");
-				//we don't treat a polyline as a curve when we are building a wire from a polyline 
-				//as generally it needs to be a compound of edges and vertices, only as a brep edge do we use the curve methodology
-				//std::map<int, gp_Pnt2d> mapOfPoints; //the key is the ifc entity label
-				//get a list of points but remove duplicates by using the tolerance
-				NCollection_Vector<KeyedPnt2d> pointSeq;
-				for each (IIfcCartesianPoint ^ cp  in ifcPolyline->Points) //these should be 2d points
-				{
-					pointSeq.Append(KeyedPnt2d(gp_XY(cp->X, cp->Y), cp->EntityLabel));
-				}
-				TopoDS_Wire wire = Ptr()->Build2dPolyline(pointSeq, ModelService->Precision);
-				return wire;
-			}
-
-			TopoDS_Wire WireFactory::Build3D(IIfcPolyline^ ifcPolyline, double startParam, double endParam)
-			{
-				//validate
-				if (!Enumerable::Any(ifcPolyline->Points))
-					throw gcnew XbimGeometryFactoryException("IfcPolyline has zero points");
-				NCollection_Vector<KeyedPnt> pointSeq;
-				for each (IIfcCartesianPoint ^ cp  in ifcPolyline->Points) //these should be 2d points
-				{
-					pointSeq.Append(KeyedPnt(gp_XYZ(cp->X, cp->Y, cp->Z), cp->EntityLabel));
-				}
-				TopoDS_Wire wire = Ptr()->BuildPolyline(pointSeq, startParam, endParam, ModelService->Precision);
-				return wire;
+				throw gcnew Exception("This needs to be re-routed");
+				/*TopoDS_Wire wire = BuildProfile(ifcProfileDef);
+				return gcnew XWire(wire);*/
 			}
 
 
-			template <typename IfcType>
-			Handle(Geom_Curve) WireFactory::BuildCompositeCurveSegment(IfcType ifcCurve, bool sameSense, bool isTrimmedCurve)
-			{
-				Handle(Geom_Curve) curve = _curveFactory->BuildGeom3d(ifcCurve);
-				if (isTrimmedCurve) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
-				{
-					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
-					if (!sameSense)
-					{
-						if (tc->SenseAgreement)
-						{
-							curve->Reverse();
-						}
-					}
-					else
-					{
-						if (!tc->SenseAgreement)
-						{
-							curve->Reverse();
-						}
-					}
-				}
-				else
-					if (!sameSense) curve->Reverse();
-				return curve;
-			}
 
 
-			void WireFactory::BuildSegments(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom_SequenceOfCurve& resultSegments, bool sameSense)
-			{
-				XCurveType curveType;
-				TColGeom_SequenceOfCurve segments;
-				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
-				{
+#pragma endregion
 
-					if (!Enum::TryParse<XCurveType>(segment->ParentCurve->ExpressType->ExpressName, curveType))
-					{
-						_loggerService->LogInformation(String::Format("Unsupported curve type:{0} for #{1} " + segment->ParentCurve->ExpressType->ExpressName, segment->ParentCurve->EntityLabel));
-						return;
-					}
-					Handle(Geom_Curve) curve;
-					switch (curveType)
-					{
-						/*case XCurveType::BoundaryCurve:
-							return Build3d(static_cast<IIfcBoundedCurve^>(curve));
-						case XCurveType::BSplineCurveWithKnots:
-							return Build3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-					case XCurveType::IfcCircle:
-						segments.Append(BuildCompositeCurveSegment(static_cast<IIfcCircle^>(segment->ParentCurve), segment->SameSense));
-						break;
-					case XCurveType::IfcEllipse:
-						segments.Append(BuildCompositeCurveSegment(static_cast<IIfcEllipse^>(segment->ParentCurve), segment->SameSense));
-						break;
-					case XCurveType::IfcLine:
-						throw gcnew XbimGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
-					case XCurveType::IfcPolyline:
-					{
-						IIfcPolyline^ pline = static_cast<IIfcPolyline^>(segment->ParentCurve);
-						TColgp_Array1OfPnt points(1, pline->Points->Count);
-						GPFactory->GetPolylinePoints(pline, points);
-						Ptr()->GetPolylineSegments(points, segments, ModelService->Precision);
-						break;
-					}
-					case XCurveType::IfcCompositeCurve:
-						BuildSegments(static_cast<IIfcCompositeCurve^>(segment->ParentCurve), segments, segment->SameSense);
-						break;
-						/*case XCurveType::CompositeCurveOnSurface:
-							return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
-						case XCurveType::IndexedPolyCurve:
-							return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));
-						case XCurveType::OffsetCurve3D:
-							return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
-						case XCurveType::Pcurve:
-							return Build3d(static_cast<IIfcPcurve^>(curve));
 
-						case XCurveType::RationalBSplineCurveWithKnots:
-							return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-						case XCurveType::SurfaceCurve:
-							return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
-					case XCurveType::IfcTrimmedCurve:
-						segments.Append(BuildCompositeCurveSegment(static_cast<IIfcTrimmedCurve^>(segment->ParentCurve), segment->SameSense, true));
-						break;
-					default:
-						_loggerService->LogInformation(String::Format("Not implemented Curve #{0}. Type:  {1}", segment->ParentCurve->EntityLabel, curveType.ToString()));
-					}
-				}
-				//if this is a nested composite curve ensure sense is applied
-				for (auto it = segments.cbegin(); it != segments.cend(); ++it)
-				{
-					if (!it->IsNull())
-					{
-						if (sameSense)
-							resultSegments.Append(*it);
-						else
-						{
-							Handle(Geom_Curve) seg = *it;
-							seg->Reverse();
-							resultSegments.Append(seg);
-						}
-					}
-				}
-			}
-			
-
-			TopoDS_Wire WireFactory::Build3d(IIfcCurve^ ifcCurve)
+			TopoDS_Wire WireFactory::BuildWire3d(IIfcCurve^ ifcCurve, bool asSingleEdge)
 			{
 				XCurveType curveType;
 				if (!Enum::TryParse<XCurveType>(ifcCurve->ExpressType->ExpressName, curveType))
-					RaiseGeometryFactoryException("Unsupported curve type.", ifcCurve);
+					throw RaiseGeometryFactoryException("Unsupported curve type", ifcCurve);
+
 				switch (curveType)
 				{
-				case XCurveType::IfcBoundaryCurve:
-					break;
 				case XCurveType::IfcBSplineCurveWithKnots:
-					break;
+					return BuildWire(static_cast<IIfcBSplineCurveWithKnots^>(ifcCurve));
 				case XCurveType::IfcCircle:
-					break;
+					return BuildWire(static_cast<IIfcCircle^>(ifcCurve));
 				case XCurveType::IfcCompositeCurve:
-					return Build2dCompositeCurve(static_cast<IIfcCompositeCurve^>(ifcCurve));
-				case XCurveType::IfcCompositeCurveOnSurface:
-					break;
+					return BuildWire3d(static_cast<IIfcCompositeCurve^>(ifcCurve), asSingleEdge);
+					/*case XCurveType::IfcCompositeCurveOnSurface:
+						return BuildWire2d(static_cast<IIfcCompositeCurveOnSurface^>(ifcCurve), asSingleEdge);*/
 				case XCurveType::IfcEllipse:
-					break;
+					return BuildWire(static_cast<IIfcEllipse^>(ifcCurve));
 				case XCurveType::IfcIndexedPolyCurve:
-					break;
+					return BuildWire3d(static_cast<IIfcIndexedPolyCurve^>(ifcCurve), asSingleEdge);
 				case XCurveType::IfcLine:
-					break;
-				case XCurveType::IfcOffsetCurve3D:
-					break;
+					return BuildWire(static_cast<IIfcLine^>(ifcCurve));
 				case XCurveType::IfcOffsetCurve2D:
-					break;
-				case XCurveType::IfcPcurve:
-					break;
-				case XCurveType::IfcPolyline: //build with no trim
-					return Build3dPolyline(static_cast<IIfcPolyline^>(ifcCurve));
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-					break;
-				case XCurveType::IfcSurfaceCurve:
-					break;
-				case XCurveType::IfcTrimmedCurve:
-					break;
-				default:
-					RaiseGeometryFactoryException("Curve type not implemented ", ifcCurve);
-				}
-
-			}
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startTrim, Nullable<double> endTrim)
-			{
-				if ((!startTrim.HasValue || !endTrim.HasValue) && !CURVE_FACTORY->IsBoundedCurve(curve))
-					RaiseGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omitted, then the Directrix has to be a bounded or closed curve.", curve);
-
-				double startParam = 0;
-				double endParam = double::PositiveInfinity;
-				if (startTrim.HasValue) startParam = startTrim.Value;
-				if (endTrim.HasValue) endParam = endTrim.Value;
-				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
-				if (sameParams)
-					throw  gcnew XbimGeometryFactoryException("Start and End Trim Parameters are the same. Null directrix is invalid");
-				if (3 != (int)curve->Dim)
-					LoggingService->LogInformation("DirectrixDim: The Directrix shall be a curve in three dimensional space. Automatic upgrade applied to 3D");
-				XCurveType curveType;
-				if (!Enum::TryParse<XCurveType>(curve->ExpressType->ExpressName, curveType))
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + curve->ExpressType->ExpressName);
-
-				switch (curveType)
-				{
-					/*case XCurveType::BoundaryCurve:
-						return Build3d(static_cast<IIfcBoundedCurve^>(curve));
-					case XCurveType::BSplineCurveWithKnots:
-						return Build3d(static_cast<IIfcBSplineCurveWithKnots^>(curve));*/
-				case XCurveType::IfcCircle:
-					return BuildDirectrix(static_cast<IIfcCircle^>(curve), startParam, endParam);
-				case XCurveType::IfcEllipse:
-					return BuildDirectrix(static_cast<IIfcEllipse^>(curve), startParam, endParam);
-				case XCurveType::IfcLine:
-					return BuildDirectrix(static_cast<IIfcLine^>(curve), startParam, endParam);
+					return BuildWire(static_cast<IIfcOffsetCurve^>(ifcCurve), asSingleEdge);
+					/*case XCurveType::IfcPcurve:
+						return BuildCurve2d(static_cast<IIfcPcurve^>(curve));*/
 				case XCurveType::IfcPolyline:
-					return BuildDirectrix(static_cast<IIfcPolyline^>(curve), startParam, endParam);
-				case XCurveType::IfcCompositeCurve:
-					return BuildDirectrix(static_cast<IIfcCompositeCurve^>(curve), startParam, endParam);
-					/*case XCurveType::CompositeCurveOnSurface:
-						return Build3d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
-					case XCurveType::IndexedPolyCurve:
-						return Build3d(static_cast<IIfcIndexedPolyCurve^>(curve));
-					case XCurveType::OffsetCurve3D:
-						return Build2d(static_cast<IIfcOffsetCurve3D^>(curve));
-					case XCurveType::Pcurve:
-						return Build3d(static_cast<IIfcPcurve^>(curve));
-
-					case XCurveType::RationalBSplineCurveWithKnots:
-						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case XCurveType::SurfaceCurve:
-						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
+					return BuildWire3d(static_cast<IIfcPolyline^>(ifcCurve), asSingleEdge);
+				case XCurveType::IfcRationalBSplineCurveWithKnots:
+					return BuildWire(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcCurve));
+					/*case XCurveType::IfcSurfaceCurve:
+						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
-					return BuildDirectrix(static_cast<IIfcTrimmedCurve^>(curve), startParam, endParam);
-
+					return BuildWire(static_cast<IIfcTrimmedCurve^>(ifcCurve), asSingleEdge);
 				default:
-					throw gcnew XbimGeometryFactoryException("Not implemented. Curve type: " + curveType.ToString());
+					throw RaiseGeometryFactoryException("Unsupported 2d curve type", ifcCurve);
 				}
-
-			}
-			
-
-			//this will never be called with an invalid start and end parameter as an ifcline is not a bounded curve and cannot be built as a directrix
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcLine^ curve, double startParam, double endParam)
-			{
-				Handle(Geom_LineWithMagnitude) line = _curveFactory->BuildGeom3d(curve);
-				if (line.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(line, startParam, endParam, (endParam > startParam));
-				if (trimmedLine.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
-				return MakeWire(trimmedLine);
+				
 			}
 
-			//this will never be called with an invalid start and end parameter as an ifcCircle is not a bounded curve and cannot be built as a directrix
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcCircle^ curve, double startParam, double endParam)
-			{
-				//make sure params are in radians
-				startParam *= ModelService->RadianFactor;
-				endParam *= ModelService->RadianFactor;
-				Handle(Geom_Circle) circle = _curveFactory->BuildGeom3d(curve);
-				if (circle.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				if (Math::Abs(startParam - endParam) < ModelService->Precision) return MakeWire(circle);
-				bool sameSense = (startParam < endParam);
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(circle, sameSense ? startParam : endParam, sameSense ? endParam : startParam, sameSense);
-				if (trimmedLine.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
-				return MakeWire(trimmedLine);
-			}
 
-			//this will never be called with an invalid start and end parameter as an ifcElipse is not a bounded curve and cannot be built as a directrix
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcEllipse^ curve, double startParam, double endParam)
+			TopoDS_Wire WireFactory::BuildWire3d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge)
 			{
-				//make sure params are in radians
-				startParam *= ModelService->RadianFactor;
-				endParam *= ModelService->RadianFactor;
-				Handle(Geom_Ellipse) elipse = _curveFactory->BuildGeom3d(curve);
-				if (elipse.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				if (Math::Abs(startParam - endParam) < ModelService->Precision) return MakeWire(elipse);
-				bool sameSense = (startParam < endParam);
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(elipse, startParam, endParam, sameSense);
-				if (trimmedLine.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
-				return MakeWire(trimmedLine);
-			}
-
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcTrimmedCurve^ curve, double startParam, double endParam)
-			{
-				Handle(Geom_TrimmedCurve) trimmed = _curveFactory->BuildGeom3d(curve);
-				if (trimmed.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				Handle(Geom_TrimmedCurve) trimmedLine = _curveFactory->Ptr()->BuildTrimmedCurve3d(trimmed, startParam, endParam, (endParam > startParam));
-				if (trimmedLine.IsNull())
-					throw gcnew XbimGeometryFactoryException("Directrix could not be trimmed");
-				return MakeWire(trimmedLine);
-			}
-
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcPolyline^ curve, double startParam, double endParam)
-			{
-				TopoDS_Wire wire = Build3D(curve, startParam, endParam);
-				if (wire.IsNull() || wire.NbChildren() == 0)
-					throw gcnew XbimGeometryFactoryException("Directrix is invalid");
-				return wire;
-			}
-
-			TopoDS_Wire WireFactory::BuildDirectrix(IIfcCompositeCurve^ curve, double startParam, double endParam)
-			{
-
-				TColGeom_SequenceOfCurve segments;
-				BuildSegments(curve, segments);
-				TopoDS_Wire wire = Ptr()->BuildDirectrix(segments, startParam, endParam, ModelService->Precision, ModelService->MinimumGap);
-				if (wire.IsNull() || wire.NbChildren() == 0)
-					throw gcnew XbimGeometryFactoryException("Directrix is an empty curve");
-				return wire;
-			}
-			/// <summary>
-			/// Builds all profile types, nb profiles are all 2d
-			/// </summary>
-			/// <param name="profileDef"></param>
-			/// <returns></returns>
-			TopoDS_Wire WireFactory::BuildProfile(IIfcProfileDef^ profileDef)
-			{
-				XProfileDefType profileDefType;
-				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileDefType))
-					throw gcnew XbimGeometryFactoryException("Unsupported curve type: " + profileDef->ExpressType->ExpressName);
-				switch (profileDefType)
+				if (asSingleEdge)
 				{
-				case XProfileDefType::IfcArbitraryClosedProfileDef:
-					break;
-				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
-					break;
-				case XProfileDefType::IfcArbitraryOpenProfileDef:
-					break;
-				case XProfileDefType::IfcCenterLineProfileDef:
-					break;
-				case XProfileDefType::IfcCompositeProfileDef:
-					break;
-				case XProfileDefType::IfcDerivedProfileDef:
-					break;
-				case XProfileDefType::IfcMirroredProfileDef:
-					break;
-				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
-					break;
-				case XProfileDefType::IfcCShapeProfileDef:
-					break;
-				case XProfileDefType::IfcCircleProfileDef:
-					return BuildProfileDef(static_cast<IIfcCircleProfileDef^>(profileDef));
-				case XProfileDefType::IfcCircleHollowProfileDef:
-					break;
-				case XProfileDefType::IfcEllipseProfileDef:
-					break;
-				case XProfileDefType::IfcIShapeProfileDef:
-					break;
-				case XProfileDefType::IfcLShapeProfileDef:
-					break;
-				case XProfileDefType::IfcRectangleProfileDef:
-					return BuildProfileDef(static_cast<IIfcRectangleProfileDef^>(profileDef));
-				case XProfileDefType::IfcRectangleHollowProfileDef:
-
-					break;
-				case XProfileDefType::IfcRoundedRectangleProfileDef:
-					break;
-				case XProfileDefType::IfcTShapeProfileDef:
-					break;
-				case XProfileDefType::IfcTrapeziumProfileDef:
-					break;
-				case XProfileDefType::IfcUShapeProfileDef:
-					break;
-				case XProfileDefType::IfcZShapeProfileDef:
-					break;
-				default:
-					break;
+					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCompositeCurve); //throws exception
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+					return wire;
 				}
-				throw gcnew XbimGeometryFactoryException("Not implemented. Profile Definition Type type: " + profileDefType.ToString());
+				else
+				{
+					TColGeom_SequenceOfBoundedCurve segments;
+					CURVE_FACTORY->BuildCompositeCurveSegments3d(ifcCompositeCurve, segments);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+					return wire;
+				}
 			}
 
-			TopoDS_Wire WireFactory::BuildProfileDef(IIfcRectangleProfileDef^ rectProfile)
+			TopoDS_Wire WireFactory::BuildWire3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge)
 			{
-				if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
-					throw gcnew XbimGeometryFactoryException("Rectangle profile has an invalid dimension <= 0");
-				TopoDS_Wire wire = Ptr()->BuildRectangleProfileDef(rectProfile->XDim, rectProfile->YDim);
-				if (wire.IsNull() || wire.NbChildren() == 0)
-					throw gcnew XbimGeometryFactoryException("Failure to build Rectangle Profile Def");
-				//apply the position transformation
-				if (rectProfile->Position != nullptr)
-					wire.Move(GPFactory->ToLocation(rectProfile->Position));
-				return wire;
+				if (asSingleEdge)
+				{
+					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcIndexedPolyCurve); //throws exception
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+					return wire;
+				}
+				else
+				{
+					TColGeom_SequenceOfBoundedCurve segments;
+					CURVE_FACTORY->BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					if (wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+					return wire;
+				}
 			}
 
-			TopoDS_Wire WireFactory::BuildProfileDef(IIfcCircleProfileDef^ circleProfile)
+			TopoDS_Wire WireFactory::BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam)
 			{
-				if (circleProfile->Radius <= 0)
-					throw gcnew XbimGeometryFactoryException("Circle profile definition has an invalid dimension radius <= 0");
-				gp_Ax22d position = GPFactory->BuildAxis2Placement2d(circleProfile->Position);
-
-				TopoDS_Wire wire = Ptr()->BuildCircleProfileDef(circleProfile->Radius, position);
-				if (wire.IsNull() || wire.NbChildren() == 0)
-					throw gcnew XbimGeometryFactoryException("Failure to build Rectangle Profile Def");
-				//apply the position transformation
-				if (circleProfile->Position != nullptr)
-					wire.Move(GPFactory->ToLocation(circleProfile->Position));
-				return wire;
+				TopoDS_Wire wire = BuildWire3d(ifcCurve, false); //throws exception
+				if (double::IsNaN(startParam) && double::IsNaN(endParam)) return wire; //no trimming required
+				if (double::IsNaN(startParam) || startParam < 0) startParam = 0;
+				if (double::IsNaN(endParam) || endParam < 0) endParam = double::PositiveInfinity;
+				TopoDS_Wire directrix = EXEC_NATIVE->BuildDirectrixWire(wire, startParam, endParam, ModelService->Precision, ModelService->MinimumGap);
+				if (directrix.IsNull())
+					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);
+				return directrix;
 			}
 
-			bool WireFactory::GetNormal(const TopoDS_Wire& wire, gp_Vec& normal)
-			{
+			//void WireFactory::AdjustDirectrixTrimParameters(IIfcCurve^ basisCurve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, double& start, double& end)
+			//{
+			//	if (!startParam.HasValue && !endParam.HasValue) //no trim required
+			//	{
+			//		start = -1;
+			//		end = -1;
+			//		return;
+			//	}
+			//	//BRepAdaptor_CompCurve cc(wire, Standard_True);
 
-				return Ptr()->GetNormal(wire, normal);
-			}
+			//	//if we have a trimmed curve we need to get the basis curve for correct parameterisation
 
-			double WireFactory::Area(const TopoDS_Wire& wire)
-			{
-				return Ptr()->Area(wire);
-			}
+			//	//IIfcCurve^ basisCurve = directrix;
+			//	while (dynamic_cast<IIfcTrimmedCurve^>(basisCurve))
+			//		basisCurve = ((IIfcTrimmedCurve^)basisCurve)->BasisCurve;
+			//	double start = 0;
+			//	double end = double::PositiveInfinity;
+
+			//	if (dynamic_cast<IIfcLine^>(basisCurve)) //params are different need to consider magnitude
+			//	{
+			//		IIfcLine^ line = (IIfcLine^)(basisCurve);
+			//		double mag = line->Dir->Magnitude;
+			//		if (startParam.HasValue && endParam.HasValue)
+			//		{
+			//			start = startParam.Value * mag;
+			//			end = endParam.Value * mag;
+			//		}
+			//		else if (startParam.HasValue && !endParam.HasValue)
+			//		{
+			//			start = startParam.Value * mag;
+			//			endPar = cc.LastParameter();
+			//		}
+			//		else if (!startParam.HasValue && endParam.HasValue)
+			//		{
+			//			startPar = cc.FirstParameter();
+			//			endPar = endParam.Value * mag;
+			//		}
+			//	}
+			//	else if (dynamic_cast<IIfcCompositeCurve^>(basisCurve)) //params are different
+			//	{
+
+			//		if (startParam.HasValue)
+			//			startPar = startParam.Value;
+			//		if (endParam.HasValue)
+			//			endPar = endParam.Value;
+			//		double occStart = 0;
+			//		double occEnd = 0;
+			//		double totCurveLen = 0;
+
+			//		// for each segment we encounter, we will see if the threshold falls within its length
+			//		//
+			//		IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(basisCurve);
+			//		for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
+			//		{
+			//			XbimWire^ segWire = gcnew XbimWire(segment, logger);
+			//			double wireLen = segWire->Length;       // this is the length to add to the OCC command if we use all of the segment
+			//			double segValue = SegLength(segment, logger);   // this is the IFC size of the segment
+			//			totCurveLen += wireLen;
 
 
-			TopoDS_Wire WireFactory::MakeWire(Handle(Geom_Curve) curve)
-			{
-				BRepBuilderAPI_MakeEdge edgeMaker(curve);
-				BRep_Builder builder;
-				TopoDS_Wire wire;
-				builder.MakeWire(wire);
-				builder.Add(wire, edgeMaker.Edge());
-				return wire;
-			}
+			//			if (startPar > 0)
+			//			{
+			//				double ratio = System::Math::Min(startPar / segValue, 1.0);
+			//				startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+			//				occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+			//			}
+
+			//			if (endPar > 0)
+			//			{
+			//				double ratio = System::Math::Min(endPar / segValue, 1.0);
+			//				endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
+			//				occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
+			//			}
+			//		}
+			//		double precision = XbimConvert::ModelService(directrix)->MinimumGap;
+			//		// only trim if needed either from start or end
+			//		if ((occStart > 0 && System::Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && System::Math::Abs(occEnd - totCurveLen) > precision))
+			//		{
+			//			return (XbimWire^)wire->Trim(occStart, occEnd, precision, logger);
+			//		}
+			//		else
+			//			return wire;
+			//	}
+			//	else if (dynamic_cast<IIfcPolyline^>(basisCurve) &&
+			//		(double)startParam.Value == 0. &&
+			//		(double)endParam.Value == 1. &&
+			//		directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
+			//	{
+			//		startPar = startParam.Value;
+			//		endPar = cc.LastParameter();
+			//		XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {0}", directrix->Model->Header->FileName->OriginatingSystem);
+			//	}
+			//	else
+			//	{
+			//		bool isConic = (dynamic_cast<IIfcConic^>(basisCurve) != nullptr);
+			//		double parameterFactor = isConic ? directrix->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
+			//		if (isConic && directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::SurfaceOfLinearExtrusion)) //part of a family of revit issues with Ifc4
+			//		{
+			//			XbimGeometryCreator::LogInfo(logger, directrix, "Workaround for Revit conic trim export applied, trims ignored");
+			//			//do nothing
+			//			return wire;
+			//		}
+			//		else
+			//		{
+			//			if (startParam.HasValue && endParam.HasValue)
+			//			{
+			//				startPar = startParam.Value * parameterFactor;
+			//				endPar = endParam.Value * parameterFactor;
+			//			}
+			//			else if (startParam.HasValue && !endParam.HasValue)
+			//			{
+
+			//				startPar = startParam.Value * parameterFactor;
+			//				endPar = cc.LastParameter();
+			//			}
+			//			else if (!startParam.HasValue && endParam.HasValue)
+			//			{
+			//				startPar = cc.FirstParameter();
+			//				endPar = endParam.Value * parameterFactor;
+			//			}
+			//		}
+
+			//	}
+			//}
+
+
+
+
 		}
 	}
 }
