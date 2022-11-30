@@ -5,7 +5,7 @@
 #include <gp_Trsf.hxx> 
 #include <gp_Pln.hxx> 
 #include <TColgp_Array1OfPnt.hxx>
-#include "Services/ModelService.h"
+#include "Services/ModelGeometryService.h"
 #include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
@@ -29,7 +29,7 @@ namespace Xbim
 			//this is a work around to get the Model Service reliably through all the legacy code
 			//this service deals with ifc exporter different precisions and tolerances
 			//it is essential to set the Tag property of the IModel before making any calls to the geometry creator
-			static IXModelService^ ModelService(IPersistEntity^ ifcEntity);
+			static IXModelGeometryService^ ModelGeometryService(IPersistEntity^ ifcEntity);
 			// Converts a Local Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger);
 			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger);

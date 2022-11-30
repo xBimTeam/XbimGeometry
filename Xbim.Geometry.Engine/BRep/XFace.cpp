@@ -48,16 +48,16 @@ namespace Xbim
 				return gcnew XWire(outerWire);
 			};
 
-			IEnumerable<IXWire^>^ XFace::InnerBounds::get()
+			array<IXWire^>^ XFace::InnerBounds::get()
 			{
-				TopoDS_ListOfShape innerWires = NXbimFace::InnerWires(OccFace());
-				if (innerWires.Extent() == 0) return Enumerable::Empty<IXWire^>();
-				List< IXWire^>^ inners = gcnew List<IXWire^>(innerWires.Extent());
-				for (TopTools_ListIteratorOfListOfShape iter(innerWires); iter.More(); iter.Next())
-				{
-					inners->Add(gcnew XWire(TopoDS::Wire(iter.Value())));
-				}
-				return inners;
+				TopExp_Explorer faceEx(OccFace(), TopAbs_FACE);
+				TopoDS_ListOfShape shapes = NXbimFace::InnerWires(OccFace());
+				array<IXWire^>^ managedShapes = gcnew  array<IXWire^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = gcnew XWire(TopoDS::Wire(shape));
+				return managedShapes;
+
 			};
 
 			IXSurface^ XFace::Surface::get()

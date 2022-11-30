@@ -3,7 +3,7 @@
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
 #include <BRep_Builder.hxx>
-#include "./Services/ModelService.h"
+#include "./Services/ModelGeometryService.h"
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Section.hxx>
@@ -195,7 +195,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryObjectSet::Solids::get()
 		{
-			XbimSolidSet^ solids = gcnew XbimSolidSet((IXModelService^)nullptr); //we need to avoid this by passing the model service through
+			XbimSolidSet^ solids = gcnew XbimSolidSet((IXModelGeometryService^)nullptr); //we need to avoid this by passing the model service through
 			for each (IXbimGeometryObject ^ geomObj in geometryObjects)
 			{
 				XbimOccShape^ occ = dynamic_cast<XbimOccShape^>(geomObj);

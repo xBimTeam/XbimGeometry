@@ -46,7 +46,7 @@ namespace Xbim
 		{
 			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger);
 			this->point = w->PointAtParameter(point->PointParameter);
-			this->tolerance = XbimConvert::ModelService(point)->MinimumGap;
+			this->tolerance = XbimConvert::ModelGeometryService(point)->MinimumGap;
 			CalculateHashCode();
 		}
 
@@ -54,7 +54,7 @@ namespace Xbim
 		{
 			XbimFace^ f = gcnew XbimFace(point->BasisSurface, logger);
 			this->point = f->PointAtParameters(point->PointParameterU, point->PointParameterV);
-			this->tolerance = XbimConvert::ModelService(point)->MinimumGap;
+			this->tolerance = XbimConvert::ModelGeometryService(point)->MinimumGap;
 			CalculateHashCode();
 		}
 

@@ -85,7 +85,26 @@ namespace Xbim
 				virtual property IXLocation^ Location { IXLocation^ get() { return gcnew XLocation(OccHandle().Location()); } };
 				virtual IEnumerable<IXFace^>^ AllFaces();
 				virtual const TopoDS_Shape& GetTopoShape() { return *(this->Ptr()); };
-
+				virtual bool IsEqual(IXShape^ shape);
+				virtual int ShapeHashCode() { return OccHandle().HashCode(0xFFFF); }
+				virtual property XOrientation Orientation { XOrientation get() 
+				{
+					TopAbs_Orientation orientation = OccHandle().Orientation();
+					switch (orientation)
+					{
+					case TopAbs_FORWARD:
+						return XOrientation::Forward;
+					case TopAbs_REVERSED:
+						return XOrientation::Reversed;
+					case TopAbs_INTERNAL:
+						return XOrientation::Internal;
+					case TopAbs_EXTERNAL:
+						return XOrientation::External;
+					default:
+						throw gcnew System::ArgumentException("Unsupported Oreintation");
+					}
+				}};
+				
 				static IXShape^ GetXbimShape(const TopoDS_Shape& shape);
 				
 

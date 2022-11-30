@@ -29,9 +29,9 @@ namespace Xbim
 		{
 		}
 
-		IXModelService^ XbimConvert::ModelService(IPersistEntity^ ifcEntity)
+		IXModelGeometryService^ XbimConvert::ModelGeometryService(IPersistEntity^ ifcEntity)
 		{
-			return static_cast<IXModelService^>(ifcEntity->Model->Tag); 
+			return static_cast<IXModelGeometryService^>(ifcEntity->Model->Tag); 
 		}
 
 		// Converts an ObjectPlacement into a TopLoc_Location
@@ -79,7 +79,7 @@ namespace Xbim
 				{
 					IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
 					List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
-					double tolerance = XbimConvert::ModelService(vi)->MinimumGap;;
+					double tolerance = XbimConvert::ModelGeometryService(vi)->MinimumGap;;
 					//its 2d, it should always be		
 					XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0], logger);
 					XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger);
@@ -592,7 +592,7 @@ namespace Xbim
 
 				IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
 				List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
-				double tolerance = XbimConvert::ModelService(vi)->MinimumGap;;
+				double tolerance = XbimConvert::ModelGeometryService(vi)->MinimumGap;;
 				//its 2d, it should always be		
 				XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0],logger);
 				XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger);

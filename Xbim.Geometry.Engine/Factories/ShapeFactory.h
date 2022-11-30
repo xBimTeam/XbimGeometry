@@ -22,7 +22,7 @@ namespace Xbim
 				TopoDS_Shape Transform(TopoDS_Shape& shape, XbimMatrix3D matrix);
 				array<System::Byte>^ CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves);
 			public:
-				ShapeFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NShapeFactory(modelService->Timeout)) {}
+				ShapeFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NShapeFactory(modelService->Timeout)) {}
 
 				
 				TopoDS_Shape NUnifyDomain(const TopoDS_Shape& toFix);
@@ -31,8 +31,8 @@ namespace Xbim
 				static IXShape^ GetXbimShape(const TopoDS_Shape& shape);
 
 				virtual IXShape^ Convert(System::String^ shape);
-				virtual IXbimGeometryObject^ ConvertToV5(System::String^ brepStr);
-				virtual IXbimGeometryObject^ ConvertToV5(IXShape^ shape);
+				/*virtual IXbimGeometryObject^ ConvertToV5(System::String^ brepStr);
+				virtual IXbimGeometryObject^ ConvertToV5(IXShape^ shape);*/
 				virtual System::String^ Convert(IXShape^ shape);
 				virtual System::String^ Convert(IXbimGeometryObject^ shape);
 

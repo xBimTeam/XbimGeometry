@@ -14,7 +14,7 @@ namespace Xbim
 			{
 
 			public:
-				CurveFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NCurveFactory()) {}
+				CurveFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NCurveFactory()) {}
 
 				//Top level abstraction for building any curve
 

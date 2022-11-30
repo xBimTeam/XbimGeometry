@@ -11,6 +11,7 @@ using Xbim.IO.Memory;
 using FluentAssertions;
 using Xbim.Common;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -20,21 +21,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     {
         
         
-        static private ILogger logger;
-
+        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            logger = new NullLogger<IfcAdvancedBrepTests>();       
-            
-           
+    
         }
         [ClassCleanup]
         static public void Cleanup()
         {
-           
-           
-            logger = null;
+
+
+            loggerFactory = null;
         }
         [TestMethod]
         public void IfcAdvancedBrepTrimmedCurveTest()
@@ -42,8 +41,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcAdvancedBrep>(nameof(IfcAdvancedBrepTrimmedCurveTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcAdvancedBrep found");
-                var geomEngine = new XbimGeometryEngine(er.Entity.Model, logger);
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(er.Entity.Model, loggerFactory);
+                var solid = geomEngine.CreateSolid(er.Entity);
                 Assert.IsTrue(solid.Faces.Count == 14, "This solid should have 14 faces");
             }
 
@@ -56,8 +55,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(model, logger);
-                var solids = geomEngine.CreateSolidSet(brep, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
+                var solids = geomEngine.CreateSolidSet(brep);
                 solids.Count.Should().Be(3); //this should really be one but the model is incorrect
                 solids.First().Faces.Count.Should().Be(60);
             }
@@ -76,8 +75,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 model.AddRevitWorkArounds();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
-                var geomEngine = new XbimGeometryEngine(model, logger);
-                var solids = geomEngine.CreateSolidSet(brep, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
+                var solids = geomEngine.CreateSolidSet(brep);
                 solids.Count.Should().Be(2);
                 solids.First().Faces.Count.Should().Be(8);
             }
@@ -102,8 +101,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 surfaceSweep.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(model, logger);
-                var sweptSolid = geomEngine.CreateSolid(surfaceSweep, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
+                var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
                 //sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
                 //    model.ModelFactors.Precision, logger);
@@ -121,11 +120,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
-                var geomEngine = new XbimGeometryEngine(model, logger);
-                var solids = geomEngine.CreateSolidSet(brep, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
+                var solids = geomEngine.CreateSolidSet(brep);
                 var shapeGeom = geomEngine.CreateShapeGeometry(solids,
                     model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
-                    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary, logger);
+                    model.ModelFactors.DeflectionAngle, XbimGeometryType.PolyhedronBinary);
                 solids.Count.Should().Be(2);
                 solids.First().Faces.Count.Should().Be(10);
             }
@@ -170,8 +169,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(model, logger);
-                var solids = geomEngine.CreateSolidSet(brep, logger);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
+                var solids = geomEngine.CreateSolidSet(brep);
                 solids.IsValid.Should().BeTrue();
                 solids.Should().HaveCount(solidCount);
                 if (!fails) //if we fail the volume will be 0 or less

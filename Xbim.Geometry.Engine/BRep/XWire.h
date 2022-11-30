@@ -20,7 +20,7 @@ namespace Xbim
 			public:
 				XWire(const TopoDS_Wire& hWire) : XShape(new TopoDS_Wire(hWire)) {};
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Wire; } };
-				virtual property IEnumerable<IXEdge^>^ EdgeLoop {IEnumerable<IXEdge^>^ get(); };
+				virtual property array<IXEdge^>^ EdgeLoop {array<IXEdge^>^ get(); };
 				virtual property double Length {double get(); };
 				virtual property double Area {double get(); };
 

@@ -24,9 +24,9 @@ namespace Xbim
 			public ref class SolidFactory : IXSolidFactory, FactoryBase<NSolidFactory>
 			{
 
-				virtual property double ModelTolerance {double get() sealed { return ModelService->Precision; } };
+				virtual property double ModelTolerance {double get() sealed { return ModelGeometryService->Precision; } };
 			public:
-				SolidFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NSolidFactory()) {}
+				SolidFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NSolidFactory()) {}
 				//Builds all IfcSolidModels
 				//throws XbimGeometryFactoryException if the solid cannot be built
 

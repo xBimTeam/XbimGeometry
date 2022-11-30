@@ -273,7 +273,7 @@
     <ClInclude Include="Factories\FactoryBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Services\ModelService.h">
+    <ClInclude Include="Services\ModelGeometryService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Factories\Unmanaged\NFactoryBase.h">
@@ -346,6 +346,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BRep\XAxis2Placement3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\GeometryConverterFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -566,7 +569,7 @@
     <ClCompile Include="Factories\FactoryBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Services\ModelService.cpp">
+    <ClCompile Include="Services\ModelGeometryService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp">
@@ -603,6 +606,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BRep\XBSplineCurve.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\GeometryConverterFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

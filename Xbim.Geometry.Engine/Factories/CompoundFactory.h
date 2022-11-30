@@ -17,7 +17,7 @@ namespace Xbim
 				
 				virtual IXCompound^ CreateEmpty();
 				virtual IXCompound^ CreateFrom(IEnumerable<IXShape^>^ shapes);
-				CompoundFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NCompoundFactory()) {}
+				CompoundFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NCompoundFactory()) {}
 			};
 		}
 	}

@@ -14,15 +14,18 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			IEnumerable<IXFace^>^ XShell::Faces::get()
+			array<IXFace^>^ XShell::Faces::get()
 			{
 				TopExp_Explorer faceEx(OccShell(), TopAbs_FACE);
-				if (!faceEx.More()) return Enumerable::Empty<IXFace^>();
-				List<IXFace^>^ faces = gcnew  List<IXFace^>();
+				TopoDS_ListOfShape shapes;
 				for (; faceEx.More(); faceEx.Next())
-					faces->Add(gcnew XFace(TopoDS::Face(faceEx.Current())));
-				return faces;
+					shapes.Append(faceEx.Current());
 
+				array<IXFace^>^ managedShapes = gcnew  array<IXFace^>(shapes.Size());
+				int i = 0;
+				for(auto&& shape:shapes)
+					managedShapes[i++]= gcnew XFace(TopoDS::Face(shape));
+				return managedShapes;
 			}
 			double XShell::SurfaceArea::get()
 			{

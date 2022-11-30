@@ -20,7 +20,7 @@ namespace Xbim
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Face; } };
 				virtual property double Tolerance { double get(); };
 				virtual property IXWire^ OuterBound {IXWire^ get(); };
-				virtual property IEnumerable<IXWire^>^ InnerBounds {IEnumerable<IXWire^>^ get(); };
+				virtual property array<IXWire^>^ InnerBounds {array<IXWire^>^ get(); };
 				virtual property IXSurface^ Surface {IXSurface^ get(); };
 				/// <summary>
 				/// Area in default model units

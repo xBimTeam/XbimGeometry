@@ -19,7 +19,7 @@ namespace Xbim
 				gp_Vec Normal(const TopoDS_Face& face);
 			public:
 			
-				FaceFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NFaceFactory()) {}
+				FaceFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NFaceFactory()) {}
 			
 				TopoDS_Face BuildPlanarFace(IXPlane^ planeDef);
 				

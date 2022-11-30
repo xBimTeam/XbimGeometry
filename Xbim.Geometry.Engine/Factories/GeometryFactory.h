@@ -27,7 +27,7 @@ namespace Xbim
 
 			public:
 
-				GeometryFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NGeometryFactory()) {}
+				GeometryFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NGeometryFactory()) {}
 
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);

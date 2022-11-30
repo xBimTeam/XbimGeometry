@@ -4,7 +4,7 @@
 #include "LoggingService.h"
 #include "../XbimGeometryCreator.h"
 
-#define ActiveModelService(ifcEntity) static_cast<ModelService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
+#define ActiveModelGeometryService(ifcEntity) static_cast<ModelGeometryService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
 
 
 using namespace Xbim::Common;
@@ -19,7 +19,7 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		ref class GeometryCreator;
+		//ref class GeometryCreator;
 		namespace Factories
 		{
 			//forward declare all factories
@@ -47,7 +47,7 @@ namespace Xbim
 		namespace Services
 		{
 
-			public ref class ModelService : IXModelService
+			public ref class ModelGeometryService : IXModelGeometryService
 			{
 			private:
 				IModel^ model;
@@ -72,7 +72,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
 				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
 
-				Xbim::Geometry::XbimGeometryCreator^ _v5GeometryEngine;
+				//Xbim::Geometry::XbimGeometryCreator^ _v5GeometryEngine;
 			internal:
 				//Factories
 
@@ -89,11 +89,11 @@ namespace Xbim
 				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
 				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
 
-				Xbim::Geometry::XbimGeometryCreator^ GetV5GeometryEngine();
+				//Xbim::Geometry::XbimGeometryCreator^ GetV5GeometryEngine();
 			public:
 
-				ModelService(IModel^ model, ILogger^ logger);
-
+				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
+				
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
 				virtual property double PrecisionSquared {double get() { return precisionSquared; }};

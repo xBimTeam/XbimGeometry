@@ -13,7 +13,7 @@ namespace Xbim
 			public ref class ProfileFactory : FactoryBase<NProfileFactory>, IXProfileFactory
 			{	
 			public:
-				ProfileFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NProfileFactory()) {};
+				ProfileFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProfileFactory()) {};
 
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
 				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);

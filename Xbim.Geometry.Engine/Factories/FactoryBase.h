@@ -1,6 +1,6 @@
 #pragma once
 #include "../XbimHandle.h"
-#include "../Services/ModelService.h"
+#include "../Services/ModelGeometryService.h"
 #include "../Exceptions/XbimGeometryFactoryException.h"
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Geometry::Abstractions;
@@ -22,7 +22,7 @@ namespace Xbim
 	{
 		namespace Services
 		{
-			ref class ModelService;
+			ref class ModelGeometryService;
 		}
 	}
 }
@@ -37,7 +37,7 @@ namespace Xbim
 			public ref class FactoryBase abstract : public XbimHandle<T>, IXModelScoped
 			{
 			protected:
-				Xbim::Geometry::Services::ModelService^ _modelService;
+				Xbim::Geometry::Services::ModelGeometryService^ _modelService;
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message) { return RaiseGeometryFactoryException(message, nullptr, nullptr); };
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, System::Exception^ innerException) { return RaiseGeometryFactoryException(message, nullptr, exception); }
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, IPersistEntity^ entity) { return RaiseGeometryFactoryException(message, entity, nullptr); }
@@ -93,19 +93,19 @@ namespace Xbim
 				}
 				ILogger^ Logger() { return _modelService->LoggingService->Logger; };
 
-				ModelService^ GetModelModelService() {
+				ModelGeometryService^ GetModelModelGeometryService() {
 					return _modelService;
 				};
 			public:
 
 
-				FactoryBase<T>(ModelService^ modelService, T* nativeFactory) : XbimHandle<T>(nativeFactory)
+				FactoryBase<T>(ModelGeometryService^ modelService, T* nativeFactory) : XbimHandle<T>(nativeFactory)
 				{
 					_modelService = modelService;
 					EXEC_NATIVE->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 				}
 
-				virtual property IXModelService^ ModelService {IXModelService^ get() { return _modelService; }; }
+				virtual property IXModelGeometryService^ ModelGeometryService {IXModelGeometryService^ get() { return _modelService; }; }
 				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }; }
 			};
 

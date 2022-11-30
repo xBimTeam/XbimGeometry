@@ -389,7 +389,7 @@ namespace Xbim
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(bRep)->MinimumGap);
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(bRep)->MinimumGap);
 			}
 		}
 
@@ -434,7 +434,7 @@ namespace Xbim
 			int retflag;
 			TopoDS_Solid solidResult;
 
-			BuildIfcSurfaceCurveSweptAreaSolid(sweepOcc, refSurface, faceStartOcc, XbimConvert::ModelService(repItem)->MinimumGap, solidResult, retflag);
+			BuildIfcSurfaceCurveSweptAreaSolid(sweepOcc, refSurface, faceStartOcc, XbimConvert::ModelGeometryService(repItem)->MinimumGap, solidResult, retflag);
 
 			if (retflag > 0)
 			{
@@ -815,7 +815,7 @@ namespace Xbim
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 						ShapeFix_ShapeTolerance tolFixer;
-						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(repItem)->MinimumGap);
 						return;
 					}
 					else if (repItem->Angle <= 0)
@@ -880,7 +880,7 @@ namespace Xbim
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 						ShapeFix_ShapeTolerance tolFixer;
-						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+						tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(repItem)->MinimumGap);
 						return;
 					}
 					else
@@ -1036,7 +1036,7 @@ namespace Xbim
 					if (repItem->Position != nullptr) //In Ifc4 this is now optional
 						pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					ShapeFix_ShapeTolerance tolFixer;
-					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(repItem)->MinimumGap);
 					return;
 				}
 				System::GC::KeepAlive(faceStart);
@@ -1206,7 +1206,7 @@ namespace Xbim
 					pSolid->Closed(Standard_True);
 					System::GC::KeepAlive(crossSections);
 					ShapeFix_ShapeTolerance tolFixer;
-					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(repItem)->MinimumGap);
 					return;
 				}
 				else
@@ -1318,7 +1318,7 @@ namespace Xbim
 						*pSolid = TopoDS::Solid(revol.Shape());
 					pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 					ShapeFix_ShapeTolerance tolFixer;
-					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(repItem)->MinimumGap);
+					tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(repItem)->MinimumGap);
 				}
 				else
 					XbimGeometryCreator::LogWarning(logger, repItem, "Invalidextrusion, could not create solid");
@@ -1338,7 +1338,7 @@ namespace Xbim
 			else //it is a simple Half space
 			{
 	
-				//Handle(Geom_Surface) geomSurface = ActiveModelService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
+				//Handle(Geom_Surface) geomSurface = ActiveModelGeometryService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
 				////XbimFace^ face = gcnew XbimFace(surface, logger);
 				//Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
 
@@ -1362,7 +1362,7 @@ namespace Xbim
 				*pSolid = hsMaker.Solid();
 				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require for a minimum gap
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(hs)->MinimumGap);
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(hs)->MinimumGap);
 			}
 		}
 
@@ -1392,7 +1392,7 @@ namespace Xbim
 				Translate(XbimVector3D(0, 0, -bhs->Enclosure->ZDim));
 			Move(ifcPlane->Position);
 			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(bhs)->MinimumGap);
+			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(bhs)->MinimumGap);
 		}
 
 		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, ILogger^ logger)
@@ -1427,7 +1427,7 @@ namespace Xbim
 				return;
 			}
 			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(polyBoundary, XbimConvert::ModelService(pbhs)->MinimumGap);
+			tolFixer.LimitTolerance(polyBoundary, XbimConvert::ModelGeometryService(pbhs)->MinimumGap);
 			// we have to use 1e8 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
 			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e8));
 			//find point inside the material
@@ -1449,7 +1449,7 @@ namespace Xbim
 			}
 			pSolid = new TopoDS_Solid();
 			*pSolid = TopoDS::Solid(map(1));
-			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(pbhs)->MinimumGap);
+			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(pbhs)->MinimumGap);
 		}
 
 		// params depend on segment type
@@ -1727,7 +1727,7 @@ namespace Xbim
 						occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
 					}
 				}
-				double precision = XbimConvert::ModelService(directrix)->MinimumGap;
+				double precision = XbimConvert::ModelGeometryService(directrix)->MinimumGap;
 				// only trim if needed either from start or end
 				if ((occStart > 0 && System::Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && System::Math::Abs(occEnd - totCurveLen) > precision))
 				{
@@ -1935,7 +1935,7 @@ namespace Xbim
 			*pSolid = TopoDS::Solid(solidMaker.Shape());
 			Move(IIfcSolid->Position);
 			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(IIfcSolid)->MinimumGap);
+			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(IIfcSolid)->MinimumGap);
 		}
 
 		void XbimSolid::Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger)
@@ -1954,7 +1954,7 @@ namespace Xbim
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(IIfcSolid)->MinimumGap);
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(IIfcSolid)->MinimumGap);
 			}
 		}
 
@@ -1974,7 +1974,7 @@ namespace Xbim
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(solid)->MinimumGap);
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(solid)->MinimumGap);
 			}
 		}
 
@@ -1994,7 +1994,7 @@ namespace Xbim
 				pSolid = new TopoDS_Solid();
 				*pSolid = (XbimSolid^)(shell->CreateSolid());
 				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelService(solid)->MinimumGap);
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(solid)->MinimumGap);
 			}
 		}
 

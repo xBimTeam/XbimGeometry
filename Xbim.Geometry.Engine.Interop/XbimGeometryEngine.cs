@@ -18,15 +18,38 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly IXbimGeometryEngine _engine;
 
         private readonly ILogger _logger;
-        private IXModelService _modelService;
+        private IXModelGeometryService _modelService;
 
+        static private IXGeometryConverterFactory geometryConverterFactory;
         static XbimGeometryEngine()
         {
 
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
+            try
+            {
+                geometryConverterFactory = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(
+                    "Xbim.Geometry.Engine",
+                    "Xbim.Geometry.Factories.GeometryConverterFactory") as IXGeometryConverterFactory;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
+
+        public static IXModelGeometryService CreateModelGeometryService(IModel model, ILoggerFactory loggerFactory)
+        {
+            return geometryConverterFactory.CreateModelGeometryService(model, loggerFactory);
+        }
+        public static IXbimGeometryEngine CreateGeometryEngineV5(IModel model, ILoggerFactory loggerFactory)
+        {
+            return geometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
+        }
+
+        public XbimGeometryEngine() { }
 
 
         public XbimGeometryEngine(IModel model, ILogger logger)
@@ -46,8 +69,11 @@ namespace Xbim.Geometry.Engine.Interop
 #else
                 _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.Location);
 #endif
-                var modelServiceType = ass.GetType("Xbim.Geometry.Services.ModelService");
-                _modelService = Activator.CreateInstance(modelServiceType, model, _logger) as IXModelService;
+
+
+                var modelServiceType = ass.GetType("Xbim.Geometry.ModelGeometryService");
+
+                _modelService = Activator.CreateInstance(modelServiceType, model, _logger) as IXModelGeometryService;
                 var creatorType = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
                 _engine = Activator.CreateInstance(creatorType, _logger, _modelService) as IXbimGeometryEngine;
 
@@ -75,7 +101,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         }
 
-        public IXModelService ModelService => _modelService;
+        public IXModelGeometryService ModelService => _modelService;
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))
@@ -912,7 +938,7 @@ namespace Xbim.Geometry.Engine.Interop
             logger.LogTrace("Entering GeometryEngine {function} with point {x},{y},{z}", methodName, point.X, point.Y, point.Z);
         }
 
-#region IDisposable Support
+        #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -941,7 +967,7 @@ namespace Xbim.Geometry.Engine.Interop
             Dispose(true);
             GC.SuppressFinalize(this);  // To avoid excessive GC
         }
-#endregion
+        #endregion
 
 
 

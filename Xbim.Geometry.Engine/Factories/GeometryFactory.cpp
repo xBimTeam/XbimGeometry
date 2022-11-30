@@ -2,7 +2,7 @@
 //fix the raising of excpetions for vectors and directions 
 
 #include "GeometryFactory.h"
-#include "../Services//ModelService.h"
+#include "../Services//ModelGeometryService.h"
 #include <gp_Ax2.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
@@ -265,7 +265,7 @@ namespace Xbim
 				Handle(Geom_Surface) surface = BRep_Tool::Surface(topoFace);
 				ShapeAnalysis_Surface sas(surface);
 				// get UV of point on surface
-				gp_Pnt2d uv = sas.ValueOfUV(pt, ModelService->Precision);
+				gp_Pnt2d uv = sas.ValueOfUV(pt, ModelGeometryService->Precision);
 				GeomLProp_SLProps props(surface, uv.X(), uv.Y(), 1, tolerance);
 				gp_Dir normal = props.Normal();
 				return gcnew Xbim::Geometry::BRep::XDirection(normal);

@@ -253,9 +253,10 @@
     <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="Factories\FactoryBase.h" />
     <ClInclude Include="Factories\Unmanaged\NFactoryBase.h" />
+    <ClInclude Include="Factories\GeometryConverterFactory.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
-    <ClInclude Include="Services\ModelService.h" />
+    <ClInclude Include="Services\ModelGeometryService.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
     <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
     <ClInclude Include="Visual\ColourRGB.h" />
@@ -344,9 +345,10 @@
     <ClCompile Include="Factories\WireFactory.cpp" />
     <ClCompile Include="Factories\FactoryBase.cpp" />
     <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp" />
+    <ClCompile Include="Factories\GeometryConverterFactory.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
-    <ClCompile Include="Services\ModelService.cpp" />
+    <ClCompile Include="Services\ModelGeometryService.cpp" />
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
     <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
     <ClCompile Include="Visual\ColourRGB.cpp" />

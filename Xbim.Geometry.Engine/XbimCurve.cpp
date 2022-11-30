@@ -222,7 +222,7 @@ namespace Xbim
 		void XbimCurve::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 
-			double tolerance = XbimConvert::ModelService(cCurve)->MinimumGap;
+			double tolerance = XbimConvert::ModelGeometryService(cCurve)->MinimumGap;
 			GeomConvert_CompCurveToBSplineCurve converter;
 
 			gp_Pnt lastVertex;
@@ -287,7 +287,7 @@ namespace Xbim
 						double actualGap = nextVertex.Distance(lastVertex);
 						if (actualGap > tolerance)
 						{
-							double fiveMilli = 5 * XbimConvert::ModelService(cCurve)->OneMeter / 1000; //we are going to accept that a gap of 5mm is not a gap
+							double fiveMilli = 5 * XbimConvert::ModelGeometryService(cCurve)->OneMeter / 1000; //we are going to accept that a gap of 5mm is not a gap
 							if (actualGap > fiveMilli)
 							{
 								XbimGeometryCreator::LogWarning(logger, seg, "Failed to join composite curve segment. It has been ignored");
@@ -326,7 +326,7 @@ namespace Xbim
 
 		void  XbimCurve::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
-			double tolerance = XbimConvert::ModelService(polyCurve)->MinimumGap;
+			double tolerance = XbimConvert::ModelGeometryService(polyCurve)->MinimumGap;
 
 			IItemSet<IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^>^ coordList;
 			IIfcCartesianPointList3D^ points3D = dynamic_cast<IIfcCartesianPointList3D^>(polyCurve->Points);
@@ -554,8 +554,8 @@ namespace Xbim
 				bool isLine = (dynamic_cast<IIfcLine^>(curve->BasisCurve) != nullptr);
 				bool isEllipse = (dynamic_cast<IIfcEllipse^>(curve->BasisCurve) != nullptr);
 
-				double parameterFactor = isConic ? XbimConvert::ModelService(curve)->RadianFactor : 1;
-				double precision = XbimConvert::ModelService(curve)->MinimumGap;
+				double parameterFactor = isConic ? XbimConvert::ModelGeometryService(curve)->RadianFactor : 1;
+				double precision = XbimConvert::ModelGeometryService(curve)->MinimumGap;
 				bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
 
 				double u1 = 0;
@@ -753,7 +753,7 @@ namespace Xbim
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
-				projector.Init(face->GetSurface(), XbimConvert::ModelService(curve)->MinimumGap);
+				projector.Init(face->GetSurface(), XbimConvert::ModelGeometryService(curve)->MinimumGap);
 				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;

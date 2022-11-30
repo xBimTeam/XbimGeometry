@@ -95,7 +95,7 @@ namespace Xbim
 			System::GC::KeepAlive(shape);
 		}
 
-		XbimSolidSet::XbimSolidSet(IXModelService^ modelService)
+		XbimSolidSet::XbimSolidSet(IXModelGeometryService^ modelService)
 		{
 			_modelService = modelService;
 			solids = gcnew  List<IXbimSolid^>();
@@ -110,13 +110,13 @@ namespace Xbim
 			solids = gcnew  List<IXbimSolid^>(1);
 			solids->Add(solid);
 		}
-		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult^ solid,IXModelService^ modelService,  ILogger^ logger)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanClippingResult^ solid,IXModelGeometryService^ modelService,  ILogger^ logger)
 		{
 			_modelService = modelService;
 			Init(solid, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelService^ modelService, ILogger^ logger)
+		XbimSolidSet::XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelGeometryService^ modelService, ILogger^ logger)
 		{
 			_modelService = modelService;
 			Init(boolOp, logger);
@@ -1017,13 +1017,13 @@ namespace Xbim
 		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
 		{
 			solids = gcnew List<IXbimSolid^>();
-			IXModelService^ mf = XbimConvert::ModelService(solid);
+			IXModelGeometryService^ mf = XbimConvert::ModelGeometryService(solid);
 
 			List<IIfcBooleanOperand^>^ clips = gcnew List<IIfcBooleanOperand^>();
 			XbimSolidSet^ solidSet = gcnew XbimSolidSet(_modelService);
 			solidSet->IfcEntityLabel = solid->EntityLabel;
 			XbimSolidSet^ bodySet = XbimSolidSet::BuildClippingList(solid, clips, logger);
-			bodySet->SetModelService(_modelService);
+			bodySet->SetModelGeometryService(_modelService);
 			bodySet->IfcEntityLabel = solid->EntityLabel;
 
 			//SRL it appears that release 7.3 of OCC does correctly cut multiple half space solids
@@ -1189,7 +1189,7 @@ namespace Xbim
 				return;
 			}
 
-			IXModelService^ mf = XbimConvert::ModelService(boolOp);
+			IXModelGeometryService^ mf = XbimConvert::ModelGeometryService(boolOp);
 
 			IXbimSolidSet^ result;
 			try

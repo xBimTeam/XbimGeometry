@@ -61,7 +61,7 @@
 #include <BRepCheck_Result.hxx>
 #include "XbimFace.h"
 #include "XbimOccWriter.h"
-#include "./Services//ModelService.h"
+#include "./Services//ModelGeometryService.h"
 #include <ShapeBuild_ReShape.hxx>
 
 using namespace System::Linq;
@@ -601,7 +601,7 @@ namespace Xbim
 		{
 			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
 			int originalCount = polygon->Count;
-			double tolerance = ActiveModelService(polyloop)->MinimumGap;
+			double tolerance = ActiveModelGeometryService(polyloop)->MinimumGap;
 			if (originalCount < 3)
 			{
 				XbimGeometryCreator::LogWarning(logger, polyloop, "Invalid loop, it has less than three points. Wire discarded");
@@ -783,7 +783,7 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcFace^ ifcFace, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape& vertexMap)
 		{
-			double tolerance = ActiveModelService(ifcFace)->MinimumGap;
+			double tolerance = ActiveModelGeometryService(ifcFace)->MinimumGap;
 			double angularTolerance = 0.00174533; //1 tenth of a degree
 			double outerLoopArea = 0;
 			ShapeFix_ShapeTolerance tolFixer;
@@ -1390,7 +1390,7 @@ namespace Xbim
 				if (rectProfile->Position != nullptr)
 					pFace->Move(XbimConvert::ToLocation(rectProfile->Position));
 				ShapeFix_ShapeTolerance fTol;
-				fTol.LimitTolerance(*pFace, ActiveModelService(rectProfile)->MinimumGap);
+				fTol.LimitTolerance(*pFace, ActiveModelGeometryService(rectProfile)->MinimumGap);
 			}
 
 		}
@@ -1426,7 +1426,7 @@ namespace Xbim
 			Handle(Geom_CylindricalSurface)   gcs = new Geom_CylindricalSurface(ax3, surface->Radius);
 			//gp_Cylinder cylinder(ax3, surface->Radius);
 			BRepBuilderAPI_MakeFace  builder;
-			builder.Init(gcs, Standard_False, ActiveModelService(surface)->MinimumGap);
+			builder.Init(gcs, Standard_False, ActiveModelGeometryService(surface)->MinimumGap);
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
 
@@ -1498,7 +1498,7 @@ namespace Xbim
 			}
 
 			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)surface->UDegree, (Standard_Integer)surface->VDegree);
-			BRepBuilderAPI_MakeFace faceMaker(hSurface, ActiveModelService(surface)->MinimumGap /*0.1surface->Model->ModelFactors->Precision*/);
+			BRepBuilderAPI_MakeFace faceMaker(hSurface, ActiveModelGeometryService(surface)->MinimumGap /*0.1surface->Model->ModelFactors->Precision*/);
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
 			pFace->EmptyCopy();
@@ -1568,7 +1568,7 @@ namespace Xbim
 			Standard_Integer uDegree = (Standard_Integer)surface->UDegree;
 			Standard_Integer vDegree = (Standard_Integer)surface->VDegree;
 			Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, weights, uknots, vknots, uMultiplicities, vMultiplicities, uDegree, vDegree);
-			BRepBuilderAPI_MakeFace faceMaker(hSurface, ActiveModelService(surface)->MinimumGap);
+			BRepBuilderAPI_MakeFace faceMaker(hSurface, ActiveModelGeometryService(surface)->MinimumGap);
 			pFace = new TopoDS_Face();
 			*pFace = faceMaker.Face();
 			pFace->EmptyCopy(); //remove any edges as we only want a surface
@@ -1583,7 +1583,7 @@ namespace Xbim
 			pFace = new TopoDS_Face();
 			*pFace = builder.Face();
 			ShapeFix_ShapeTolerance fTol;
-			fTol.LimitTolerance(*pFace, ActiveModelService(plane)->MinimumGap);
+			fTol.LimitTolerance(*pFace, ActiveModelGeometryService(plane)->MinimumGap);
 		}
 		void XbimFace::Init(IIfcSurfaceOfRevolution^ sRev, ILogger^ logger)
 		{
@@ -1628,7 +1628,7 @@ namespace Xbim
 				Handle(Geom_Surface) surface = BRep_Tool::Surface(this, loc);
 				Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(surface, def->U1, def->U2, def->V1, def->V2));
 
-				BRepBuilderAPI_MakeFace faceMaker(geomTrim, ActiveModelService(def)->MinimumGap);
+				BRepBuilderAPI_MakeFace faceMaker(geomTrim, ActiveModelGeometryService(def)->MinimumGap);
 				if (faceMaker.IsDone())
 				{
 					pFace = new TopoDS_Face();

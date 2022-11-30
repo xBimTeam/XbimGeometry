@@ -5,7 +5,7 @@
 #include "XWire.h"
 #include "XEdge.h"
 #include "XVertex.h"
-#include "XShape.h"
+//#include "XShape.h"
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS.hxx>
 #include <BRepTools.hxx>
@@ -176,84 +176,113 @@ namespace Xbim
 				return false;
 			};
 
-			IEnumerable<IXCompound^>^ XCompound::Compounds::get()
+			array<IXCompound^>^ XCompound::Compounds::get()
 			{
-
-				List<IXCompound^>^ compounds = gcnew List<IXCompound^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
 					if (iter.Value().ShapeType() == TopAbs_COMPOUND)
-						compounds->Add(gcnew XCompound(TopoDS::Compound(iter.Value())));
+						shapes.Append(iter.Value());
 				}
-				return compounds;
+				array<IXCompound^>^ managedShapes = gcnew array<IXCompound^>(shapes.Size());
+				int i = 0;
+				for(auto&& shape: shapes)
+					managedShapes[i++] = (gcnew XCompound(TopoDS::Compound(shape)));
+				return managedShapes;
 			};
 
-			IEnumerable<IXSolid^>^ XCompound::Solids::get()
+			array<IXSolid^>^ XCompound::Solids::get()
 			{
 				
-				List<IXSolid^>^ solids = gcnew List<IXSolid^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
 					if (iter.Value().ShapeType() == TopAbs_SOLID)
-						solids->Add(gcnew XSolid(TopoDS::Solid(iter.Value())));
+						shapes.Append(iter.Value());
 				}
-				return solids;
+				array<IXSolid^>^ managedShapes = gcnew array<IXSolid^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XSolid(TopoDS::Solid(shape)));
+				return managedShapes;
 			};
 
-			IEnumerable<IXShell^>^ XCompound::Shells::get()
+			array<IXShell^>^ XCompound::Shells::get()
 			{
 
-				List<IXShell^>^ shells = gcnew List<IXShell^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
 					if (iter.Value().ShapeType() == TopAbs_SHELL)
-						shells->Add(gcnew XShell(TopoDS::Shell(iter.Value())));
+						shapes.Append(iter.Value());
 				}
-				return shells;
+				array<IXShell^>^ managedShapes = gcnew array<IXShell^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XShell(TopoDS::Shell(shape)));
+				return managedShapes;
 			};
 
-			IEnumerable<IXFace^>^ XCompound::Faces::get()
+			array<IXFace^>^ XCompound::Faces::get()
 			{
-				List<IXFace^>^ faces = gcnew List<IXFace^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
-					if (iter.Value().ShapeType() == TopAbs_FACE) faces->Add(gcnew XFace(TopoDS::Face(iter.Value())));
+					if (iter.Value().ShapeType() == TopAbs_FACE)
+						shapes.Append(iter.Value());
 				}
-				return faces;
+				array<IXFace^>^ managedShapes = gcnew array<IXFace^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XFace(TopoDS::Face(shape)));
+				return managedShapes;
 			};
+			
 
-			IEnumerable<IXWire^>^ XCompound::Wires::get()
+			array<IXWire^>^ XCompound::Wires::get()
 			{
-				List<IXWire^>^ wires = gcnew List<IXWire^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
 					if (iter.Value().ShapeType() == TopAbs_WIRE)
-						wires->Add(gcnew XWire(TopoDS::Wire(iter.Value())));
+						shapes.Append(iter.Value());
 				}
-				return wires;
+				array<IXWire^>^ managedShapes = gcnew array<IXWire^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XWire(TopoDS::Wire(shape)));
+				return managedShapes;
 			};
 
 
-			IEnumerable<IXEdge^>^ XCompound::Edges::get()
+			array<IXEdge^>^ XCompound::Edges::get()
 			{
-				List<IXEdge^>^ edges = gcnew List<IXEdge^>();
-				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
-				{
-					if (iter.Value().ShapeType() == TopAbs_EDGE) 
-						edges->Add(gcnew XEdge(TopoDS::Edge(iter.Value())));
-				}
-				return edges;
-			};
-
-			IEnumerable<IXVertex^>^ XCompound::Vertices::get()
-			{
-				List<IXVertex^>^ vertices = gcnew List<IXVertex^>();
+				TopoDS_ListOfShape shapes;
 				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
 				{
 					if (iter.Value().ShapeType() == TopAbs_EDGE)
-						vertices->Add(gcnew XVertex(TopoDS::Vertex(iter.Value())));
+						shapes.Append(iter.Value());
 				}
-				return vertices;
+				array<IXEdge^>^ managedShapes = gcnew array<IXEdge^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XEdge(TopoDS::Edge(shape)));
+				return managedShapes;
+			};
+
+			array<IXVertex^>^ XCompound::Vertices::get()
+			{
+				TopoDS_ListOfShape shapes;
+				for (TopoDS_Iterator iter(OccCompound()); iter.More(); iter.Next())
+				{
+					if (iter.Value().ShapeType() == TopAbs_VERTEX)
+						shapes.Append(iter.Value());
+				}
+				array<IXVertex^>^ managedShapes = gcnew array<IXVertex^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = (gcnew XVertex(TopoDS::Vertex(shape)));
+				return managedShapes;
 			};
 
 			void XCompound::Add(IXShape^ shape)

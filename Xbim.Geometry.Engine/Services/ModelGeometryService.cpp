@@ -1,4 +1,4 @@
-#include "ModelService.h"
+#include "ModelGeometryService.h"
 #include "../Services/LoggingService.h"
 #include <IMeshData_Status.hxx>
 #include <IMeshTools_Parameters.hxx>
@@ -19,7 +19,7 @@ using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
-//using namespace Xbim::Geometry::BRep;
+
 
 using namespace System;
 using namespace Xbim::IO::Memory;
@@ -32,14 +32,21 @@ namespace Xbim
 		namespace Services
 		{
 
-			ModelService::ModelService(IModel^ iModel, ILogger^ logger)
+			ModelGeometryService::ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory)
 			{
+				auto logger = LoggerFactoryExtensions::CreateLogger<ModelGeometryService^>(loggerFactory);
+				Dictionary<System::String^, System::Object^>^ scope = gcnew Dictionary<System::String^, System::Object^>();
+				scope->Add("OriginatingSystem", model->Header->FileName->OriginatingSystem);
+				scope->Add("CreatedBy", model->Header->CreatingApplication);
+				scope->Add("IfcVersion", model->Header->SchemaVersion);
+				logger->BeginScope(scope);
 				_loggingService = gcnew Xbim::Geometry::Services::LoggingService(logger);
-				SetModel(iModel);
+				SetModel(model);
+				//_v5GeometryEngine = gcnew XbimGeometryCreator(model, loggerFactory);	
 			}
 
 
-			void ModelService::SetModel(IModel^ iModel)
+			void ModelGeometryService::SetModel(IModel^ iModel)
 			{
 				model = iModel;
 				precisionSquared = model->ModelFactors->Precision * model->ModelFactors->Precision;
@@ -62,7 +69,7 @@ namespace Xbim
 			/// This method can be made more aware of model variations in how contexts are specified
 			/// </summary>
 			/// <returns></returns>
-			ISet<IIfcGeometricRepresentationContext^>^ ModelService::GetTypical3dContexts()
+			ISet<IIfcGeometricRepresentationContext^>^ ModelGeometryService::GetTypical3dContexts()
 			{
 				HashSet<IIfcGeometricRepresentationContext^>^ results = gcnew HashSet<IIfcGeometricRepresentationContext^>();
 
@@ -86,14 +93,14 @@ namespace Xbim
 				}
 				return results;
 			}
-			IXLocation^ ModelService::Create(IIfcObjectPlacement^ placement)
+			IXLocation^ ModelGeometryService::Create(IIfcObjectPlacement^ placement)
 			{
 				throw gcnew NotImplementedException("Create() not available in Version 5");
 				/*if (placement == nullptr) return gcnew XbimLocation();
 				return gcnew XbimLocation(XbimConvert::ToTransform(placement, _logger));*/
 
 			}
-			IXLocation^ ModelService::CreateMappingTransform(IIfcMappedItem^ mappedItem)
+			IXLocation^ ModelGeometryService::CreateMappingTransform(IIfcMappedItem^ mappedItem)
 			{
 				throw gcnew NotImplementedException("CreateMappingTransform() not available in Version 5");
 				/*auto targetTransform = XbimConvert::ToTransform(mappedItem->MappingTarget);
@@ -101,102 +108,99 @@ namespace Xbim
 				auto mapLocation = sourceTransform * targetTransform;
 				return gcnew XbimLocation(mapLocation);*/
 			}
-			IXLoggingService^ ModelService::LoggingService::get()
+			IXLoggingService^ ModelGeometryService::LoggingService::get()
 			{
 				return _loggingService;
 			}
 
-			GeometryFactory^ ModelService::GetGeometryFactory()
+			GeometryFactory^ ModelGeometryService::GetGeometryFactory()
 			{
 				if (_geometryFactory == nullptr) _geometryFactory = gcnew Xbim::Geometry::Factories::GeometryFactory(this);
 				return _geometryFactory;
 			}
 
-			CurveFactory^ ModelService::GetCurveFactory()
+			CurveFactory^ ModelGeometryService::GetCurveFactory()
 			{
 				if (_curveFactory == nullptr) _curveFactory = gcnew Xbim::Geometry::Factories::CurveFactory(this);
 				return _curveFactory;
 			}
 
-			SurfaceFactory^ ModelService::GetSurfaceFactory()
+			SurfaceFactory^ ModelGeometryService::GetSurfaceFactory()
 			{
 				if (_surfaceFactory == nullptr) _surfaceFactory = gcnew Xbim::Geometry::Factories::SurfaceFactory(this);
 				return _surfaceFactory;
 			}
 
 
-			EdgeFactory^ ModelService::GetEdgeFactory()
+			EdgeFactory^ ModelGeometryService::GetEdgeFactory()
 			{
 				if (_edgeFactory == nullptr) _edgeFactory = gcnew Xbim::Geometry::Factories::EdgeFactory(this);
 				return _edgeFactory;
 			}
 
-			WireFactory^ ModelService::GetWireFactory()
+			WireFactory^ ModelGeometryService::GetWireFactory()
 			{
 				if (_wireFactory == nullptr) _wireFactory = gcnew Xbim::Geometry::Factories::WireFactory(this);
 				return _wireFactory;
 			}
 
-			FaceFactory^ ModelService::GetFaceFactory()
+			FaceFactory^ ModelGeometryService::GetFaceFactory()
 			{
 				if (_faceFactory == nullptr) _faceFactory = gcnew Xbim::Geometry::Factories::FaceFactory(this);
 				return _faceFactory;
 			}
-			ShellFactory^ ModelService::GetShellFactory()
+			ShellFactory^ ModelGeometryService::GetShellFactory()
 			{
 				if (_shellFactory == nullptr) _shellFactory = gcnew Xbim::Geometry::Factories::ShellFactory(this);
 				return _shellFactory;
 			}
-			SolidFactory^ ModelService::GetSolidFactory()
+			SolidFactory^ ModelGeometryService::GetSolidFactory()
 			{
 				if (_solidFactory == nullptr) _solidFactory = gcnew Xbim::Geometry::Factories::SolidFactory(this);
 				return _solidFactory;
 			}
-			CompoundFactory^ ModelService::GetCompoundFactory()
+			CompoundFactory^ ModelGeometryService::GetCompoundFactory()
 			{
 				if (_compoundFactory == nullptr) _compoundFactory = gcnew Xbim::Geometry::Factories::CompoundFactory(this);
 				return _compoundFactory;
 			}
-			BooleanFactory^ ModelService::GetBooleanFactory()
+			BooleanFactory^ ModelGeometryService::GetBooleanFactory()
 			{
 				if (_booleanFactory == nullptr) _booleanFactory = gcnew Xbim::Geometry::Factories::BooleanFactory(this);
 				return _booleanFactory;
 			}
 
-			ShapeFactory^ ModelService::GetShapeFactory()
+			ShapeFactory^ ModelGeometryService::GetShapeFactory()
 			{
 				if (_shapeFactory == nullptr) _shapeFactory = gcnew Xbim::Geometry::Factories::ShapeFactory(this);
 				return _shapeFactory;
 			}
 
-			ProfileFactory^ ModelService::GetProfileFactory()
+			ProfileFactory^ ModelGeometryService::GetProfileFactory()
 			{
 				if (_profileFactory == nullptr) _profileFactory = gcnew Xbim::Geometry::Factories::ProfileFactory(this);
 				return _profileFactory;
 			}
 
-			XbimGeometryCreator^ ModelService::GetV5GeometryEngine()
+			/*XbimGeometryCreator^ ModelGeometryService::GetV5GeometryEngine()
 			{
-				if (_v5GeometryEngine == nullptr)
-				{
-					_v5GeometryEngine = gcnew XbimGeometryCreator(_loggingService->Logger, this);
-				}
+				
 				return _v5GeometryEngine;
-			}
+			}*/
 
 
-			IXGeometryFactory^ ModelService::GeometryFactory::get() { return GetGeometryFactory(); }
-			IXCurveFactory^ ModelService::CurveFactory::get() { return GetCurveFactory(); }
-			IXSurfaceFactory^ ModelService::SurfaceFactory::get() { return GetSurfaceFactory(); }
-			IXEdgeFactory^ ModelService::EdgeFactory::get() { return GetEdgeFactory(); }
-			IXWireFactory^ ModelService::WireFactory::get() { return GetWireFactory(); }
-			IXFaceFactory^ ModelService::FaceFactory::get() { return GetFaceFactory(); }
-			IXShellFactory^ ModelService::ShellFactory::get() { return GetShellFactory(); }
-			IXSolidFactory^ ModelService::SolidFactory::get() { return GetSolidFactory(); }
-			IXCompoundFactory^ ModelService::CompoundFactory::get() { return GetCompoundFactory(); }
-			IXBooleanFactory^ ModelService::BooleanFactory::get() { return GetBooleanFactory(); }
-			IXShapeFactory^ ModelService::ShapeFactory::get() { return GetShapeFactory(); }
-			IXProfileFactory^ ModelService::ProfileFactory::get() { return GetProfileFactory(); }
+			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
+			IXCurveFactory^ ModelGeometryService::CurveFactory::get() { return GetCurveFactory(); }
+			IXSurfaceFactory^ ModelGeometryService::SurfaceFactory::get() { return GetSurfaceFactory(); }
+			IXEdgeFactory^ ModelGeometryService::EdgeFactory::get() { return GetEdgeFactory(); }
+			IXWireFactory^ ModelGeometryService::WireFactory::get() { return GetWireFactory(); }
+			IXFaceFactory^ ModelGeometryService::FaceFactory::get() { return GetFaceFactory(); }
+			IXShellFactory^ ModelGeometryService::ShellFactory::get() { return GetShellFactory(); }
+			IXSolidFactory^ ModelGeometryService::SolidFactory::get() { return GetSolidFactory(); }
+			IXCompoundFactory^ ModelGeometryService::CompoundFactory::get() { return GetCompoundFactory(); }
+			IXBooleanFactory^ ModelGeometryService::BooleanFactory::get() { return GetBooleanFactory(); }
+			IXShapeFactory^ ModelGeometryService::ShapeFactory::get() { return GetShapeFactory(); }
+			IXProfileFactory^ ModelGeometryService::ProfileFactory::get() { return GetProfileFactory(); }
 		}
 
 

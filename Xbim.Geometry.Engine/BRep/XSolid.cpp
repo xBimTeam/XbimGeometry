@@ -7,6 +7,7 @@
 #include <BRepBndLib.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
+#include <TopExp.hxx>
 using namespace System::Linq;
 namespace Xbim
 {
@@ -14,22 +15,25 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			IEnumerable<IXShell^>^ XSolid::Shells::get()
+			array<IXShell^>^ XSolid::Shells::get()
 			{
-				TopExp_Explorer shellEx(OccSolid(), TopAbs_SHELL);
-				if (!shellEx.More()) return Enumerable::Empty<IXShell^>();
-				List<IXShell^>^ shells = gcnew  List<IXShell^>();
-				for (; shellEx.More(); shellEx.Next())
-					shells->Add(gcnew XShell(TopoDS::Shell(shellEx.Current())));
+
+				TopTools_IndexedMapOfShape map;
+				TopExp::MapShapes(OccSolid(), TopAbs_SHELL, map);
+				array<IXShell^>^ shells = gcnew array<IXShell^>(map.Size());
+
+				for (int i = 0; i < map.Size(); i++)
+					shells[i] = (gcnew XShell(TopoDS::Shell(map(i + 1))));
+
 				return shells;
 			}
 
-			
+
 			double XSolid::Volume::get()
 			{
 				GProp_GProps gProps;
 				BRepGProp::VolumeProperties(OccSolid(), gProps);
-				return gProps.Mass();				
+				return gProps.Mass();
 			}
 
 		}

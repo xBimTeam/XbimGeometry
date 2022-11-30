@@ -39,9 +39,9 @@ namespace Xbim
 		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
 		private:
-			IXModelService^ _modelService;
+			IXModelGeometryService^ _modelService;
 			List<IXbimSolid^>^ solids;
-			static XbimSolidSet^ empty = gcnew XbimSolidSet((IXModelService^)nullptr);
+			static XbimSolidSet^ empty = gcnew XbimSolidSet((IXModelGeometryService^)nullptr);
 			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
@@ -78,13 +78,13 @@ namespace Xbim
 			static property XbimSolidSet^ Empty {XbimSolidSet^ get() { return empty; }};
 			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
 			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger);
-			XbimSolidSet(IXModelService^ modelService);
+			XbimSolidSet(IXModelGeometryService^ modelService);
 			XbimSolidSet(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelService^ modelService, ILogger^ logger);
-			XbimSolidSet(IIfcBooleanClippingResult^ solid, IXModelService^ modelService, ILogger^ logger);
+			XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelGeometryService^ modelService, ILogger^ logger);
+			XbimSolidSet(IIfcBooleanClippingResult^ solid, IXModelGeometryService^ modelService, ILogger^ logger);
 			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);
@@ -99,7 +99,7 @@ namespace Xbim
 			XbimSolidSet(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger);
 			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
 			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
-			void SetModelService(IXModelService^ modelService) { _modelService = modelService; };
+			void SetModelGeometryService(IXModelGeometryService^ modelService) { _modelService = modelService; };
 			virtual property bool IsValid
 			{
 				bool get()

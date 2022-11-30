@@ -18,7 +18,7 @@ namespace Xbim
 			public:
 				XShell(const TopoDS_Shell& hShell) : XShape(new TopoDS_Shell(hShell)) {  };
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Shell; } };
-				virtual property IEnumerable<IXFace^>^ Faces {IEnumerable<IXFace^>^ get(); };
+				virtual property array<IXFace^>^ Faces {array<IXFace^>^ get(); };
 				virtual property double SurfaceArea {double get(); }
 
 				

@@ -17,9 +17,9 @@ namespace Xbim
 			{
 			public:
 				XCompound(const TopoDS_Compound& hCompound) : XShape(new TopoDS_Compound(hCompound)) { };
-				
+
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Compound; } };
-				
+
 				virtual property bool IsCompoundsOnly {bool get(); };
 				virtual property bool IsSolidsOnly {bool get(); };
 				virtual property bool IsShellsOnly {bool get(); };
@@ -34,13 +34,13 @@ namespace Xbim
 				virtual property bool HasWires {bool get(); };
 				virtual property bool HasEdges {bool get(); };
 				virtual property bool HasVertices {bool get(); };
-				virtual property IEnumerable<IXCompound^>^ Compounds { IEnumerable<IXCompound^>^ get(); };
-				virtual property IEnumerable<IXSolid^>^ Solids { IEnumerable<IXSolid^>^ get(); };
-				virtual property IEnumerable<IXShell^>^ Shells { IEnumerable<IXShell^>^ get(); };
-				virtual property IEnumerable<IXFace^>^ Faces { IEnumerable<IXFace^>^ get(); };
-				virtual property IEnumerable<IXWire^>^ Wires { IEnumerable<IXWire^>^ get(); };
-				virtual property IEnumerable<IXEdge^>^ Edges { IEnumerable<IXEdge^>^ get(); };
-				virtual property IEnumerable<IXVertex^>^ Vertices { IEnumerable<IXVertex^>^ get(); };
+				virtual property array<IXCompound^>^ Compounds { array<IXCompound^>^ get(); };
+				virtual property array<IXSolid^>^ Solids { array<IXSolid^>^ get(); };
+				virtual property array<IXShell^>^ Shells { array<IXShell^>^ get(); };
+				virtual property array<IXFace^>^ Faces {  array<IXFace^>^ get(); };
+				virtual property array<IXWire^>^ Wires {  array<IXWire^>^ get(); };
+				virtual property array<IXEdge^>^ Edges {  array<IXEdge^>^ get(); };
+				virtual property array<IXVertex^>^ Vertices {  array<IXVertex^ >^ get(); };
 				virtual void Add(IXShape^ shape);
 
 			};

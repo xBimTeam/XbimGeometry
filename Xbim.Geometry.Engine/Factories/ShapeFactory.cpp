@@ -41,7 +41,7 @@ namespace Xbim
 		namespace Factories
 		{
 			
-			IXbimGeometryObject^ ShapeFactory::ConvertToV5(System::String^ brepStr)
+			/*IXbimGeometryObject^ ShapeFactory::ConvertToV5(System::String^ brepStr)
 			{
 				
 				return _modelService->GetV5GeometryEngine()->FromBrep(brepStr);
@@ -79,7 +79,7 @@ namespace Xbim
 
 				throw gcnew XbimGeometryServiceException("Failure to convert from from IXShape");
 
-			}
+			}*/
 			System::String^ ShapeFactory::Convert(IXShape^ shape)
 			{
 				return shape->BrepString();
@@ -112,19 +112,19 @@ namespace Xbim
 
 			IXShape^ ShapeFactory::Build(IIfcGeometricRepresentationItem^ geomRep)
 			{
-				IXbimGeometryObject^ brepV5 = _modelService->GetV5GeometryEngine()->Create(geomRep, Logger());
-				if (brepV5 != nullptr && brepV5->IsValid)
-				{
-					XbimSetObject^ geomSet = dynamic_cast<XbimSetObject^>(brepV5); //do we have a set
-					XbimOccShape^ geomShape = dynamic_cast<XbimOccShape^>(brepV5); //or a simple shape
-					if (geomShape != nullptr)
-						return GetXbimShape((const TopoDS_Shape&)geomShape);
-					else if (geomSet != nullptr)
-						return GetXbimShape((const TopoDS_Shape&)geomSet);
-					else
-						return nullptr;
-				}
-				else
+				//IXbimGeometryObject^ brepV5 = _modelService->GetV5GeometryEngine()->Create(geomRep, Logger());
+				//if (brepV5 != nullptr && brepV5->IsValid)
+				//{
+				//	XbimSetObject^ geomSet = dynamic_cast<XbimSetObject^>(brepV5); //do we have a set
+				//	XbimOccShape^ geomShape = dynamic_cast<XbimOccShape^>(brepV5); //or a simple shape
+				//	if (geomShape != nullptr)
+				//		return GetXbimShape((const TopoDS_Shape&)geomShape);
+				//	else if (geomSet != nullptr)
+				//		return GetXbimShape((const TopoDS_Shape&)geomSet);
+				//	else
+				//		return nullptr;
+				//}
+				//else
 					return nullptr;
 			}
 

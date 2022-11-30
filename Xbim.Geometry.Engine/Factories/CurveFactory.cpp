@@ -192,7 +192,7 @@ namespace Xbim
 						boundedCurve->Reverse();
 					segments.Append(boundedCurve);
 				}
-				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
@@ -224,7 +224,7 @@ namespace Xbim
 			{
 				TColGeom2d_SequenceOfBoundedCurve segments;
 				BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments); //this may throw exceptions
-				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve2d(segments, ModelService->MinimumGap);
+				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve2d(segments, ModelGeometryService->MinimumGap);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 				return bspline;
@@ -274,7 +274,7 @@ namespace Xbim
 							Handle(Geom2d_Circle) circle = EXEC_NATIVE->BuildCircle2d(start, mid, end);
 							if (!circle.IsNull()) //it is a valid arc
 							{
-								Handle(Geom2d_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve2d(circle, start, end, ModelService->MinimumGap);
+								Handle(Geom2d_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve2d(circle, start, end, ModelGeometryService->MinimumGap);
 								if (arcSegment.IsNull())
 									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
 								segments.Append(arcSegment);
@@ -369,7 +369,7 @@ namespace Xbim
 				{
 					gp_Pnt2d start = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[0]);
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelService->MinimumGap))
+					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 					Handle(Geom2d_TrimmedCurve) lineSeg = EXEC_NATIVE->BuildTrimmedLine2d(start, end);
 					if (lineSeg.IsNull())
@@ -379,7 +379,7 @@ namespace Xbim
 				TColgp_Array1OfPnt2d points(1, ifcPolyline->Points->Count);
 				GEOMETRY_FACTORY->GetPolylinePoints2d(ifcPolyline, points);
 
-				Handle(Geom2d_BSplineCurve) polyline = EXEC_NATIVE->BuildPolyline2d(points, ModelService->Precision);
+				Handle(Geom2d_BSplineCurve) polyline = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->Precision);
 				if (polyline.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IfcPolyline", ifcPolyline);
 				return polyline;
@@ -593,7 +593,7 @@ namespace Xbim
 						boundedCurve->Reverse();
 					segments.Append(boundedCurve);
 				}
-				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve3d(segments, ModelService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve3d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
@@ -646,7 +646,7 @@ namespace Xbim
 			{
 				TColGeom_SequenceOfBoundedCurve segments;
 				BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments); //this may throw exceptions
-				Handle(Geom_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve3d(segments, ModelService->MinimumGap);
+				Handle(Geom_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve3d(segments, ModelGeometryService->MinimumGap);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 				return bspline;
@@ -695,7 +695,7 @@ namespace Xbim
 							Handle(Geom_Circle) circle = EXEC_NATIVE->BuildCircle3d(start, mid, end);
 							if (!circle.IsNull()) //it is a valid arc
 							{
-								Handle(Geom_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve3d(circle, start, end, ModelService->MinimumGap);
+								Handle(Geom_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve3d(circle, start, end, ModelGeometryService->MinimumGap);
 								if (arcSegment.IsNull())
 									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
 								segments.Append(arcSegment);
@@ -749,7 +749,7 @@ namespace Xbim
 
 			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
 			{
-				double sameParams = Math::Abs(endParam - startParam) < ModelService->Precision;
+				double sameParams = Math::Abs(endParam - startParam) < ModelGeometryService->Precision;
 				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
 					throw RaiseGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
 				if (3 != (int)curve->Dim)
@@ -764,7 +764,7 @@ namespace Xbim
 				{
 					if (startParam == -1) startParam = geomCurve->FirstParameter();
 					if (endParam == -1) endParam = geomCurve->LastParameter();
-					Handle(Geom_Curve)  geomCurveTrimmed = EXEC_NATIVE->TrimDirectrix(geomCurve, startParam, endParam, ModelService->Precision);
+					Handle(Geom_Curve)  geomCurveTrimmed = EXEC_NATIVE->TrimDirectrix(geomCurve, startParam, endParam, ModelGeometryService->Precision);
 					if (geomCurve.IsNull())
 						throw RaiseGeometryFactoryException("Directrix could not be trimmed");
 					return geomCurveTrimmed;
@@ -993,9 +993,9 @@ namespace Xbim
 						{
 							gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
 							gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
-							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
+							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
 								throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
-							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
+							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
 								throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
 						}
 						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
@@ -1004,8 +1004,8 @@ namespace Xbim
 						{
 							if (isConic)
 							{
-								u1 *= ModelService->RadianFactor; //correct to radians
-								u2 *= ModelService->RadianFactor; //correct to radians
+								u1 *= ModelGeometryService->RadianFactor; //correct to radians
+								u2 *= ModelGeometryService->RadianFactor; //correct to radians
 
 							}
 						}
@@ -1013,7 +1013,7 @@ namespace Xbim
 						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
 							throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
 
-						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+						if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
 						{
 							if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 							throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve", ifcTrimmedCurve->BasisCurve);
@@ -1078,9 +1078,9 @@ namespace Xbim
 								throw RaiseGeometryFactoryException("Trim Point1 is not a 2d point", cp1);
 							if (!GEOMETRY_FACTORY->BuildPoint2d(cp2, p2))
 								throw RaiseGeometryFactoryException("Trim Point2 is not a 2d point", cp1);
-							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelService->MinimumGap, u1))
+							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
 								throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
-							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelService->MinimumGap, u2))
+							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
 								throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
 						}
 						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
@@ -1089,13 +1089,13 @@ namespace Xbim
 						{
 							if (isConic)
 							{
-								u1 *= ModelService->RadianFactor; //correct to radians
-								u2 *= ModelService->RadianFactor; //correct to radians
+								u1 *= ModelGeometryService->RadianFactor; //correct to radians
+								u2 *= ModelGeometryService->RadianFactor; //correct to radians
 							}
 						}
 						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
 							throw RaiseGeometryFactoryException("Error converting Ifc Trim Points");
-						if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+						if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
 						{
 							if (isConic) return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 							throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
@@ -1124,7 +1124,7 @@ namespace Xbim
 				{
 					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[0]);
 					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelService->MinimumGap))
+					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 					Handle(Geom_TrimmedCurve) lineSeg = EXEC_NATIVE->BuildTrimmedLine3d(start, end);
 					if (lineSeg.IsNull())
@@ -1135,7 +1135,7 @@ namespace Xbim
 				{
 					TColgp_Array1OfPnt points(1, ifcPolyline->Points->Count);
 					GEOMETRY_FACTORY->GetPolylinePoints3d(ifcPolyline, points);
-					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline3d(points, ModelService->Precision);
+					Handle(Geom_BSplineCurve) polyline = Ptr()->BuildPolyline3d(points, ModelGeometryService->Precision);
 					if (polyline.IsNull())
 						throw RaiseGeometryFactoryException("Failed to build IfcPolyline", ifcPolyline);
 					return polyline;

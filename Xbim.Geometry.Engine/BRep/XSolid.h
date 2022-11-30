@@ -19,7 +19,7 @@ namespace Xbim
 				XSolid(const TopoDS_Solid& solid) : XShape(new TopoDS_Solid(solid)) {  };
 				virtual property XShapeType ShapeType { XShapeType get() override  { return XShapeType::Solid; }};
 				
-				virtual property IEnumerable<IXShell^>^ Shells {IEnumerable<IXShell^>^ get(); };
+				virtual property array<IXShell^>^ Shells {array<IXShell^>^ get(); };
 				virtual property double Volume {double get(); }
 
 				

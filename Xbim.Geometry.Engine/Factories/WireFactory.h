@@ -39,7 +39,7 @@ namespace Xbim
 				TopoDS_Wire BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam);
 				//void AdjustDirectrixTrimParameters(IIfcCurve^ ifcCurve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, double& start, double& end);
 			public:
-				WireFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NWireFactory()) {}				
+				WireFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NWireFactory()) {}				
 				virtual IXWire^ BuildWire(array<IXPoint^>^  points);
 				virtual IXWire^ Build(IIfcCurve^ ifcCurve);
 				virtual IXWire^ Build(IIfcProfileDef^ ifcProfileDef);

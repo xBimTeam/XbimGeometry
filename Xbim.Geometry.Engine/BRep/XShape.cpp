@@ -19,32 +19,39 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			 bool XShape::IsValidShape()
+			bool XShape::IsValidShape()
 			{
-//				bool ok = false;
-//				try
-//				{
-//					
-//#if _DEBUG
-//					/*BRepCheck_Analyzer analyser(OccHandle(), true);
-//					ok = analyser.IsValid();*/
-//					//code below is useful to see errors
-//					//Handle(BRepCheck_Result) res = analyser.Result(OccHandle());
-//					//const BRepCheck_ListOfStatus& stati = res->Status();
-//					//BRepCheck_Status first = stati.First();
-//#else
-//					ok = true; //only do this check in debug mode, when we have a problem houston, its quite expensive
-//#endif
-//					
-//					
-//				}
-//				catch (Standard_Failure e)
-//				{
-//				}
-//				return ok;
-				 return !OccHandle().IsNull();
-			};
-			
+				//				bool ok = false;
+				//				try
+				//				{
+				//					
+				//#if _DEBUG
+				//					/*BRepCheck_Analyzer analyser(OccHandle(), true);
+				//					ok = analyser.IsValid();*/
+				//					//code below is useful to see errors
+				//					//Handle(BRepCheck_Result) res = analyser.Result(OccHandle());
+				//					//const BRepCheck_ListOfStatus& stati = res->Status();
+				//					//BRepCheck_Status first = stati.First();
+				//#else
+				//					ok = true; //only do this check in debug mode, when we have a problem houston, its quite expensive
+				//#endif
+				//					
+				//					
+				//				}
+				//				catch (Standard_Failure e)
+				//				{
+				//				}
+				//				return ok;
+				return !OccHandle().IsNull();
+			}
+			bool XShape::IsEqual(IXShape^ iXShape)
+			{
+				XShape^ xShape = dynamic_cast<XShape^>(iXShape);
+				if (xShape == __nullptr) return false;
+				bool isEqual = xShape->Ptr()->IsSame(*Ptr()); //we ignore orientation
+				return isEqual;
+			}
+
 
 			IXShape^ XShape::GetXbimShape(const TopoDS_Shape& shape)
 			{

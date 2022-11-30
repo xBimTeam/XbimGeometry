@@ -11,7 +11,7 @@ namespace Xbim
 			public ref class SurfaceFactory : FactoryBase<NSurfaceFactory>, IXSurfaceFactory	
 			{					
 			public:
-				SurfaceFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService,new NSurfaceFactory()) {};
+				SurfaceFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService,new NSurfaceFactory()) {};
 				virtual IXPlane^ BuildPlane(IXPoint^ origin, IXDirection^ normal);
 			internal:
 				Handle(Geom_Surface) BuildSurface(IIfcSurface^ ifcSurface);

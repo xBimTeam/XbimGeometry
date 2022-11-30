@@ -126,7 +126,7 @@ namespace Xbim
 				{
 					TColGeom2d_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildCompositeCurveSegments2d(ifcCompositeCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -156,7 +156,7 @@ namespace Xbim
 				{
 					TColGeom2d_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -200,7 +200,7 @@ namespace Xbim
 					{
 						points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint2d(cp));
 					}
-					TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelService->Precision);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->Precision);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 					return wire;
@@ -259,18 +259,18 @@ namespace Xbim
 					trim_cartesian = false;
 					if (isConic)
 					{
-						u1 *= ModelService->RadianFactor; //correct to radians
-						u2 *= ModelService->RadianFactor; //correct to radians
+						u1 *= ModelGeometryService->RadianFactor; //correct to radians
+						u2 *= ModelGeometryService->RadianFactor; //correct to radians
 					}
 				}
 
-				if (Math::Abs(u1 - u2) < ModelService->Precision) //if the parameters are the same trimming will fail we cannot support periodic wires conic curve
+				if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail we cannot support periodic wires conic curve
 				{
 					throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty wire", ifcTrimmedCurve->BasisCurve);
 				}
 				else
 				{
-					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelService->MinimumGap);
+					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelGeometryService->MinimumGap);
 					if (trimmedWire.IsNull())
 						throw RaiseGeometryFactoryException("IfcTrimmedCurve could not be built as a wire", ifcTrimmedCurve);
 					return trimmedWire;
@@ -294,11 +294,11 @@ namespace Xbim
 				{
 					points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint3d(cp));
 				}
-				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, -1, -1, ModelService->Precision);
+				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, -1, -1, ModelGeometryService->Precision);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Resulting wire is empty");
 
-				if (EXEC_NATIVE->IsClosed(wire, ModelService->Precision))
+				if (EXEC_NATIVE->IsClosed(wire, ModelGeometryService->Precision))
 					wire.Closed(true);
 				return gcnew XWire(wire);
 			}
@@ -380,7 +380,7 @@ namespace Xbim
 				{
 					TColGeom_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildCompositeCurveSegments3d(ifcCompositeCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -401,7 +401,7 @@ namespace Xbim
 				{
 					TColGeom_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelService->Precision, ModelService->MinimumGap);
+					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -414,7 +414,7 @@ namespace Xbim
 				if (double::IsNaN(startParam) && double::IsNaN(endParam)) return wire; //no trimming required
 				if (double::IsNaN(startParam) || startParam < 0) startParam = 0;
 				if (double::IsNaN(endParam) || endParam < 0) endParam = double::PositiveInfinity;
-				TopoDS_Wire directrix = EXEC_NATIVE->BuildDirectrixWire(wire, startParam, endParam, ModelService->Precision, ModelService->MinimumGap);
+				TopoDS_Wire directrix = EXEC_NATIVE->BuildDirectrixWire(wire, startParam, endParam, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);
 				return directrix;
@@ -494,7 +494,7 @@ namespace Xbim
 			//				occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
 			//			}
 			//		}
-			//		double precision = XbimConvert::ModelService(directrix)->MinimumGap;
+			//		double precision = XbimConvert::ModelGeometryService(directrix)->MinimumGap;
 			//		// only trim if needed either from start or end
 			//		if ((occStart > 0 && System::Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && System::Math::Abs(occEnd - totCurveLen) > precision))
 			//		{

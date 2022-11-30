@@ -18,9 +18,9 @@ namespace Xbim
 			public ref class ShellFactory : FactoryBase<NShellFactory>, IXShellFactory
 			{
 				
-				IXModelService^ _modelService;
+				IXModelGeometryService^ _modelService;
 			public:
-				ShellFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NShellFactory()){}
+				ShellFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NShellFactory()){}
 				
 				TopoDS_Shell BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet);
 			};

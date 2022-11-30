@@ -44,7 +44,7 @@ namespace Xbim
 			private:
 
 			public:
-				EdgeFactory(Xbim::Geometry::Services::ModelService^ modelService) : FactoryBase(modelService, new NEdgeFactory()) {}
+				EdgeFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NEdgeFactory()) {}
 #pragma endregion		
 			};
 		}

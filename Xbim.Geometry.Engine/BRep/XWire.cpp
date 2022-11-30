@@ -14,14 +14,19 @@ namespace Xbim
 		namespace BRep
 		{
 			
-			IEnumerable<IXEdge^>^ XWire::EdgeLoop::get()
+			array<IXEdge^>^ XWire::EdgeLoop::get()
 			{
 				BRepTools_WireExplorer wireEx(OccWire());
-				if (!wireEx.More()) return Enumerable::Empty<IXEdge^>();
-				List<IXEdge^>^ edges = gcnew List<IXEdge^>();
+				TopoDS_ListOfShape shapes;
 				for (; wireEx.More(); wireEx.Next())
-					edges->Add(gcnew XEdge(wireEx.Current()));
-				return edges;
+					shapes.Append(wireEx.Current());
+
+				array<IXEdge^>^ managedShapes = gcnew  array<IXEdge^>(shapes.Size());
+				int i = 0;
+				for (auto&& shape : shapes)
+					managedShapes[i++] = gcnew XEdge(TopoDS::Edge(shape));
+				return managedShapes;
+
 			}
 
 			double XWire::Area::get()
