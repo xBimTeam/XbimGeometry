@@ -351,6 +351,9 @@
     <ClInclude Include="Factories\GeometryConverterFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="XbimGeometryCreatorV6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -609,6 +612,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\GeometryConverterFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="XbimGeometryCreatorV6.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

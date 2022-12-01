@@ -35,6 +35,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception ex)
             {
+                var msg = ex.Message;
                 Console.WriteLine(ex.Message);
             }
 
@@ -47,6 +48,11 @@ namespace Xbim.Geometry.Engine.Interop
         public static IXbimGeometryEngine CreateGeometryEngineV5(IModel model, ILoggerFactory loggerFactory)
         {
             return geometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
+        }
+
+        public static IXbimGeometryEngine CreateGeometryEngine(XGeometryEngineVersion version, IModel model, ILoggerFactory loggerFactory)
+        {
+            return geometryConverterFactory.CreateGeometryEngine(version, model, loggerFactory);
         }
 
         public XbimGeometryEngine() { }

@@ -39,7 +39,7 @@ namespace Xbim
 			protected:
 				Xbim::Geometry::Services::ModelGeometryService^ _modelService;
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message) { return RaiseGeometryFactoryException(message, nullptr, nullptr); };
-				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, System::Exception^ innerException) { return RaiseGeometryFactoryException(message, nullptr, exception); }
+				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, System::Exception^ innerException) { return RaiseGeometryFactoryException(message, nullptr, innerException); }
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, IPersistEntity^ entity) { return RaiseGeometryFactoryException(message, entity, nullptr); }
 				XbimGeometryFactoryException^ RaiseGeometryFactoryException(System::String^ message, IPersistEntity^ entity, System::Exception^ innerException)
 				{
@@ -56,7 +56,7 @@ namespace Xbim
 					return geomExcept;
 				}
 				void LogError(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, nullptr, nullptr, format, args); };
-				void LogError(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::WarErrorning, nullptr, ifcEntity, format, args); };
+				void LogError(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, nullptr, ifcEntity, format, args); };
 				void LogError(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, exception, ifcEntity, format, args); };
 				void LogError(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, exception, nullptr, format, args); };
 

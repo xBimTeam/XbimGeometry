@@ -117,6 +117,7 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -135,6 +136,7 @@
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
     </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -272,6 +274,7 @@
     <ClInclude Include="XbimFace.h" />
     <ClInclude Include="XbimFaceSet.h" />
     <ClInclude Include="XbimGeometryCreator.h" />
+    <ClInclude Include="XbimGeometryCreatorV6.h" />
     <ClInclude Include="XbimGeometryObject.h" />
     <ClInclude Include="XbimGeometryObjectSet.h" />
     <ClInclude Include="XbimHandle.h" />
@@ -378,6 +381,7 @@
     </ClCompile>
     <ClCompile Include="XbimFaceSet.cpp" />
     <ClCompile Include="XbimGeometryCreator.cpp" />
+    <ClCompile Include="XbimGeometryCreatorV6.cpp" />
     <ClCompile Include="XbimGeometryObject.cpp" />
     <ClCompile Include="XbimGeometryObjectSet.cpp" />
     <ClCompile Include="XbimMesh.cpp" />

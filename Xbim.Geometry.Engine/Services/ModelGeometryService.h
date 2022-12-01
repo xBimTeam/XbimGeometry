@@ -3,6 +3,9 @@
 #include "MeshFactors.h"
 #include "LoggingService.h"
 #include "../XbimGeometryCreator.h"
+#include "../Exceptions/XbimGeometryServiceException.h"
+#include "../Exceptions/XbimGeometryServiceException.h"
+using namespace Xbim::Geometry::Exceptions;
 
 #define ActiveModelGeometryService(ifcEntity) static_cast<ModelGeometryService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
 
@@ -43,12 +46,14 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		
+
 		namespace Services
 		{
 
 			public ref class ModelGeometryService : IXModelGeometryService
 			{
+			protected:
+				LoggingService^ _loggingService;
 			private:
 				IModel^ model;
 				double minimumGap;
@@ -58,7 +63,7 @@ namespace Xbim
 				double _timeout;
 				bool _upgradeFaceSets = true;
 
-				LoggingService^ _loggingService;
+
 				Xbim::Geometry::Factories::GeometryFactory^ _geometryFactory;
 				Xbim::Geometry::Factories::CurveFactory^ _curveFactory;
 				Xbim::Geometry::Factories::SurfaceFactory^ _surfaceFactory;
@@ -130,6 +135,64 @@ namespace Xbim
 				virtual property IXBooleanFactory^ BooleanFactory {IXBooleanFactory^ get(); }
 				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
+
+#pragma region Logging and Exceptions
+				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message) { return RaiseGeometryServiceException(message, nullptr, nullptr); };
+				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message, System::Exception^ innerException) { return RaiseGeometryServiceException(message, nullptr, innerException); }
+				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message, IPersistEntity^ entity) { return RaiseGeometryServiceException(message, entity, nullptr); }
+				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message, IPersistEntity^ entity, System::Exception^ innerException)
+				{
+					XbimGeometryServiceException^ geomExcept = gcnew XbimGeometryServiceException(message, innerException);
+					if (entity != nullptr)
+					{
+						geomExcept->Data->Add("IfcEntityId", entity->EntityLabel);
+						geomExcept->Data->Add("IfcEntityType", entity->GetType()->Name);
+						System::String^ formattedMessage = "#{EntityId}={EntityType}: " + message;
+						LoggerExtensions::LogWarning(LoggingService->Logger, geomExcept, formattedMessage, entity->EntityLabel, entity->GetType()->Name);
+					}
+					else
+						LoggerExtensions::LogWarning(LoggingService->Logger, geomExcept, message);
+					return geomExcept;
+				}
+				void LogError(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, nullptr, nullptr, format, args); };
+				void LogError(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, nullptr, ifcEntity, format, args); };
+				void LogError(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, exception, ifcEntity, format, args); };
+				void LogError(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, exception, nullptr, format, args); };
+
+				void LogWarning(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, nullptr, nullptr, format, args); };
+				void LogWarning(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, nullptr, ifcEntity, format, args); };
+				void LogWarning(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, exception, ifcEntity, format, args); };
+				void LogWarning(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Warning, exception, nullptr, format, args); };
+
+				void LogInformation(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Information, nullptr, nullptr, format, args); };
+				void LogInformation(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Information, nullptr, ifcEntity, format, args); };
+				void LogInformation(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Information, exception, ifcEntity, format, args); };
+				void LogInformation(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Information, exception, nullptr, format, args); };
+
+				void LogDebug(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, nullptr, nullptr, format, args); };
+				void LogDebug(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, nullptr, ifcEntity, format, args); };
+				void LogDebug(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, exception, ifcEntity, format, args); };
+				void LogDebug(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, exception, nullptr, format, args); };
+
+				void Log(LogLevel logLevel, System::Exception^ exception, IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args)
+				{
+					System::String^ message = System::String::Format(format, args);
+
+					if (ifcEntity != nullptr)
+					{
+						System::String^ amendedMessage = "#{EntityId}={EntityType}: " + message;
+						cli::array<System::Object^>^ amendedArgs = gcnew cli::array<System::Object^>(args->Length + 2);
+						amendedArgs[0] = ifcEntity->EntityLabel;
+						amendedArgs[1] = ifcEntity->GetType()->Name;
+						for (int i = 0; i < args->Length; i++) amendedArgs[i + 2] = args[i];
+						LoggerExtensions::Log(LoggingService->Logger, logLevel, 0, exception, amendedMessage, amendedArgs);
+					}
+					else
+						LoggerExtensions::Log(LoggingService->Logger, logLevel, 0, exception, format, args);
+				}
+				ILogger^ Logger() { return LoggingService->Logger; };
+#pragma endregion
+
 			};
 		}
 	}
