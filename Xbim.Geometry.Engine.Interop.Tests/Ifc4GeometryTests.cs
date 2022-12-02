@@ -670,16 +670,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        [TestMethod]
-        public void CompositeCurveEmptySegmentTest()
+        [DataTestMethod]
+        [DataRow(XGeometryEngineVersion.V5, DisplayName = "V5 Engine")]
+        [DataRow(XGeometryEngineVersion.V6, DisplayName = "V6 Engine")]
+        public void CompositeCurveEmptySegmentTest(XGeometryEngineVersion engineVersion)
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\composite-curve4.ifc"))
             {
                 var eas = model.Instances[3676127] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(eas);
-                var geomEngine = new XbimGeometryEngine(model, loggerFactory);
+                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, logger);
-                geom.Volume.Should().BeApproximately(11443062570.814053, 1e-5);
+                geom.Volume.Should().BeApproximately(11443062573.022554, 1e-5);
             }
         }
 
