@@ -104,6 +104,8 @@ namespace Xbim
 			model->Tag = _modelService;
 		}
 
+		
+
 		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
 			System::String^ msg = System::String::Format(format, arg);

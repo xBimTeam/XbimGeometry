@@ -141,6 +141,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
 
                     var block = IfcModelBuilder.MakeBlock(m, 10, 15, 20);
+                    try
+                    {
+
                     var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, m, loggerFactory);
                     var solid = geomEngine.CreateSolid(block, logger);
 
@@ -151,6 +154,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsTrue(meshRec.FaceCount == 6, "6 mesh faces are required of a block");
                     Assert.IsTrue(meshRec.PointCount == 24, "24 mesh points are required of a block");
                     txn.Commit();
+
+                    }
+                    catch (Exception e)
+                    {
+                        var ms = e.Message;
+                        throw;
+                    }
                 }
             }
         }

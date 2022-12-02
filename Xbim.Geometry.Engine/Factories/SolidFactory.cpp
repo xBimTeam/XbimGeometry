@@ -29,7 +29,7 @@ namespace Xbim
 		{
 			bool SolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 			{
-				return Ptr()->TryUpgrade(solid, shape);
+				return EXEC_NATIVE->TryUpgrade(solid, shape);
 			}
 			IXShape^ ShapeFactory::Convert(System::String^ brepStr)
 			{
@@ -184,13 +184,15 @@ namespace Xbim
 
 			TopoDS_Shape SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
 			{
-				TopoDS_Shell faceSet = SHELL_FACTORY->BuildConnectedFaceSet(facetedBrep->Outer);
+				return BuildClosedShell(facetedBrep->Outer);
+			}
+
+			TopoDS_Shape SolidFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
+			{
+				TopoDS_Shell faceSet = SHELL_FACTORY->BuildConnectedFaceSet(closedShell);
 				TopoDS_Solid solid = EXEC_NATIVE->MakeSolid(faceSet);
-
-
 				//A solid is required but not necessarily built, default assume all is OK and make a solid, checking for errors has performance issues that we may not always need
 				//i.e. a set of faces will produce a pretty good triangulation if thats all we need done
-
 
 				if (_modelService->UpgradeFaceSets)
 				{
@@ -202,7 +204,7 @@ namespace Xbim
 				}
 				else
 					return faceSet;
-			};
+			}
 
 			/// <summary>
 			/// FC4 CHANGE  The entity has been deprecated and shall not be used. The entity IfcFacetedBrep shall be used instead. Implemented for backward compatibility

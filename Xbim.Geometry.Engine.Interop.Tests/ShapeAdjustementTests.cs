@@ -1,34 +1,28 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.GeometryResource;
-using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.ProfileResource;
 using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-	[TestClass]
+    [TestClass]
 	public class ShapeAdjustementTests
 	{
         
         static private ILogger logger;
 
+        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-             logger = new NullLogger<IfcAdvancedBrepTests>();
-           
+            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
-
         [ClassCleanup]
         static public void Cleanup()
         {
@@ -124,7 +118,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
                 var area = m.Instances.New<IfcArbitraryClosedProfileDef>();
                 area.OuterCurve = poly;
-                var geomEngine = new XbimGeometryEngine(m, logger);
+                var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                 var solid = geomEngine.CreateFace(area, logger);
                 var pline = geomEngine.CreateCurve(poly, logger);
                 var t = solid.ToBRep;

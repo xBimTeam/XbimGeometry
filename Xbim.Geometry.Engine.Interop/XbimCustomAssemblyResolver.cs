@@ -8,13 +8,13 @@ namespace Xbim.Geometry.Engine.Interop
 {
     internal class XbimCustomAssemblyResolver
     {
-        
+
 
         const string GeometryModuleName = "Xbim.Geometry.Engine";
         const string XbimModulePrefix = "Xbim.";
         static readonly ILogger<XbimCustomAssemblyResolver> _logger;
 
-          
+
         static XbimCustomAssemblyResolver()
         {
             _logger = XbimLogging.CreateLogger<XbimCustomAssemblyResolver>();
@@ -55,7 +55,7 @@ namespace Xbim.Geometry.Engine.Interop
 
                 return null;
             }
-                
+
             string libraryPath = null;
 
             if (moduleName.StartsWith(GeometryModuleName))
@@ -101,18 +101,20 @@ namespace Xbim.Geometry.Engine.Interop
             Assembly loadedAssembly = null;
             if (libraryPath != null)
             {
+
                 loadedAssembly = LoadAssembly(moduleName, libraryPath);
+
             }
             return loadedAssembly;
         }
 
         private static Assembly LoadAssembly(string moduleName, string assemblyPath)
         {
-            
+
             if (!File.Exists(assemblyPath))
             {
                 _logger.LogTrace("File {assemblyPath} did not exist", assemblyPath);
-               
+
                 return null;
             }
             else
@@ -124,6 +126,6 @@ namespace Xbim.Geometry.Engine.Interop
                 return geomLoaded;
             }
         }
-        
+
     }
 }

@@ -60,7 +60,7 @@ namespace Xbim
 #pragma endregion
 
 				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);
-
+				TopoDS_Shape BuildClosedShell(IIfcClosedShell^ closedShell);
 				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
 
 

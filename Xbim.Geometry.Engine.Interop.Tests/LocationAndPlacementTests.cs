@@ -20,13 +20,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         
         
         static private ILogger logger;
-
+        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            logger = new NullLogger<IfcAdvancedBrepTests>();
-           
-            
+            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
         [ClassCleanup]
         static public void Cleanup()
@@ -99,7 +97,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     {
                         var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                        var geomEngine = new XbimGeometryEngine(m, logger);
+                        var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                         var solid = geomEngine.CreateSolid(block, logger);
                         var ax3D = IfcModelBuilder.MakeAxis2Placement3D(m);
                         ax3D.Location.Y = 100;
@@ -126,7 +124,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                     var solid = geomEngine.CreateSolid(block, logger);
                     var transform = IfcModelBuilder.MakeCartesianTransformationOperator3D(m);
                     transform.Scale = 2;
@@ -154,7 +152,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 50, 10, 10);
-                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                     var solid = geomEngine.CreateSolid(block, logger);
                     var placement = IfcModelBuilder.MakeLocalPlacement(m);
                     ((IfcAxis2Placement3D)placement.RelativePlacement).Location.X = 100;
@@ -191,7 +189,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 using (var txn = m.BeginTransaction("Test"))
                 {
-                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
                     var solid = geomEngine.CreateSolid(block, logger);
                     var grid = IfcModelBuilder.MakeGrid(m, 3, 100);
@@ -216,7 +214,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
-                    var geomEngine = new XbimGeometryEngine(m, logger);
+                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                     var solid = geomEngine.CreateSolid(extrude, logger);
                     var transform = new XbimMatrix3D(); //test first with identity
                     var solid2 = (IXbimSolid)solid.Transform(transform);

@@ -74,6 +74,7 @@ namespace Xbim
 		public:
 			
 			XbimGeometryCreator(IModel^ model, ILoggerFactory^ loggerFactory);
+			
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
@@ -85,7 +86,7 @@ namespace Xbim
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
-			virtual IXModelGeometryService^ CreateModelGeometryService(IModel^ model) { throw gcnew System::NotSupportedException(); }
+			IXModelGeometryService^ GetModelGeometryService() { return _modelService; }
 			
 			virtual XbimShapeGeometry^ CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^);
 			

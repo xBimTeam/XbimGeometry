@@ -18,7 +18,7 @@ namespace Xbim.ModelGeometry.Scene
         /// This function centralises the extraction of a product placement, but it needs the support of XbimPlacementTree and an XbimGeometryEngine
         /// We should probably find a conceptual place for it somewhere in the scene, where these are cached.
         /// </summary>
-        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, XbimGeometryEngine engine)
+        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, IXbimGeometryEngine engine)
         {
             XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
             if (product.ObjectPlacement is IIfcLocalPlacement)

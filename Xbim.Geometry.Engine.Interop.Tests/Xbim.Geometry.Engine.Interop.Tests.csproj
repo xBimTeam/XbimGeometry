@@ -1,53 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
-    <XbimGeometryPlatform>netcoreapp3.1</XbimGeometryPlatform>
-    <IsPackable>false</IsPackable>
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <SignAssembly>False</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-	  <GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/$(Platform)</GeometryInteropDirectory>
-  </PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	<PropertyGroup>
+		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+		<IsPackable>false</IsPackable>
+		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+		<SignAssembly>False</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
+		<Platforms>AnyCPU</Platforms>
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-	  <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-	  <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<PlatformTarget>x86</PlatformTarget><!-- TODO check why -->
-	</PropertyGroup>
 
 
-  
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-	  <PlatformTarget>x86</PlatformTarget>
-	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-	  <PlatformTarget>x64</PlatformTarget>
-	</PropertyGroup>
-
-  <PropertyGroup Condition="'$(Platform)'=='AnyCPU' OR '$(Platform)'=='x64'">
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x64.runsettings</RunSettingsFilePath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Platform)'=='x86' OR '$(PlatformTarget)'=='x86'">
-    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x86.runsettings</RunSettingsFilePath>
-  </PropertyGroup>
-
-	
 	<ItemGroup>
-		
+
 		<PackageReference Include="FluentAssertions" Version="5.10.3" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
@@ -60,9 +27,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-    <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
-      <Private>True</Private>
-    </ProjectReference>
+		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
+			<Private>True</Private>
+		</ProjectReference>
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>
 

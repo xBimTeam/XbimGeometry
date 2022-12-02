@@ -627,7 +627,7 @@ IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcManifoldSolidBrep^ IIfc
 
 IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrep^ IIfcSolid, ILogger^)
 {
-	return gcnew XbimSolidSet(IIfcSolid, Logger());
+	return gcnew XbimSolidSet(GetSolidFactory()->BuildFacetedBrep(IIfcSolid));
 };
 
 IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrepWithVoids^ IIfcSolid, ILogger^)
@@ -637,7 +637,7 @@ IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrepWithVoids^ I
 
 IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcClosedShell^ IIfcSolid, ILogger^)
 {
-	return gcnew XbimSolidSet(IIfcSolid, Logger());
+	return gcnew XbimSolidSet(GetSolidFactory()->BuildClosedShell(IIfcSolid));
 };
 
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
@@ -17,13 +18,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     [TestClass]
     public class MemoryAndThreadingTests
     {
-       
-
+        static ILogger logger;
+        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-           
+            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
+        
         [ClassCleanup]
         static public void Cleanup()
         {
@@ -142,7 +144,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //}
                 //Assert.IsFalse(vertex.IsValid);
                 var vertices = new List<IXbimVertex>(10000);
-                var geomEngine = new XbimGeometryEngine(new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()), new NullLogger<MemoryAndThreadingTests>());
+                var geomEngine = new XbimGeometryEngine(new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()), loggerFactory);
                 for (int i = 0; i < 1000000; i++)
                 {
                     vertices.Add(geomEngine.CreateVertexPoint(aPoint, 0.005));

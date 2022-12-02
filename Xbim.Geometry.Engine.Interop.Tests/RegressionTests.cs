@@ -20,11 +20,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         
  
         static private ILogger logger;
-
+        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            logger = new NullLogger<IfcAdvancedBrepTests>();
+            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
 
         [ClassCleanup]
@@ -40,7 +40,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
             {
-                var geomEngine = new XbimGeometryEngine(m, logger);
+                var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
                 var solid = geomEngine.CreateSolid(extSolid, logger);
                 IfcCsgTests.GeneralTest(solid);

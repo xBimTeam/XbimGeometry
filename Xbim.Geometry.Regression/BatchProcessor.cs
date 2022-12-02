@@ -75,7 +75,7 @@ namespace XbimRegression
                     XbimLogging.LoggerFactory = loggerFactory;
                     ILogger logger = loggerFactory.CreateLogger<BatchProcessor>();
                     Console.WriteLine($"Processing {file}");
-                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
+                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, loggerFactory);
                     XbimLogging.LoggerFactory = null; // uses a default loggerFactory
                 };
 
@@ -151,8 +151,10 @@ namespace XbimRegression
             stateIsComplete = false;
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger logger)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILoggerFactory loggerFactory)
         {
+            var logger = loggerFactory.CreateLogger<BatchProcessor>();
+
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
@@ -223,7 +225,7 @@ namespace XbimRegression
                             var path = Path.Combine(
                                     Path.GetDirectoryName(ifcFile),
                                     Path.GetFileName(ifcFile) + ".brep.unclassified");
-                            var engine = new XbimGeometryEngine(model, logger);
+                            var engine = new XbimGeometryEngine(model, loggerFactory);
                             if (!Directory.Exists(path))
                                 Directory.CreateDirectory(path);
                             IfcStore s = model as IfcStore;

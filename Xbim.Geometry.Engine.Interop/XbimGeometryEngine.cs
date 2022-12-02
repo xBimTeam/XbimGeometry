@@ -18,51 +18,56 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly IXbimGeometryEngine _engine;
 
         private readonly ILogger _logger;
-        private IXModelGeometryService _modelService;
+
 
         static private IXGeometryConverterFactory geometryConverterFactory;
+        private static IXGeometryConverterFactory GeometryConverterFactory
+        {
+            get
+            {
+                if (geometryConverterFactory == null)
+                {
+                    var conventions = new XbimArchitectureConventions();    // understands the process we run under
+                    string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
+                    var ass = Assembly.Load(assemblyName);
+                    var theType = ass.GetType("Xbim.Geometry.Factories.GeometryConverterFactory");
+                    geometryConverterFactory = Activator.CreateInstance(theType) as IXGeometryConverterFactory;
+                }
+                return geometryConverterFactory;
+            }
+        }
+
         static XbimGeometryEngine()
         {
 
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
             AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
-            try
-            {
-                geometryConverterFactory = AppDomain.CurrentDomain.CreateInstanceAndUnwrap(
-                    "Xbim.Geometry.Engine",
-                    "Xbim.Geometry.Factories.GeometryConverterFactory") as IXGeometryConverterFactory;
-            }
-            catch (Exception ex)
-            {
-                var msg = ex.Message;
-                Console.WriteLine(ex.Message);
-            }
 
         }
 
         public static IXModelGeometryService CreateModelGeometryService(IModel model, ILoggerFactory loggerFactory)
         {
-            return geometryConverterFactory.CreateModelGeometryService(model, loggerFactory);
+            return GeometryConverterFactory.CreateModelGeometryService(model, loggerFactory);
         }
         public static IXbimGeometryEngine CreateGeometryEngineV5(IModel model, ILoggerFactory loggerFactory)
         {
-            return geometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
+            return GeometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
         }
 
         public static IXbimGeometryEngine CreateGeometryEngine(XGeometryEngineVersion version, IModel model, ILoggerFactory loggerFactory)
         {
-            return geometryConverterFactory.CreateGeometryEngine(version, model, loggerFactory);
+            return GeometryConverterFactory.CreateGeometryEngine(version, model, loggerFactory);
         }
 
         public XbimGeometryEngine() { }
 
 
-        public XbimGeometryEngine(IModel model, ILogger logger)
+        public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory)
         {
 
 
-            _logger = logger ?? (ILogger)XbimLogging.CreateLogger<XbimGeometryEngine>();
+            _logger = loggerFactory.CreateLogger<XbimGeometryEngine>();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
@@ -77,12 +82,7 @@ namespace Xbim.Geometry.Engine.Interop
 #endif
 
 
-                var modelServiceType = ass.GetType("Xbim.Geometry.ModelGeometryService");
-
-                _modelService = Activator.CreateInstance(modelServiceType, model, _logger) as IXModelGeometryService;
-                var creatorType = ass.GetType("Xbim.Geometry.XbimGeometryCreator");
-                _engine = Activator.CreateInstance(creatorType, _logger, _modelService) as IXbimGeometryEngine;
-
+                _engine = GeometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
                 _logger.LogTrace("Created Instance of {fullName}", _engine.GetType().FullName);
                 if (_engine == null)
                 {
@@ -90,9 +90,9 @@ namespace Xbim.Geometry.Engine.Interop
                 }
                 if (model is IfcStore ifcStore) //special case for stores which wrap the internal model
                 {
-                    ifcStore.Model.Tag = _modelService;
+                    ifcStore.Model.Tag = GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
                 }
-                model.Tag = _modelService;
+
                 _logger.LogDebug("XbimGeometryEngine constructed successfully");
             }
             catch (Exception e)
@@ -107,7 +107,7 @@ namespace Xbim.Geometry.Engine.Interop
 
         }
 
-        public IXModelGeometryService ModelService => _modelService;
+        public IXModelGeometryService ModelService => GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))

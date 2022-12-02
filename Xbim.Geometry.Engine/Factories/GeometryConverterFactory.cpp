@@ -37,6 +37,14 @@ namespace Xbim
 					throw gcnew System::ArgumentOutOfRangeException("Invalid Geometry Engine Version");
 				}
 			}
+			IXModelGeometryService^ GeometryConverterFactory::GetUnderlyingModelGeometryService(IXbimGeometryEngine^ engine)
+			{
+				XbimGeometryCreator^ v5Creator = dynamic_cast<XbimGeometryCreator^>(engine);
+				if (v5Creator != nullptr) return v5Creator->GetModelGeometryService();
+				XbimGeometryCreatorV6^ v6Creator = dynamic_cast<XbimGeometryCreatorV6^>(engine);
+				if (v6Creator != nullptr) return v6Creator->GetModelGeometryService();
+				throw gcnew System::Exception("Unsupported XbimGeometryCreator type");
+			}
 		}
 	}
 }

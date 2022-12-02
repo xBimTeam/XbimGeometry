@@ -62,7 +62,7 @@ namespace Xbim
 			static double LinearDeflectionInMM;
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
-			
+			IXModelGeometryService^ GetModelGeometryService() { return this; }
 
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, ILogger^);
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^);

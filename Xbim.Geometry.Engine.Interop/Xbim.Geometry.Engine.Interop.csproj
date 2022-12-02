@@ -14,11 +14,15 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.140" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.141" />
 	</ItemGroup>
 
 	<PropertyGroup>
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <Optimize>False</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true">

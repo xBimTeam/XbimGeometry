@@ -10,7 +10,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			ref class GeometryConverterFactory :IXGeometryConverterFactory
+			public ref class GeometryConverterFactory :IXGeometryConverterFactory
 			{
 			public:
 				virtual IXbimGeometryEngine^ CreateGeometryEngineV5(IModel^ model, ILoggerFactory^ loggerFactory);
@@ -18,6 +18,7 @@ namespace Xbim
 				virtual IXModelGeometryService^ CreateModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
 				virtual IXbimGeometryEngine^ CreateGeometryEngineV6(IModel^ model, ILoggerFactory^ loggerFactory);
 				virtual IXbimGeometryEngine^ CreateGeometryEngine(XGeometryEngineVersion version,  IModel^ model, ILoggerFactory^ loggerFactory);
+				virtual IXModelGeometryService^ GetUnderlyingModelGeometryService(IXbimGeometryEngine^ engine);
 			};
 		}
 	}

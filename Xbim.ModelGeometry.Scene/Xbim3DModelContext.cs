@@ -51,7 +51,7 @@ namespace Xbim.ModelGeometry.Scene
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
 
-            public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
+            public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
             {
                 _modelContext = modelContext;
                 _contextId = context;
@@ -64,7 +64,7 @@ namespace Xbim.ModelGeometry.Scene
                 AddGeometries(contextHelper, engine, model, shapeIdsUsedMoreThanOnce, productShapes, cutToolIds, projectToolIds);
             }
 
-            private void AddGeometries(XbimCreateContextHelper contextHelper, XbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds)
+            private void AddGeometries(XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds)
             {
                 // todo: memory: I suppose that the memory footprint grows during meshing because all the shapes are retained in the XbimBooleanDefinition fields
                 // this should be investigated and moved.
@@ -253,7 +253,7 @@ namespace Xbim.ModelGeometry.Scene
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
-                   // ParallelOptions.MaxDegreeOfParallelism = 16;
+                    // ParallelOptions.MaxDegreeOfParallelism = 16;
 
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
@@ -484,12 +484,12 @@ namespace Xbim.ModelGeometry.Scene
         private readonly ILogger _logger;
         static public int BooleanTimeOutMilliSeconds;
         private readonly IfcRepresentationContextCollection _contexts;
-        private readonly XbimGeometryEngine _engine;
-       
+        private readonly IXbimGeometryEngine _engine;
 
-        private XbimGeometryEngine Engine => _engine;
 
-        
+        private IXbimGeometryEngine Engine => _engine;
+
+
         static Xbim3DModelContext()
         {
             var timeOut = System.Configuration.ConfigurationManager.AppSettings["BooleanTimeOut"];
@@ -499,7 +499,7 @@ namespace Xbim.ModelGeometry.Scene
         }
         private readonly IModel _model;
 
-        internal  void LogWarning(object entity, string format, params object[] args)
+        internal void LogWarning(object entity, string format, params object[] args)
         {
             if (_logger != null)
             {
@@ -512,7 +512,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        internal  void LogInfo(object entity, string format, params object[] args)
+        internal void LogInfo(object entity, string format, params object[] args)
         {
 
             if (_logger != null)
@@ -526,7 +526,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        internal  void LogError(object entity, string format, params object[] args)
+        internal void LogError(object entity, string format, params object[] args)
         {
             if (_logger != null)
             {
@@ -539,7 +539,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        internal  void LogError(string msg, Exception ex = null)
+        internal void LogError(string msg, Exception ex = null)
         {
             if (_logger != null)
             {
@@ -554,7 +554,11 @@ namespace Xbim.ModelGeometry.Scene
 
             }
         }
+        public Xbim3DModelContext(IModel model, ILoggerFactory loggerFactory, XGeometryEngineVersion engineVersion, string contextType = "model", string requiredContextIdentifier = null)
+            :this(model, contextType, requiredContextIdentifier, loggerFactory.CreateLogger<Xbim3DModelContext>(), engineVersion, loggerFactory)
+        {
 
+        }
         //The maximum extent for any dimension of any products bouding box 
         //private double _maxXyz;
 
@@ -566,13 +570,13 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="requiredContextIdentifier"></param>
         /// <param name="logger"></param>
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
-            ILogger logger = null)
+            ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
-            
-            _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());                
-             _model = model;
-            
-            _engine = new XbimGeometryEngine(_model, _logger);
+
+            _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());
+            _model = model;
+            if(loggerFactory==null) loggerFactory= XbimLogging.LoggerFactory;
+            _engine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
 
             model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
@@ -1062,11 +1066,11 @@ namespace Xbim.ModelGeometry.Scene
             contextHelper.PercentageParsed = localPercentageParsed;
         }
 
-        private  bool IsInContext(IfcRepresentationContextCollection contexts, IIfcRepresentation r)
+        private bool IsInContext(IfcRepresentationContextCollection contexts, IIfcRepresentation r)
         {
             if (!contexts.Any()) return true; //if we have no context take everything
 
-            if(r.ContextOfItems == null)
+            if (r.ContextOfItems == null)
             {
                 LogWarning(r, "No Context found for this representation");
                 return false;
@@ -1123,7 +1127,7 @@ namespace Xbim.ModelGeometry.Scene
             IIfcRepresentation rep, XbimGeometryRepresentationType repType, XbimMatrix3D placementTransform, IItemSet<IIfcRepresentationItem> representationItems)
         {
             var shapesInstances = new List<XbimShapeInstance>();
-            if(rep.ContextOfItems == null)
+            if (rep.ContextOfItems == null)
             {
                 LogWarning(product, "Unable to write representation because no ContextOfItems was provided for representation {0}", rep.EntityLabel);
                 return shapesInstances;
@@ -1295,7 +1299,7 @@ namespace Xbim.ModelGeometry.Scene
         /// </summary>
         public int MaxThreads { get; set; }
 
-        
+
         private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
@@ -1337,7 +1341,7 @@ namespace Xbim.ModelGeometry.Scene
             ConcurrentDictionary<int, byte> processed = new ConcurrentDictionary<int, byte>();
             try
             {
-                
+
 
                 //   int c = 0;
                 //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
@@ -1347,7 +1351,7 @@ namespace Xbim.ModelGeometry.Scene
                     productMeshingTime.Start();
                     // Console.WriteLine($"{c} - {shapeId}");
                     // Interlocked.Increment(ref c);
-                    if (processed.TryGetValue(shapeId, out byte b)) 
+                    if (processed.TryGetValue(shapeId, out byte b))
                         return; //skip it
 
                     processed.TryAdd(shapeId, 0); //we are only going to try once
