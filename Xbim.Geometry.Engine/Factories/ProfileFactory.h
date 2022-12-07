@@ -38,6 +38,22 @@ namespace Xbim
 				TopoDS_Face BuildProfileFace(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef);
 				//constructs a reProfilectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
 				TopoDS_Face BuildProfileFace(double x, double y, double tolerance, bool centre);
+
+				TopoDS_Edge BuildProfileEdge(IIfcProfileDef^ ifcProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcDerivedProfileDef^ ifcDerivedProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcParameterizedProfileDef^ ifcParameterizedProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcCircleProfileDef^ ifcCircleProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcLShapeProfileDef^ ifcLShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcUShapeProfileDef^ ifcUShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcEllipseProfileDef^ ifcEllipseProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcIShapeProfileDef^ ifcIShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcZShapeProfileDef^ ifcZShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcCShapeProfileDef^ ifcCShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcTShapeProfileDef^ ifcTShapeProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef);
+				TopoDS_Edge BuildProfileEdge(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef);
 			protected:
 				
 			};

@@ -64,7 +64,10 @@ namespace Xbim
 				return gcnew XPoint(x, y);
 			};
 
-			
+			gp_XYZ GeometryFactory::BuildXYZ(IIfcCartesianPoint^ ifcPoint)
+			{
+				return gp_XYZ(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1], (int)ifcPoint->Dim == 3 ? (double)ifcPoint->Coordinates[2] : 0.0);
+			}
 
 			gp_Pnt GeometryFactory::BuildPoint3d(IIfcCartesianPoint^ ifcPoint)
 			{
@@ -211,6 +214,33 @@ namespace Xbim
 				if (axis2D->RefDirection != nullptr)
 					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
 				return EXEC_NATIVE->ToLocation(pnt2d, xDir, location);
+			}
+
+			bool GeometryFactory::ToLocation(IIfcAxis2Placement3D^ axis3D, TopLoc_Location& location)
+			{
+				gp_Pnt loc = BuildPoint3d(axis3D->Location);
+				gp_Trsf trsf;
+				if (axis3D->Axis != nullptr && axis3D->RefDirection != nullptr) //if one or other is null then use default axis (Ifc Rule)
+				{
+					gp_Vec zDir;
+					if(!BuildDirection3d(axis3D->Axis, zDir))
+						throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Axis Direction is invalid ", axis3D->Axis);
+					zDir.Normalize();
+					gp_Vec xDir;
+					if(BuildDirection3d(axis3D->RefDirection, xDir))
+						throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Reference Direction is invalid ", axis3D->RefDirection);
+					xDir.Normalize();
+					trsf.SetTransformation(gp_Ax3(loc, zDir, xDir), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+				}
+				else
+				{
+					gp_Dir zDir(0, 0, 1);
+					gp_Dir xDir(1, 0, 0);
+					trsf.SetTransformation(gp_Ax3(loc, zDir, xDir));
+				}
+				
+				location = TopLoc_Location(trsf);
+				return true;
 			}
 
 			gp_Trsf GeometryFactory::ToTransform(XbimMatrix3D m3D)

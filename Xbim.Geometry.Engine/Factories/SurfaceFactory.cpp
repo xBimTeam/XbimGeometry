@@ -1,6 +1,8 @@
 #include "SurfaceFactory.h"
 #include "GeometryFactory.h"
 #include "CurveFactory.h"
+#include "ProfileFactory.h"
+#include "BIMAuthoringToolWorkArounds.h"
 #include "EdgeFactory.h"
 #include <Geom_Plane.hxx>
 #include "../BRep//XPlane.h"
@@ -105,7 +107,25 @@ namespace Xbim
 
 			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
 			{
-				throw gcnew NotImplementedException();
+				if (ifcSurfaceOfLinearExtrusion->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
+					throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of linearExtrusion", ifcSurfaceOfLinearExtrusion);
+				TopoDS_Edge sweptEdge;
+				if (!BIM_WORKAROUNDS->FixRevitIncorrectArcCentreSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge))
+				{
+					//didn't need a fix so just create it
+					sweptEdge = PROFILE_FACTORY->BuildProfileEdge(ifcSurfaceOfLinearExtrusion->SweptCurve);
+				}
+				gp_Vec extrude;
+				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcSurfaceOfLinearExtrusion->ExtrudedDirection, extrude))
+					throw RaiseGeometryFactoryException("Direction of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion->ExtrudedDirection);
+				extrude *= ifcSurfaceOfLinearExtrusion->Depth;
+				BIM_WORKAROUNDS->FixRevitSweptSurfaceExtrusionInFeet(extrude);
+				BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
+
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
+				if(surface.IsNull())
+					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);			
+				return surface;
 			}
 
 			Handle(Geom_Plane) SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)

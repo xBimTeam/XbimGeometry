@@ -16,7 +16,7 @@
 #include "../BRep/XEdge.h"
 #include "../BRep/XWire.h"
 #include "../BRep/XFace.h"
-
+#include "CheckClosedStatus.h"
 #include "../XbimSolid.h"
 using namespace System;
 using namespace Xbim::Geometry::BRep;
@@ -182,36 +182,20 @@ namespace Xbim
 				return solid;
 			}
 
-			TopoDS_Shape SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
+			TopoDS_Solid SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
 			{
-				return BuildClosedShell(facetedBrep->Outer);
+				CheckClosedStatus isCheckedClosed;
+				TopoDS_Shell shell =  SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isCheckedClosed); //throws exeptions
+				return EXEC_NATIVE->MakeSolid(shell);
 			}
 
-			TopoDS_Shape SolidFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
-			{
-				TopoDS_Shell faceSet = SHELL_FACTORY->BuildConnectedFaceSet(closedShell);
-				TopoDS_Solid solid = EXEC_NATIVE->MakeSolid(faceSet);
-				//A solid is required but not necessarily built, default assume all is OK and make a solid, checking for errors has performance issues that we may not always need
-				//i.e. a set of faces will produce a pretty good triangulation if thats all we need done
-
-				if (_modelService->UpgradeFaceSets)
-				{
-					TopoDS_Shape result;
-					bool upgraded = TryUpgrade(solid, result);
-					//use the result as some flages will be changed in this version to reflect checking actions performed
-					return result;
-
-				}
-				else
-					return faceSet;
-			}
-
+			
 			/// <summary>
 			/// FC4 CHANGE  The entity has been deprecated and shall not be used. The entity IfcFacetedBrep shall be used instead. Implemented for backward compatibility
 			/// </summary>
 			/// <param name="faceBasedSurfaceModel"></param>
 			/// <returns></returns>
-			TopoDS_Shape SolidFactory::BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel)
+			TopoDS_Compound SolidFactory::BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel)
 			{
 				TopoDS_Compound compound;
 				BRep_Builder builder;
@@ -221,53 +205,78 @@ namespace Xbim
 				//myFixShell.FixOrientationMode() = false;
 				for each (IIfcConnectedFaceSet ^ faceSet in faceBasedSurfaceModel->FbsmFaces)
 				{
-					TopoDS_Shell shell = SHELL_FACTORY->BuildConnectedFaceSet(faceSet);
-					BRepCheck_Shell checker(shell);
-					BRepCheck_Status st = checker.Closed();
-					if (st == BRepCheck_Status::BRepCheck_NoError)
+					CheckClosedStatus isCheckedClosed;
+					TopoDS_Shell shell = SHELL_FACTORY->BuildConnectedFaceSet(faceSet, isCheckedClosed);
+					switch (isCheckedClosed)
 					{
-						//make it a solid
-						TopoDS_Solid solid;
-						builder.MakeSolid(solid);
-						builder.Add(solid, shell);
-						solid.Checked(true);
-						solid.Closed(true);
-						builder.Add(compound, solid);
+					case CheckAndClosed:
+						builder.Add(compound, EXEC_NATIVE->MakeSolid(shell));
+						break;
+					case CheckedNotClosed:		//Nb 	IfcFaceBasedSurfaceModel do not require to be made of solids or add up to a solid		
+					case NotChecked:
+					default:
+						builder.Add(compound, shell);
+						break;
 					}
-					else //try and fix the shells, often there are multiple shells in one that are solid parts
-					{
+					//BRepCheck_Shell checker(shell);
+					//BRepCheck_Status st = checker.Closed();
+					//if (st == BRepCheck_Status::BRepCheck_NoError)
+					//{
+					//	//make it a solid
+					//	TopoDS_Solid solid;
+					//	builder.MakeSolid(solid);
+					//	builder.Add(solid, shell);
+					//	solid.Checked(true);
+					//	solid.Closed(true);
+					//	builder.Add(compound, solid);
+					//}
+					//else //try and fix the shells, often there are multiple shells in one that are solid parts
+					//{
+					//	myFixShell.Init(TopoDS::Shell(shell));
+					//	bool ok = myFixShell.Perform();
 
-						myFixShell.Init(TopoDS::Shell(shell));
-						bool ok = myFixShell.Perform();
-
-						if (ok && myFixShell.NbShells() > 0)
-						{
-							for (TopExp_Explorer aExpSh(myFixShell.Shape(), TopAbs_SHELL); aExpSh.More(); aExpSh.Next())
-							{
-								TopoDS_Shell sh = TopoDS::Shell(aExpSh.Current());
-								BRepCheck_Shell checker2(sh);
-								BRepCheck_Status st2 = checker2.Closed();
-								if (st2 == BRepCheck_Status::BRepCheck_NoError)
-								{
-									//make it a solid
-									TopoDS_Solid solid;
-									builder.MakeSolid(solid);
-									builder.Add(solid, sh);
-									solid.Checked(true);
-									solid.Closed(true);
-									builder.Add(compound, solid);
-								}
-								else
-									builder.Add(compound, sh); //add the shell
-							}
-						}
-						else
-							builder.Add(compound, shell); //add the shell
-					}
+					//	if (ok && myFixShell.NbShells() > 0)
+					//	{
+					//		for (TopExp_Explorer aExpSh(myFixShell.Shape(), TopAbs_SHELL); aExpSh.More(); aExpSh.Next())
+					//		{
+					//			TopoDS_Shell sh = TopoDS::Shell(aExpSh.Current());
+					//			BRepCheck_Shell checker2(sh);
+					//			BRepCheck_Status st2 = checker2.Closed();
+					//			if (st2 == BRepCheck_Status::BRepCheck_NoError)
+					//			{
+					//				//make it a solid
+					//				TopoDS_Solid solid;
+					//				builder.MakeSolid(solid);
+					//				builder.Add(solid, sh);
+					//				solid.Checked(true);
+					//				solid.Closed(true);
+					//				builder.Add(compound, solid);
+					//			}
+					//			else
+					//				builder.Add(compound, sh); //add the shell
+					//		}
+					//	}
+					//	else
+					//		builder.Add(compound, shell); //add the shell
+					//}
 
 				}
 				return compound;
-			};
+			}
+			TopoDS_Solid SolidFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet)
+			{
+				CheckClosedStatus isCheckedClosed;
+				TopoDS_Shell shell = SHELL_FACTORY->BuildPolygonalFaceSet(ifcPolygonalFaceSet, isCheckedClosed);
+				return EXEC_NATIVE->MakeSolid(shell);
+			}
+			;
+
+			TopoDS_Solid SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
+			{
+				CheckClosedStatus isCheckedClosed;
+				TopoDS_Shell shell =   SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isCheckedClosed);
+				return EXEC_NATIVE->MakeSolid(shell);
+			}
 
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
 			{

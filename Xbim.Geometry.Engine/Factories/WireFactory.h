@@ -1,7 +1,7 @@
 #pragma once
 #include "./Unmanaged/NWireFactory.h"
 #include "FactoryBase.h"
-
+#include <TopTools_SequenceOfShape.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -17,7 +17,7 @@ namespace Xbim
 				
 				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, bool asSingleEdge);
 
-				
+				TopoDS_Wire BuildWire3d(const TopTools_SequenceOfShape& edgeList);
 				TopoDS_Wire BuildWire2d(IIfcCurve^ ifcCurve, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
 				TopoDS_Wire BuildWire(IIfcCircle^ ifcCircle);

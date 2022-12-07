@@ -19,7 +19,7 @@
 #include <Geom2d_OffsetCurve.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
-
+#include <TopoDS_Vertex.hxx>
 public class NCurveFactory : public NFactoryBase
 {
 
@@ -66,8 +66,10 @@ public:
 
 	Handle(Geom_Curve) TrimDirectrix(const Handle(Geom_Curve)& basisCurve, double u1, double u2, double precision);
 
-
-	
+	/// <summary>
+	/// If a vertex lies on a curve within the maxTolerance, the parameter of the vertex on the curve is returned and the actual distance between the point of the vertex and the curve is calculated
+	/// </summary>
+	static bool LocateVertexOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance);
 #pragma endregion
 
 };

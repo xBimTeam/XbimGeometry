@@ -14,7 +14,7 @@
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 #include <TColGeom2d_SequenceOfBoundedCurve.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
-
+#include <TopTools_SequenceOfShape.hxx>
 
 class NWireFactory : public NFactoryBase
 {
@@ -24,7 +24,7 @@ public:
 	bool IsClosed(const TopoDS_Wire& wire, double tolerance);
 
 	TopoDS_Wire BuildWire(const TopoDS_Edge& edge);
-
+	TopoDS_Wire BuildWire(const TopTools_SequenceOfShape& edgeList);
 	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
 	TopoDS_Wire BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
 	TopoDS_Wire BuildPolyline3d(const TColgp_Array1OfPnt& points, double startParam, double endParam, double tolerance);

@@ -65,7 +65,7 @@ struct EdgeIdEqual {
 /// </summary>
 /// <param name="loops"></param>
 /// <returns></returns>
-TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<double>>>& faceData, double tolerance, double oneMillimeter)
+TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, double tolerance, double oneMillimeter)
 {
 	static int counter = 0;
 
@@ -83,20 +83,22 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 		TopTools_SequenceOfShape vertices;
 		std::vector<std::vector<std::vector<int>>> faces;
 
-		for (const std::vector<std::vector<double>>& face : faceData)
+		for (const std::vector<std::vector<int>>& face : faceData)
 		{
 			faces.push_back(std::vector<std::vector<int>>());
 			std::vector<std::vector<int>>& faceBounds = faces.back();
-			for (const std::vector<double>& bounds : face)
+			for (const std::vector<int>& bounds : face)
 			{
 				faceBounds.push_back(std::vector<int>());
 				std::vector<int>& boundVertexIndices = faceBounds.back();
-				for (size_t i = 0; i < bounds.size(); i += 3)
+				for (size_t i = 0; i < bounds.size(); i++)
 				{
-					gp_Pnt p(bounds[i], bounds[i + 1], bounds[i + 2]);
+					int idx = bounds[i];
+					auto found = points.find(idx);
+					gp_XYZ coord = found->second;
 					inspector.ClearResList();
-					inspector.SetCurrent(p.Coord());
-					vertexCellFilter.Inspect(p.Coord(), inspector);
+					inspector.SetCurrent(coord);
+					vertexCellFilter.Inspect(coord, inspector);
 					const TColStd_ListOfInteger& results = inspector.ResInd();
 					TopoDS_Vertex vertex;
 					if (results.Size() > 0) //hit
@@ -108,13 +110,13 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 					}
 					else //miss
 					{
-						inspector.Add(p.Coord());
+						inspector.Add(coord);
 						//build the vertex
 						//see for tolerance explaination https://opencascade.blogspot.com/2009/02/topology-and-geometry-in-open-cascade_09.html
 						//nb if building from ground up use maximum precision
-						builder.MakeVertex(vertex, p, Precision::Confusion()); //use highest precision as we have already made all required vertices coincidental using the inspector
+						builder.MakeVertex(vertex, coord, Precision::Confusion()); //use highest precision as we have already made all required vertices coincidental using the inspector
 						vertices.Append(vertex); //it will have the same index as the point in the inspector
-						vertexCellFilter.Add(vertices.Size(), p.Coord());
+						vertexCellFilter.Add(vertices.Size(), coord);
 						boundVertexIndices.push_back(vertices.Size());
 					}
 

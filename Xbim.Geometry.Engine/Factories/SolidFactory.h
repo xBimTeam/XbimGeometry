@@ -41,7 +41,8 @@ namespace Xbim
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
 
-#pragma region CSG solids			
+#pragma region CSG solids		
+				
 				TopoDS_Solid BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid);
 				TopoDS_Solid BuildBooleanResult(IIfcBooleanResult^ ifcBooleanResult);
 				TopoDS_Solid BuildCsgPrimitive3D(IIfcCsgPrimitive3D^ ifcCsgPrimitive3D);
@@ -58,11 +59,11 @@ namespace Xbim
 				TopoDS_Solid BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
 
 #pragma endregion
-
-				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);
-				TopoDS_Shape BuildClosedShell(IIfcClosedShell^ closedShell);
-				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
-
+				TopoDS_Solid BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
+				TopoDS_Solid BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
+				TopoDS_Compound BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
+				TopoDS_Solid BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
+				
 
 			};
 		}

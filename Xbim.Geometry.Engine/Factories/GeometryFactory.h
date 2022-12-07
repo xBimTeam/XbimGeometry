@@ -54,6 +54,7 @@ namespace Xbim
 				bool BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis, gp_Ax22d& ax22d);
 
 				bool ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& loc);
+				bool ToLocation(IIfcAxis2Placement3D^ axis3D, TopLoc_Location& loc);
 				gp_Trsf ToTransform(Xbim::Common::Geometry::XbimMatrix3D m3D);
 				
 
@@ -67,6 +68,7 @@ namespace Xbim
 				virtual IXDirection^ BuildDirection2d(double x, double y);
 				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				virtual IXPoint^ BuildPoint2d(double x, double y);
+				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);

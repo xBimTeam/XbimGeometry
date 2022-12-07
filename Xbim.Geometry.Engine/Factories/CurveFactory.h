@@ -27,7 +27,7 @@ namespace Xbim
 
 
 				
-
+				Handle(Geom_Curve) BuildCurve3d(IIfcCurve^ curve);
 				template <typename IfcType>
 				Handle(Geom2d_Curve) BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense);
 

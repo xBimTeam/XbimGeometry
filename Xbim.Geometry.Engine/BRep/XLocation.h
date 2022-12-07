@@ -40,6 +40,7 @@ namespace Xbim
 				
 				virtual property bool IsIdentity {bool get() { return Ref().Form() == gp_TrsfForm::gp_Identity; }}
 				virtual IXLocation^ Inverted() { return gcnew XLocation(Ref().Inverted()); }
+				virtual IXLocation^ ScaledBy(double scale);
 			};
 		}
 	}

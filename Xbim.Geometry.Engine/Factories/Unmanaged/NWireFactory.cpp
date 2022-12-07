@@ -46,6 +46,7 @@
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
 
+
 bool NWireFactory::IsClosed(const TopoDS_Wire& wire, double tolerance)
 {
 	try
@@ -76,6 +77,28 @@ TopoDS_Wire NWireFactory::BuildWire(const TopoDS_Edge& edge)
 		LogStandardFailure(e);
 		return TopoDS_Wire();
 	}
+}
+
+TopoDS_Wire NWireFactory::BuildWire(const TopTools_SequenceOfShape& edgeList)
+{
+	try
+	{
+		BRep_Builder builder;
+		TopoDS_Wire loopWire;
+		builder.MakeWire(loopWire);
+
+		for (const auto& edge : edgeList)
+		{		
+			builder.Add(loopWire, TopoDS::Edge(edge));
+		}
+		return loopWire;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+
+	return TopoDS_Wire();
 }
 
 TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance)
@@ -472,7 +495,7 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 			TopLoc_Location loc;
 			bool useExistingEdge = false;
 			Handle(Geom_Curve) segment = BRep_Tool::Curve(edge, loc, start, end);
-			
+
 			double segLength = Abs(end - start);
 			if (segLength < trimStart) //don't need this
 				trimStart -= segLength;

@@ -874,7 +874,7 @@ namespace Xbim
 										{
 #ifdef _DEBUG
 											XbimWire^ currentWire = gcnew XbimWire(resultWire);
-											String^ rep = currentWire->ToBRep;
+											System::String^ rep = currentWire->ToBRep;
 #endif // _DEBUG
 											XbimGeometryCreator::LogWarning(logger, seg, "Unconnected composite curve segment. Curve is incomplete");
 											continue;

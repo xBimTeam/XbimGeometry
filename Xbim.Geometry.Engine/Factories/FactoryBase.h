@@ -6,6 +6,7 @@ using namespace Xbim::Geometry::Services;
 using namespace Xbim::Geometry::Abstractions;
 
 #define EXEC_NATIVE Ptr()
+#define VERTEX_FACTORY _modelService->GetVertexFactory()
 #define SURFACE_FACTORY _modelService->GetSurfaceFactory()
 #define CURVE_FACTORY _modelService->GetCurveFactory()
 #define GEOMETRY_FACTORY _modelService->GetGeometryFactory()
@@ -16,6 +17,7 @@ using namespace Xbim::Geometry::Abstractions;
 #define PROFILE_FACTORY _modelService->GetProfileFactory()
 #define SHAPE_FACTORY _modelService->GetShapeFactory()
 #define SOLID_FACTORY _modelService->GetSolidFactory()
+#define BIM_WORKAROUNDS _modelService->GetBimAuthoringToolWorkArounds()
 namespace Xbim
 {
 	namespace Geometry

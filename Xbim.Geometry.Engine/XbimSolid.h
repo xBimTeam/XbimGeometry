@@ -71,6 +71,7 @@ namespace Xbim
 			void Init(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
+			
 			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
 #pragma endregion
 

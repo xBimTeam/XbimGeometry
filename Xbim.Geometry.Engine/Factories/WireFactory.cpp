@@ -21,6 +21,7 @@
 #include <ShapeAnalysis.hxx>
 #include <ShapeAnalysis_Wire.hxx>
 #include <TColGeom2d_SequenceOfCurve.hxx>
+
 #include "../BRep/XWire.h"
 #include <GeomLib_Tool.hxx>
 
@@ -52,6 +53,14 @@ namespace Xbim
 				{
 					return BuildWire3d(ifcCurve, asSingleEdge);
 				}
+			}
+
+			TopoDS_Wire WireFactory::BuildWire3d(const TopTools_SequenceOfShape& edgeList)
+			{
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edgeList);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Edge list could not be built as a wire");
+				return wire;
 			}
 
 			TopoDS_Wire WireFactory::BuildWire2d(IIfcCurve^ ifcCurve, bool asSingleEdge)

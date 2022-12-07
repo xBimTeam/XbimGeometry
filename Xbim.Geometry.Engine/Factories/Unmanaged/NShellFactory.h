@@ -4,6 +4,7 @@
 #include <TopoDS_Shell.hxx>
 
 #include <vector>
+#include <unordered_map>
 #include "NWireFactory.h"
 #include "NFaceFactory.h"
 
@@ -20,6 +21,6 @@ public:
 		WireFactory.SetLogger(lFunc);
 		FaceFactory.SetLogger(lFunc);
 	};
-	TopoDS_Shell BuildConnectedFaceSet(const std::vector<std::vector<std::vector<double>>>& faces, double tolerance, double oneMillimeter);
+	TopoDS_Shell BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, double tolerance, double oneMillimeter);
 };
 

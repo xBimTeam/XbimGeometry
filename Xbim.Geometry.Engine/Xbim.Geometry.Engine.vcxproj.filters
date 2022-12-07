@@ -354,6 +354,21 @@
     <ClInclude Include="XbimGeometryCreatorV6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Factories\VertexFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NVertexFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\CheckClosedStatus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -615,6 +630,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimGeometryCreatorV6.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\VertexFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NVertexFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

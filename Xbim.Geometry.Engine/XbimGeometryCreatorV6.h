@@ -103,6 +103,7 @@ namespace Xbim
 
 			virtual IXbimSolid^ CreateSolid(IIfcSweptAreaSolid^ ifcSolid, ILogger^);
 			virtual IXbimSolid^ CreateSolid(IIfcExtrudedAreaSolid^ ifcSolid, ILogger^);
+			IXbimSolid^ CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^);
 			virtual IXbimSolid^ CreateSolid(IIfcRevolvedAreaSolid^ ifcSolid, ILogger^);
 			virtual IXbimSolid^ CreateSolid(IIfcSweptDiskSolid^ ifcSolid, ILogger^);
 			virtual IXbimSolid^ CreateSolid(IIfcBoundingBox^ ifcSolid, ILogger^);

@@ -23,6 +23,8 @@
 #include <Geom2dAPI_PointsToBSpline.hxx>
 #include <GC_MakeCircle.hxx>
 #include <Geom_OffsetCurve.hxx>
+#include <BRep_Tool.hxx>
+#include <Extrema_ExtPC.hxx>
 
 Handle(Geom2d_BSplineCurve) NCurveFactory::BuildBSplineCurve2d(const TColgp_Array1OfPnt2d& poles, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree)
 {
@@ -41,7 +43,9 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildBSplineCurve3d(const TColgp_Array1
 {
 	try
 	{
-		return new Geom_BSplineCurve(poles, knots, knotMultiplicities, degree);
+		Handle(Geom_BSplineCurve) bspline = new Geom_BSplineCurve(poles, knots, knotMultiplicities, degree);
+		
+		return bspline;
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -298,10 +302,17 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
 			return arcMaker.Value();
 		}
-#ifdef _DEBUG
-		if (!Handle(Geom_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom_Ellipse)::DownCast(basisCurve).IsNull())
+		Handle(Geom_LineWithMagnitude) line = Handle(Geom_LineWithMagnitude)::DownCast(basisCurve);
+		if (!line.IsNull()) //otherwise fall through to end
 		{
-			Standard_Failure::Raise("OCC Circle and Elipse definitions should not be used for trimming scenarios");
+			u1 = line->ConvertIfcTrimParameter(u1);
+			u2 = line->ConvertIfcTrimParameter(u2);
+			return new Geom_TrimmedCurve(basisCurve, u1, u2, sense, true);
+		}
+#ifdef _DEBUG
+		if (!Handle(Geom_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom_Ellipse)::DownCast(basisCurve).IsNull() || !Handle(Geom_Line)::DownCast(basisCurve).IsNull())
+		{
+			Standard_Failure::Raise("OCC Circle, Line and Elipse definitions should not be used for trimming scenarios");
 		}
 #endif
 		return new Geom_TrimmedCurve(basisCurve, u1, u2, sense, true);
@@ -467,10 +478,17 @@ Handle(Geom2d_TrimmedCurve) NCurveFactory::BuildTrimmedCurve2d(const Handle(Geom
 			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
 			return arcMaker.Value();
 		}
-#ifdef _DEBUG
-		if (!Handle(Geom2d_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom2d_Ellipse)::DownCast(basisCurve).IsNull())
+		Handle(Geom2d_LineWithMagnitude) line = Handle(Geom2d_LineWithMagnitude)::DownCast(basisCurve);
+		if (!line.IsNull()) //otherwise fall through to end
 		{
-			Standard_Failure::Raise("OCC Circle and Elipse definitions should not be used for trimming scenarios");
+			u1 = line->ConvertIfcTrimParameter(u1);
+			u2 = line->ConvertIfcTrimParameter(u2);
+			return new Geom2d_TrimmedCurve(basisCurve, u1, u2, sense, true);
+		}
+#ifdef _DEBUG
+		if (!Handle(Geom2d_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom2d_Ellipse)::DownCast(basisCurve).IsNull() || !Handle(Geom2d_Line)::DownCast(basisCurve).IsNull())
+		{
+			Standard_Failure::Raise("OCC Circle, line and Elipse definitions should not be used for trimming scenarios");
 		}
 #endif
 		Handle(Geom2d_TrimmedCurve) trimmedCurve = new Geom2d_TrimmedCurve(basisCurve, u1, u2, sense, true);
@@ -554,6 +572,67 @@ Handle(Geom_Curve) NCurveFactory::TrimDirectrix(const Handle(Geom_Curve)& basisC
 
 
 }
+
+bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance)
+{
+	Standard_Real Eps2 = maxTolerance * maxTolerance;
+
+	// kill trimmed curves
+	Handle(Geom_Curve) C = geomCurve;
+	Handle(Geom_TrimmedCurve) CT = Handle(Geom_TrimmedCurve)::DownCast(C);
+	while (!CT.IsNull()) {
+		C = CT->BasisCurve();
+		CT = Handle(Geom_TrimmedCurve)::DownCast(C);
+	}
+
+	gp_Pnt P = BRep_Tool::Pnt(V);
+	GeomAdaptor_Curve GAC(C);
+
+
+	Standard_Real D1, D2;
+	gp_Pnt P1, P2;
+	P1 = GAC.Value(GAC.FirstParameter());
+	P2 = GAC.Value(GAC.LastParameter());
+	D1 = P1.SquareDistance(P);
+	D2 = P2.SquareDistance(P);
+	if ((D1 < D2) && (D1 <= Eps2)) 
+	{
+		parameter = GAC.FirstParameter();
+		actualDistance = sqrt(D1);
+		return Standard_True;
+	}
+	else if ((D2 < D1) && (D2 <= Eps2)) 
+	{
+		parameter = GAC.LastParameter();
+		actualDistance = sqrt(D2);
+		return Standard_True;
+	}
+
+	Extrema_ExtPC extrema(P, GAC);
+	if (extrema.IsDone()) 
+	{
+		Standard_Integer i, index = 0, n = extrema.NbExt();
+		Standard_Real Dist2 = RealLast(), dist2min;
+
+		for (i = 1; i <= n; i++) {
+			dist2min = extrema.SquareDistance(i);
+			if (dist2min < Dist2) {
+				index = i;
+				Dist2 = dist2min;
+			}
+		}
+
+		if (index != 0) {
+			if (Dist2 <= Eps2) {
+				parameter = (extrema.Point(index)).Parameter();
+				actualDistance = sqrt(Dist2);
+				return Standard_True;
+			}
+		}
+	}
+	return Standard_False;
+}
+
 
 
 

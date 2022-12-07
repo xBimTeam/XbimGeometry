@@ -26,6 +26,7 @@ namespace Xbim
 		namespace Factories
 		{
 			//forward declare all factories
+			ref class VertexFactory;
 			ref class GeometryFactory;
 			ref class CurveFactory;
 			ref class SurfaceFactory;
@@ -38,6 +39,7 @@ namespace Xbim
 			ref class BooleanFactory;
 			ref class ShapeFactory;
 			ref class ProfileFactory;
+			ref class BIMAuthoringToolWorkArounds;
 		}
 	}
 }
@@ -63,7 +65,7 @@ namespace Xbim
 				double _timeout;
 				bool _upgradeFaceSets = true;
 
-
+				Xbim::Geometry::Factories::VertexFactory^ _vertexFactory;
 				Xbim::Geometry::Factories::GeometryFactory^ _geometryFactory;
 				Xbim::Geometry::Factories::CurveFactory^ _curveFactory;
 				Xbim::Geometry::Factories::SurfaceFactory^ _surfaceFactory;
@@ -76,11 +78,11 @@ namespace Xbim
 				Xbim::Geometry::Factories::BooleanFactory^ _booleanFactory;
 				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
 				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
-
+				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ _bimAuthoringToolWorkArounds;
 				//Xbim::Geometry::XbimGeometryCreator^ _v5GeometryEngine;
 			internal:
 				//Factories
-
+				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
 				Xbim::Geometry::Factories::GeometryFactory^ GetGeometryFactory();
 				Xbim::Geometry::Factories::CurveFactory^ GetCurveFactory();
 				Xbim::Geometry::Factories::SurfaceFactory^ GetSurfaceFactory();
@@ -93,7 +95,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::BooleanFactory^ GetBooleanFactory();
 				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
 				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
-
+				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ GetBimAuthoringToolWorkArounds();
 				//Xbim::Geometry::XbimGeometryCreator^ GetV5GeometryEngine();
 			public:
 
@@ -102,6 +104,7 @@ namespace Xbim
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
 				virtual property double PrecisionSquared {double get() { return precisionSquared; }};
+				virtual property double OneFoot {double get() { return model->ModelFactors->OneFoot; }};
 				virtual property double OneMeter {double get() { return model->ModelFactors->OneMeter; }};
 				virtual property double OneMillimeter {double get() { return model->ModelFactors->OneMilliMeter; }};
 				virtual property double MinAreaM2 {double get() { return minAreaM2; }};
@@ -120,9 +123,11 @@ namespace Xbim
 
 				virtual IXLocation^ Create(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ CreateMappingTransform(IIfcMappedItem^ mappedItem);
+				System::String^ GetBrep(const TopoDS_Shape& shape);
 
 				//Factories
 				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get(); }
+				virtual property IXVertexFactory^ VertexFactory {IXVertexFactory^ get(); }
 				virtual property IXGeometryFactory^ GeometryFactory {IXGeometryFactory^ get(); }
 				virtual property IXCurveFactory^ CurveFactory {IXCurveFactory^ get(); }
 				virtual property IXSurfaceFactory^ SurfaceFactory {IXSurfaceFactory^ get(); }
@@ -135,6 +140,8 @@ namespace Xbim
 				virtual property IXBooleanFactory^ BooleanFactory {IXBooleanFactory^ get(); }
 				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
+				
+
 
 #pragma region Logging and Exceptions
 				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message) { return RaiseGeometryServiceException(message, nullptr, nullptr); };

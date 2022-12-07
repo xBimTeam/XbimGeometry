@@ -1,4 +1,5 @@
 #include "NEdgeFactory.h"
+#include "NCurveFactory.h"
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeEdge2d.hxx>
 #include <Geom_TrimmedCurve.hxx>
@@ -28,7 +29,7 @@ std::stringstream NEdgeFactory::GetError(BRepLib_EdgeError edgeError)
 }
 
 
-TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom_Curve)  hCurve)
+TopoDS_Edge NEdgeFactory::BuildEdge(const Handle(Geom_Curve)& hCurve)
 {
 	try
 	{
@@ -47,7 +48,7 @@ TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom_Curve)  hCurve)
 	return TopoDS_Edge();
 }
 
-TopoDS_Edge NEdgeFactory::BuildEdge(Handle(Geom2d_Curve)  hCurve2d)
+TopoDS_Edge NEdgeFactory::BuildEdge(const Handle(Geom2d_Curve)& hCurve2d)
 {
 	try
 	{
@@ -93,6 +94,46 @@ TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt2d& start, const gp_Pnt2d& end)
 	}
 	return TopoDS_Edge();
 }
+
+TopoDS_Edge NEdgeFactory::BuildEdge(const Handle(Geom_Curve)& edgeGeom, TopoDS_Vertex& startVertex, TopoDS_Vertex& endVertex, double maxTolerance)
+{
+	try
+	{
+		double paramStart, paramEnd;
+		double distanceStart, distanceEnd;
+		if (!NCurveFactory::LocateVertexOnCurve(edgeGeom, startVertex, maxTolerance, paramStart, distanceStart))
+			Standard_Failure::Raise("Start Vertex is not located on the curve within the required tolerance");
+		if (!NCurveFactory::LocateVertexOnCurve(edgeGeom, endVertex, maxTolerance, paramEnd, distanceEnd))
+			Standard_Failure::Raise("End Vertex is not located on the curve within the required tolerance");
+
+		//update the vertices tolerance if necessary
+		double startVertexTolerance = BRep_Tool::Tolerance(startVertex);
+		double endVertexTolerance = BRep_Tool::Tolerance(endVertex);
+		BRep_Builder builder;
+		if (distanceStart > startVertexTolerance)
+			builder.UpdateVertex(startVertex, distanceStart);
+		if (distanceEnd > endVertexTolerance)
+			builder.UpdateVertex(endVertex, distanceEnd);
+		BRepLib_MakeEdge edgeMaker(edgeGeom, startVertex, endVertex, paramStart, paramEnd);
+		if (!edgeMaker.IsDone())
+			Standard_Failure::Raise(GetError(edgeMaker.Error()));
+		else
+		{
+			bool ok = BRepLib::BuildCurve3d(edgeMaker.Edge());
+			if (!ok)
+				Standard_Failure::Raise("Error building 3d curve for edge");
+			else
+				return edgeMaker.Edge();
+		}
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Edge();
+}
+
+
 
 TopoDS_Edge NEdgeFactory::BuildEdge(const gp_Pnt& start, const gp_Pnt& end)
 {

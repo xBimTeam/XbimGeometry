@@ -7,3 +7,10 @@ IXLocation^ Xbim::Geometry::BRep::XLocation::Multiplied(IXLocation^ location)
 	return gcnew XLocation(xbimLoc->Ref().Multiplied(Ref()));
 }
 
+IXLocation^ Xbim::Geometry::BRep::XLocation::ScaledBy(double scale)
+{
+	gp_Trsf scaler;
+	scaler.SetScaleFactor(scale);
+	return gcnew XLocation(Ref().Multiplied(scaler));
+}
+

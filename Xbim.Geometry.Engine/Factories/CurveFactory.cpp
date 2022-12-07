@@ -2,7 +2,7 @@
 #include "GeometryFactory.h"
 #include "SurfaceFactory.h"
 
-
+#include <GeomLib.hxx>
 #include <GeomLib_Tool.hxx>
 
 #include "../BRep/XLine.h"
@@ -71,6 +71,8 @@ namespace Xbim
 				}
 			}
 
+			
+
 #pragma region 2d Curve builders
 
 			Handle(Geom2d_Curve) CurveFactory::BuildCurve2d(IIfcCurve^ curve, XCurveType% curveType)
@@ -114,6 +116,7 @@ namespace Xbim
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
+				if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots)) return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots));
 				//all control points shall have the same dimensionality of 2
 				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
 				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
@@ -447,6 +450,26 @@ namespace Xbim
 				}
 			}
 
+			/// <summary>
+			/// This functions respects 2d curve builder but always updates the result to a 3d curve
+			/// </summary>
+			/// <param name="curve"></param>
+			/// <returns></returns>
+			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcCurve^ curve)
+			{
+				XCurveType curveType;
+				int dim = (int)curve->Dim;
+				if (dim == 2)
+				{
+					Handle(Geom2d_Curve) hCurve2d = BuildCurve2d(curve, curveType); //this will throw an exception if it fails	
+					return GeomLib::To3d(gp::XOY(), hCurve2d); //upgrade to 3d
+				}
+				else
+				{
+					return BuildCurve3d(curve, curveType);//this will throw an exception if it fails									
+				}
+			}
+
 			template <typename IfcType>
 			Handle(Geom2d_Curve) CurveFactory::BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense)
 			{
@@ -504,9 +527,9 @@ namespace Xbim
 					return Build3d(static_cast<IIfcPcurve^>(curve));*/
 				case XCurveType::IfcPolyline:
 					return BuildCurve3d(static_cast<IIfcPolyline^>(curve));
-					/*case XCurveType::RationalBSplineCurveWithKnots:
-						return Build3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-					case XCurveType::SurfaceCurve:
+					case XCurveType::IfcRationalBSplineCurveWithKnots:
+						return BuildCurve3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+					/*case XCurveType::SurfaceCurve:
 						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
 					return BuildCurve3d(static_cast<IIfcTrimmedCurve^>(curve));
@@ -519,6 +542,7 @@ namespace Xbim
 
 			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve3d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
+				if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots)) return BuildCurve3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots));
 				//all control points shall have the same dimensionality of 3
 				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
 				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
@@ -958,7 +982,7 @@ namespace Xbim
 				{
 					//Validation
 					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						throw RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.", ifcTrimmedCurve);
+						LogInformation(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
 					XCurveType curveType;
 					Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
 					if (!basisCurve.IsNull())
@@ -1026,7 +1050,7 @@ namespace Xbim
 				}
 				catch (Exception^ ex)
 				{
-					LogInformation(ex, "Trimmed curve failed", ifcTrimmedCurve);
+					LogInformation(ifcTrimmedCurve, ex, "Trimmed curve failed");
 
 				}
 				return nullptr;
@@ -1108,7 +1132,7 @@ namespace Xbim
 				}
 				catch (Exception^ ex)
 				{
-					LogInformation(ex, "Trimmed Curve failed", ifcTrimmedCurve);
+					LogInformation(ifcTrimmedCurve, ex, "Trimmed Curve failed");
 
 				}
 				return nullptr;

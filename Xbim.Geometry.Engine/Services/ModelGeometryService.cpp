@@ -2,8 +2,10 @@
 #include "../Services/LoggingService.h"
 #include <IMeshData_Status.hxx>
 #include <IMeshTools_Parameters.hxx>
+#include <BRepTools.hxx>
 
 #include "../XbimConvert.h"
+#include "../Factories/VertexFactory.h"
 #include "../Factories/GeometryFactory.h"
 #include "../Factories/CurveFactory.h"
 #include "../Factories/SurfaceFactory.h"
@@ -15,6 +17,8 @@
 #include "../Factories/CompoundFactory.h"
 #include "../Factories/BooleanFactory.h"
 #include "../Factories/ProfileFactory.h"
+#include "../Factories/BimAuthoringToolWorkArounds.h"
+
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
@@ -108,11 +112,22 @@ namespace Xbim
 				auto mapLocation = sourceTransform * targetTransform;
 				return gcnew XbimLocation(mapLocation);*/
 			}
+			System::String^ ModelGeometryService::GetBrep(const TopoDS_Shape& shape)
+			{
+				std::ostringstream oss;
+				BRepTools::Write(shape, oss);
+				return gcnew System::String(oss.str().c_str());
+
+			}
 			IXLoggingService^ ModelGeometryService::LoggingService::get()
 			{
 				return _loggingService;
 			}
-
+			VertexFactory^ ModelGeometryService::GetVertexFactory()
+			{
+				if (_vertexFactory == nullptr) _vertexFactory = gcnew Xbim::Geometry::Factories::VertexFactory(this);
+				return _vertexFactory;
+			}
 			GeometryFactory^ ModelGeometryService::GetGeometryFactory()
 			{
 				if (_geometryFactory == nullptr) _geometryFactory = gcnew Xbim::Geometry::Factories::GeometryFactory(this);
@@ -182,14 +197,21 @@ namespace Xbim
 				return _profileFactory;
 			}
 
+			Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ ModelGeometryService::GetBimAuthoringToolWorkArounds()
+			{
+				if (_bimAuthoringToolWorkArounds == nullptr) _bimAuthoringToolWorkArounds = gcnew Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds(this);
+				return _bimAuthoringToolWorkArounds;
+			}
+
 			/*XbimGeometryCreator^ ModelGeometryService::GetV5GeometryEngine()
 			{
-				
+
 				return _v5GeometryEngine;
 			}*/
 
 
 			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
+			IXVertexFactory^ ModelGeometryService::VertexFactory::get() { return GetVertexFactory(); }
 			IXCurveFactory^ ModelGeometryService::CurveFactory::get() { return GetCurveFactory(); }
 			IXSurfaceFactory^ ModelGeometryService::SurfaceFactory::get() { return GetSurfaceFactory(); }
 			IXEdgeFactory^ ModelGeometryService::EdgeFactory::get() { return GetEdgeFactory(); }

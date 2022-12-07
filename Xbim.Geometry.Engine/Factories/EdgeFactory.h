@@ -3,6 +3,8 @@
 #include "Unmanaged/NEdgeFactory.h"
 #include "FactoryBase.h"
 
+#include <TopTools_DataMapOfIntegerShape.hxx>
+
 namespace Xbim
 {
 	namespace Geometry
@@ -17,14 +19,14 @@ namespace Xbim
 
 			public:
 				
-				virtual IXEdge^ BuildEdge(IXPoint^ start, IXPoint^ end);
+				virtual IXEdge^ Build(IXPoint^ start, IXPoint^ end);
 				virtual IXEdge^ Build(IIfcCurve^ curve);
-				virtual IXEdge^ BuildEdge(IXCurve^ curve);
+				virtual IXEdge^ Build(IXCurve^ curve);
 				
 #pragma endregion
 
 
-#pragma region  Methods returning Opencascade native types, internal use only
+#pragma region  Native Methods 
 
 			protected:
 				
@@ -36,7 +38,7 @@ namespace Xbim
 
 				TopoDS_Edge BuildEdge(Handle(Geom_Curve) hCurve3d);
 
-
+				TopoDS_Edge BuildEdgeCurve(IIfcEdgeCurve^ ifcEdgeCurve, TopTools_DataMapOfIntegerShape& verticesContext);
 #pragma endregion
 
 #pragma region Constructors and private and protected data
