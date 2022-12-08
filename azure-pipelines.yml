@@ -3,6 +3,7 @@ trigger:
     include:
     - master
     - develop
+    - feature/netcore
   paths:
     exclude:
     - README.md
@@ -181,3 +182,11 @@ jobs:
       publishFeedCredentials: 'MyGetDev'
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_FlexGet'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/netcore'))
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '2591d379-784d-4b57-88f5-a932c93cbffd'
