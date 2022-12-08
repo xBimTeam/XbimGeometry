@@ -10,7 +10,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class ProfileFactory : FactoryBase<NProfileFactory>, IXProfileFactory
+			public ref class ProfileFactory : public FactoryBase<NProfileFactory>, IXProfileFactory
 			{	
 			public:
 				ProfileFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProfileFactory()) {};
@@ -35,6 +35,7 @@ namespace Xbim
 				TopoDS_Face BuildProfileFace(IIfcCShapeProfileDef^ ifcCShapeProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcTShapeProfileDef^ ifcTShapeProfileDef);						
 				TopoDS_Face BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef);
+				TopoDS_Face BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef);
 				//constructs a reProfilectangle wire with the bottom left corner at 0,0,0, top right at x,y,0
 				TopoDS_Face BuildProfileFace(double x, double y, double tolerance, bool centre);

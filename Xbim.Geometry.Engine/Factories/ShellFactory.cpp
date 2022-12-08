@@ -102,17 +102,26 @@ namespace Xbim
 				{
 					std::vector<std::vector<int>> faceLoops;
 					
-					std::vector<int> loop;
+					std::vector<int> outerLoop;
 					for each (auto coordIndex in Enumerable::Concat(face->CoordIndex, Enumerable::Take(face->CoordIndex, 1))) //repeat first point at end to close the loop
 					{
-						loop.push_back((int)coordIndex);
+						outerLoop.push_back((int)coordIndex);
 					}
-					faceLoops.push_back(loop); //outer loop
-					/*
-					IIfcPolygonalFaceSetWithVoids
-					create a loop for each void and add to the faceLoops
-					*/
-
+					faceLoops.push_back(outerLoop); //outer loop
+					
+					IIfcIndexedPolygonalFaceWithVoids^  faceWithVoids = dynamic_cast<IIfcIndexedPolygonalFaceWithVoids^>(face);
+					if (faceWithVoids != nullptr)
+					{
+						for each (auto faceVoid in faceWithVoids->InnerCoordIndices)
+						{
+							std::vector<int> innerLoop;
+							for each (auto coordIndex in Enumerable::Concat(faceVoid, Enumerable::Take(faceVoid, 1))) //repeat first point at end to close the loop
+							{
+								innerLoop.push_back((int)coordIndex);
+							}
+							faceLoops.push_back(innerLoop); //outer loop
+						}
+					}
 					faceMesh.push_back(faceLoops);
 				}
 

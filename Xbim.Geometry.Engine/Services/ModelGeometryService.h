@@ -40,6 +40,7 @@ namespace Xbim
 			ref class ShapeFactory;
 			ref class ProfileFactory;
 			ref class BIMAuthoringToolWorkArounds;
+			ref class MaterialFactory;
 		}
 	}
 }
@@ -79,7 +80,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ShapeFactory^ _shapeFactory;
 				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ _bimAuthoringToolWorkArounds;
-				//Xbim::Geometry::XbimGeometryCreator^ _v5GeometryEngine;
+				Xbim::Geometry::Factories::MaterialFactory^ _materialFactory;
 			internal:
 				//Factories
 				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
@@ -96,11 +97,11 @@ namespace Xbim
 				Xbim::Geometry::Factories::ShapeFactory^ GetShapeFactory();
 				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ GetBimAuthoringToolWorkArounds();
-				//Xbim::Geometry::XbimGeometryCreator^ GetV5GeometryEngine();
+				Xbim::Geometry::Factories::MaterialFactory^ GetMaterialFactory();
 			public:
 
 				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
-				
+
 				virtual property bool UpgradeFaceSets {bool get() { return _upgradeFaceSets; } void set(bool upgrade) { _upgradeFaceSets = upgrade; }};
 				virtual property double Precision {double get() { return model->ModelFactors->Precision; }};
 				virtual property double PrecisionSquared {double get() { return precisionSquared; }};
@@ -140,7 +141,7 @@ namespace Xbim
 				virtual property IXBooleanFactory^ BooleanFactory {IXBooleanFactory^ get(); }
 				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
-				
+				virtual property IXMaterialFactory^ MaterialFactory {IXMaterialFactory^ get(); }
 
 
 #pragma region Logging and Exceptions

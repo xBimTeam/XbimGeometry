@@ -8,7 +8,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			public ref class VertexFactory : FactoryBase<NVertexFactory>, IXVertexFactory
+			public ref class VertexFactory : public FactoryBase<NVertexFactory>, IXVertexFactory
 			{
 
 			public:

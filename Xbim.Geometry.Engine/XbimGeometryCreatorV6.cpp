@@ -433,7 +433,7 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(IIfcSolid, Logger());
+			return gcnew XbimSolid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid));
 		};
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)
 		{

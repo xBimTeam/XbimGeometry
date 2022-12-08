@@ -18,7 +18,7 @@
 #include "../Factories/BooleanFactory.h"
 #include "../Factories/ProfileFactory.h"
 #include "../Factories/BimAuthoringToolWorkArounds.h"
-
+#include "../Factories/MaterialFactory.h"
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
@@ -196,19 +196,18 @@ namespace Xbim
 				if (_profileFactory == nullptr) _profileFactory = gcnew Xbim::Geometry::Factories::ProfileFactory(this);
 				return _profileFactory;
 			}
-
+			MaterialFactory^ ModelGeometryService::GetMaterialFactory()
+			{
+				if (_materialFactory == nullptr) _materialFactory = gcnew Xbim::Geometry::Factories::MaterialFactory(this);
+				return _materialFactory;
+			}
 			Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ ModelGeometryService::GetBimAuthoringToolWorkArounds()
 			{
 				if (_bimAuthoringToolWorkArounds == nullptr) _bimAuthoringToolWorkArounds = gcnew Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds(this);
 				return _bimAuthoringToolWorkArounds;
 			}
 
-			/*XbimGeometryCreator^ ModelGeometryService::GetV5GeometryEngine()
-			{
-
-				return _v5GeometryEngine;
-			}*/
-
+			
 
 			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
 			IXVertexFactory^ ModelGeometryService::VertexFactory::get() { return GetVertexFactory(); }
@@ -223,6 +222,7 @@ namespace Xbim
 			IXBooleanFactory^ ModelGeometryService::BooleanFactory::get() { return GetBooleanFactory(); }
 			IXShapeFactory^ ModelGeometryService::ShapeFactory::get() { return GetShapeFactory(); }
 			IXProfileFactory^ ModelGeometryService::ProfileFactory::get() { return GetProfileFactory(); }
+			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
 		}
 
 

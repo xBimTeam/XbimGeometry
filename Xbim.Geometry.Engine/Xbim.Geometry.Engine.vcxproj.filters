@@ -369,6 +369,12 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Factories\MaterialFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -642,6 +648,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\MaterialFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

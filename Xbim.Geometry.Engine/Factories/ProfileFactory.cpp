@@ -60,7 +60,7 @@ namespace Xbim
 				throw gcnew System::NotImplementedException();
 				// TODO: insert return statement here
 			}
-			
+
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
 			{
@@ -198,16 +198,18 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{
-				/*if (dynamic_cast<IIfcCenterLineProfileDef^>(ifcArbitraryOpenProfileDef))
-					throw RaiseGeometryFactoryException("An Edge built from an IfcCenterLineProfileDef is not supported, use BuildProfileWire", ifcArbitraryOpenProfileDef);
-				else
-				{
-					Handle(Geom2d_Curve) curve2d = WIRE_FACTORY->BuildWire2d(ifcArbitraryOpenProfileDef->Curve);
-					return WIRE_FACTORY->Buil(curve);
-				}*/
+				
 				return TopoDS_Face();
 			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
+			{
+				XCurveType curveType;
+				Handle(Geom2d_Curve) centreLine = CURVE_FACTORY->BuildCurve2d(ifcCenterLineProfileDef->Curve, curveType);
+				if (centreLine.IsNull())
+					throw RaiseGeometryFactoryException("Error building centre line Curve", ifcCenterLineProfileDef);
 
+				return TopoDS_Face();
+			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(double x, double y, double tolerance, bool centre)
 			{
 				return TopoDS_Face();
@@ -282,7 +284,7 @@ namespace Xbim
 			{
 				return TopoDS_Edge();
 			}
-			
+
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
 				return TopoDS_Edge();
@@ -334,6 +336,6 @@ namespace Xbim
 			{
 				return TopoDS_Edge();
 			}
-}
+		}
 	}
 }

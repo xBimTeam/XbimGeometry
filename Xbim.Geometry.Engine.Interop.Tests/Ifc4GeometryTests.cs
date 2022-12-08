@@ -105,7 +105,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [DataTestMethod]
-        [DataRow(XGeometryEngineVersion.V5, DisplayName = "V5 Engine")]
+       // [DataRow(XGeometryEngineVersion.V5, DisplayName = "V5 Engine")]
         [DataRow(XGeometryEngineVersion.V6, DisplayName = "V6 Engine")]
         public void CentreLineProfileTest(XGeometryEngineVersion engineVersion)
         {

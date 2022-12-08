@@ -260,6 +260,8 @@
     <ClInclude Include="Factories\GeometryConverterFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NVertexFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
+    <ClInclude Include="Factories\MaterialFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
     <ClInclude Include="Services\ModelGeometryService.h" />
@@ -357,6 +359,8 @@
     <ClCompile Include="Factories\GeometryConverterFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NVertexFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
+    <ClCompile Include="Factories\MaterialFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
     <ClCompile Include="Services\ModelGeometryService.cpp" />
@@ -465,7 +469,6 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
- 
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
     <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
