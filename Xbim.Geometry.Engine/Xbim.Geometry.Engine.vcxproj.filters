@@ -375,6 +375,9 @@
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Services\ServiceCollectionExtensions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -654,6 +657,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\ServiceCollectionExtensions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

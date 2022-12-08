@@ -265,6 +265,7 @@
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
     <ClInclude Include="Services\ModelGeometryService.h" />
+    <ClInclude Include="Services\ServiceCollectionExtensions.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
     <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
     <ClInclude Include="Factories\VertexFactory.h" />
@@ -364,6 +365,7 @@
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
     <ClCompile Include="Services\ModelGeometryService.cpp" />
+    <ClCompile Include="Services\ServiceCollectionExtensions.cpp" />
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
     <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
     <ClCompile Include="Factories\VertexFactory.cpp" />
