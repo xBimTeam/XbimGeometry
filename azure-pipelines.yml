@@ -137,17 +137,17 @@ jobs:
   #  name: Geometry_metapackage_Pack
   
   
-  - task: VSTest@2
-    displayName: 'VsTest - testAssemblies'
-    inputs:
-      testSelector: 'testAssemblies'
-      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
-      searchFolder: '$(System.DefaultWorkingDirectory)'
-      # runSettingsFile: 'test.runsettings'
-      vsTestVersion: 'toolsInstaller'
-      codeCoverageEnabled: false
-      platform: '$(BuildPlatform)'
-      configuration: '$(BuildConfiguration)'
+#  - task: VSTest@2
+#    displayName: 'VsTest - testAssemblies'
+#    inputs:
+#      testSelector: 'testAssemblies'
+#      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+#      searchFolder: '$(System.DefaultWorkingDirectory)'
+#      # runSettingsFile: 'test.runsettings'
+#      vsTestVersion: 'toolsInstaller'
+#      codeCoverageEnabled: false
+#      platform: '$(BuildPlatform)'
+#      configuration: '$(BuildConfiguration)'
   
   - task: PublishSymbols@1
     displayName: 'Publish symbols path: '
