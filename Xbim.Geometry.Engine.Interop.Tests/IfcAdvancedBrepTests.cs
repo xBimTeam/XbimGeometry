@@ -1,21 +1,15 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Xunit;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
-using FluentAssertions;
-using Xbim.Common;
-using Microsoft.Extensions.Logging.Abstractions;
-using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+    
     // [DeploymentItem("TestFiles")]
     public class IfcAdvancedBrepTests
     {
@@ -23,32 +17,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         
-        [ClassInitialize]
-        static public void Initialise(TestContext context)
-        {
-    
-        }
-        [ClassCleanup]
-        static public void Cleanup()
-        {
-
-
-            loggerFactory = null;
-        }
-        [TestMethod]
+        
+        [Fact]
         public void IfcAdvancedBrepTrimmedCurveTest()
         {
             using (var er = new EntityRepository<IIfcAdvancedBrep>(nameof(IfcAdvancedBrepTrimmedCurveTest)))
             {
-                Assert.IsTrue(er.Entity != null, "No IIfcAdvancedBrep found");
+                er.Entity.Should().NotBeNull();
                 var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(er.Entity.Model, loggerFactory);
                 var solid = geomEngine.CreateSolid(er.Entity);
-                Assert.IsTrue(solid.Faces.Count == 14, "This solid should have 14 faces");
+                solid.Faces.Count.Should().Be(14, "This solid should have 14 faces");
             }
 
         }
 
-        [TestMethod]
+        [Fact]
         public void Incorrectly_defined_edge_curve()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\incorrectly_defined_edge_curve.ifc"))
@@ -65,7 +48,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         /// <summary>
         /// This test still produces incorrect solids and surfaces, the model appears to be faulty
         /// </summary>
-        [TestMethod]
+        [Fact]
         public void Incorrectly_defined_edge_curve_with_identical_points()
         {
 
@@ -74,7 +57,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //this model needs workarounds to be applied
                 model.AddRevitWorkArounds();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
-                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
+                brep.Should().NotBeNull();
                 var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 solids.Count.Should().Be(2);
@@ -83,14 +66,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        [DataTestMethod]
-        [DataRow("SurfaceCurveSweptAreaSolid_1", 29.444264292193111, DisplayName = "Handles Self Intersection unorientable shape")]
-        [DataRow("SurfaceCurveSweptAreaSolid_2", 0.00025657473102144062, DisplayName = "Handles Planar reference surface, parallel to sweep")]
-        [DataRow("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false, DisplayName = "Reference Model from IFC documentation")]
-        [DataRow("SurfaceCurveSweptAreaSolid_4", 19.276830224679465, DisplayName = "Handles Trimmed directrix is periodic")]
-        [DataRow("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1")]
-        [DataRow("SurfaceCurveSweptAreaSolid_6", 12.603349469526613, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit")]
-       // [DataRow("SurfaceCurveSweptAreaSolid_7", 12.603349469526613,false, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit")]
+        [Theory]
+        [InlineData("SurfaceCurveSweptAreaSolid_1", 29.444264292193111/*, DisplayName = "Handles Self Intersection unorientable shape"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_2", 0.00025657473102144062/*, DisplayName = "Handles Planar reference surface, parallel to sweep"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false/*, DisplayName = "Reference Model from IFC documentation"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_4", 19.276830224679465/*, DisplayName = "Handles Trimmed directrix is periodic"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true/*, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_6", 12.603349469526613/*, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_7", 12.603349469526613, false/*, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit"*/)]
         public void SurfaceCurveSweptAreaSolid_Tests(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
@@ -103,14 +86,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 surfaceSweep.Should().NotBeNull();
                 var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
                 var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
-                //sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
                 //    model.ModelFactors.Precision, logger);
-               
+
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Advanced_brep_with_sewing_issues()
         {
 
@@ -119,7 +102,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //this model needs workarounds to be applied
                // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
-                Assert.IsNotNull(brep, "No IIfcAdvancedBrep found");
+                brep.Should().NotBeNull();
                 var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 var shapeGeom = geomEngine.CreateShapeGeometry(solids,
@@ -132,11 +115,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
 
-        //[DataTestMethod]
-        //[DataRow("ShapeGeometry_5")]
-        //[DataRow("ShapeGeometry_6")]
-        //[DataRow("ShapeGeometry_18")]
-        //[DataRow("ShapeGeometry_20")]
+        //[Theory]
+        //[InlineData("ShapeGeometry_5")]
+        //[InlineData("ShapeGeometry_6")]
+        //[InlineData("ShapeGeometry_18")]
+        //[InlineData("ShapeGeometry_20")]
         //public void Advanced_brep_shapes(string fileName)
         //{
         //    using (var model = MemoryModel.OpenRead($@"C:\Users\Steve\Documents\testModel\{fileName}.ifc"))
@@ -144,23 +127,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //        foreach (var advBrep in model.Instances.OfType<IIfcAdvancedBrep>())
         //        {
         //            var solids = geomEngine.CreateSolidSet(advBrep, logger);
-        //            Assert.IsTrue(solids.Count > 0);
+        //            solids.Count > 0);
         //        }
         //    }
         //}
 
 
         //This is a fauly Brep conversion case that needs t be firther examinedal
-        [DataTestMethod]
-        [DataRow("advanced_brep_1", false, 1, DisplayName = "Self Intersection unorientable shape")]
-        [DataRow("advanced_brep_2", DisplayName = "Curved edges with varying orientation")]
-        [DataRow("advanced_brep_3", false, DisplayName = "Badly formed wire orders and missing faces and holes")]
-        [DataRow("advanced_brep_4", true, 2, DisplayName = "Two solids from one advanced brep, errors in holes")]
-        [DataRow("advanced_brep_5", true, 1, DisplayName = "Example of arc and circle having centre displaced twice RevitIncorrectArcCentreSweptCurve")]
-        [DataRow("advanced_brep_6", true, 1, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve")]
-        [DataRow("advanced_brep_7", true, 2, DisplayName = "Long running construction")]
-        [DataRow("advanced_brep_8", true, 2, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve")]
-        public void Advanced_brep_tests(string brepFileName, bool isValidSolid = true, int solidCount = 1, bool fails = false)
+        [Theory]
+        [InlineData("advanced_brep_1", 1/*, DisplayName = "Self Intersection unorientable shape"*/)]
+        [InlineData("advanced_brep_2"/*, DisplayName = "Curved edges with varying orientation"*/)]
+        [InlineData("advanced_brep_3"/*, DisplayName = "Badly formed wire orders and missing faces and holes"*/)]
+        [InlineData("advanced_brep_4", 2/*, DisplayName = "Two solids from one advanced brep, errors in holes"*/)]
+        [InlineData("advanced_brep_5", 1/*, DisplayName = "Example of arc and circle having centre displaced twice RevitIncorrectArcCentreSweptCurve"*/)]
+        [InlineData("advanced_brep_6", 1/*, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve"*/)]
+        [InlineData("advanced_brep_7", 2/*, DisplayName = "Long running construction"*/)]
+        [InlineData("advanced_brep_8", 2/*, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve"*/)]
+        public void Advanced_brep_tests(string brepFileName,  int solidCount = 1, bool fails = false)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))

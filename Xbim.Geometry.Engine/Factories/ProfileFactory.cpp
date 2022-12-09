@@ -150,59 +150,60 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcDerivedProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcParameterizedProfileDef^ ifcParameterizedProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcParameterizedProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCircleProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcRectangleProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcRoundedRectangleProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcLShapeProfileDef^ ifcLShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcLShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcUShapeProfileDef^ ifcUShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcUShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcEllipseProfileDef^ ifcEllipseProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcEllipseProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcIShapeProfileDef^ ifcIShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcIShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcZShapeProfileDef^ ifcZShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcZShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCShapeProfileDef^ ifcCShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTShapeProfileDef^ ifcTShapeProfileDef)
 			{
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcTShapeProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{
 				
-				return TopoDS_Face();
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcArbitraryOpenProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
 			{
+				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCenterLineProfileDef);
 				XCurveType curveType;
 				Handle(Geom2d_Curve) centreLine = CURVE_FACTORY->BuildCurve2d(ifcCenterLineProfileDef->Curve, curveType);
 				if (centreLine.IsNull())
@@ -212,6 +213,7 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(double x, double y, double tolerance, bool centre)
 			{
+				throw RaiseGeometryFactoryException("Failed to create Profile");
 				return TopoDS_Face();
 			}
 

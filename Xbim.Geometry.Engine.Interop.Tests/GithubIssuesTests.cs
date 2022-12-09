@@ -1,26 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xbim.Geometry.Abstractions;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
-
+using Xunit;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+  
     public class GithubIssuesTests
 
     {
 
         ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-        [DataTestMethod]
-        [DataRow(XGeometryEngineVersion.V5, DisplayName = "V5 Engine")]
-        [DataRow(XGeometryEngineVersion.V6, DisplayName = "V6 Engine")]
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
         public void Github_Issue_281(XGeometryEngineVersion engineVersion)
         {
             // this file resulted in a stack-overflow exception due to precision issues in the data.

@@ -1,41 +1,25 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
-
+using Xunit;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+    
     public class RegressionTests
     {
         
         
  
-        static private ILogger logger;
+        static private ILogger logger = NullLogger< RegressionTests >.Instance;
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        [ClassInitialize]
-        static public void Initialise(TestContext context)
-        {
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
-        }
-
-        [ClassCleanup]
-        static public void Cleanup()
-        {
-            logger = null;
-        }
-
+        
 
         // todo: 2021: @SRL this test used to be ignored, but the reason is not clear
-        [TestMethod]
+        [Fact]
         public void IfcHalfspace_FailingGeom()
         {
             using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
@@ -43,7 +27,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(m, loggerFactory);
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
                 var solid = geomEngine.CreateSolid(extSolid, logger);
-                IfcCsgTests.GeneralTest(solid);
+                HelperFunctions.GeneralTest(solid);
 
                 var mlist = m.Instances.OfType<IIfcBooleanClippingResult>();
                 foreach (var eas in mlist)
@@ -54,10 +38,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 foreach (var eas in mlist)
                 {
                     // var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.EntityLabel == 185249);
-                    Assert.IsTrue(eas != null, "No IfcBooleanClippingResult found");
+                    eas.SecondOperand.Should().NotBeNull();
                     var ret = geomEngine.CreateSolidSet(eas, logger);
-                    
-                    IfcCsgTests.GeneralTest(solid);
+
+                    HelperFunctions.GeneralTest(solid);
 
                     Debug.WriteLine(eas.EntityLabel + " ok");
                     //if (eas.EntityLabel == 185243)

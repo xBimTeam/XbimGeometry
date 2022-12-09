@@ -1,11 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
+
 using Xbim.Common;
 using Xbim.IO.Memory;
-
+using Xunit;
+using FluentAssertions;
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
     public class EntityRepository<T> : IDisposable where T : IPersistEntity
@@ -18,7 +19,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public EntityRepository(string name)
         {
             var path = Path.GetFullPath($@"Testfiles\{name}.ifc");
-            Assert.IsTrue(File.Exists(path), $"File not found '{path}'");
+            File.Exists(path).Should().BeTrue();
             Debug.WriteLine($"Opening '{path}' for tests.");
             Model = MemoryModel.OpenRead(path);
 

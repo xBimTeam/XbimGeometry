@@ -176,6 +176,8 @@ namespace Xbim
 				if (!GEOMETRY_FACTORY->BuildDirection3d(extrudedSolid->ExtrudedDirection, extrudeDirection))
 					throw RaiseGeometryFactoryException("Extruded Solid sweep dirction is illegal", extrudedSolid->ExtrudedDirection);
 				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(extrudedSolid->SweptArea); //if this fails it will throw an exception
+				if (sweptArea.IsNull())
+					throw RaiseGeometryFactoryException("Extruded Solid Swept area could not be built", extrudedSolid->SweptArea);
 				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
 				if (solid.IsNull() || solid.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Extruded Solid could not be built", extrudedSolid);

@@ -1,34 +1,23 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
+using Xunit;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+  
     // [DeploymentItem("TestFiles")]
     public class WireAndFaceTests
     {
        
-        static private ILogger logger;
+        static private ILogger logger = NullLogger<WireAndFaceTests>.Instance;
 
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        [ClassInitialize]
-        static public void Initialise(TestContext context)
-        {
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
-        }
-        [ClassCleanup]
-        static public void Cleanup()
-        {
-           
-            
-            logger = null;
-        }
-
-        [TestMethod]
+        
+        [Fact]
         public void Empty_Polyline()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Polyline.ifc"))
@@ -38,7 +27,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wire = geomEngine.CreateWire(poly, logger);
             }
         }
-        [TestMethod]
+        [Fact]
         public void Composite_curve_issue_261()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Composite_curve_issue_261.ifc"))
@@ -49,16 +38,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TestIfFaceIsPlanar()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\non_planar_wire.ifc"))
             {
                 var polyloop = model.Instances.OfType<IIfcPolyLoop>().FirstOrDefault();
-                Assert.IsNotNull(polyloop);
+                polyloop.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, loggerFactory);
                 var face = geomEngine.CreateFace(polyloop, logger);
-                Assert.IsNotNull(face.OuterBound);
+                face.OuterBound.Should().NotBeNull();
             }
 
         }

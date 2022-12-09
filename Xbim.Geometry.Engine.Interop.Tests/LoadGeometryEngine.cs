@@ -1,20 +1,16 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
-using System;
-using System.IO;
-using System.Reflection;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.IO.Memory;
+using Xunit;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+
     public class LoadGeometryEngine
     {
-        [TestMethod]
+        [Fact]
         public void SimpleLoad()
         {
             var mm = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
@@ -26,7 +22,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
        
 
-        [TestMethod]
+        [Fact]
         public void TestLogging()
         {           
             using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))

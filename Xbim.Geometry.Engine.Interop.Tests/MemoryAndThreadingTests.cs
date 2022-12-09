@@ -1,42 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Xbim.Common.Geometry;
-using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
+using Xunit;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+   
     public class MemoryAndThreadingTests
     {
-        static ILogger logger;
+        static ILogger logger = NullLogger<MemoryAndThreadingTests>.Instance;
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        [ClassInitialize]
-        static public void Initialise(TestContext context)
-        {
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
-        }
         
-        [ClassCleanup]
-        static public void Cleanup()
-        {
-
-           
-
-        }
-
-       
-
-        //[TestMethod]
+        //[Fact]
         //public void simple_thread_time_out_operation_test()
         //{
         //    var runCount = 20;
@@ -97,7 +75,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //     });
         //    totalTime.Stop();
         //    var secondRunTime = totalTime.ElapsedMilliseconds;
-        //    Assert.IsTrue(res.Where(kv => kv.Key < 0).Any(),"Some executions should have timed out");
+        //    res.Where(kv => kv.Key < 0).Any(),"Some executions should have timed out");
         //    Console.WriteLine($"Single thread simple execution time {firstRunTime}, av unit {avTime}ms");
         //    Console.WriteLine($"Multi thread with time out run time {secondRunTime}, av unit {(int)res.Average(r => r.Value)}ms, number of time outs {res.Count(kv=> kv.Key<0)} out of {runCount}");
         //}
@@ -129,7 +107,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //    return SleepTime;
         //}
 
-        [TestMethod]
+        [Fact]
         public void simple_vertex_is_constructed_and_disposed()
         {
             //IXbimVertex vertex;

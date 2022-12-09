@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Linq;
@@ -11,30 +11,20 @@ using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
+using Xunit;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    [TestClass]
+   
     public class LocationAndPlacementTests
     {
         
         
-        static private ILogger logger;
+        static private ILogger logger = NullLogger<LocationAndPlacementTests>.Instance;
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        [ClassInitialize]
-        static public void Initialise(TestContext context)
-        {
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
-        }
-        [ClassCleanup]
-        static public void Cleanup()
-        {
-            
-           
-            logger = null;
-        }
+       
 
-        [TestMethod]
+        [Fact]
         // [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
         public void LargeCoordinatesDisplacementTest()
         {
@@ -49,15 +39,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     // region should be placed far away from origin
                     var region = store.ContextRegions.FirstOrDefault().MostPopulated();
                     var centre = region.Centre;
-                    Assert.IsTrue(centre.X > 300000);
-                    Assert.IsTrue(centre.Y > 6200000);
+                    centre.X.Should().BeGreaterThan(300000);
+                    centre.Y.Should().BeGreaterThan(6200000);
 
                     var product = m.Instances.FirstOrDefault<IIfcBuildingElementProxy>();
 
-                    Assert.IsNotNull(product.Representation);
+                    product.Representation.Should().NotBeNull();
 
                     var instances = store.ShapeInstancesOfEntity(product);
-                    Assert.AreEqual(1, instances.Count());
+                    instances.Count().Should().Be(1);
 
                     var instance = instances.First();
                     var geometry = store.ShapeGeometryOfInstance(instance);
@@ -65,7 +55,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     // this should be a large displacement
                     var transform = instance.Transformation;
                     var length = transform.Translation.Length;
-                    Assert.IsTrue(length > 6200000);
+                    length.Should().BeGreaterThan(6200000);
 
                     // geometry thould be in small numbers
                     var ms = new MemoryStream(((IXbimShapeGeometryData)geometry).ShapeData);
@@ -73,20 +63,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var tr = br.ReadShapeTriangulation();
 
                     var point = tr.Vertices.FirstOrDefault();
-                    Assert.IsTrue(point.X < 1000);
-                    Assert.IsTrue(point.Y < 1000);
-                    Assert.IsTrue(point.Z < 1000);
+                    point.X.Should().BeGreaterThan(1000);
+                    point.Y.Should().BeGreaterThan(1000);
+                    point.Z.Should().BeGreaterThan(1000);
 
                     // when transformation is applied to the geometry it should be large
                     tr = tr.Transform(transform);
                     point = tr.Vertices.FirstOrDefault();
-                    Assert.IsTrue(point.X > 300000);
-                    Assert.IsTrue(point.Y > 6200000);
+                    point.X.Should().BeGreaterThan(300000);
+                    point.Y.Should().BeGreaterThan(6200000);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MoveAndCopyTest()
         {
             //this test checks that a object is correctly copied and moved
@@ -102,19 +92,19 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                         var ax3D = IfcModelBuilder.MakeAxis2Placement3D(m);
                         ax3D.Location.Y = 100;
                         var solidA = geomEngine.Moved(solid, ax3D) as IXbimSolid;
-                        Assert.IsNotNull(solidA, "Should be the same type as the master");
-                        Assert.IsTrue(Math.Abs(solidA.Volume - solid.Volume) < 1e-9, "Volume has changed");
+                        solidA.Should().NotBeNull();
+                        Math.Abs(solidA.Volume - solid.Volume).Should().BeLessThan(1e-9, "Volume has changed");
                         var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
-                        Assert.IsTrue(displacement == new XbimVector3D(0, 100, 0));
+                        displacement.Should().BeEquivalentTo(new XbimVector3D(0, 100, 0));
                         var bbA = solidA.BoundingBox;
                         var solidB = geomEngine.Moved(solid, ax3D);
-                        Assert.IsTrue(bbA.Centroid() - solidB.BoundingBox.Centroid() == new XbimVector3D(0, 0, 0));
+                        (bbA.Centroid() - solidB.BoundingBox.Centroid()).Should().BeEquivalentTo( new XbimVector3D(0, 0, 0));
                     }
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ScaleAndCopyTest()
         {
             //this test checks that a object is correctly copied and moved
@@ -131,18 +121,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var solidA = geomEngine.Transformed(solid, transform);
                     var bb = solid.BoundingBox;
                     var bbA = solidA.BoundingBox;
-                    Assert.IsTrue(Math.Abs(bb.Volume - 1000) < 1e-9, "Bounding box volume is incorrect in original shape");
-                    Assert.IsTrue(Math.Abs(bbA.Volume - 8000) < 1e-9, "Bounding box volume is incorrect in scaled shape");
+                    Math.Abs(bb.Volume - 1000).Should().BeLessThan(1e-9, "Bounding box volume is incorrect in original shape");
+                    Math.Abs(bbA.Volume - 8000).Should().BeLessThan(1e-9, "Bounding box volume is incorrect in scaled shape");
                     var transformNonUniform = IfcModelBuilder.MakeCartesianTransformationOperator3DnonUniform(m);
                     transformNonUniform.Scale3 = 100;
                     var solidB = geomEngine.Transformed(solid, transformNonUniform);
-                    Assert.IsTrue(Math.Abs(solidB.BoundingBox.Volume - 100000) < 1e-9, "Bounding box volume is incorrect in non uniform scaled shape");
-                    Assert.IsTrue(Math.Abs(bb.Volume - 1000) < 1e-9, "Bounding box volume of original shape as been changed");
+                    Math.Abs(solidB.BoundingBox.Volume - 100000).Should().BeLessThan(1e-9, "Bounding box volume is incorrect in non uniform scaled shape");
+                    Math.Abs(bb.Volume - 1000).Should().BeLessThan(1e-9, "Bounding box volume of original shape as been changed");
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ObjectPlacementTest()
         {
             //this test checks that a object is correctly copied and moved
@@ -158,9 +148,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     ((IfcAxis2Placement3D)placement.RelativePlacement).Location.X = 100;
                     var bb = solid.BoundingBox;
                     var solidA = geomEngine.Moved(solid, placement, logger) as IXbimSolid;
-                    Assert.IsNotNull(solidA, "Should be the same type as the master");
+                    solidA.Should().NotBeNull();
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
-                    Assert.IsTrue(displacement == new XbimVector3D(100, 0, 0));
+                    displacement.Should().BeEquivalentTo(new XbimVector3D(100, 0, 0));
 
                     var placementRelTo = ((IfcLocalPlacement)placement.PlacementRelTo);
                     var zDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 0, 1));
@@ -173,14 +163,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var meshbuilder = new MeshHelper();
                     geomEngine.Mesh(meshbuilder, solidB, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance);
                     var box = meshbuilder.BoundingBox;
-                    Assert.IsTrue(displacement == new XbimVector3D(1970, 120, 0));
+                    displacement.Should().BeEquivalentTo(new XbimVector3D(1970, 120, 0));
 
 
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GridPlacementTest()
         {
             //this test checks that a object is correctly copied and moved
@@ -198,13 +188,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.UAxes.Last());
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.VAxes.Last());
                     var solidA = geomEngine.Moved(solid, gridPlacement,logger) as IXbimSolid;
-                    Assert.IsNotNull(solidA, "Should be the same type as the master");
+                    solidA.Should().NotBeNull();
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
-                    Assert.IsTrue(displacement == new XbimVector3D(200, 200, 0));
+                    displacement.Should().BeEquivalentTo(new XbimVector3D(200, 200, 0));
                 }
             }
         }
-        [TestMethod]
+        [Fact]
         public void TransformSolidRectangularProfileDef()
         {
             using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
@@ -223,7 +213,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     for (int i = 0; i < s1Verts.Count; i++)
                     {
                         XbimVector3D v = s1Verts[i].VertexGeometry - s2Verts[i].VertexGeometry;
-                        Assert.IsTrue(v.Length < m.ModelFactors.Precision, "vertices not the same");
+                        v.Length.Should().BeLessThan(m.ModelFactors.Precision, "vertices not the same");
                     }
                     transform.RotateAroundXAxis(Math.PI / 2);
                     transform.RotateAroundYAxis(Math.PI / 4);
@@ -232,7 +222,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     transform.OffsetY += 200;
                     transform.OffsetZ += 300;
                     solid2 = (IXbimSolid)solid.Transform(transform);
-                    Assert.IsTrue(Math.Abs(solid.Volume - solid2.Volume) < 0.001, "Volume differs");
+                    Math.Abs(solid.Volume - solid2.Volume).Should().BeLessThan(0.001, "Volume differs");
                     transform.Invert();
                     solid2 = (IXbimSolid)solid2.Transform(transform);
                     s1Verts = solid.Vertices.ToList();
@@ -240,7 +230,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     for (int i = 0; i < s1Verts.Count; i++)
                     {
                         XbimVector3D v = s1Verts[i].VertexGeometry - s2Verts[i].VertexGeometry;
-                        Assert.IsTrue(v.Length < m.ModelFactors.Precision, "vertices not the same");
+                        v.Length.Should().BeLessThan(m.ModelFactors.Precision, "vertices not the same");
                     }
                     txn.Commit();
                 }
