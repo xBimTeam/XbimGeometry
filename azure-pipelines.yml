@@ -194,7 +194,7 @@ jobs:
       versionEnvVar: packageversion
   - task: NuGetCommand@2
     name: 'Xbim_Publishing'
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/*'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/netcore'))
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
