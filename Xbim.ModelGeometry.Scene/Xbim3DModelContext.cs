@@ -569,6 +569,8 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="contextType"></param>
         /// <param name="requiredContextIdentifier"></param>
         /// <param name="logger"></param>
+        /// <param name="engineVersion"></param>
+        /// <param name="loggerFactory"></param>
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
