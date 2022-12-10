@@ -19,6 +19,7 @@
 #include "../Factories/ProfileFactory.h"
 #include "../Factories/BimAuthoringToolWorkArounds.h"
 #include "../Factories/MaterialFactory.h"
+#include "../Factories/ProjectionFactory.h"
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
@@ -201,6 +202,11 @@ namespace Xbim
 				if (_materialFactory == nullptr) _materialFactory = gcnew Xbim::Geometry::Factories::MaterialFactory(this);
 				return _materialFactory;
 			}
+			ProjectionFactory^ ModelGeometryService::GetProjectionFactory()
+			{
+				if (_projectionFactory == nullptr) _projectionFactory = gcnew Xbim::Geometry::Factories::ProjectionFactory(this);
+				return _projectionFactory;
+			}
 			Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ ModelGeometryService::GetBimAuthoringToolWorkArounds()
 			{
 				if (_bimAuthoringToolWorkArounds == nullptr) _bimAuthoringToolWorkArounds = gcnew Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds(this);
@@ -223,6 +229,7 @@ namespace Xbim
 			IXShapeFactory^ ModelGeometryService::ShapeFactory::get() { return GetShapeFactory(); }
 			IXProfileFactory^ ModelGeometryService::ProfileFactory::get() { return GetProfileFactory(); }
 			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
+			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
 		}
 
 

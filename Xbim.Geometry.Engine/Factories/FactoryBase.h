@@ -104,7 +104,7 @@ namespace Xbim
 				FactoryBase<T>(ModelGeometryService^ modelService, T* nativeFactory) : XbimHandle<T>(nativeFactory)
 				{
 					_modelService = modelService;
-					EXEC_NATIVE->SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
+					OccHandle().SetLogger(static_cast<WriteLog>(_modelService->LoggingService->LogDelegatePtr.ToPointer()));
 				}
 
 				virtual property IXModelGeometryService^ ModelGeometryService {IXModelGeometryService^ get() { return _modelService; }; }

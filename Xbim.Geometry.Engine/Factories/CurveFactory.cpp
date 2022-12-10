@@ -150,7 +150,7 @@ namespace Xbim
 					knotMultiplicities.SetValue(i, multiplicity);
 					i++;
 				}
-				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildBSplineCurve2d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
+				Handle(Geom2d_BSplineCurve) bSpline = OccHandle().BuildBSplineCurve2d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IfcBSplineCurveWithKnots", ifcBSplineCurveWithKnots);
 				return bSpline;
@@ -168,7 +168,7 @@ namespace Xbim
 				gp_Ax22d ax22d;
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d, ax22d))
 					throw RaiseGeometryFactoryException("Cannot build IIfcAxis2Placement2D, see logs", ifcCircle);
-				Handle(Geom2d_Circle) circle2d = EXEC_NATIVE->BuildCircle2d(ax22d, ifcCircle->Radius);
+				Handle(Geom2d_Circle) circle2d = OccHandle().BuildCircle2d(ax22d, ifcCircle->Radius);
 				if (circle2d.IsNull())
 					throw RaiseGeometryFactoryException("Cannot build 2D circle, see logs", ifcCircle);
 				return circle2d;
@@ -195,7 +195,7 @@ namespace Xbim
 						boundedCurve->Reverse();
 					segments.Append(boundedCurve);
 				}
-				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				Handle(Geom2d_BSplineCurve) bSpline = OccHandle().BuildCompositeCurve2d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
@@ -216,7 +216,7 @@ namespace Xbim
 				gp_Ax22d ax22d;
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement2d(axis2d, ax22d))
 					throw RaiseGeometryFactoryException("Cannot build IIfcAxis2Placement2D", axis2d);
-				Handle(Geom2d_Ellipse) elipse = EXEC_NATIVE->BuildEllipse2d(ax22d, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+				Handle(Geom2d_Ellipse) elipse = OccHandle().BuildEllipse2d(ax22d, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 				if (elipse.IsNull())
 					throw RaiseGeometryFactoryException("Cannot build a Elipse", ifcEllipse);
 				return elipse;
@@ -227,7 +227,7 @@ namespace Xbim
 			{
 				TColGeom2d_SequenceOfBoundedCurve segments;
 				BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments); //this may throw exceptions
-				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve2d(segments, ModelGeometryService->MinimumGap);
+				Handle(Geom2d_BSplineCurve) bspline = OccHandle().BuildIndexedPolyCurve2d(segments, ModelGeometryService->MinimumGap);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 				return bspline;
@@ -274,10 +274,10 @@ namespace Xbim
 							gp_Pnt2d start = poles.Value((int)indices[0]);
 							gp_Pnt2d mid = poles.Value((int)indices[1]);
 							gp_Pnt2d end = poles.Value((int)indices[2]);
-							Handle(Geom2d_Circle) circle = EXEC_NATIVE->BuildCircle2d(start, mid, end);
+							Handle(Geom2d_Circle) circle = OccHandle().BuildCircle2d(start, mid, end);
 							if (!circle.IsNull()) //it is a valid arc
 							{
-								Handle(Geom2d_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve2d(circle, start, end, ModelGeometryService->MinimumGap);
+								Handle(Geom2d_TrimmedCurve) arcSegment = OccHandle().BuildTrimmedCurve2d(circle, start, end, ModelGeometryService->MinimumGap);
 								if (arcSegment.IsNull())
 									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
 								segments.Append(arcSegment);
@@ -285,7 +285,7 @@ namespace Xbim
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
 							{
 								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
-								Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(start, end);
+								Handle(Geom2d_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine2d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 								segments.Append(lineSegment);
@@ -301,7 +301,7 @@ namespace Xbim
 
 							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
 							{
-								Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
+								Handle(Geom2d_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine2d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
 								segments.Append(lineSegment);
@@ -316,7 +316,7 @@ namespace Xbim
 					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
 					for (Standard_Integer p = 1; p < pointCount; p++)
 					{
-						Handle(Geom2d_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine2d(poles.Value(p), poles.Value(p + 1));
+						Handle(Geom2d_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine2d(poles.Value(p), poles.Value(p + 1));
 						if (lineSegment.IsNull())
 							throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
 						segments.Append(lineSegment);
@@ -338,7 +338,7 @@ namespace Xbim
 				gp_Vec2d direction;
 				if (!GEOMETRY_FACTORY->BuildDirection2d(ifcLine->Dir->Orientation, direction))
 					throw RaiseGeometryFactoryException("Cannot build a 2D direction", ifcLine->Dir->Orientation);
-				Handle(Geom2d_LineWithMagnitude) line = EXEC_NATIVE->BuildLine2d(origin, direction, ifcLine->Dir->Magnitude);
+				Handle(Geom2d_LineWithMagnitude) line = OccHandle().BuildLine2d(origin, direction, ifcLine->Dir->Magnitude);
 				if (line.IsNull())
 					throw RaiseGeometryFactoryException("Cannot build 2D line, see logs", ifcLine);
 				return line;
@@ -348,7 +348,7 @@ namespace Xbim
 			{
 				XCurveType curveType;
 				Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcOffsetCurve2D->BasisCurve, curveType); //throws exceptiom
-				Handle(Geom2d_OffsetCurve) offsetCurve = EXEC_NATIVE->BuildOffsetCurve2d(basisCurve, ifcOffsetCurve2D->Distance);
+				Handle(Geom2d_OffsetCurve) offsetCurve = OccHandle().BuildOffsetCurve2d(basisCurve, ifcOffsetCurve2D->Distance);
 				if (offsetCurve.IsNull())
 					throw RaiseGeometryFactoryException("Cannot build offset curve, see logs", ifcOffsetCurve2D);
 				return offsetCurve;
@@ -359,7 +359,7 @@ namespace Xbim
 				throw gcnew NotImplementedException("IIfcPcurve is not implemented");
 				//Handle(Geom_Surface) basisSurface = SURFACE_FACTORY->BuildSurface(ifcPcurve->BasisSurface); //throws Exceptions
 				//Handle(Geom2d_Curve) referenceCurve = CURVE_FACTORY->BuildCurve2d(ifcPcurve->ReferenceCurve, curveType); //throws Exceptions
-				//Handle(Geom_Curve) curve3d = EXEC_NATIVE->BuildCurveOnSurface(referenceCurve, basisSurface);
+				//Handle(Geom_Curve) curve3d = OccHandle().BuildCurveOnSurface(referenceCurve, basisSurface);
 			}
 
 			Handle(Geom2d_Curve) CurveFactory::BuildCurve2d(IIfcPolyline^ ifcPolyline)
@@ -374,7 +374,7 @@ namespace Xbim
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
-					Handle(Geom2d_TrimmedCurve) lineSeg = EXEC_NATIVE->BuildTrimmedLine2d(start, end);
+					Handle(Geom2d_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine2d(start, end);
 					if (lineSeg.IsNull())
 						throw RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
 					return lineSeg;
@@ -382,7 +382,7 @@ namespace Xbim
 				TColgp_Array1OfPnt2d points(1, ifcPolyline->Points->Count);
 				GEOMETRY_FACTORY->GetPolylinePoints2d(ifcPolyline, points);
 
-				Handle(Geom2d_BSplineCurve) polyline = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->Precision);
+				Handle(Geom2d_BSplineCurve) polyline = OccHandle().BuildPolyline2d(points, ModelGeometryService->Precision);
 				if (polyline.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IfcPolyline", ifcPolyline);
 				return polyline;
@@ -420,7 +420,7 @@ namespace Xbim
 					i++;
 				}
 
-				Handle(Geom2d_BSplineCurve) bspline = EXEC_NATIVE->BuildRationalBSplineCurve2d(poles, weights, knots, knotMultiplicities, (int)ifcRationalBSplineCurveWithKnots->Degree);
+				Handle(Geom2d_BSplineCurve) bspline = OccHandle().BuildRationalBSplineCurve2d(poles, weights, knots, knotMultiplicities, (int)ifcRationalBSplineCurveWithKnots->Degree);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcRationalBSplineCurveWithKnots could not be built.", ifcRationalBSplineCurveWithKnots);
 				return bspline;
@@ -576,7 +576,7 @@ namespace Xbim
 					knotMultiplicities.SetValue(i, multiplicity);
 					i++;
 				}
-				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildBSplineCurve3d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
+				Handle(Geom_BSplineCurve) bSpline = OccHandle().BuildBSplineCurve3d(poles, knots, knotMultiplicities, (int)ifcBSplineCurveWithKnots->Degree);
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IfcBSplineCurveWithKnots", ifcBSplineCurveWithKnots);
 				return bSpline;
@@ -590,7 +590,7 @@ namespace Xbim
 				gp_Ax2 pos;
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(axis3d, pos))
 					throw RaiseGeometryFactoryException("Failed to build IIfcAxis2Placement3D", axis3d);
-				Handle(Geom_Circle) circle = EXEC_NATIVE->BuildCircle3d(pos, ifcCircle->Radius);
+				Handle(Geom_Circle) circle = OccHandle().BuildCircle3d(pos, ifcCircle->Radius);
 				if (circle.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IIfcCircle", ifcCircle);
 				return circle;
@@ -617,7 +617,7 @@ namespace Xbim
 						boundedCurve->Reverse();
 					segments.Append(boundedCurve);
 				}
-				Handle(Geom_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve3d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
+				Handle(Geom_BSplineCurve) bSpline = OccHandle().BuildCompositeCurve3d(segments, ModelGeometryService->MinimumGap); //use minimum gap for tolerance to avoid issues with curves and line tolerance errors
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
@@ -660,7 +660,7 @@ namespace Xbim
 				gp_Ax2 pos;
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(axis3d, pos))
 					throw RaiseGeometryFactoryException("Failed to build IIfcAxis2Placement3D", ifcEllipse->Position);
-				Handle(Geom_Ellipse) elipse = EXEC_NATIVE->BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
+				Handle(Geom_Ellipse) elipse = OccHandle().BuildEllipse3d(pos, ifcEllipse->SemiAxis1, ifcEllipse->SemiAxis2);
 				if (elipse.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build IfcEllipse", ifcEllipse);
 				return elipse;
@@ -670,7 +670,7 @@ namespace Xbim
 			{
 				TColGeom_SequenceOfBoundedCurve segments;
 				BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments); //this may throw exceptions
-				Handle(Geom_BSplineCurve) bspline = EXEC_NATIVE->BuildIndexedPolyCurve3d(segments, ModelGeometryService->MinimumGap);
+				Handle(Geom_BSplineCurve) bspline = OccHandle().BuildIndexedPolyCurve3d(segments, ModelGeometryService->MinimumGap);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 				return bspline;
@@ -716,10 +716,10 @@ namespace Xbim
 							gp_Pnt start = poles.Value((int)indices[0]);
 							gp_Pnt mid = poles.Value((int)indices[1]);
 							gp_Pnt end = poles.Value((int)indices[2]);
-							Handle(Geom_Circle) circle = EXEC_NATIVE->BuildCircle3d(start, mid, end);
+							Handle(Geom_Circle) circle = OccHandle().BuildCircle3d(start, mid, end);
 							if (!circle.IsNull()) //it is a valid arc
 							{
-								Handle(Geom_TrimmedCurve) arcSegment = EXEC_NATIVE->BuildTrimmedCurve3d(circle, start, end, ModelGeometryService->MinimumGap);
+								Handle(Geom_TrimmedCurve) arcSegment = OccHandle().BuildTrimmedCurve3d(circle, start, end, ModelGeometryService->MinimumGap);
 								if (arcSegment.IsNull())
 									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
 								segments.Append(arcSegment);
@@ -727,7 +727,7 @@ namespace Xbim
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
 							{
 								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
-								Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(start, end);
+								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 								segments.Append(lineSegment);
@@ -743,7 +743,7 @@ namespace Xbim
 
 							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
 							{
-								Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
+								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
 								segments.Append(lineSegment);
@@ -758,7 +758,7 @@ namespace Xbim
 					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
 					for (Standard_Integer p = 1; p < pointCount; p++)
 					{
-						Handle(Geom_TrimmedCurve) lineSegment = EXEC_NATIVE->BuildTrimmedLine3d(poles.Value(p), poles.Value(p + 1));
+						Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(poles.Value(p), poles.Value(p + 1));
 						if (lineSegment.IsNull())
 							throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
 						segments.Append(lineSegment);
@@ -788,7 +788,7 @@ namespace Xbim
 				{
 					if (startParam == -1) startParam = geomCurve->FirstParameter();
 					if (endParam == -1) endParam = geomCurve->LastParameter();
-					Handle(Geom_Curve)  geomCurveTrimmed = EXEC_NATIVE->TrimDirectrix(geomCurve, startParam, endParam, ModelGeometryService->Precision);
+					Handle(Geom_Curve)  geomCurveTrimmed = OccHandle().TrimDirectrix(geomCurve, startParam, endParam, ModelGeometryService->Precision);
 					if (geomCurve.IsNull())
 						throw RaiseGeometryFactoryException("Directrix could not be trimmed");
 					return geomCurveTrimmed;
@@ -947,7 +947,7 @@ namespace Xbim
 				gp_Vec refDir;
 				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcOffsetCurve3D->RefDirection, refDir))
 					throw RaiseGeometryFactoryException("Cannot build offset curve reference direction", ifcOffsetCurve3D->RefDirection);
-				Handle(Geom_OffsetCurve) offsetCurve = EXEC_NATIVE->BuildOffsetCurve3d(basisCurve, refDir, ifcOffsetCurve3D->Distance);
+				Handle(Geom_OffsetCurve) offsetCurve = OccHandle().BuildOffsetCurve3d(basisCurve, refDir, ifcOffsetCurve3D->Distance);
 				if (offsetCurve.IsNull())
 					throw RaiseGeometryFactoryException("Cannot build offset curve, see logs", ifcOffsetCurve3D);
 				return offsetCurve;
@@ -1150,7 +1150,7 @@ namespace Xbim
 					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
-					Handle(Geom_TrimmedCurve) lineSeg = EXEC_NATIVE->BuildTrimmedLine3d(start, end);
+					Handle(Geom_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine3d(start, end);
 					if (lineSeg.IsNull())
 						throw RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
 					return lineSeg;

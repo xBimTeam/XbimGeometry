@@ -1,4 +1,4 @@
-#include "ProjectionService.h"
+#include "ProjectionFactory.h"
 #include <TopoDS_Shape.hxx>
 #include <Poly_Polygon2D.hxx>
 
@@ -20,9 +20,9 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		namespace Services
+		namespace Factories
 		{
-			IXFootprint^ ProjectionService::CreateFootprint(IXShape^ shape)
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape)
 			{
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
@@ -34,25 +34,25 @@ namespace Xbim
 				};
 				double deflection = isMetric ? oneMillimeter * 25 : oneMillimeter * 25.4;	
 				double angularDeflection = M_PI / 6;
-				OccHandle().CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref());
 				return footprint;
 			}
 
-			IXFootprint^ ProjectionService::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection)
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection)
 			{
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
-				OccHandle().CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref());
 				return footprint;
 			}
-			IXCompound^ ProjectionService::GetOutline(IXShape^ shape)
+			IXCompound^ ProjectionFactory::GetOutline(IXShape^ shape)
 			{
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
-				TopoDS_Compound outline = OccHandle().GetOutline(topoShape);
+				TopoDS_Compound outline = EXEC_NATIVE->GetOutline(topoShape);
 				return  (IXCompound^)XShape::GetXbimShape(outline);
 			}
 
-			IEnumerable<IXFace^>^ ProjectionService::CreateSection(IXShape^ shape, IXPlane^ cutPlane)
+			IEnumerable<IXFace^>^ ProjectionFactory::CreateSection(IXShape^ shape, IXPlane^ cutPlane)
 			{
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
 				XPlane^ plane = dynamic_cast<XPlane^>(cutPlane);
@@ -60,7 +60,7 @@ namespace Xbim
 					throw gcnew InvalidCastException("Unsupported native plane object");
 				TopTools_ListOfShape faces;
 				
-				bool success = OccHandle().CreateSection(topoShape, plane->Ref(), _modelService->Precision, faces);
+				bool success = EXEC_NATIVE->CreateSection(topoShape, plane->Ref(), _modelService->Precision, faces);
 				if (!success) 
 					throw gcnew XbimGeometryServiceException("Failed to create section");
 				List<IXFace^>^ faceList = gcnew List<IXFace^>(faces.Size());

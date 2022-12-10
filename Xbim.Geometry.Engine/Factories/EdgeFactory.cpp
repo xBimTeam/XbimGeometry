@@ -14,7 +14,7 @@ namespace Xbim
 		{
 			IXEdge^ EdgeFactory::Build(IXPoint^ start, IXPoint^ end)
 			{
-				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(gp_Pnt(start->X, start->Y, start->Z), gp_Pnt(end->X, end->Y, end->Z));
+				TopoDS_Edge edge = OccHandle().BuildEdge(gp_Pnt(start->X, start->Y, start->Z), gp_Pnt(end->X, end->Y, end->Z));
 				if (edge.IsNull())
 					RaiseGeometryFactoryException("Failed to build edge, invalid points, see logs");
 				return gcnew XEdge(edge);
@@ -31,7 +31,7 @@ namespace Xbim
 				if (curve->Is3d)
 				{
 					Handle(Geom_Curve) hCurve = XCurve::GeomCurve(curve);
-					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve);
+					TopoDS_Edge edge = OccHandle().BuildEdge(hCurve);
 					if (edge.IsNull())
 						RaiseGeometryFactoryException("Failed to build edge, invalid curve 3D");
 					return gcnew XEdge(edge);
@@ -39,7 +39,7 @@ namespace Xbim
 				else
 				{
 					const Handle(Geom2d_Curve) hCurve = XCurve2d::GeomCurve2d(curve);
-					TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve);
+					TopoDS_Edge edge = OccHandle().BuildEdge(hCurve);
 					if (edge.IsNull())
 						RaiseGeometryFactoryException("Failed to build edge, invalid curve 2D");
 					return gcnew XEdge(edge);
@@ -65,14 +65,14 @@ namespace Xbim
 
 			TopoDS_Edge EdgeFactory::BuildEdge(Handle(Geom2d_Curve) hCurve2d)
 			{
-				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve2d);
+				TopoDS_Edge edge = OccHandle().BuildEdge(hCurve2d);
 				if (edge.IsNull())
 					RaiseGeometryFactoryException("Failed to build edge, invalid curve 2D");
 				return edge;
 			}
 			TopoDS_Edge EdgeFactory::BuildEdge(Handle(Geom_Curve) hCurve3d)
 			{
-				TopoDS_Edge edge = EXEC_NATIVE->BuildEdge(hCurve3d);
+				TopoDS_Edge edge = OccHandle().BuildEdge(hCurve3d);
 				if (edge.IsNull())
 					RaiseGeometryFactoryException("Failed to build edge, invalid curve 3D");
 				return edge;
@@ -120,11 +120,11 @@ namespace Xbim
 
 				if (edgeCurve->IsClosed() && startVertex.IsSame(endVertex))// we have a closed shape and we want the whole loop
 				{				
-					edge = EXEC_NATIVE->BuildEdge(edgeCurve);
+					edge = OccHandle().BuildEdge(edgeCurve);
 				}
 				else
 				{
-					edge = EXEC_NATIVE->BuildEdge(edgeCurve,startVertex, endVertex, ModelGeometryService->MinimumGap);
+					edge = OccHandle().BuildEdge(edgeCurve,startVertex, endVertex, ModelGeometryService->MinimumGap);
 				}
 
 				return edge;

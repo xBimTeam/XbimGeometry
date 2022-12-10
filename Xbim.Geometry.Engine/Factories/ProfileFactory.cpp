@@ -64,7 +64,7 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
 			{
-				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				TopoDS_Face face = OccHandle().MakeFace(wire);
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Profile cound not be built from wire");
 				return face;
@@ -140,7 +140,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
 
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
-				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				TopoDS_Face face = OccHandle().MakeFace(wire);
 
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Failed to create IfcArbitraryClosedProfileDef", arbitraryClosedProfile);

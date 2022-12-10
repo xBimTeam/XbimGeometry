@@ -29,7 +29,7 @@ namespace Xbim
 
 			gp_Vec Xbim::Geometry::Factories::FaceFactory::Normal(const TopoDS_Face& face)
 			{
-				return EXEC_NATIVE->Normal(face);
+				return OccHandle().Normal(face);
 			}
 
 			TopoDS_Face Xbim::Geometry::Factories::FaceFactory::BuildPlanarFace(IXPlane^ planeDef)
@@ -175,7 +175,7 @@ namespace Xbim
 			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops)
 			{
 
-				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
+				TopoDS_Face face = OccHandle().BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Could not apply inner bound to face, it has been ignored");
 

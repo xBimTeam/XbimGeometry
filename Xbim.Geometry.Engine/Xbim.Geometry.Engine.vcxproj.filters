@@ -378,10 +378,10 @@
     <ClInclude Include="Services\ServiceCollectionExtensions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Services\ProjectionService.h">
+    <ClInclude Include="Factories\ProjectionFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Services\Unmanaged\NProjectionService.h">
+    <ClInclude Include="Factories\Unmanaged\NProjectionFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BRep\Unmanaged\NFootprint.h">
@@ -677,10 +677,10 @@
     <ClCompile Include="Services\ServiceCollectionExtensions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Services\ProjectionService.cpp">
+    <ClCompile Include="Factories\ProjectionFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Services\Unmanaged\NProjectionService.cpp">
+    <ClCompile Include="Factories\Unmanaged\NProjectionFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BRep\Unmanaged\NFootprint.cpp">

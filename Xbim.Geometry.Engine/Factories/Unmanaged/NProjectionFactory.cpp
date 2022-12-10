@@ -1,4 +1,4 @@
-#include "NProjectionService.h"
+#include "NProjectionFactory.h"
 
 #include <HLRBRep_HLRToShape.hxx>
 #include <BRep_Builder.hxx>
@@ -29,7 +29,7 @@
 #include <gp_Ax2.hxx>
 #include <BRepAlgo_FaceRestrictor.hxx>
 
-int NProjectionService::GetOrAddVertex(
+int NProjectionFactory::GetOrAddVertex(
 	BRepMesh_VertexInspector& anInspector,
 	VertexCellFilter& theCells,
 	//std::map<int, std::set<int>>& arcs,
@@ -57,7 +57,7 @@ int NProjectionService::GetOrAddVertex(
 
 	return id;
 }
-bool NProjectionService::UpdateLeftMostPoint(gp_XY& leftMost, double x, double y, double tolerance)
+bool NProjectionFactory::UpdateLeftMostPoint(gp_XY& leftMost, double x, double y, double tolerance)
 {
 	if (x <= leftMost.X()) //its a candidate for left most, check if it is equal and lowest
 	{
@@ -81,7 +81,7 @@ bool NProjectionService::UpdateLeftMostPoint(gp_XY& leftMost, double x, double y
 	return false;
 }
 
-void NProjectionService::FindOuterLoops(BRepMesh_VertexInspector& anInspector, std::map<int, std::set<int>>& arcs, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint)
+void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, std::map<int, std::set<int>>& arcs, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint)
 {
 
 	if (arcs.size() == 0) return;
@@ -202,7 +202,7 @@ void NProjectionService::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 
 
 
-void NProjectionService::CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint)
+void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint)
 {
 
 	const double halfPi = std::_Pi / 2;
@@ -410,7 +410,7 @@ void NProjectionService::CreateFootPrint(const TopoDS_Shape& shape, double linea
 
 }
 
-void NProjectionService::ConvertToLinearSegments(const TopoDS_Edge& edge, TColGeom2d_SequenceOfCurve& segments, double tolerance)
+void NProjectionFactory::ConvertToLinearSegments(const TopoDS_Edge& edge, TColGeom2d_SequenceOfCurve& segments, double tolerance)
 {
 	TopLoc_Location location;
 
@@ -442,7 +442,7 @@ void NProjectionService::ConvertToLinearSegments(const TopoDS_Edge& edge, TColGe
 	}
 }
 
-bool NProjectionService::BuildSegment(gp_XYZ pointA, gp_XYZ pointB, double tolerance, Handle(Geom2d_TrimmedCurve)& segment)
+bool NProjectionFactory::BuildSegment(gp_XYZ pointA, gp_XYZ pointB, double tolerance, Handle(Geom2d_TrimmedCurve)& segment)
 {
 	// z is always 0 in this situation, due to the  selected projection plane
 	gp_XY a(pointA.X(), pointA.Y()); gp_XY b(pointB.X(), pointB.Y());
@@ -454,7 +454,7 @@ bool NProjectionService::BuildSegment(gp_XYZ pointA, gp_XYZ pointB, double toler
 }
 
 
-TopoDS_Compound NProjectionService::GetOutline(const TopoDS_Shape& shape)
+TopoDS_Compound NProjectionFactory::GetOutline(const TopoDS_Shape& shape)
 {
 	HLRAlgo_Projector aProjector; //create an axonometric projector with 0 focus and a plane it the XY plane at height srZmin
 
@@ -483,7 +483,7 @@ TopoDS_Compound NProjectionService::GetOutline(const TopoDS_Shape& shape)
 
 }
 
-bool NProjectionService::CreateSection(const TopoDS_Shape& shape, const Handle(Geom_Surface)& cutSurface, double tolerance, TopTools_ListOfShape& result)
+bool NProjectionFactory::CreateSection(const TopoDS_Shape& shape, const Handle(Geom_Surface)& cutSurface, double tolerance, TopTools_ListOfShape& result)
 {
 	try
 	{
@@ -541,7 +541,7 @@ bool NProjectionService::CreateSection(const TopoDS_Shape& shape, const Handle(G
 	return false;
 }
 
-TopoDS_Compound NProjectionService::FindClosedWires(const TopTools_ListOfShape& edgeList, double tolerance)
+TopoDS_Compound NProjectionFactory::FindClosedWires(const TopTools_ListOfShape& edgeList, double tolerance)
 {
 	Handle(TopTools_HSequenceOfShape) edges = new TopTools_HSequenceOfShape;
 	Handle(TopTools_HSequenceOfShape) wires;
@@ -566,7 +566,7 @@ TopoDS_Compound NProjectionService::FindClosedWires(const TopTools_ListOfShape& 
 /// <param name="anInspector"></param>
 /// <param name="arcs"></param>
 /// <returns></returns>
-int NProjectionService::FindNextNearestOuterPoint(int currentPointIndex, int previousPointIndex, gp_XY currentPoint, gp_Dir2d currentDir, BRepMesh_VertexInspector& anInspector,
+int NProjectionFactory::FindNextNearestOuterPoint(int currentPointIndex, int previousPointIndex, gp_XY currentPoint, gp_Dir2d currentDir, BRepMesh_VertexInspector& anInspector,
 	const std::map<int, std::set<int>>& arcs)
 {
 
@@ -615,7 +615,7 @@ int NProjectionService::FindNextNearestOuterPoint(int currentPointIndex, int pre
 /// </summary>
 /// <param name="connectedTo"></param>
 /// <param name="arcs"></param>
-void NProjectionService::ConnectedPoints(int connectedTo, const std::map<int, std::set<int>>& arcs, std::set<int>& connected)
+void NProjectionFactory::ConnectedPoints(int connectedTo, const std::map<int, std::set<int>>& arcs, std::set<int>& connected)
 {
 	auto& insertResult = connected.insert(connectedTo);
 	if (insertResult.second) //we have not previously inserted this element

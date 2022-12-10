@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 
+
 namespace Xbim.Geometry.Engine.Interop.Tests.Logging
 {
-    using System;
-    using Microsoft.Extensions.Logging;
+
 
     public static class TestLoggerExtensions
     {
@@ -37,7 +38,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.Logging
         }
         public void Dispose()
         {
-            
+
         }
     }
     public static class TestLogger

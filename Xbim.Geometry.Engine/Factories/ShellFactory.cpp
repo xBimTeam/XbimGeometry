@@ -55,7 +55,7 @@ namespace Xbim
 						}
 						faceMesh.push_back(faceLoops);
 					}
-					TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					TopoDS_Shell shell = OccHandle().BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (shell.IsNull())
 						throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
 					isCheckedClosed = NotChecked;
@@ -125,7 +125,7 @@ namespace Xbim
 					faceMesh.push_back(faceLoops);
 				}
 
-				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+				TopoDS_Shell shell = OccHandle().BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build PolygonalFaceSet", faceSet);
 				isCheckedClosed = NotChecked;

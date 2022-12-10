@@ -41,6 +41,7 @@ namespace Xbim
 			ref class ProfileFactory;
 			ref class BIMAuthoringToolWorkArounds;
 			ref class MaterialFactory;
+			ref class ProjectionFactory;
 		}
 	}
 }
@@ -81,6 +82,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ProfileFactory^ _profileFactory;
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ _bimAuthoringToolWorkArounds;
 				Xbim::Geometry::Factories::MaterialFactory^ _materialFactory;
+				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
 			internal:
 				//Factories
 				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
@@ -98,6 +100,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ProfileFactory^ GetProfileFactory();
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ GetBimAuthoringToolWorkArounds();
 				Xbim::Geometry::Factories::MaterialFactory^ GetMaterialFactory();
+				Xbim::Geometry::Factories::ProjectionFactory^ GetProjectionFactory();
 			public:
 
 				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
@@ -142,6 +145,7 @@ namespace Xbim
 				virtual property IXShapeFactory^ ShapeFactory {IXShapeFactory^ get(); }
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
 				virtual property IXMaterialFactory^ MaterialFactory {IXMaterialFactory^ get(); }
+				virtual property IXProjectionFactory^ ProjectionFactory {IXProjectionFactory^ get(); }
 
 
 #pragma region Logging and Exceptions

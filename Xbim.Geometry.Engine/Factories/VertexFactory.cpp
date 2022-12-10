@@ -5,9 +5,9 @@ using namespace Xbim::Geometry::BRep;
 TopoDS_Vertex Xbim::Geometry::Factories::VertexFactory::Build(IIfcCartesianPoint^ ifcCartesianPoint)
 {
 	if (3 == (int)ifcCartesianPoint->Dim)
-		return EXEC_NATIVE->BuildVertex(ifcCartesianPoint->X, ifcCartesianPoint->Y, ifcCartesianPoint->Z, ModelGeometryService->Precision);
+		return OccHandle().BuildVertex(ifcCartesianPoint->X, ifcCartesianPoint->Y, ifcCartesianPoint->Z, ModelGeometryService->Precision);
 	else
-		return EXEC_NATIVE->BuildVertex(ifcCartesianPoint->X, ifcCartesianPoint->Y, 0., ModelGeometryService->Precision);
+		return OccHandle().BuildVertex(ifcCartesianPoint->X, ifcCartesianPoint->Y, 0., ModelGeometryService->Precision);
 }
 
 bool Xbim::Geometry::Factories::VertexFactory::IsGeometricallySame(const TopoDS_Vertex& vertex1, const TopoDS_Vertex& vertex2)
@@ -18,7 +18,7 @@ bool Xbim::Geometry::Factories::VertexFactory::IsGeometricallySame(const TopoDS_
 
 IXVertex^ Xbim::Geometry::Factories::VertexFactory::Build(double x, double y, double z)
 {
-	return gcnew XVertex(EXEC_NATIVE->BuildVertex(x, y, z));
+	return gcnew XVertex(OccHandle().BuildVertex(x, y, z));
 }
 
 

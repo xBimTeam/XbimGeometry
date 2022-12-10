@@ -57,7 +57,7 @@ namespace Xbim
 
 			TopoDS_Wire WireFactory::BuildWire3d(const TopTools_SequenceOfShape& edgeList)
 			{
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edgeList);
+				TopoDS_Wire wire = OccHandle().BuildWire(edgeList);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Edge list could not be built as a wire");
 				return wire;
@@ -106,7 +106,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
 				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcBSplineCurveWithKnots); //throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				TopoDS_Wire wire = OccHandle().BuildWire(edge);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Circle could not be built as a wire", ifcBSplineCurveWithKnots);
 				return wire;
@@ -115,7 +115,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire(IIfcCircle^ ifcCircle)
 			{
 				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCircle); //throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				TopoDS_Wire wire = OccHandle().BuildWire(edge);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Circle could not be built as a wire", ifcCircle);
 				return wire;
@@ -126,7 +126,7 @@ namespace Xbim
 				if (asSingleEdge)
 				{
 					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCompositeCurve); //throws exception
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					TopoDS_Wire wire = OccHandle().BuildWire(edge);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -135,7 +135,7 @@ namespace Xbim
 				{
 					TColGeom2d_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildCompositeCurveSegments2d(ifcCompositeCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					TopoDS_Wire wire = OccHandle().BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -145,7 +145,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire(IIfcEllipse^ ifcEllipse)
 			{
 				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcEllipse); //throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				TopoDS_Wire wire = OccHandle().BuildWire(edge);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcEllipse could not be built as a wire", ifcEllipse);
 				return wire;
@@ -156,7 +156,7 @@ namespace Xbim
 				if (asSingleEdge)
 				{
 					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcIndexedPolyCurve); //throws exception
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					TopoDS_Wire wire = OccHandle().BuildWire(edge);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -165,7 +165,7 @@ namespace Xbim
 				{
 					TColGeom2d_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					TopoDS_Wire wire = OccHandle().BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -175,7 +175,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire(IIfcLine^ ifcLine)
 			{
 				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcLine); //throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				TopoDS_Wire wire = OccHandle().BuildWire(edge);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcLine could not be built as a wire", ifcLine);
 				return wire;
@@ -184,7 +184,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge)
 			{
 				TopoDS_Wire basisWire = BuildWire(ifcOffsetCurve2D->BasisCurve, asSingleEdge);//throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildOffset(basisWire, ifcOffsetCurve2D->Distance);
+				TopoDS_Wire wire = OccHandle().BuildOffset(basisWire, ifcOffsetCurve2D->Distance);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcOffsetCurve2D could not be built as a wire", ifcOffsetCurve2D);
 				return wire;
@@ -195,7 +195,7 @@ namespace Xbim
 				if (asSingleEdge)
 				{
 					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcPolyline); //throws exception
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					TopoDS_Wire wire = OccHandle().BuildWire(edge);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 					return wire;
@@ -209,7 +209,7 @@ namespace Xbim
 					{
 						points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint2d(cp));
 					}
-					TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->Precision);
+					TopoDS_Wire wire = OccHandle().BuildPolyline2d(points, ModelGeometryService->Precision);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 					return wire;
@@ -219,7 +219,7 @@ namespace Xbim
 			TopoDS_Wire WireFactory::BuildWire(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots)
 			{
 				TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcRationalBSplineCurveWithKnots); //throws exception
-				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+				TopoDS_Wire wire = OccHandle().BuildWire(edge);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcLine could not be built as a wire", ifcRationalBSplineCurveWithKnots);
 				return wire;
@@ -279,7 +279,7 @@ namespace Xbim
 				}
 				else
 				{
-					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelGeometryService->MinimumGap);
+					TopoDS_Wire trimmedWire = OccHandle().BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelGeometryService->MinimumGap);
 					if (trimmedWire.IsNull())
 						throw RaiseGeometryFactoryException("IfcTrimmedCurve could not be built as a wire", ifcTrimmedCurve);
 					return trimmedWire;
@@ -303,11 +303,11 @@ namespace Xbim
 				{
 					points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint3d(cp));
 				}
-				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, -1, -1, ModelGeometryService->Precision);
+				TopoDS_Wire wire = OccHandle().BuildPolyline3d(points, -1, -1, ModelGeometryService->Precision);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Resulting wire is empty");
 
-				if (EXEC_NATIVE->IsClosed(wire, ModelGeometryService->Precision))
+				if (OccHandle().IsClosed(wire, ModelGeometryService->Precision))
 					wire.Closed(true);
 				return gcnew XWire(wire);
 			}
@@ -380,7 +380,7 @@ namespace Xbim
 				if (asSingleEdge)
 				{
 					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcCompositeCurve); //throws exception
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					TopoDS_Wire wire = OccHandle().BuildWire(edge);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -389,7 +389,7 @@ namespace Xbim
 				{
 					TColGeom_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildCompositeCurveSegments3d(ifcCompositeCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					TopoDS_Wire wire = OccHandle().BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 					return wire;
@@ -401,7 +401,7 @@ namespace Xbim
 				if (asSingleEdge)
 				{
 					TopoDS_Edge edge = EDGE_FACTORY->BuildEdge(ifcIndexedPolyCurve); //throws exception
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(edge);
+					TopoDS_Wire wire = OccHandle().BuildWire(edge);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -410,7 +410,7 @@ namespace Xbim
 				{
 					TColGeom_SequenceOfBoundedCurve segments;
 					CURVE_FACTORY->BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments);
-					TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					TopoDS_Wire wire = OccHandle().BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 					return wire;
@@ -423,7 +423,7 @@ namespace Xbim
 				if (double::IsNaN(startParam) && double::IsNaN(endParam)) return wire; //no trimming required
 				if (double::IsNaN(startParam) || startParam < 0) startParam = 0;
 				if (double::IsNaN(endParam) || endParam < 0) endParam = double::PositiveInfinity;
-				TopoDS_Wire directrix = EXEC_NATIVE->BuildDirectrixWire(wire, startParam, endParam, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+				TopoDS_Wire directrix = OccHandle().BuildDirectrixWire(wire, startParam, endParam, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);
 				return directrix;

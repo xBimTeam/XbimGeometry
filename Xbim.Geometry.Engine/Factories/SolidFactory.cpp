@@ -29,7 +29,7 @@ namespace Xbim
 		{
 			bool SolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 			{
-				return EXEC_NATIVE->TryUpgrade(solid, shape);
+				return OccHandle().TryUpgrade(solid, shape);
 			}
 			IXShape^ ShapeFactory::Convert(System::String^ brepStr)
 			{
@@ -178,7 +178,7 @@ namespace Xbim
 				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(extrudedSolid->SweptArea); //if this fails it will throw an exception
 				if (sweptArea.IsNull())
 					throw RaiseGeometryFactoryException("Extruded Solid Swept area could not be built", extrudedSolid->SweptArea);
-				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
+				TopoDS_Solid solid = OccHandle().BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
 				if (solid.IsNull() || solid.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Extruded Solid could not be built", extrudedSolid);
 				return solid;
@@ -188,7 +188,7 @@ namespace Xbim
 			{
 				CheckClosedStatus isCheckedClosed;
 				TopoDS_Shell shell =  SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isCheckedClosed); //throws exeptions
-				return EXEC_NATIVE->MakeSolid(shell);
+				return OccHandle().MakeSolid(shell);
 			}
 
 			
@@ -212,7 +212,7 @@ namespace Xbim
 					switch (isCheckedClosed)
 					{
 					case CheckAndClosed:
-						builder.Add(compound, EXEC_NATIVE->MakeSolid(shell));
+						builder.Add(compound, OccHandle().MakeSolid(shell));
 						break;
 					case CheckedNotClosed:		//Nb 	IfcFaceBasedSurfaceModel do not require to be made of solids or add up to a solid		
 					case NotChecked:
@@ -269,7 +269,7 @@ namespace Xbim
 			{
 				CheckClosedStatus isCheckedClosed;
 				TopoDS_Shell shell = SHELL_FACTORY->BuildPolygonalFaceSet(ifcPolygonalFaceSet, isCheckedClosed);
-				return EXEC_NATIVE->MakeSolid(shell);
+				return OccHandle().MakeSolid(shell);
 			}
 			;
 
@@ -277,7 +277,7 @@ namespace Xbim
 			{
 				CheckClosedStatus isCheckedClosed;
 				TopoDS_Shell shell =   SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isCheckedClosed);
-				return EXEC_NATIVE->MakeSolid(shell);
+				return OccHandle().MakeSolid(shell);
 			}
 
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
@@ -328,7 +328,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg block has invalid axis placement", ifcBlock->Position);
 				if (ifcBlock->XLength <= 0 || ifcBlock->YLength <= 0 || ifcBlock->ZLength <= 0)
 					throw RaiseGeometryFactoryException("Csg block is a solid with zero volume", ifcBlock);
-				return EXEC_NATIVE->BuildBlock(ax2, ifcBlock->XLength, ifcBlock->YLength, ifcBlock->ZLength);
+				return OccHandle().BuildBlock(ax2, ifcBlock->XLength, ifcBlock->YLength, ifcBlock->ZLength);
 
 			}
 
@@ -339,7 +339,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg rectangle pyramid has invalid axis placement", ifcRectangularPyramid->Position);
 				if (ifcRectangularPyramid->XLength <= 0 || ifcRectangularPyramid->YLength <= 0 || ifcRectangularPyramid->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg Rectangular Pyramid is a solid with zero volume", ifcRectangularPyramid);
-				return EXEC_NATIVE->BuildRectangularPyramid(ax2, ifcRectangularPyramid->XLength, ifcRectangularPyramid->YLength, ifcRectangularPyramid->Height);
+				return OccHandle().BuildRectangularPyramid(ax2, ifcRectangularPyramid->XLength, ifcRectangularPyramid->YLength, ifcRectangularPyramid->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildRightCircularCone(IIfcRightCircularCone^ ifcRightCircularCone)
@@ -349,7 +349,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg circular cone has invalid axis placement", ifcRightCircularCone->Position);
 				if (ifcRightCircularCone->BottomRadius <= 0 || ifcRightCircularCone->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg RightCircularCone is a solid with zero volume");
-				return EXEC_NATIVE->BuildRightCircularCone(ax2, ifcRightCircularCone->BottomRadius, ifcRightCircularCone->Height);
+				return OccHandle().BuildRightCircularCone(ax2, ifcRightCircularCone->BottomRadius, ifcRightCircularCone->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder))
@@ -359,7 +359,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg circular cylinder has invalid axis placement", ifcRightCircularCylinder->Position);
 				if (ifcRightCircularCylinder->Radius <= 0 || ifcRightCircularCylinder->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg RightCircularCylinder is a solid with zero volume");
-				return EXEC_NATIVE->BuildRightCylinder(ax2, ifcRightCircularCylinder->Radius, ifcRightCircularCylinder->Height);
+				return OccHandle().BuildRightCylinder(ax2, ifcRightCircularCylinder->Radius, ifcRightCircularCylinder->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildSphere(IIfcSphere^ ifcSphere)
@@ -369,7 +369,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg sphere has invalid axis placement", ifcSphere->Position);
 				if (ifcSphere->Radius <= 0)
 					throw RaiseGeometryFactoryException("Csg Sphere is a solid with zero volume", ifcSphere);
-				return EXEC_NATIVE->BuildSphere(ax2, ifcSphere->Radius);
+				return OccHandle().BuildSphere(ax2, ifcSphere->Radius);
 			}
 
 		}

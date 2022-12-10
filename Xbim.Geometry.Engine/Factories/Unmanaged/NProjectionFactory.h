@@ -1,5 +1,5 @@
 #pragma once
-#include "NLoggingService.h"
+#include "NFactoryBase.h"
 
 #include <TopoDS_Edge.hxx>
 #include <Poly_Polygon2D.hxx>
@@ -18,13 +18,11 @@
 class BRepMesh_VertexInspector;
 typedef NCollection_CellFilter<BRepMesh_VertexInspector> VertexCellFilter;
 
-class NProjectionService
+class NProjectionFactory : public NFactoryBase
 {
-private:
-	NLoggingService* pLoggingService;
 
 public:
-	void SetLogger(NLoggingService* loggingService) { pLoggingService = loggingService; };
+	
 	void CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint);
 	TopoDS_Compound GetOutline(const TopoDS_Shape& shape);
 	bool CreateSection(const TopoDS_Shape& shape, const Handle(Geom_Surface)& cutSurface, double tolerance, TopTools_ListOfShape& result);

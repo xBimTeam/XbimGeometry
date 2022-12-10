@@ -65,7 +65,7 @@ namespace Xbim
 				gp_Vec normal;
 				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
 					throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
-				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal);
+				Handle(Geom_Plane) plane = OccHandle().BuildPlane(origin, normal);
 				if (plane.IsNull())
 					throw RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
 				return plane;
@@ -122,7 +122,7 @@ namespace Xbim
 				BIM_WORKAROUNDS->FixRevitSweptSurfaceExtrusionInFeet(extrude);
 				BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
 
-				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = OccHandle().BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
 				if(surface.IsNull())
 					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);			
 				return surface;

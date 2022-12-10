@@ -98,13 +98,13 @@ namespace Xbim
 			bool GeometryFactory::BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir2d)
 			{
 				if ((int)ifcDir->Dim != 2) return false;
-				return EXEC_NATIVE->BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], dir2d);
+				return OccHandle().BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], dir2d);
 			}
 
 
 			bool GeometryFactory::BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& dir)
 			{
-				return EXEC_NATIVE->BuildDirection3d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], ifcDir->DirectionRatios[2], dir);
+				return OccHandle().BuildDirection3d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], ifcDir->DirectionRatios[2], dir);
 			}
 
 			bool GeometryFactory::BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec)
@@ -135,7 +135,7 @@ namespace Xbim
 			{
 				if (axis2->Axis == nullptr || axis2->RefDirection == nullptr) //both have to be given if one is null use the defaults
 				{
-					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), gp::DZ(), gp::DX(), ax2))
+					if (OccHandle().BuildAxis2Placement3d(BuildPoint3d(axis2->Location), gp::DZ(), gp::DX(), ax2))
 						return true;
 				}
 				else
@@ -144,7 +144,7 @@ namespace Xbim
 					gp_Vec refDir;
 					if (!BuildDirection3d(axis2->Axis, axis)) return false;
 					if (!BuildDirection3d(axis2->RefDirection, refDir)) return false;
-					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), axis, refDir, ax2))
+					if (OccHandle().BuildAxis2Placement3d(BuildPoint3d(axis2->Location), axis, refDir, ax2))
 						return true;
 				}
 				return false;
@@ -157,13 +157,13 @@ namespace Xbim
 					return false;
 				if (axis2d->RefDirection == nullptr) //both have to be given if one is null use the defaults
 				{
-					return EXEC_NATIVE->BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
+					return OccHandle().BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
 				}
 				else
 				{
 					gp_Vec2d refDir;
 					if (!BuildDirection2d(axis2d->RefDirection, refDir)) return false;
-					return EXEC_NATIVE->BuildAxis2Placement2d(loc, refDir, ax22);
+					return OccHandle().BuildAxis2Placement2d(loc, refDir, ax22);
 				}
 			}
 
@@ -213,7 +213,7 @@ namespace Xbim
 				gp_XY xDir(1, 0);
 				if (axis2D->RefDirection != nullptr)
 					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
-				return EXEC_NATIVE->ToLocation(pnt2d, xDir, location);
+				return OccHandle().ToLocation(pnt2d, xDir, location);
 			}
 
 			bool GeometryFactory::ToLocation(IIfcAxis2Placement3D^ axis3D, TopLoc_Location& location)
