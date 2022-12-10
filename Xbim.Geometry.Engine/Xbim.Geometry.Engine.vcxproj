@@ -182,6 +182,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
+    <ClInclude Include="BRep\XCylindricalSurface.h" />
+    <ClInclude Include="BRep\XDirection.h" />
     <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
@@ -265,10 +268,12 @@
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
     <ClInclude Include="Services\ModelGeometryService.h" />
+    <ClInclude Include="Services\ProjectionService.h" />
     <ClInclude Include="Services\ServiceCollectionExtensions.h" />
     <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
     <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
     <ClInclude Include="Factories\VertexFactory.h" />
+    <ClInclude Include="Services\Unmanaged\NProjectionService.h" />
     <ClInclude Include="Visual\ColourRGB.h" />
     <ClInclude Include="Visual\VisualMaterial.h" />
     <ClInclude Include="Visual\XbimShapeColour.h" />
@@ -305,6 +310,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
+    <ClCompile Include="BRep\Unmanaged\NFootprint.cpp" />
+    <ClCompile Include="BRep\XEllipse.cpp" />
     <ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="BRep\XAxisAlignedBox.cpp" />
     <ClCompile Include="BRep\XBSplineCurve.cpp" />
@@ -365,10 +372,12 @@
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
     <ClCompile Include="Services\ModelGeometryService.cpp" />
+    <ClCompile Include="Services\ProjectionService.cpp" />
     <ClCompile Include="Services\ServiceCollectionExtensions.cpp" />
     <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
     <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
     <ClCompile Include="Factories\VertexFactory.cpp" />
+    <ClCompile Include="Services\Unmanaged\NProjectionService.cpp" />
     <ClCompile Include="Visual\ColourRGB.cpp" />
     <ClCompile Include="Visual\VisualMaterial.cpp" />
     <ClCompile Include="Visual\XbimShapeColour.cpp" />
