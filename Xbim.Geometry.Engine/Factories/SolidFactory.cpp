@@ -31,51 +31,12 @@ namespace Xbim
 			{
 				return OccHandle().TryUpgrade(solid, shape);
 			}
-			IXShape^ ShapeFactory::Convert(System::String^ brepStr)
+
+			IXShape^ SolidFactory::Convert(System::String^ brepStr)
 			{
-				const char* cStr = (const char*)(Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
-				try
-				{
-					TopoDS_Shape shape = OccHandle().Convert(cStr);
-					switch (shape.ShapeType())
-					{
-					case TopAbs_VERTEX:
-						return gcnew XVertex(TopoDS::Vertex(shape));
-					case TopAbs_EDGE:
-						return gcnew XEdge(TopoDS::Edge(shape));
-					case TopAbs_WIRE:
-						return gcnew XWire(TopoDS::Wire(shape));
-					case TopAbs_FACE:
-						return gcnew XFace(TopoDS::Face(shape));
-					case TopAbs_SHELL:
-						return gcnew XShell(TopoDS::Shell(shape));
-					case TopAbs_SOLID:
-						return gcnew XSolid(TopoDS::Solid(shape));
-					case TopAbs_COMPOUND:
-						return  gcnew XCompound(TopoDS::Compound(shape));
-					case TopAbs_COMPSOLID:
-					default:
-						LogError("Unsupported Shape Type, Compound Solid");
-					}
-				}
-				catch (...)
-				{
-					throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
-				}
-				finally
-				{
-					Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
-				}
-				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
+				return SHAPE_FACTORY->Convert(brepStr);
 			}
-			IXShape^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
-			{
-				TopoDS_Shape topoShape = BuildSolidModel(ifcSolid);
-				if (topoShape.IsNull())
-					throw RaiseGeometryFactoryException("Failure building IIfcSolidModel", ifcSolid);
-				topoShape.Closed(true);
-				return  ShapeFactory::GetXbimShape(topoShape);
-			}
+			
 
 			IXShape^ SolidFactory::Build(IIfcFacetedBrep^ ifcBrep)
 			{
@@ -97,6 +58,14 @@ namespace Xbim
 				return gcnew XSolid(topoSolid);
 			}
 
+			IXShape^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
+			{
+				TopoDS_Shape topoShape = BuildSolidModel(ifcSolid);
+				if (topoShape.IsNull())
+					throw RaiseGeometryFactoryException("Failure building IIfcSolidModel", ifcSolid);
+				topoShape.Closed(true);
+				return  ShapeFactory::GetXbimShape(topoShape);
+			}
 
 
 			///this method builds all solid models and is the main entry point

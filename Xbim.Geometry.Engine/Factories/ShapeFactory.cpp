@@ -40,6 +40,44 @@ namespace Xbim
 	{
 		namespace Factories
 		{
+			IXShape^ ShapeFactory::Convert(System::String^ brepStr)
+			{
+				const char* cStr = (const char*)(Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
+				try
+				{
+					TopoDS_Shape shape = EXEC_NATIVE->Convert(cStr);
+					switch (shape.ShapeType())
+					{
+					case TopAbs_VERTEX:
+						return gcnew XVertex(TopoDS::Vertex(shape));
+					case TopAbs_EDGE:
+						return gcnew XEdge(TopoDS::Edge(shape));
+					case TopAbs_WIRE:
+						return gcnew XWire(TopoDS::Wire(shape));
+					case TopAbs_FACE:
+						return gcnew XFace(TopoDS::Face(shape));
+					case TopAbs_SHELL:
+						return gcnew XShell(TopoDS::Shell(shape));
+					case TopAbs_SOLID:
+						return gcnew XSolid(TopoDS::Solid(shape));
+					case TopAbs_COMPOUND:
+						return  gcnew XCompound(TopoDS::Compound(shape));
+					case TopAbs_COMPSOLID:
+					default:
+						LogError("Unsupported Shape Type, Compound Solid");
+					}
+				}
+				catch (...)
+				{
+					throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
+				}
+				finally
+				{
+					Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
+				}
+				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
+			}
+			
 			
 			/*IXbimGeometryObject^ ShapeFactory::ConvertToV5(System::String^ brepStr)
 			{

@@ -32,6 +32,8 @@ namespace Xbim
 
 				bool TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape);
 
+				IXShape^ Convert(System::String^ brepStr);
+
 				virtual IXShape^ Build(IIfcSolidModel^ ifcSolid);
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
