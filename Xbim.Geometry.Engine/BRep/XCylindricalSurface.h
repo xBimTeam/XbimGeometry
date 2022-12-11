@@ -12,14 +12,14 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XCylindricalSurface : XbimHandle<Handle(Geom_CylindricalSurface)>, IXCylindricalSurface
+			public ref class XCylindricalSurface : public XSurface, IXCylindricalSurface
 			{
 			public:
-				XCylindricalSurface(Handle(Geom_CylindricalSurface) hCylinder) : XbimHandle(new Handle(Geom_CylindricalSurface)(hCylinder)) {};
-				virtual property XSurfaceType SurfaceType {XSurfaceType get() { return XSurfaceType::IfcCylindricalSurface; }}
-				virtual property double Radius {double get() { return OccHandle()->Radius(); }}
+				XCylindricalSurface(Handle(Geom_CylindricalSurface) hCylinder) : XSurface(hCylinder) {};
+				virtual property XSurfaceType SurfaceType {XSurfaceType get() override { return XSurfaceType::IfcCylindricalSurface; }}
+				virtual property double Radius {double get() { return Handle(Geom_CylindricalSurface)::DownCast(Ref())->Radius(); }}
 				virtual property IXAxis2Placement3d^ Position {IXAxis2Placement3d^ get() 
-					{ return gcnew XAxis2Placement3d(new Geom_Axis2Placement(OccHandle()->Position().Ax2())); }};
+					{ return gcnew XAxis2Placement3d(new Geom_Axis2Placement(Handle(Geom_CylindricalSurface)::DownCast(Ref())->Position().Ax2())); }};
 			};
 		}
 	}

@@ -92,7 +92,8 @@ namespace Xbim
 
 				TopoDS_Wire outerLoop;
 				TopTools_SequenceOfShape  innerLoops;
-				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(faceSurface->FaceSurface); //throws exception
+				XSurfaceType surfaceType;
+				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(faceSurface->FaceSurface, surfaceType); //throws exception
 				for each (IIfcFaceBound ^ ifcBound in faceSurface->Bounds) //build all the loops
 				{
 					TopTools_SequenceOfShape loopEdges;

@@ -63,47 +63,7 @@ namespace Xbim
 			IXSurface^ XFace::Surface::get()
 			{
 				Handle(Geom_Surface) surface = BRep_Tool::Surface(OccFace());
-
-				GeomAdaptor_Surface gs(surface);
-				GeomAbs_SurfaceType surfaceType = gs.GetType();
-				String^ surfaceTypeName = "";
-				switch (surfaceType)
-				{
-				case GeomAbs_Plane:
-					return gcnew XPlane(Handle(Geom_Plane)::DownCast(surface));
-				case GeomAbs_Cylinder:
-					return gcnew XCylindricalSurface(Handle(Geom_CylindricalSurface)::DownCast(surface));
-				case GeomAbs_Cone:
-					return gcnew XConicalSurface(Handle(Geom_ConicalSurface)::DownCast(surface));
-				case GeomAbs_Sphere:
-					return gcnew XbimSphericalSurface(Handle(Geom_SphericalSurface)::DownCast(surface));
-				case GeomAbs_Torus:
-					surfaceTypeName = "GeomAbs_Torus";
-					break;
-				case GeomAbs_BezierSurface:
-					surfaceTypeName = "GeomAbs_BezierSurface";
-					break;
-				case GeomAbs_BSplineSurface:
-					surfaceTypeName = "GeomAbs_BSplineSurface";
-					break;
-				case GeomAbs_SurfaceOfRevolution:
-					surfaceTypeName = "GeomAbs_SurfaceOfRevolution";
-					break;
-				case GeomAbs_SurfaceOfExtrusion:
-					surfaceTypeName = "GeomAbs_SurfaceOfExtrusion";
-					break;
-				case GeomAbs_OffsetSurface:
-					surfaceTypeName = "GeomAbs_OffsetSurface";
-					break;
-				case GeomAbs_OtherSurface:
-					surfaceTypeName = "GeomAbs_OtherSurface";
-					break;
-				default:
-					surfaceTypeName = "Unknown_SurfaceType";
-					break;
-				}
-				
-				throw gcnew XbimGeometryDefinitionException(String::Format("Surface type not implemented: {0}", surfaceTypeName));
+				return XSurface::GeomToXSurface(surface);
 			};
 
 			

@@ -307,6 +307,11 @@
     <ClInclude Include="XbimWireSet.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="BRep\XSurfaceOfRevolution.h" />
+    <ClInclude Include="BRep\XBSplineSurface.h" />
+    <ClInclude Include="BRep\XBoundedSurface.h" />
+    <ClInclude Include="BRep\XRectangleTrimmedSurface.h" />
+    <ClInclude Include="BRep\XSurfaceOfLinearExtrusion.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />

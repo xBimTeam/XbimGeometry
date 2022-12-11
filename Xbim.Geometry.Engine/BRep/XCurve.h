@@ -20,7 +20,7 @@ namespace Xbim
 				}
 
 				static const Handle(Geom_Curve) GeomCurve(IXCurve^ xCurve);
-				
+				static  IXCurve^ GeomToXCurve(Handle(Geom_Curve) curve);
 				property XCurveType CurveType {virtual XCurveType get()  abstract; }
 				
 				property bool Is3d {virtual bool get() { return true; }; }

@@ -4,8 +4,13 @@
 #include "ProfileFactory.h"
 #include "BIMAuthoringToolWorkArounds.h"
 #include "EdgeFactory.h"
-#include <Geom_Plane.hxx>
-#include "../BRep//XPlane.h"
+
+#include "../BRep/XPlane.h"
+#include "../BRep/XCylindricalSurface.h"
+#include "../BRep/XConicalSurface.h"
+#include "../BRep/XSurfaceOfRevolution.h"
+#include "../BRep/XSurfaceOfLinearExtrusion.h"
+
 #include <TopoDS_Edge.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <TopoDS.hxx>
@@ -26,36 +31,58 @@ namespace Xbim
 			{
 				Handle(Geom_Plane) occPlane = Ptr()->BuildPlane(origin->X, origin->Y, origin->Z, normal->X, normal->Y, normal->Z);
 				if (occPlane.IsNull())
-					throw gcnew Exception("Invalid arguments for plane");
+					throw RaiseGeometryFactoryException("Error building plane");
 				else
 					return gcnew XPlane(occPlane);
+			}
+
+			IXSurface^ SurfaceFactory::Build(IIfcSurface^ ifcSurface)
+			{
+				XSurfaceType surfaceType;
+				Handle(Geom_Surface) surface = BuildSurface(ifcSurface, surfaceType);
+				if (surface.IsNull())
+					throw RaiseGeometryFactoryException("Error building surface", ifcSurface);
+				
+				return XSurface::GeomToXSurface(surface);
+					
 			}
 
 #pragma endregion
 
 #pragma region OCC
-			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface)
+			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType )
 			{
-				if (dynamic_cast<IIfcPlane^>(ifcSurface))
-					return BuildPlane((IIfcPlane^)ifcSurface);
-				else if (dynamic_cast<IIfcSurfaceOfRevolution^>(ifcSurface))
-					return BuildSurfaceOfRevolution((IIfcSurfaceOfRevolution^)ifcSurface);
-				else if (dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(ifcSurface))
-					return BuildSurfaceOfLinearExtrusion((IIfcSurfaceOfLinearExtrusion^)ifcSurface);
-				else if (dynamic_cast<IIfcCurveBoundedPlane^>(ifcSurface))
-					return BuildCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
-				else if (dynamic_cast<IIfcCurveBoundedSurface^>(ifcSurface))
-					return BuildCurveBoundedSurface((IIfcCurveBoundedSurface^)ifcSurface);
-				else if (dynamic_cast<IIfcRectangularTrimmedSurface^>(ifcSurface))
-					return BuildRectangularTrimmedSurface((IIfcRectangularTrimmedSurface^)ifcSurface);
-				else if (dynamic_cast<IIfcBSplineSurfaceWithKnots^>(ifcSurface))
+				if (!Enum::TryParse<XSurfaceType>(ifcSurface->ExpressType->ExpressName, surfaceType))
+					throw RaiseGeometryFactoryException("Unsupported surface type", ifcSurface);
+
+				switch (surfaceType)
+				{
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcBSplineSurfaceWithKnots:
 					return BuildBSplineSurfaceWithKnots((IIfcBSplineSurfaceWithKnots^)ifcSurface);
-				else if (dynamic_cast<IIfcRationalBSplineSurfaceWithKnots^>(ifcSurface))
-					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
-				else if (dynamic_cast<IIfcCylindricalSurface^>(ifcSurface))
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRationalBSplineSurfaceWithKnots:
+					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface); 
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:
+					return BuildCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedSurface:
+					return BuildCurveBoundedSurface((IIfcCurveBoundedSurface^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRectangularTrimmedSurface:
+					return BuildRectangularTrimmedSurface((IIfcRectangularTrimmedSurface^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcSurfaceOfLinearExtrusion:
+					return BuildSurfaceOfLinearExtrusion((IIfcSurfaceOfLinearExtrusion^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcSurfaceOfRevolution:
+					return BuildSurfaceOfRevolution((IIfcSurfaceOfRevolution^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCylindricalSurface:
 					return BuildCylindricalSurface((IIfcCylindricalSurface^)ifcSurface);
-				throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
-				return Handle(Geom_Surface)();
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcPlane:
+					return BuildPlane((IIfcPlane^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcSphericalSurface:
+					throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcToroidalSurface:
+					throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
+				default:
+					throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
+				}
+				
 			}
 
 
@@ -71,7 +98,7 @@ namespace Xbim
 				return plane;
 			}
 
-			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
+			Handle(Geom_SurfaceOfRevolution) SurfaceFactory::BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
 			{
 				throw RaiseGeometryFactoryException("BuildSurfaceOfRevolution is not implemented");
 				//if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
@@ -102,10 +129,10 @@ namespace Xbim
 				//{
 				//	throw RaiseGeometryFactoryException("Invalid IfcSurfaceOfRevolution", ifcSurfaceOfRevolution);
 				//}
-				return Handle(Geom_Surface)();
+				//return Handle(Geom_Surface)();
 			}
 
-			Handle(Geom_Surface) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
+			Handle(Geom_SurfaceOfLinearExtrusion) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
 			{
 				if (ifcSurfaceOfLinearExtrusion->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 					throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of linearExtrusion", ifcSurfaceOfLinearExtrusion);
@@ -136,7 +163,7 @@ namespace Xbim
 			{
 				throw gcnew NotImplementedException();
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
+			Handle(Geom_RectangularTrimmedSurface) SurfaceFactory::BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
 			{
 				throw gcnew NotImplementedException();
 			}
