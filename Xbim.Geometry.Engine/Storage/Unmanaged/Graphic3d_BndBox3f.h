@@ -1,6 +1,0 @@
-#pragma once
-
-#include <BVH_Box.hxx>
-#include <BVH_Types.hxx>
-
-typedef BVH_Box<Standard_ShortReal, 3> Graphic3d_BndBox3f;
