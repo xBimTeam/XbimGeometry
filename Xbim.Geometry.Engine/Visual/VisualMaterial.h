@@ -7,12 +7,13 @@
 #include <TDF_Tool.hxx>
 #include <TDataStd_Name.hxx>
 #include "../XbimHandle.h"
-//#include "../storage/StorageItem.h"
+#include "../Storage/StorageItem.h"
+
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Runtime::InteropServices;
 using namespace Xbim::Ifc4::Interfaces;
-
+using namespace Xbim::Geometry::Storage;
 namespace Xbim
 {
 	namespace Geometry
@@ -22,7 +23,7 @@ namespace Xbim
 			public ref class VisualMaterial : XbimHandle<Handle(XCAFDoc_VisMaterial)>, IXVisualMaterial
 			{
 			private:
-				/*StorageItem^ _label;*/
+				StorageItem^ _label;
 				System::String^ _name;
 				
 			public:
@@ -39,18 +40,18 @@ namespace Xbim
 					Shininess = 1.0f;
 					Transparency = 0.0f;
 				}
-				VisualMaterial(Handle(XCAFDoc_VisMaterial) visMat/*, StorageItem^ label*/) : XbimHandle(new Handle(XCAFDoc_VisMaterial)(visMat))
+				VisualMaterial(Handle(XCAFDoc_VisMaterial) visMat, StorageItem^ label) : XbimHandle(new Handle(XCAFDoc_VisMaterial)(visMat))
 				{
-					//TCollection_AsciiString entry;
-					//TDF_Tool::Entry(label->Ref(), entry);
-					//_label = label;
-					//TCollection_AsciiString aName;
-					//Handle(TDataStd_Name) aNodeName;
-					//if (label->Ref().FindAttribute(TDataStd_Name::GetID(), aNodeName))
-					//{
-					//	aName = aNodeName->Get(); // instance name
-					//	_name = gcnew System::String(aName.ToCString());
-					//}
+					TCollection_AsciiString entry;
+					TDF_Tool::Entry(label->Ref(), entry);
+					_label = label;
+					TCollection_AsciiString aName;
+					Handle(TDataStd_Name) aNodeName;
+					if (label->Ref().FindAttribute(TDataStd_Name::GetID(), aNodeName))
+					{
+						aName = aNodeName->Get(); // instance name
+						_name = gcnew System::String(aName.ToCString());
+					}
 				};
 				virtual property IXStorageItem^ Label {IXStorageItem^ get() { throw gcnew System::NotImplementedException(); }; }
 				virtual property System::String^ Name {System::String^ get() { return _name; }; }
