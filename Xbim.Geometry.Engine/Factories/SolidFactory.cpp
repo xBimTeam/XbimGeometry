@@ -120,9 +120,10 @@ namespace Xbim
 					ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : -1,
 					ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1,
 					directrixCurveType);*/
-				double startParam = ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : double::NaN;
-				double endParam = ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : double::NaN;
-				TopoDS_Wire directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSolid->Directrix, startParam, endParam);
+				//double startParam = ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : double::NaN;
+			//	double endParam = ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : double::NaN;
+			//	TopoDS_Wire directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSolid->Directrix, startParam, endParam);
+				Handle(Geom_Curve) directrix = CURVE_FACTORY->BuildDirectrixCurve(ifcSolid->Directrix, ifcSolid->StartParam, ifcSolid->EndParam);
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSolid);
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
@@ -131,7 +132,7 @@ namespace Xbim
 				if (dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix))
 					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 
-				TopoDS_Solid solid = Ptr()->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
+				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
 				return solid;
 
 			}
@@ -147,7 +148,7 @@ namespace Xbim
 				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(extrudedSolid->SweptArea); //if this fails it will throw an exception
 				if (sweptArea.IsNull())
 					throw RaiseGeometryFactoryException("Extruded Solid Swept area could not be built", extrudedSolid->SweptArea);
-				TopoDS_Solid solid = OccHandle().BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
+				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
 				if (solid.IsNull() || solid.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Extruded Solid could not be built", extrudedSolid);
 				return solid;

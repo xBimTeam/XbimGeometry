@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using Xbim.Common;
 using Xbim.Common.Metadata;
 using Xbim.Geometry.Abstractions;

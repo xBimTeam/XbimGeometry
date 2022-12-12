@@ -404,7 +404,7 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildPolyline3d(const TColgp_Array1OfPn
 {
 	try
 	{
-		GeomConvert_CompCurveToBSplineCurve compositeConverter(Convert_ParameterisationType::Convert_TgtThetaOver2); //provides exact parameterisation for line segs		
+		GeomConvert_CompCurveToBSplineCurve compositeConverter(Convert_ParameterisationType::Convert_RationalC1); //provides exact parameterisation for line segs		
 		int pointCount = points.Length();
 		int lastPointIdx = 1;
 		for (Standard_Integer i = 1; i < pointCount; i++)

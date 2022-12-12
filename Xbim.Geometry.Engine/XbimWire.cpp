@@ -402,7 +402,7 @@ namespace Xbim
 				//std::map<int, gp_Pnt2d> mapOfPoints; //the key is the ifc entity label
 				//get a list of points but remove duplicates by using the tolerance
 				
-				TopoDS_Wire wire = ActiveModelGeometryService(pline)->GetWireFactory()->BuildWire2d(pline, false);
+				TopoDS_Wire wire = ActiveModelGeometryService(pline)->GetWireFactory()->BuildWire(pline, false);
 				
 				//we have a wire and it will be planar as it was defined in 2d
 				//However, it may not comply with any other topological rules, these need to be checked at an appropriate level
@@ -419,7 +419,7 @@ namespace Xbim
 				if (!Enumerable::Any(pline->Points))
 					throw gcnew XbimGeometryException("IfcPolyline has zero points");
 				
-				TopoDS_Wire wire = ActiveModelGeometryService(pline)->GetWireFactory()->BuildWire3d(pline,false);
+				TopoDS_Wire wire = ActiveModelGeometryService(pline)->GetWireFactory()->BuildWire(pline,false);
 				if (!wire.IsNull())
 				{
 					pWire = new TopoDS_Wire();

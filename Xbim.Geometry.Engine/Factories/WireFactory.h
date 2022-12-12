@@ -15,25 +15,23 @@ namespace Xbim
 			internal:
 				//The distance between two points at which they are determined to be equal points
 				
+				
+				TopoDS_Wire BuildWire(const TopTools_SequenceOfShape& edgeList);
 				TopoDS_Wire BuildWire(IIfcCurve^ ifcCurve, bool asSingleEdge);
-
-				TopoDS_Wire BuildWire3d(const TopTools_SequenceOfShape& edgeList);
-				TopoDS_Wire BuildWire2d(IIfcCurve^ ifcCurve, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
 				TopoDS_Wire BuildWire(IIfcCircle^ ifcCircle);
-				TopoDS_Wire BuildWire2d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcEllipse^ ifcEllipse);
-				TopoDS_Wire BuildWire2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcLine^ ifcLine);
-				TopoDS_Wire BuildWire2d(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge);
-				TopoDS_Wire BuildWire2d(IIfcPolyline^ ifcPolyline, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcOffsetCurve3D^ ifcOffsetCurve3D, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcPolyline^ ifcPolyline, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots);
 				TopoDS_Wire BuildWire(IIfcTrimmedCurve^ ifcTrimmedCurve, bool asSingleEdge);
 
-				TopoDS_Wire BuildWire3d(IIfcCurve^ ifcCurve, bool asSingleEdge);
-				TopoDS_Wire BuildWire3d(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
 
-				TopoDS_Wire BuildWire3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
+				
 
 				
 				TopoDS_Wire BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam);

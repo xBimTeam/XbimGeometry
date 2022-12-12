@@ -4,6 +4,7 @@
 
 #include <TColGeom2d_SequenceOfBoundedCurve.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
+using namespace Xbim::Ifc4::MeasureResource;
 namespace Xbim
 {
 	namespace Geometry
@@ -79,7 +80,7 @@ namespace Xbim
 				virtual IXCurve^ BuildDirectrix(IIfcCurve^ curve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 
 				Handle(Geom_Curve) BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType);
-
+				Handle(Geom_Curve) BuildDirectrixCurve(IIfcCurve^ curve, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam);
 
 
 				Handle(Geom_TrimmedCurve) BuildCurve3d(IIfcTrimmedCurve^ ifcTrimmedCurve);

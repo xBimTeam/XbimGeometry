@@ -8,6 +8,7 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_SurfaceOfRevolution.hxx>
 #include <Geom_SphericalSurface.hxx>
+#include <Geom_ConicalSurface.hxx>
 
 #include "XPlane.h"
 #include "XCylindricalSurface.h"
@@ -16,6 +17,7 @@
 #include "XRectangleTrimmedSurface.h"
 #include "XSurfaceOfRevolution.h"
 #include "XSurfaceOfLinearExtrusion.h"
+#include "XConicalSurface.h"
 
 
 namespace Xbim
@@ -47,6 +49,8 @@ namespace Xbim
 				auto sphereSurface = Handle(Geom_SphericalSurface)::DownCast(surface);
 				if (!sphereSurface.IsNull()) return gcnew XSphericalSurface(sphereSurface);
 
+				auto  coneSurface = Handle(Geom_ConicalSurface)::DownCast(surface);
+				if (!coneSurface.IsNull()) return gcnew XConicalSurface(coneSurface);
 				throw gcnew System::NotImplementedException("Surface not implemented yet");
 				
 				/*TODO

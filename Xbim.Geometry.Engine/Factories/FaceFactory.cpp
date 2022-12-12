@@ -130,7 +130,7 @@ namespace Xbim
 						System::String^ edgeBrep = _modelService->GetBrep(edge);
 						loopEdges.Append(edge);
 					}
-					TopoDS_Wire wire = WIRE_FACTORY->BuildWire3d(loopEdges);
+					TopoDS_Wire wire = WIRE_FACTORY->BuildWire(loopEdges);
 					if (!ifcBound->Orientation)
 						wire.Reverse();
 					if (isOuter) // this may not be known but if it is a single bound or the bound has been correctly typed it simplifies things later

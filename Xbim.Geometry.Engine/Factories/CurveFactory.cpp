@@ -796,13 +796,21 @@ namespace Xbim
 				return geomCurve;
 
 			}
-
+			Handle(Geom_Curve) CurveFactory::BuildDirectrixCurve(IIfcCurve^ curve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam)
+			{
+				double start, end;
+				if (startParam.HasValue) start = startParam.Value; else start = -1;
+				if (endParam.HasValue) end = endParam.Value; else  end = -1;
+				XCurveType curveType;
+				return BuildDirectrix(curve, start, end,curveType );
+			}
 
 			IXCurve^ CurveFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startParam, Nullable<double> endParam)
 			{
-				if (!startParam.HasValue) startParam = -1;
-				if (!endParam.HasValue) endParam = -1;
-				return BuildXDirectrix(curve, startParam.Value, endParam.Value);
+				double start, end;
+				if (startParam.HasValue) start = startParam.Value; else start = -1;
+				if (endParam.HasValue) end = endParam.Value; else  end = -1;
+				return BuildXDirectrix(curve, start, end);
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType)

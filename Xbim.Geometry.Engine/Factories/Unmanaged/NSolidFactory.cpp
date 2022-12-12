@@ -168,9 +168,7 @@ bool NSolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogError("Could not build a Solid from a Shell");
 	return true; //return  upgrade is needed
@@ -186,9 +184,7 @@ TopoDS_Solid NSolidFactory::BuildBlock(gp_Ax2 ax2, double xLength, double yLengt
 	}
 	catch (const Standard_Failure& e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgBlock");
 	return TopoDS_Solid();
@@ -273,9 +269,7 @@ TopoDS_Solid NSolidFactory::BuildRectangularPyramid(gp_Ax2 ax2, double xLength, 
 	}
 	catch (const Standard_Failure& e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRectangularPyramid");
 	return TopoDS_Solid();
@@ -290,9 +284,7 @@ TopoDS_Solid NSolidFactory::BuildRightCircularCone(gp_Ax2 ax2, double radius, do
 	}
 	catch (const Standard_Failure& e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRightCircularCone");
 	return TopoDS_Solid();
@@ -307,9 +299,7 @@ TopoDS_Solid NSolidFactory::BuildRightCylinder(gp_Ax2 ax2, double radius, double
 	}
 	catch (const Standard_Failure& e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgRightCylinder");
 	return TopoDS_Solid();
@@ -324,11 +314,107 @@ TopoDS_Solid NSolidFactory::BuildSphere(gp_Ax2 ax2, double radius)
 	}
 	catch (const Standard_Failure& e) //pretty much only throws Standard_DomainError, we should have got most of these earlier
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}//but just in case we haven't
 	pLoggingService->LogError("Could not build CsgSphere");
+	return TopoDS_Solid();
+}
+
+TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const Handle(Geom_Curve) directrixCurve, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
+{
+	//the standard say
+
+	//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
+	//this will be the case for a polyline as each segment is not tangent continuous
+	//composite curves will be tangent continuous
+	try
+	{
+		//form the shape to sweep, the centre of the circles must be at the start of the directrix
+		BRepBuilderAPI_MakeEdge edgeMaker;
+		BRep_Builder outerBuilder;
+		//get the normal at the start point
+		gp_Vec dirAtStart;
+		gp_Pnt startPoint;
+		//BRepAdaptor_CompCurve directrix(directrixCurve, Standard_True);
+		directrixCurve->D1(0, startPoint, dirAtStart);
+		gp_Ax2 axis(startPoint, dirAtStart);
+		dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
+		Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
+		edgeMaker.Init(outer);
+		TopoDS_Wire outerWire;
+		outerBuilder.MakeWire(outerWire);
+		outerBuilder.Add(outerWire, edgeMaker.Edge());
+		BRepBuilderAPI_MakeEdge wireEdgeMaker(directrixCurve);
+
+		BRepBuilderAPI_MakeWire wireMaker(wireEdgeMaker.Edge());
+		BRepOffsetAPI_MakePipeShell oSweepMaker(wireMaker.Wire());
+		oSweepMaker.SetTransitionMode(transitionMode);
+		oSweepMaker.SetMode(true);
+		oSweepMaker.Add(outerWire);
+
+		oSweepMaker.Build();
+		if (oSweepMaker.IsDone())
+		{
+			//do we need an inner shell
+			if (innerRadius > 0)
+			{
+
+				Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
+				edgeMaker.Init(inner);
+				BRepBuilderAPI_MakeWire iWireMaker(edgeMaker.Edge());
+				BRepOffsetAPI_MakePipeShell iSweepMaker(wireMaker.Wire());
+				iSweepMaker.SetTransitionMode(transitionMode);
+				TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
+				iSweepMaker.Add(holeWire);
+				iSweepMaker.Build();
+				if (iSweepMaker.IsDone())
+				{
+					BRep_Builder innerBuilder;
+					TopoDS_Solid solid;
+					TopoDS_Shell shell;
+					innerBuilder.MakeSolid(solid);
+					innerBuilder.MakeShell(shell);
+					TopExp_Explorer faceEx(oSweepMaker.Shape(), TopAbs_FACE);
+					for (; faceEx.More(); faceEx.Next())
+						innerBuilder.Add(shell, TopoDS::Face(faceEx.Current()));
+					faceEx.Init(iSweepMaker.Shape(), TopAbs_FACE);
+					for (; faceEx.More(); faceEx.Next())
+						innerBuilder.Add(shell, TopoDS::Face(faceEx.Current()));
+					//cap the faces
+					TopoDS_Face startFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.FirstShape().Reversed()), Standard_True);
+					innerBuilder.Add(startFace, iSweepMaker.FirstShape().Reversed());
+					TopoDS_Face endFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
+					innerBuilder.Add(endFace, iSweepMaker.LastShape().Reversed());
+					innerBuilder.Add(shell, startFace);
+					innerBuilder.Add(shell, endFace.Reversed());
+					innerBuilder.Add(solid, shell);
+					return solid;
+				}
+				else
+				{
+					pLoggingService->LogWarning("Could not build Inner radius of SweptDiskSolid");
+					bool ok = oSweepMaker.MakeSolid();
+					if (ok) return TopoDS::Solid(oSweepMaker.Shape());
+				}
+
+			}
+			else
+			{
+				bool ok = oSweepMaker.MakeSolid();
+				if (ok) return TopoDS::Solid(oSweepMaker.Shape());
+			}
+		}
+
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	catch (...)
+	{
+		pLoggingService->LogError("Could not build SweptDiskSolid");
+	}
+
 	return TopoDS_Solid();
 }
 
@@ -416,13 +502,15 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 		}
 
 	}
-	catch (Standard_Failure e)
+	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
-	pLoggingService->LogError("Could not build SweptDiskSolid");
+	catch (...)
+	{
+		pLoggingService->LogError("Could not build SweptDiskSolid");
+	}
+	
 	return TopoDS_Solid();
 }
 
@@ -437,9 +525,7 @@ TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_D
 	}
 	catch (const Standard_Failure& e)
 	{
-		std::stringstream strm;
-		e.Print(strm);
-		pLoggingService->LogError(strm.str().c_str());
+		LogStandardFailure(e);
 	}
 	pLoggingService->LogError("Could not build ExtrudedAreaSolid");
 	return TopoDS_Solid();

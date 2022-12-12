@@ -27,7 +27,7 @@ public:
 	TopoDS_Wire BuildWire(const TopTools_SequenceOfShape& edgeList);
 	//Builds a polyline in the context of 0  or more existing vertices, if buildRaw is true no geometrical or topological corrections are made
 	TopoDS_Wire BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
-	TopoDS_Wire BuildPolyline3d(const TColgp_Array1OfPnt& points, double startParam, double endParam, double tolerance);
+	TopoDS_Wire BuildPolyline3d(const TColgp_Array1OfPnt& points, /*double startParam, double endParam,*/ double tolerance);
 
 	
 
@@ -37,6 +37,8 @@ public:
 	void GetPolylineSegments2d(const TColgp_Array1OfPnt2d& points, double tolerance, TColGeom2d_SequenceOfBoundedCurve& curves);
 
 	TopoDS_Wire BuildDirectrixWire(const TopoDS_Wire& wire, double trimStart, double trimEnd, double tolerance, double gapSize);
+
+	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance);
 	
 	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance);
 
@@ -48,6 +50,8 @@ public:
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
 	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax22d& position);
 	TopoDS_Wire BuildOffset(TopoDS_Wire basisWire, double distance);
+
+	TopoDS_Wire BuildOffset(TopoDS_Wire basisWire, double distance, gp_Dir dir);
 
 	//TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
 

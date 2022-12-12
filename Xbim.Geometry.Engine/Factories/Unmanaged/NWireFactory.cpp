@@ -88,7 +88,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TopTools_SequenceOfShape& edgeList)
 		builder.MakeWire(loopWire);
 
 		for (const auto& edge : edgeList)
-		{		
+		{
 			builder.Add(loopWire, TopoDS::Edge(edge));
 		}
 		return loopWire;
@@ -217,7 +217,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 
 //trims the polyline to the parameters, if they are >=0, nb this method does not check for intersecting or notched lines
 TopoDS_Wire NWireFactory::BuildPolyline3d(
-	const TColgp_Array1OfPnt& points, double startParam, double endParam,
+	const TColgp_Array1OfPnt& points,/* double startParam, double endParam,*/
 	double tolerance)
 {
 	//3d polylines don't necessarily sit on a surface, they may in the case of an brep face, 
@@ -225,6 +225,8 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 	//no checks ar eperformed here apart from stopping zero length edges
 	try
 	{
+		double startParam = -1;
+		double endParam = -1;
 		int id = 0;
 		NCollection_Vector<KeyedPnt> pointSeq;
 		for (auto&& point : points)
@@ -474,7 +476,7 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 	{
 		BRep_Builder builder;
 		double parametricLength = 0;
-		TopoDS_Wire wire;
+
 		//std::ofstream myfile;
 		//myfile.open("segments.txt");
 		//for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
@@ -487,10 +489,10 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 		//}
 
 		//myfile.close();
-		;
+
 		for (auto wireExplorer = BRepTools_WireExplorer(wire); wireExplorer.More(); wireExplorer.Next())
 		{
-			TopoDS_Edge edge = wireExplorer.Current();
+			const TopoDS_Edge& edge = wireExplorer.Current();
 			Standard_Real start = 0, end = 0;
 			TopLoc_Location loc;
 			bool useExistingEdge = false;
@@ -512,7 +514,7 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 					else //trimStart to end seg					
 					{
 						if (trimStart > 0)
-							segment = new Geom_TrimmedCurve(segment, trimStart, segment->LastParameter());
+							segment = new Geom_TrimmedCurve(segment, trimStart, end);
 						parametricLength += (segment->LastParameter() - segment->FirstParameter());
 					}
 					trimStart = 0; //we have the first segment at 0
@@ -584,10 +586,13 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 			}
 
 		}
-		builder.MakeWire(wire);
-		for (auto&& edge : edges)
-			builder.Add(wire, edge);
-		return wire;
+		if (edges.Size() == 0)
+			Standard_Failure::Raise("Directrix has no Segments");
+		TopoDS_Wire result;
+		builder.MakeWire(result);
+		for (const auto& edge : edges)
+			builder.Add(result, edge);
+		return result;
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -598,13 +603,17 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 	return TopoDS_Wire();
 }
 
+TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance)
+{
+	return BuildTrimmedWire(basisWire, gp::Origin(), gp::Origin(), first, last, false, sameSense, tolerance);
+}
 
 TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance)
 {
 	try
 	{
 
-		//BRepAdaptor_CompCurve cc(basisWire, Standard_True, first, last, tolerance); TODO: test if we can trim here and remove complexity
+
 		BRepAdaptor_CompCurve cc(basisWire, Standard_True);
 		GeomAbs_Shape continuity = cc.Continuity();
 		int numIntervals = cc.NbIntervals(continuity);
@@ -982,6 +991,25 @@ TopoDS_Wire NWireFactory::BuildOffset(TopoDS_Wire basisWire, double distance)
 	}
 	return TopoDS_Wire();
 }
+
+TopoDS_Wire NWireFactory::BuildOffset(TopoDS_Wire basisWire, double distance, gp_Dir dir)
+{
+	return TopoDS_Wire();
+	/*try
+	{
+		BRepOffsetAPI_MakeOffset offsetMaker(basisWire);
+		offsetMaker.Perform(distance);
+		if (!offsetMaker.IsDone() || offsetMaker.Shape().ShapeType() != TopAbs_WIRE)
+			Standard_Failure::Raise("Error building offset curve as a wire");
+		return TopoDS::Wire(offsetMaker.Shape());
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	return TopoDS_Wire();*/
+}
+
 //
 //TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
 //{
