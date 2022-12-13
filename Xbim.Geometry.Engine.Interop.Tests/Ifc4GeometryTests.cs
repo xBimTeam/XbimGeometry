@@ -118,7 +118,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, loggerFactory);
                 var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
                 HelperFunctions.IsValidSolid(extrudedSolid);
-                extrudedSolid.Volume.Should().BeApproximately(14999524619, 1e-5);
+                extrudedSolid.Volume.Should().BeApproximately(14999524619.3158950805664, 1e-5);
             }
         }
 

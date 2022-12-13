@@ -86,7 +86,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 surfaceSweep.Should().NotBeNull();
                 var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, loggerFactory);
                 var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
-                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
                 //    model.ModelFactors.Precision, logger);
 
