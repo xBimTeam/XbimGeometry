@@ -6,7 +6,7 @@ namespace Xbim
 	namespace Geometry
 	{
 
-		public ref class XbimGeometryCreatorV6 : public ModelGeometryService, IXbimGeometryEngine
+		public ref class XbimGeometryCreatorV6 : public ModelGeometryService, IXGeometryEngineV6
 		{
 
 
@@ -50,7 +50,7 @@ namespace Xbim
 			}
 		public:
 
-			XbimGeometryCreatorV6(IModel^ model, ILoggerFactory^ loggerFactory) : ModelGeometryService(model, loggerFactory){ }
+			XbimGeometryCreatorV6(IModel^ model, ILoggerFactory^ loggerFactory) : Xbim::Geometry::Services::ModelGeometryService(model, loggerFactory){ }
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
@@ -63,7 +63,7 @@ namespace Xbim
 			static double AngularDeflectionInRadians;
 			static bool IgnoreIfcSweptDiskSolidParams;
 			IXModelGeometryService^ GetModelGeometryService() { return this; }
-
+			virtual property  IXModelGeometryService^ ModelGeometryService{ IXModelGeometryService^  get() { return this; } }
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, ILogger^);
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^);
 			virtual IXbimGeometryObjectSet^ CreateGeometricSet(IIfcGeometricSet^ geomSet, ILogger^);
