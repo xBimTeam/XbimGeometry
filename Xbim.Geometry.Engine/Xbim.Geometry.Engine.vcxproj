@@ -265,6 +265,7 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Primitives\GeometryPrimitives.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
     <ClInclude Include="Services\ModelGeometryService.h" />
@@ -383,6 +384,7 @@
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="Factories\MaterialFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
+    <ClCompile Include="Primitives\GeometryPrimitives.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
     <ClCompile Include="Services\ModelGeometryService.cpp" />
