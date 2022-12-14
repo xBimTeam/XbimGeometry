@@ -18,6 +18,7 @@ namespace Xbim
 		static void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid & result,  int& retflag);
 		ref class XbimSolid :IXbimSolid, XbimOccShape
 		{
+		
 		private:
 
 			System::IntPtr ptrContainer;

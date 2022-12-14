@@ -16,7 +16,7 @@ namespace Xbim
 				virtual IXbimGeometryEngine^ CreateGeometryEngineV5(IModel^ model, ILoggerFactory^ loggerFactory);
 
 				virtual IXModelGeometryService^ CreateModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
-				virtual IXbimGeometryEngine^ CreateGeometryEngineV6(IModel^ model, ILoggerFactory^ loggerFactory);
+				virtual IXGeometryEngineV6^ CreateGeometryEngineV6(IModel^ model, ILoggerFactory^ loggerFactory);
 				virtual IXbimGeometryEngine^ CreateGeometryEngine(XGeometryEngineVersion version,  IModel^ model, ILoggerFactory^ loggerFactory);
 				virtual IXModelGeometryService^ GetUnderlyingModelGeometryService(IXbimGeometryEngine^ engine);
 			};

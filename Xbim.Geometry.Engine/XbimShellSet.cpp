@@ -13,10 +13,16 @@
 
 #include "XbimGeometryObjectSet.h"
 #include "XbimConvert.h"
+#include "./BRep/XCompound.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimShellSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(shells)));
+		}
+
 		XbimShellSet::XbimShellSet(const TopoDS_Shape& shape)
 		{
 			TopTools_IndexedMapOfShape map;

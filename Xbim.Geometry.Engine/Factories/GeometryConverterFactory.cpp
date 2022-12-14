@@ -20,7 +20,7 @@ namespace Xbim
 			{
 				return gcnew ModelGeometryService(model, loggerFactory);
 			}
-			IXbimGeometryEngine^ GeometryConverterFactory::CreateGeometryEngineV6(IModel^ model, ILoggerFactory^ loggerFactory)
+			IXGeometryEngineV6^ GeometryConverterFactory::CreateGeometryEngineV6(IModel^ model, ILoggerFactory^ loggerFactory)
 			{
 				return gcnew XbimGeometryCreatorV6(model, loggerFactory);
 				

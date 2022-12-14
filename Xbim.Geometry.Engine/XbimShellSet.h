@@ -24,6 +24,8 @@ namespace Xbim
 
 #pragma region Constructors
 
+			IXCompound^ ToXCompound();
+
 			XbimShellSet(const TopoDS_Shape& shape);
 			XbimShellSet(List<IXbimShell^>^ shells);
 

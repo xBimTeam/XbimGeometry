@@ -25,6 +25,7 @@ namespace Xbim
 #pragma region Constructors
 
 			XbimEdgeSet(const TopoDS_Shape& shape);
+			IXCompound^ ToXCompound();
 			operator  TopoDS_Shape () override;
 			XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges);
 			XbimEdgeSet(XbimWire^ wire);

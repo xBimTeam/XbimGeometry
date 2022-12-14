@@ -20,6 +20,7 @@ namespace Xbim
 			};
 		public:
 			static property XbimVertexSet^ Empty{XbimVertexSet^ get(){ return empty; }};
+			IXCompound^ ToXCompound();
 			virtual operator  TopoDS_Shape () override;
 #pragma region Constructors
 			XbimVertexSet(const TopoDS_Shape& shape);

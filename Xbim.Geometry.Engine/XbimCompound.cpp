@@ -73,7 +73,7 @@
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
 #include "XbimConvert.h"
-#include "XbimGeometryObjectSet.h"
+
 
 
 using namespace System::Linq;

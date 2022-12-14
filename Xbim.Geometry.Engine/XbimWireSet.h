@@ -23,6 +23,7 @@ namespace Xbim
 		public:
 			static property XbimWireSet^ Empty{XbimWireSet^ get(){ return empty; }};
 #pragma region Constructors
+			IXCompound^ ToXCompound();
 			XbimWireSet(const TopoDS_Shape& shape);
 			XbimWireSet(const TopTools_ListOfShape & wires);
 			XbimWireSet(IEnumerable<IXbimWire^>^ wires){ this->wires = gcnew List<IXbimWire^>(wires); };

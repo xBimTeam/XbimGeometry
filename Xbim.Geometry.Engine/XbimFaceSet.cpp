@@ -5,10 +5,17 @@
 #include "XbimFaceSet.h"
 #include "XbimConvert.h"
 #include <BRep_Builder.hxx>
+#include "./BRep/XCompound.h"
+#include "XbimGeometryObjectSet.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimFaceSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(faces)));
+		}
+
 #pragma region Constructors
 
 		XbimFaceSet::XbimFaceSet(const TopoDS_Shape& shape)

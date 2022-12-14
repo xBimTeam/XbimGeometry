@@ -6,6 +6,7 @@ using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
 using namespace Microsoft::Extensions::Logging;
 
+using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -79,6 +80,7 @@ namespace Xbim
 		private:
 			Object^ tag;
 		public:
+			static IXShape^ ToXShape(IXbimGeometryObject^ geomObj);
 			XbimGeometryObject(){};
 #pragma region destructors
 
@@ -95,7 +97,8 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) abstract;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D) abstract;
 			virtual property System::String^  ToBRep{System::String^ get(); }
-			virtual property Object^  Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; }
+			virtual property Object^ Tag {Object^ get() { return tag; }; void set(Object^ value) { tag = value; }; };
+			
 		};
 	}
 }

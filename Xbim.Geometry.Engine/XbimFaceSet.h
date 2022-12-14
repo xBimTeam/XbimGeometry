@@ -23,6 +23,7 @@ namespace Xbim
 			static property XbimFaceSet^ Empty{XbimFaceSet^ get(){ return empty; }};
 
 #pragma region Constructors
+			IXCompound^ ToXCompound();
 			XbimFaceSet(const TopoDS_Shape& shape);
 			XbimFaceSet(const TopTools_ListOfShape & shapes);
 			XbimFaceSet(List<IXbimFace^>^ faces);

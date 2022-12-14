@@ -5,10 +5,16 @@
 #include "XbimWireSet.h"
 #include "XbimConvert.h"
 #include <BRep_Builder.hxx>
+#include "./BRep/XCompound.h"
+#include "XbimGeometryObjectSet.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimWireSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(wires)));
+		}
 		XbimWireSet::XbimWireSet(const TopoDS_Shape& shape)
 		{
 			TopTools_IndexedMapOfShape map;

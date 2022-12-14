@@ -6,6 +6,7 @@
 #include "XbimOccWriter.h"
 #include "XbimConvert.h"
 
+
 #include "./Factories/SolidFactory.h"
 #include "./Factories/FaceFactory.h"
 #include "./Factories/WireFactory.h"
@@ -20,6 +21,7 @@
 #include <Standard_Type.hxx>
 #include <GeomLib.hxx>
 #include <Geom2d_Line.hxx>
+
 
 namespace Xbim
 {
@@ -58,6 +60,12 @@ namespace Xbim
 			return Create(geomRep, nullptr, nullptr);
 		}
 
+		IXShape^ XbimGeometryCreatorV6::Build(IIfcGeometricRepresentationItem^ geomRep)
+		{
+
+			IXbimGeometryObject^ geomObj = Create(geomRep, nullptr, nullptr);
+			return XbimGeometryObject::ToXShape(geomObj);
+		}
 
 
 		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^)
@@ -355,10 +363,10 @@ namespace Xbim
 			//there are too many uncertainties, the composite curve may not be closed, it might not fit on a surface, it may be 2 or 3d
 			//this has been implemented but has the same restrictions as the V5 interface and should be avoided in future work
 			TopoDS_Wire wire = this->GetWireFactory()->BuildWire(cCurve, false);
-			if(wire.IsNull())
+			if (wire.IsNull())
 				throw RaiseGeometryServiceException("Could not buld composite curve", cCurve);
 			BRepBuilderAPI_MakeFace faceMaker(wire);
-			if(!faceMaker.IsDone())
+			if (!faceMaker.IsDone())
 				throw RaiseGeometryServiceException("Face not buld for composite curve", cCurve);
 			return gcnew XbimFace(faceMaker.Face());
 		};
@@ -601,7 +609,7 @@ namespace Xbim
 		}
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcPolygonalFaceSet^ shell, ILogger^)
 		{
-			if (shell->Closed.HasValue&& shell->Closed.Value)
+			if (shell->Closed.HasValue && shell->Closed.Value)
 				return gcnew XbimSolidSet(shell, Logger());
 			else
 				throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");

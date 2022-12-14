@@ -23,6 +23,8 @@
 #include "XbimFaceSet.h"
 #include "XbimEdgeSet.h"
 #include "XbimVertexSet.h"
+
+#include "./BRep/XCompound.h"
 using namespace System::ComponentModel;
 namespace Xbim
 {
@@ -143,6 +145,11 @@ namespace Xbim
 		XbimGeometryObjectSet::operator  TopoDS_Shape ()
 		{
 			return CreateCompound(geometryObjects);
+		}
+
+		IXCompound^ XbimGeometryObjectSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(geometryObjects));
 		}
 
 		void XbimGeometryObjectSet::Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle)

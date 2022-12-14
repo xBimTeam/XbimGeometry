@@ -23,14 +23,20 @@
 #include "XbimGeometryCreator.h"
 #include "XbimOccWriter.h"
 #include "XbimProgressMonitor.h"
-using namespace std;
+
 
 using namespace System::Linq;
 using namespace System::Threading;
+#include "XbimGeometryObjectSet.h"
+#include "./BRep/XCompound.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimSolidSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(solids)));
+		}
 
 
 		System::String^ XbimSolidSet::ToBRep::get()
@@ -485,16 +491,16 @@ namespace Xbim
 
 				if (aBOP.HasWarnings())
 				{
-					ofstream os;
-					OSD_OpenStream(os, "c:/tmp/warnings.txt", ios::out);
+					std::ofstream os;
+					OSD_OpenStream(os, "c:/tmp/warnings.txt", std::ios::out);
 					aBOP.DumpWarnings(os);
 					os.flush();
 					os.close();
 				}
 				if (aBOP.HasErrors())
 				{
-					ofstream os;
-					OSD_OpenStream(os, "c:/tmp/errors.txt", ios::out);
+					std::ofstream os;
+					OSD_OpenStream(os, "c:/tmp/errors.txt", std::ios::out);
 					aBOP.DumpErrors(os);
 					os.flush();
 					os.close();

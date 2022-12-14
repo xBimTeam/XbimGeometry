@@ -65,6 +65,7 @@ namespace Xbim
 			IXModelGeometryService^ GetModelGeometryService() { return this; }
 			virtual property  IXModelGeometryService^ ModelGeometryService{ IXModelGeometryService^  get() { return this; } }
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, ILogger^);
+			virtual IXShape^ Build(IIfcGeometricRepresentationItem^ geomRep);
 			virtual IXbimGeometryObject^ Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^);
 			virtual IXbimGeometryObjectSet^ CreateGeometricSet(IIfcGeometricSet^ geomSet, ILogger^);
 			//Point Creation

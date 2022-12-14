@@ -5,10 +5,16 @@
 #include "XbimEdgeSet.h"
 #include "XbimConvert.h"
 #include <BRep_Builder.hxx>
+#include "./BRep/XCompound.h"
+#include "XbimGeometryObjectSet.h"
 namespace Xbim
-{ 
+{
 	namespace Geometry
 	{
+		IXCompound^ XbimEdgeSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(edges)));
+		}
 		XbimEdgeSet::operator  TopoDS_Shape ()
 		{
 			BRep_Builder builder;

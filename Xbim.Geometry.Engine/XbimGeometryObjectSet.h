@@ -32,6 +32,7 @@ namespace Xbim
 			{
 				geometryObjects = nullptr;
 			};
+		internal:
 			static TopoDS_Compound CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects);
 		public:
 			static property IXbimGeometryObjectSet^ Empty{IXbimGeometryObjectSet^ get(){ return empty; }};	
@@ -85,6 +86,8 @@ namespace Xbim
 			// Inherited via XbimSetObject
 			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 			virtual operator TopoDS_Shape () override;
+
+			IXCompound^ ToXCompound();
 		};
 	}
 }

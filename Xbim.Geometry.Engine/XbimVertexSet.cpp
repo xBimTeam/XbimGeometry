@@ -5,10 +5,16 @@
 #include "XbimConvert.h"
 #include <BRep_Builder.hxx>
 
+#include "./BRep/XCompound.h"
+#include "XbimGeometryObjectSet.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimVertexSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(vertices)));
+		}
 		XbimVertexSet::operator  TopoDS_Shape ()
 		{
 			BRep_Builder builder;
