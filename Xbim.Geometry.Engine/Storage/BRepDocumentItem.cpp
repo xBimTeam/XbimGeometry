@@ -7,7 +7,7 @@
 #include "../BRep/XShell.h"
 #include "../BRep/XFace.h"
 #include "../BRep/XWire.h"
-//#include <XCAFDoc_DocumentTool.hxx>
+
 #include <TDataStd_Name.hxx>
 #include <BRep_Builder.hxx>
 
@@ -22,15 +22,17 @@
 //#include <XCAFDoc_MaterialTool.hxx>
 #include <TDataStd_TreeNode.hxx>
 //#include <XCAFDoc.hxx>
-//#include <XCAFDoc_VisMaterialTool.hxx>
+#include <XCAFDoc_VisMaterialTool.hxx>
 
 #include "../XbimConvert.h"
 #include "unmanaged/FlexShape.h"
+#include <XCAFDoc.hxx>
+#include "unmanaged/NBRepDocument.h"
 
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Factories;
-
+using namespace Xbim::Geometry::Visual;
 using namespace Xbim::Geometry::Storage;
 using namespace Microsoft::Extensions::Logging::Abstractions;
 using namespace System::Linq;
@@ -40,7 +42,7 @@ namespace Xbim
 	{
 		namespace Storage
 		{
-			
+
 
 			void BRepDocumentItem::AddReference(IXBRepDocumentItem^ referred, System::Nullable<XbimMatrix3D> transform)
 			{
@@ -56,8 +58,8 @@ namespace Xbim
 				else
 				{
 					TDF_Label aLabel = The_ShapeTool()->AddComponent(Ref(), referedLabel, TopLoc_Location());
-					SetName(aLabel, "R");					
-					
+					SetName(aLabel, "R");
+
 				}
 			}
 
@@ -157,7 +159,7 @@ namespace Xbim
 			{
 				if (!(this->IsAssembly || this->IsSimpleShape)) throw gcnew XbimGeometryException("Components can only be added to Assemblies or simple shapes");
 
-				const TopoDS_Shape& topoShape = ((XShape^)shape)->GetTopoShape();
+				const TopoDS_Shape& topoShape = static_cast<XShape^>(shape)->GetTopoShape();
 
 				TopoDS_Shape shapeWithoutLocation = topoShape;
 				TopLoc_Location emptyLocation;
@@ -186,7 +188,7 @@ namespace Xbim
 			IXBRepDocumentItem^ BRepDocumentItem::AddSubShape(System::String^ name, IXShape^ shape, bool isExistingPart)
 			{
 				//first ensure the shape of the label has this shape in its compounds
-				const TopoDS_Shape& subShape = ((XShape^)shape)->GetTopoShape();
+				const TopoDS_Shape& subShape =  static_cast<XShape^>(shape)->GetTopoShape();
 
 				if (!isExistingPart)
 				{
@@ -318,7 +320,7 @@ namespace Xbim
 				Handle(TDataStd_BooleanArray)features = TDataStd_BooleanArray::Set(Ref(), 1, 6);
 				features->SetValue(5, isShapeRepresentation);
 			}
-			
+
 			bool BRepDocumentItem::HasProjections::get()
 			{
 				Handle(TDataStd_BooleanArray)features;
@@ -505,7 +507,7 @@ namespace Xbim
 				return The_ShapeTool()->SetShape(Ref(), shape);
 			}
 
-			
+
 			IXShape^ BRepDocumentItem::Shape::get()
 			{
 				TopoDS_Shape topoShape = The_ShapeTool()->GetShape(Ref());
@@ -567,7 +569,7 @@ namespace Xbim
 				TCollection_AsciiString entry;
 				TDF_Tool::Entry(Ref(), entry);
 				return gcnew System::String(entry.ToCString());
-				
+
 			}
 
 			System::String^ BRepDocumentItem::Name::get()
@@ -601,7 +603,85 @@ namespace Xbim
 				}
 			}
 
-			
+			IXVisualMaterial^ BRepDocumentItem::VisualMaterial::get()
+			{
+				TDF_Label  materialLabel;
+				try
+				{
+					Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref());
+
+					if (aMatTool->GetShapeMaterial(Ref(), materialLabel))
+					{
+						Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
+						return gcnew Xbim::Geometry::Visual::VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+					}
+					return nullptr;
+				}
+				catch (const Standard_Failure& sf)
+				{
+					std::stringstream strm;
+					sf.Print(strm);
+					throw gcnew XbimGeometryServiceException(gcnew System::String(strm.str().c_str()));
+				}
+
+			}
+
+			void BRepDocumentItem::VisualMaterial::set(IXVisualMaterial^ visMaterial)
+			{
+				auto aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref());
+				if (visMaterial->Label == nullptr) //need to add to the document
+				{	
+					//copy material in
+					System::IntPtr p = Marshal::StringToHGlobalAnsi(visMaterial->Name);
+					try
+					{
+						const char* pAnsi = static_cast<const char*>(p.ToPointer());
+						auto materialLabel = aMatTool->AddMaterial(pAnsi);
+						Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
+						XCAFDoc_VisMaterialCommon aMatCom = aMat->CommonMaterial();
+						aMatCom.AmbientColor.SetValues(visMaterial->AmbientColor->Red, visMaterial->AmbientColor->Green, visMaterial->AmbientColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+						aMatCom.DiffuseColor.SetValues(visMaterial->DiffuseColor->Red, visMaterial->DiffuseColor->Green, visMaterial->DiffuseColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+						aMatCom.EmissiveColor.SetValues(visMaterial->EmissiveColor->Red, visMaterial->EmissiveColor->Green, visMaterial->EmissiveColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+						aMatCom.SpecularColor.SetValues(visMaterial->SpecularColor->Red, visMaterial->SpecularColor->Green, visMaterial->SpecularColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+						aMatCom.Shininess = visMaterial->Shininess;
+						aMatCom.Transparency = visMaterial->Transparency;
+						aMatCom.IsDefined = true;
+						aMat->SetCommonMaterial(aMatCom);
+						XCAFDoc_VisMaterialPBR pbr = aMat->ConvertToPbrMaterial();
+						aMat->SetPbrMaterial(pbr);
+						aMatTool->SetShapeMaterial(Ref(), materialLabel);
+					}
+					finally
+					{
+						Marshal::FreeHGlobal(p);
+					}
+				}
+				else
+				{
+					BRepDocumentItem^ materialItem = dynamic_cast<BRepDocumentItem^>(visMaterial->Label);
+					aMatTool->SetShapeMaterial(Ref(), materialItem->Ref());
+				}
+			}
+			IEnumerable<IXBRepDocumentItem^>^ BRepDocumentItem::ShapesAssignedToMaterial::get()
+			{
+				TDF_LabelSequence userLabels;
+				int numUsers = The_ShapeTool()->GetUsers(Ref(), userLabels, true);
+				List<IXBRepDocumentItem^>^ users = gcnew List<IXBRepDocumentItem^>(numUsers);
+				Handle(TDataStd_TreeNode) tree;
+				bool hasTree = Ref().FindAttribute(XCAFDoc::VisMaterialRefGUID(), tree);
+				if (hasTree)
+				{
+					int nbKids = tree->NbChildren(true);
+					Handle(TDataStd_TreeNode) f = tree->First();
+					for (int i = 0; i < nbKids; i++)
+					{
+						users->Add(gcnew BRepDocumentItem(f->Label()));
+						f = f->Next();
+					}
+				}
+				return users;
+			}
+
 		}
 	}
 }

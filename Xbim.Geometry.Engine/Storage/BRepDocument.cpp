@@ -1,16 +1,15 @@
 
+
+#include <TDocStd_Document.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
-//#include <XCAFDoc_ShapeTool.hxx>
-//#include <STEPCAFControl_Writer.hxx>
-//#include <RWGltf_CafWriter.hxx>
-//
-//
-//#include <XCAFDoc_VisMaterialTool.hxx>
-//#include <XCAFDoc_ColorTool.hxx>
-//#include <XCAFDoc_MaterialTool.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
+#include <TDocStd_Application.hxx>
+
+#include <XCAFDoc_VisMaterialTool.hxx>
+
+#include "./Unmanaged/NBRepDocument.h"
 #include <TDF_Tool.hxx>
 
-//#include <RWGltf_CafWriter.hxx>
 #include <TDataStd_Name.hxx>
 #include <OSD_OpenFile.hxx>
 
@@ -19,9 +18,7 @@
 #include "../Visual/VisualMaterial.h"
 #include "../Factories//ShapeFactory.h"
 #include "../Exceptions//XbimGeometryServiceException.h"
-#
 
-//#include "./Unmanaged/WexBim_CafWriter.h"
 
 #include "../BRep/XShape.h"
 
@@ -32,6 +29,7 @@ using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Geometry::Visual;
 
 using namespace Xbim::Geometry::Exceptions;
+#define XCAFDoc_ShapeTool() XCAFDoc_DocumentTool::ShapeTool(Ref()->Main())
 namespace Xbim
 {
 	namespace Geometry
@@ -40,7 +38,7 @@ namespace Xbim
 		{
 			IXBRepDocumentItem^ BRepDocument::CreateAssembly(System::String^ name)
 			{
-
+				
 				TDF_Label assemblyLabel = XCAFDoc_ShapeTool()->NewShape();
 				BRepDocumentItem::SetName(assemblyLabel, name);
 				return gcnew BRepDocumentItem(assemblyLabel);
@@ -159,7 +157,130 @@ namespace Xbim
 				for (auto& it = labels.cbegin(); it != labels.cend(); ++it)
 					shapes->Add(gcnew BRepDocumentItem(*it));
 				return shapes;
-			}		
+			}	
+
+
+			IXVisualMaterial^ BRepDocument::AddVisualMaterial(IXVisualMaterial^ visMaterial)
+			{
+
+
+				System::IntPtr p = Marshal::StringToHGlobalAnsi(visMaterial->Name);
+				try
+				{
+					const char* pAnsi = static_cast<const char*>(p.ToPointer());
+
+					Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+					TDF_Label materialLabel = NBRepDocument::FindVisualMaterial(Ref(), pAnsi);
+					if (materialLabel.IsNull())
+						materialLabel = aMatTool->AddMaterial(pAnsi);
+					Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
+					XCAFDoc_VisMaterialCommon aMatCom = aMat->CommonMaterial();
+					aMatCom.AmbientColor.SetValues(visMaterial->AmbientColor->Red, visMaterial->AmbientColor->Green, visMaterial->AmbientColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+					aMatCom.DiffuseColor.SetValues(visMaterial->DiffuseColor->Red, visMaterial->DiffuseColor->Green, visMaterial->DiffuseColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+					aMatCom.EmissiveColor.SetValues(visMaterial->EmissiveColor->Red, visMaterial->EmissiveColor->Green, visMaterial->EmissiveColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+					aMatCom.SpecularColor.SetValues(visMaterial->SpecularColor->Red, visMaterial->SpecularColor->Green, visMaterial->SpecularColor->Blue, Quantity_TypeOfColor::Quantity_TOC_RGB);
+					aMatCom.Shininess = visMaterial->Shininess;
+					aMatCom.Transparency = visMaterial->Transparency;
+					aMatCom.IsDefined = true;
+					aMat->SetCommonMaterial(aMatCom);
+					XCAFDoc_VisMaterialPBR pbr = aMat->ConvertToPbrMaterial();
+					aMat->SetPbrMaterial(pbr);
+					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+				}
+				finally
+				{
+					Marshal::FreeHGlobal(p);
+				}
+			}
+
+			void BRepDocument::SetMaterial(IXShape^ shape, IXVisualMaterial^ visMaterial)
+			{
+				VisualMaterial^ visMatItem = dynamic_cast<VisualMaterial^>(visMaterial);
+				if (visMatItem != nullptr)
+				{
+					BRepDocumentItem^ storeItem = dynamic_cast<BRepDocumentItem^>(visMaterial->Label);
+					if (storeItem != nullptr)
+					{
+						Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+						const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+						aMatTool->SetShapeMaterial(topoShape, storeItem->Ref());
+					}
+				}
+			}
+
+
+			IEnumerable<IXVisualMaterial^>^ BRepDocument::GetVisualMaterials()
+			{
+				Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+				TDF_LabelSequence materialLabels;
+				aMatTool->GetMaterials(materialLabels);
+				List<IXVisualMaterial^>^ materials = gcnew List<IXVisualMaterial^>(materialLabels.Size());
+				for (auto& it = materialLabels.cbegin(); it != materialLabels.cend(); ++it)
+				{
+					Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(*it);
+					materials->Add(gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(*it)));
+				}
+				return materials;
+			}
+			IEnumerable<IXBRepDocumentItem^>^ BRepDocument::GetMaterials()
+			{
+				Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+				TDF_LabelSequence materialLabels;
+				aMatTool->GetMaterials(materialLabels);
+				List<IXBRepDocumentItem^>^ materials = gcnew List<IXBRepDocumentItem^>(materialLabels.Size());
+				for (auto& it = materialLabels.cbegin(); it != materialLabels.cend(); ++it)
+				{
+					materials->Add(gcnew BRepDocumentItem(*it));
+				}
+				return materials;
+			}
+
+			IXVisualMaterial^ BRepDocument::GetMaterial(IXBRepDocumentItem^ item)
+			{
+				if (!item->IsNull)
+				{
+					System::IntPtr pShape = Marshal::StringToHGlobalAnsi(item->Key);
+					try
+					{
+
+						const char* pShapeAnsi = static_cast<const char*>(pShape.ToPointer());
+						TDF_Label aShapeLabel;
+						TDF_Tool::Label(Ref()->GetData(), pShapeAnsi, aShapeLabel);
+						Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+						if (!aShapeLabel.IsNull())
+						{
+							TDF_Label  materialLabel;
+							if (aMatTool->GetShapeMaterial(aShapeLabel, materialLabel))
+							{
+								Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
+								return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+							}
+						}
+					}
+					finally
+					{
+						Marshal::FreeHGlobal(pShape);
+					}
+				}
+				return nullptr;
+			}
+			IXVisualMaterial^ BRepDocument::GetMaterial(IXShape^ shape)
+			{
+
+				Handle(XCAFDoc_VisMaterialTool) aMatTool = XCAFDoc_DocumentTool::VisMaterialTool(Ref()->Main());
+
+				TDF_Label  materialLabel;
+				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+				if (aMatTool->GetShapeMaterial(topoShape, materialLabel))
+				{
+					Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
+					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+				}
+
+				return nullptr;
+			}
+
+
 		}
 	}
 }

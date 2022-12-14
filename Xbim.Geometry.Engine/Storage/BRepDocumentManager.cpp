@@ -275,7 +275,7 @@ namespace Xbim
 				try
 				{
 					Handle(TDocStd_Document) aDoc;
-					//Ref()->NewDocument("BinXCAF", aDoc);
+					Ref()->NewDocument("BinXCAF", aDoc);
 					return gcnew BRepDocument(aDoc);
 				}
 				catch (const Standard_Failure& sf)

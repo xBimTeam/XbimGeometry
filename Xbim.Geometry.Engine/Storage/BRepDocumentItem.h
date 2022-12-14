@@ -1,10 +1,12 @@
 #pragma once	
-
+#include <XCAFDoc_DocumentTool.hxx>
+#include <XCAFDoc_ShapeTool.hxx>
 #include <TDF_Label.hxx>
 #include <TDF_Tool.hxx>
 
 #include "../XbimHandle.h"
 #include "BRepDocument.h"
+
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Abstractions;
@@ -39,7 +41,7 @@ namespace Xbim
 				virtual property System::String^ Key {System::String^ get(); }
 				virtual property System::String^ Name {System::String^ get(); void set(System::String^ name); }
 				virtual property bool IsStored {bool get() { return !Ref().IsNull(); }; };
-				virtual property bool IsTopLevel {bool get() { return The_ShapeTool()->IsTopLevel(Ref()); }; };
+				virtual property bool IsTopLevel {bool get() { return  The_ShapeTool()->IsTopLevel(Ref()); }; };
 				virtual property bool IsShape {bool get() { return The_ShapeTool()->IsShape(Ref()); }; };
 
 				virtual property bool IsSubShape {bool get() { return The_ShapeTool()->IsSubShape(Ref()); }; };
@@ -105,7 +107,8 @@ namespace Xbim
 				virtual property bool IsShapeRepresentation { bool get(); void set(bool isShapeRep); }
 				virtual property bool IsShapeRepresentationMap { bool get(); void set(bool isShapeRepMap); }
 				virtual property bool IsGeometricRepresentationItem { bool get(); void set(bool isGeomRep); }
-				
+				virtual property IEnumerable<IXBRepDocumentItem^>^ ShapesAssignedToMaterial {IEnumerable<IXBRepDocumentItem^>^ get(); }
+				virtual property IXVisualMaterial^ VisualMaterial { IXVisualMaterial^ get(); void set(IXVisualMaterial^ material); }
 				
 			};
 

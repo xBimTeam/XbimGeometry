@@ -432,6 +432,9 @@
     <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Storage\Unmanaged\NBRepDocument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -750,6 +753,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

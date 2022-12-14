@@ -282,6 +282,7 @@
     <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h" />
     <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.h" />
     <ClInclude Include="Storage\Unmanaged\FlexShape.h" />
+    <ClInclude Include="Storage\Unmanaged\NBRepDocument.h" />
     <ClInclude Include="Visual\ColourRGB.h" />
     <ClInclude Include="Visual\VisualMaterial.h" />
     <ClInclude Include="Visual\XbimShapeColour.h" />
@@ -399,6 +400,7 @@
     <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.cpp" />
     <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp" />
     <ClCompile Include="Storage\Unmanaged\FlexShape.cpp" />
+    <ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp" />
     <ClCompile Include="Visual\ColourRGB.cpp" />
     <ClCompile Include="Visual\VisualMaterial.cpp" />
     <ClCompile Include="Visual\XbimShapeColour.cpp" />

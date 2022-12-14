@@ -1,9 +1,11 @@
 #pragma once	
 
+
 #include <TDocStd_Document.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
 #include <TDocStd_Application.hxx>
+
 
 #include "Unmanaged/FlexApp_Application.h"
 //#include "Unmanaged/FlexDrivers.h"
@@ -17,7 +19,7 @@ using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace System::IO;
 
-#define XCAFDoc_ShapeTool() XCAFDoc_DocumentTool::ShapeTool(Ref()->Main())
+
 #include "../XbimHandle.h"
 namespace Xbim
 {
@@ -29,6 +31,7 @@ namespace Xbim
 
 			public ref class BRepDocument : XbimHandle<Handle(TDocStd_Document)>, IXBRepDocument
 			{
+			
 
 			private:
 
@@ -66,6 +69,12 @@ namespace Xbim
 					System::Nullable<double> get() { return RootItem->GetDoubleAttribute("PrecisionFactor"); };
 					void set(System::Nullable<double> val) { RootItem->SetDoubleAttribute("PrecisionFactor", val); }; };
 				virtual void UpdateAssemblies();
+				virtual IXVisualMaterial^ AddVisualMaterial(IXVisualMaterial^ visMaterial);
+				virtual void SetMaterial(IXShape^ shape, IXVisualMaterial^ visMaterial);
+				virtual IEnumerable<IXVisualMaterial^>^ GetVisualMaterials();
+				virtual IEnumerable<IXBRepDocumentItem^>^ GetMaterials();
+				virtual IXVisualMaterial^ GetMaterial(IXBRepDocumentItem^ item);
+				virtual IXVisualMaterial^ GetMaterial(IXShape^ shape);
 
 
 			};
