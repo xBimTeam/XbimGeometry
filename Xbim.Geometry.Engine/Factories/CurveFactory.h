@@ -27,7 +27,7 @@ namespace Xbim
 				virtual IXCurve^ Build(IIfcCurve^ curve);
 
 
-				
+
 				Handle(Geom_Curve) BuildCurve3d(IIfcCurve^ curve);
 				template <typename IfcType>
 				Handle(Geom2d_Curve) BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense);
@@ -59,7 +59,9 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots);
 
 				void BuildCompositeCurveSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments);
+				Handle(Geom2d_Curve) BuildAxis2d(IIfcGridAxis^ axis);
 
+				int Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections);
 
 				Handle(Geom_Curve) BuildCurve3d(IIfcCurve^ curve, XCurveType% curveType);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
@@ -90,6 +92,9 @@ namespace Xbim
 				Handle(Geom_Curve) BuildCurve3d(IIfcSurfaceCurve^ ifcPolyline);
 
 				bool IsBoundedCurve(IIfcCurve^ curve);
+
+				bool Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent);
+
 			};
 
 		}

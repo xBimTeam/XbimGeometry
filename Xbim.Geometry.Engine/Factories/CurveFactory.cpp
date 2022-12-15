@@ -24,7 +24,7 @@
 #include <NCollection_Vector.hxx>
 #include "../BRep/OccExtensions/KeyedPnt.h"
 #include "../BRep/OccExtensions/KeyedPnt2d.h"
-
+#include <Geom2dAPI_InterCurveCurve.hxx>
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -71,7 +71,7 @@ namespace Xbim
 				}
 			}
 
-			
+
 
 #pragma region 2d Curve builders
 
@@ -111,7 +111,7 @@ namespace Xbim
 				default:
 					throw RaiseGeometryFactoryException("Unsupported 2d curve type", curve);
 				}
-				
+
 			}
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
@@ -204,7 +204,7 @@ namespace Xbim
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcCompositeCurveOnSurface^ ifcCompositeCurve)
 			{
 				throw RaiseGeometryFactoryException("IIfcCompositeCurveOnSurface is currently not supported", ifcCompositeCurve);
-				
+
 			}
 
 			Handle(Geom2d_Ellipse) CurveFactory::BuildCurve2d(IIfcEllipse^ ifcEllipse)
@@ -450,6 +450,24 @@ namespace Xbim
 				}
 			}
 
+			Handle(Geom2d_Curve) CurveFactory::BuildAxis2d(IIfcGridAxis^ axis)
+			{
+				if (2 != (int)axis->AxisCurve->Dim)
+					RaiseGeometryFactoryException("Axis must have a 2d curve");
+				XCurveType curveType;
+				Handle(Geom2d_Curve) curve2d = BuildCurve2d(axis->AxisCurve, curveType); //throws exception
+				if(!axis->SameSense) curve2d->Reverse();
+				return curve2d;
+			}
+
+			int CurveFactory::Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections)
+			{
+				int intersectCnt = EXEC_NATIVE->Intersections(c1, c2, intersections, ModelGeometryService->MinimumGap);
+				if (intersectCnt < 0)
+					RaiseGeometryFactoryException("Calculation of Curve intersections failed");
+				return intersectCnt;
+			}
+
 			/// <summary>
 			/// This functions respects 2d curve builder but always updates the result to a 3d curve
 			/// </summary>
@@ -527,8 +545,8 @@ namespace Xbim
 					return Build3d(static_cast<IIfcPcurve^>(curve));*/
 				case XCurveType::IfcPolyline:
 					return BuildCurve3d(static_cast<IIfcPolyline^>(curve));
-					case XCurveType::IfcRationalBSplineCurveWithKnots:
-						return BuildCurve3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+				case XCurveType::IfcRationalBSplineCurveWithKnots:
+					return BuildCurve3d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
 					/*case XCurveType::SurfaceCurve:
 						return Build3d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
@@ -802,7 +820,7 @@ namespace Xbim
 				if (startParam.HasValue) start = startParam.Value; else start = -1;
 				if (endParam.HasValue) end = endParam.Value; else  end = -1;
 				XCurveType curveType;
-				return BuildDirectrix(curve, start, end,curveType );
+				return BuildDirectrix(curve, start, end, curveType);
 			}
 
 			IXCurve^ CurveFactory::BuildDirectrix(IIfcCurve^ curve, Nullable<double> startParam, Nullable<double> endParam)
@@ -851,7 +869,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Unsupported curve type");
 				}
 				throw RaiseGeometryFactoryException("Unsupported curve type");
-				
+
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType)
@@ -891,7 +909,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Unsupported 2d curve type");
 				}
 				throw RaiseGeometryFactoryException("Unsupported 2d curve type");
-				
+
 			}
 
 			IXCurve^ CurveFactory::BuildXDirectrix(IIfcCurve^ curve, double startParam, double endParam)
@@ -934,7 +952,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Unsupported curve type");
 				}
 				throw RaiseGeometryFactoryException("Unsupported curve type");
-				
+
 			}
 
 			Handle(Geom_LineWithMagnitude) CurveFactory::BuildCurve3d(IIfcLine^ ifcLine)
@@ -1184,6 +1202,10 @@ namespace Xbim
 				if (dynamic_cast<IIfcPcurve^>(curve)) return false;
 				if (dynamic_cast<IIfcSurfaceCurve^>(curve)) return false;
 				return true;
+			}
+			bool CurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent)
+			{
+				return EXEC_NATIVE->Tangent2dAt(curve, parameter, pnt2d, tangent); //throws exception
 			}
 #pragma endregion
 		}

@@ -27,6 +27,8 @@ public:
 
 #pragma region Geometric methods
 
+	int Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections, double intersectTolerance);
+
 	Handle(Geom2d_BSplineCurve) BuildBSplineCurve2d(const TColgp_Array1OfPnt2d& poles, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree);
 
 	Handle(Geom2d_Circle) BuildCircle2d(const gp_Ax22d &axis, double radius);
@@ -70,6 +72,7 @@ public:
 	/// If a vertex lies on a curve within the maxTolerance, the parameter of the vertex on the curve is returned and the actual distance between the point of the vertex and the curve is calculated
 	/// </summary>
 	static bool LocateVertexOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance);
+	bool Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent);
 #pragma endregion
 
 };

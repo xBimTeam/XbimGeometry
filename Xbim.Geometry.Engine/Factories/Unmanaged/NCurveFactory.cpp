@@ -25,7 +25,27 @@
 #include <Geom_OffsetCurve.hxx>
 #include <BRep_Tool.hxx>
 #include <Extrema_ExtPC.hxx>
+#include <Geom2dAPI_InterCurveCurve.hxx>
 
+int NCurveFactory::Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections, double intersectTolerance)
+{
+	try
+	{
+		Geom2dAPI_InterCurveCurve extrema(c1, c2, intersectTolerance);
+		
+		intersections.Resize(1, extrema.NbPoints(),false);
+		for (Standard_Integer i = 1; i <= extrema.NbPoints(); i++)
+		{
+			intersections.SetValue(i, extrema.Point(i));
+		}
+		return extrema.NbPoints();
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e, "Invalid BSplineCurve specification");
+		return -1; //return -1 for failure checking
+	}
+}
 Handle(Geom2d_BSplineCurve) NCurveFactory::BuildBSplineCurve2d(const TColgp_Array1OfPnt2d& poles, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree)
 {
 	try
@@ -631,6 +651,23 @@ bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, con
 		}
 	}
 	return Standard_False;
+}
+
+bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter,  gp_Pnt2d& pnt2d, gp_Vec2d& tangent)
+{
+	try
+	{
+		curve->D1(parameter, pnt2d, tangent);
+		return true;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e, "Invalid tangent at point on curve");
+		return false;
+	}
+	
+	
+	
 }
 
 

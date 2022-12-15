@@ -15,6 +15,7 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TopLoc_Location.hxx>
 
+using namespace Xbim::Ifc4::MeasureResource;
 namespace Xbim
 {
 	namespace Geometry
@@ -43,6 +44,7 @@ namespace Xbim
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				bool BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir);
 
+				
 				//builds a 3d vector, if the Ifc Vector is 2d the Z component is 0
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				bool BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec);
@@ -63,21 +65,27 @@ namespace Xbim
 
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
+
+
 				virtual IXAxis2Placement2d^ GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
 				virtual IXDirection^ BuildDirection3d(double x, double y, double z);
 				virtual IXDirection^ BuildDirection2d(double x, double y);
 				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				virtual IXPoint^ BuildPoint2d(double x, double y);
 				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
+				bool BuildDirection3d(double x, double y, double z, gp_Vec& vec);
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);
 				virtual IXDirection^ NormalAt(IXFace^ face, IXPoint^ position, double tolerance);
 
 				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
-
+				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
 				static double GetDeterminant(double x1, double y1, double x2, double y2);
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
+				gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement);
+				TopLoc_Location ToLocation(IIfcObjectPlacement^ placement);
+				bool MakeDir3d(IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v);
 			};
 		}
 	}
