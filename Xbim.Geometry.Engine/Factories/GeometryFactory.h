@@ -9,7 +9,10 @@
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
 #include <gp_Ax22d.hxx>
-
+#include <gp_GTrsf2d.hxx>
+#include <gp_GTrsf.hxx>
+#include <gp_Trsf2d.hxx>
+#include <gp_Trsf.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
@@ -63,6 +66,8 @@ namespace Xbim
 				void GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
 
+				bool ToLocation(IIfcAxis2Placement^ axis, TopLoc_Location& location);
+
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
 
@@ -81,11 +86,22 @@ namespace Xbim
 
 				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
+				virtual IXLocation^ BuildLocation();
 				static double GetDeterminant(double x1, double y1, double x2, double y2);
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 				gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement);
 				TopLoc_Location ToLocation(IIfcObjectPlacement^ placement);
 				bool MakeDir3d(IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v);
+
+				gp_GTrsf ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D);
+
+				gp_GTrsf2d ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
+
+				gp_Trsf2d ToTransform(IIfcCartesianTransformationOperator2D^ ct);
+
+				gp_Trsf ToTransform(IIfcCartesianTransformationOperator3D^ ct3D);
+
+				
 			};
 		}
 	}

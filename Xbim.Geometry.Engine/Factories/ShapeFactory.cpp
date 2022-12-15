@@ -6,6 +6,9 @@
 #include <HLRBRep_PolyHLRToShape.hxx>
 #include <TopExp.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
+#include <gp_Trsf.hxx>
+
 #include <BRep_Builder.hxx>
 #include "../BRep/XShape.h"
 #include "../BRep/XVertex.h"
@@ -16,6 +19,7 @@
 #include "../BRep/XSolid.h"
 #include "../BRep/XCompound.h"
 #include "../Brep/XPlane.h"
+#include "../Brep/XLocation.h"
 
 #include "../Exceptions/XbimGeometryServiceException.h"
 #include "../XbimConvert.h"
@@ -77,11 +81,11 @@ namespace Xbim
 				}
 				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
 			}
-			
-			
+
+
 			/*IXbimGeometryObject^ ShapeFactory::ConvertToV5(System::String^ brepStr)
 			{
-				
+
 				return _modelService->GetV5GeometryEngine()->FromBrep(brepStr);
 			}
 			IXbimGeometryObject^ ShapeFactory::ConvertToV5(IXShape^ shape)
@@ -163,7 +167,7 @@ namespace Xbim
 				//		return nullptr;
 				//}
 				//else
-					return nullptr;
+				return nullptr;
 			}
 
 			IXShape^ ShapeFactory::GetXbimShape(const TopoDS_Shape& shape)
@@ -361,6 +365,48 @@ namespace Xbim
 				array<System::Byte>^ result = CreateWexBimMesh(faceCompound, meshFactors->Tolerance, true, hasCurves);
 				BRepTools::Clean(faceCompound);
 				return result;
+			}
+
+			IXShape^ ShapeFactory::BuildMappedShape(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXShape^ shape, IXLocation^% location)
+			{
+				TopLoc_Location sourceTransform;
+				if (!GEOMETRY_FACTORY->ToLocation(origin, sourceTransform))
+					throw RaiseGeometryFactoryException("Invalid origin", origin);
+				TopoDS_Shape topoShape = static_cast<XShape^>(shape)->GetTopoShape();
+				if (dynamic_cast<IfcCartesianTransformationOperator3D^>(transform) != nullptr)
+				{
+					gp_Trsf targetTransform = GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator3D^>(transform));
+					auto mapLocation = sourceTransform * targetTransform;
+					location = gcnew XLocation(mapLocation);
+					return shape;
+				}
+				else if (dynamic_cast<IfcCartesianTransformationOperator2D^>(transform) != nullptr)
+				{
+					gp_Trsf targetTransform = gp_Trsf(GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator2D^>(transform)));
+					auto mapLocation = sourceTransform * targetTransform;
+					location = gcnew XLocation(mapLocation);
+					return shape;
+				}
+				else if (dynamic_cast<IfcCartesianTransformationOperator3DnonUniform^>(transform) != nullptr)
+				{
+					gp_GTrsf targetTransform = GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator3DnonUniform^>(transform));
+					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);
+					location = gcnew XLocation(sourceTransform);
+					return XShape::GetXbimShape(tr.Shape());
+				}
+				else if (dynamic_cast<IfcCartesianTransformationOperator2DnonUniform^>(transform) != nullptr)
+				{
+					gp_GTrsf2d t2d = GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator2DnonUniform^>(transform));
+					gp_Mat mat(gp_XYZ(t2d.Value(1, 1), t2d.Value(2, 1), 0), gp_XYZ(t2d.Value(1, 2), t2d.Value(2, 2), 0), gp_XYZ());
+					gp_XY xy = t2d.TranslationPart();
+					gp_GTrsf targetTransform(mat, gp_XYZ(xy.X(), xy.Y(), 0));
+					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);
+					location = gcnew XLocation(sourceTransform);
+					return XShape::GetXbimShape(tr.Shape());
+				}
+				else
+					throw RaiseGeometryFactoryException("Unsupported transformation type", transform);
+
 			}
 
 			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves)

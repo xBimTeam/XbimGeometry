@@ -59,6 +59,8 @@ namespace Xbim
 				virtual array<System::Byte>^ CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors);
 				virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, bool% hasCurves);
 				virtual array<System::Byte>^ CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors, bool% hasCurves);
+
+				virtual IXShape^ BuildMappedShape(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXShape^ shape, IXLocation^% location);
 				
 			};
 		}
