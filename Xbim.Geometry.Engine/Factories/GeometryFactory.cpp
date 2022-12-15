@@ -390,7 +390,7 @@ namespace Xbim
 
 						auto axis1 = CURVE_FACTORY->BuildAxis2d(axises[0]);
 						auto axis2 = CURVE_FACTORY->BuildAxis2d(axises[1]);
-						TColgp_Array1OfPnt2d interections(1, 4);
+						TColgp_Array1OfPnt2d interections(1, 1);
 						int intCnt = CURVE_FACTORY->Intersections(axis1, axis2, interections);
 						if (intCnt <= 0) return trsf;
 
