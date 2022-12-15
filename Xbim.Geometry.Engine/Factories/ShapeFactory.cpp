@@ -370,28 +370,26 @@ namespace Xbim
 			IXShape^ ShapeFactory::BuildMappedShape(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXShape^ shape, IXLocation^% location)
 			{
 				TopLoc_Location sourceTransform;
+				location = gcnew XLocation(sourceTransform);
 				if (!GEOMETRY_FACTORY->ToLocation(origin, sourceTransform))
 					throw RaiseGeometryFactoryException("Invalid origin", origin);
 				TopoDS_Shape topoShape = static_cast<XShape^>(shape)->GetTopoShape();
 				if (dynamic_cast<IfcCartesianTransformationOperator3D^>(transform) != nullptr)
 				{
 					gp_Trsf targetTransform = GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator3D^>(transform));
-					auto mapLocation = sourceTransform * targetTransform;
-					location = gcnew XLocation(mapLocation);
-					return shape;
+					BRepBuilderAPI_Transform tr(topoShape, targetTransform, Standard_False);
+					return XShape::GetXbimShape(tr.Shape());
 				}
 				else if (dynamic_cast<IfcCartesianTransformationOperator2D^>(transform) != nullptr)
 				{
 					gp_Trsf targetTransform = gp_Trsf(GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator2D^>(transform)));
-					auto mapLocation = sourceTransform * targetTransform;
-					location = gcnew XLocation(mapLocation);
-					return shape;
+					BRepBuilderAPI_Transform tr(topoShape, targetTransform, Standard_False);
+					return XShape::GetXbimShape(tr.Shape());
 				}
 				else if (dynamic_cast<IfcCartesianTransformationOperator3DnonUniform^>(transform) != nullptr)
 				{
 					gp_GTrsf targetTransform = GEOMETRY_FACTORY->ToTransform(static_cast<IfcCartesianTransformationOperator3DnonUniform^>(transform));
-					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);
-					location = gcnew XLocation(sourceTransform);
+					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);			
 					return XShape::GetXbimShape(tr.Shape());
 				}
 				else if (dynamic_cast<IfcCartesianTransformationOperator2DnonUniform^>(transform) != nullptr)
@@ -400,8 +398,7 @@ namespace Xbim
 					gp_Mat mat(gp_XYZ(t2d.Value(1, 1), t2d.Value(2, 1), 0), gp_XYZ(t2d.Value(1, 2), t2d.Value(2, 2), 0), gp_XYZ());
 					gp_XY xy = t2d.TranslationPart();
 					gp_GTrsf targetTransform(mat, gp_XYZ(xy.X(), xy.Y(), 0));
-					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);
-					location = gcnew XLocation(sourceTransform);
+					BRepBuilderAPI_GTransform tr(topoShape, targetTransform, Standard_True);					
 					return XShape::GetXbimShape(tr.Shape());
 				}
 				else
