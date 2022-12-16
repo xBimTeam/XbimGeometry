@@ -51,6 +51,8 @@ namespace Xbim
 		}
 		IXShape^ XbimGeometryObject::ToXShape(IXbimGeometryObject^ geomObj)
 		{
+			if (geomObj == nullptr)
+				return nullptr;
 			switch (geomObj->GeometryType)
 			{
 			case XbimGeometryObjectType::XbimGeometryObjectSetType:
