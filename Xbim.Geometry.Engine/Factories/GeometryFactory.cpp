@@ -626,7 +626,7 @@ namespace Xbim
 
 				auto dotU2_xAxis = U2.Dot(xAxis);
 				tmpVec = dotU2_xAxis * xAxis;
-				xAxis = gp_Vec(yAxis) - tmpVec;
+				yAxis = gp_Vec(yAxis) - tmpVec;
 
 				U2 = yAxis;
 				U1 = xAxis;
@@ -638,8 +638,9 @@ namespace Xbim
 					U3.X(), U3.Y(), U3.Z(), 0);
 
 				trsf.SetTranslationPart(translation);
-				trsf.SetScaleFactor(ct3D->Scl);
-				return gcnew XMatrix(trsf);
+				auto m = gcnew XMatrix(trsf);
+				m->SetScale(ct3D->Scl, ct3D->Scl, ct3D->Scl);
+				return m;
 			}
 
 			void GeometryFactory::BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix)
@@ -670,7 +671,10 @@ namespace Xbim
 						location = gcnew XLocation(newTranform);
 					}
 					else
+					{
 						matrix = m;
+						location = gcnew XLocation(sourceTransform);
+					}
 				}
 				else if (dynamic_cast<IIfcCartesianTransformationOperator2D^>(transform) != nullptr)
 				{
@@ -683,7 +687,10 @@ namespace Xbim
 						location = gcnew XLocation(newTranform);
 					}
 					else
+					{
 						matrix = m;
+						location = gcnew XLocation(sourceTransform);
+					}
 				}
 				else
 					throw RaiseGeometryFactoryException("Unsupported transformation type", transform);
