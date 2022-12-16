@@ -441,7 +441,8 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid));
+			return gcnew XbimSolid(IIfcSolid, Logger());
+			//return gcnew XbimSolid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid));
 		};
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)
 		{
@@ -632,24 +633,25 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanOperand^ IIfcSolid, ILogger^)
 		{
+			return gcnew XbimSolidSet(IIfcSolid, Logger());
 			//ensure operands get treated correctly
-			if (dynamic_cast<IIfcBooleanClippingResult^>(IIfcSolid))
-				return gcnew XbimSolidSet((IIfcBooleanClippingResult^)IIfcSolid, Logger());
-			else if (dynamic_cast<IIfcBooleanResult^>(IIfcSolid))
-				return gcnew XbimSolidSet((IIfcBooleanResult^)IIfcSolid, Logger());
-			else if (dynamic_cast<IIfcCsgSolid^>(IIfcSolid))
-				return gcnew XbimSolidSet((IIfcCsgSolid^)IIfcSolid, Logger());
-			else if (dynamic_cast<IIfcManifoldSolidBrep^>(IIfcSolid)) //these must be single volume solid
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcManifoldSolidBrep^)IIfcSolid, Logger()));
-			else if (dynamic_cast<IIfcSweptAreaSolid^>(IIfcSolid)) //these must be single volume solid
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptAreaSolid^)IIfcSolid, Logger()));
-			else if (dynamic_cast<IIfcSweptDiskSolid^>(IIfcSolid))
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptDiskSolid^)IIfcSolid, Logger()));
-			else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
-				return gcnew  XbimSolidSet(gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid, Logger()));
-			else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
-				return gcnew XbimSolidSet(gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid, Logger()));
-			throw gcnew System::Exception(System::String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
+			//if (dynamic_cast<IIfcBooleanClippingResult^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcBooleanClippingResult^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcBooleanResult^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcBooleanResult^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcCsgSolid^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcCsgSolid^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcManifoldSolidBrep^>(IIfcSolid)) //these must be single volume solid
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcManifoldSolidBrep^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcSweptAreaSolid^>(IIfcSolid)) //these must be single volume solid
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptAreaSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcSweptDiskSolid^>(IIfcSolid))
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptDiskSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
+			//	return gcnew  XbimSolidSet(gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid, Logger()));
+			//throw gcnew System::Exception(System::String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcManifoldSolidBrep^ IIfcSolid, ILogger^)
