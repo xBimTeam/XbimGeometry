@@ -19,7 +19,7 @@ namespace Xbim
 				XMatrix(const gp_Mat& mat, const gp_Vec& offset, const gp_XYZ& scale) : XbimHandle(new NCollection_Mat4<double>())
 				{
 					for (int r = 1; r < 4; r++)
-						for (int c = 4; c < 4; c++)
+						for (int c = 1; c < 4; c++)
 							Ref().SetValue(r, c, mat.Value(r, c));
 
 					Ref().SetValue(1, 4, scale.X());
@@ -55,6 +55,17 @@ namespace Xbim
 					Ref().SetValue(2, 4, y);
 					Ref().SetValue(3, 4, z);
 				};
+				virtual property array<double>^ Values {
+					array<double>^ get()
+					{
+						array<double>^ values = gcnew array<double>(16);
+						int i = 0;
+						for (int r = 1; r < 5; r++)
+							for (int c = 1; c < 5; c++)
+								values[i++] = Ref().GetValue(r, c);
+						return values;
+					};
+				}
 			};
 		}
 	}
