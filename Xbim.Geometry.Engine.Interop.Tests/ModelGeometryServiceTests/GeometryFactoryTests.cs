@@ -21,13 +21,20 @@ namespace Xbim.Geometry.NetCore.Tests
         [Fact]
         public void Can_Build_IfcCartesianTransformationOperator3D()
         {
-            var ct3d = IfcMoq.IfcCartesianTransformationOperator3DMoq(1);
-            var ax3 = IfcMoq.IfcAxis2Placement3DMock();
-            IXLocation loc;
-            IXMatrix mat;
-            _modelSvc.GeometryFactory.BuildMapTransform(ct3d, ax3, out loc, out mat);
-            loc.Should().NotBeNull();
-            mat.Should().NotBeNull();
+            var ct3d = IfcMoq.IfcCartesianTransformationOperator3DMoq(3);
+            var ax3 = IfcMoq.IfcAxis2Placement3DMock(loc: IfcMoq.IfcCartesianPoint3dMock(10, 5, 2));
+            IXLocation location;
+            IXMatrix matrix;
+            _modelSvc.GeometryFactory.BuildMapTransform(ct3d, ax3, out location, out matrix);
+            location.Should().NotBeNull();
+            matrix.Should().NotBeNull();
+            matrix.ScaleX.Should().Be(3);
+            matrix.ScaleY.Should().Be(3);
+            matrix.ScaleZ.Should().Be(3);
+            location.Translation.X.Should().Be(-10);
+            location.Translation.Y.Should().Be(-5);
+            location.Translation.Z.Should().Be(-2);
+
 
         }
 

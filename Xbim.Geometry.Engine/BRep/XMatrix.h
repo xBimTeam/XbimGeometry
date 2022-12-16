@@ -4,6 +4,7 @@
 #include <gp_GTrsf.hxx>
 #include "../XbimHandle.h"
 #include <Graphic3d_Mat4d.hxx>
+#include "../Exceptions/XbimGeometryFactoryException.h"
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
@@ -27,43 +28,51 @@ namespace Xbim
 						for (int c = 0; c < 4; c++)
 							Ref().SetValue(r, c, mat.Value(r, c));
 
-					Ref().SetValue(0, 3, scale.X());
-					Ref().SetValue(1, 3, scale.Y());
-					Ref().SetValue(2, 3, scale.Z());
-					Ref().SetValue(3, 0, offset.X());
-					Ref().SetValue(3, 1, offset.Y());
-					Ref().SetValue(3, 2, offset.Z());
+					Ref().SetValue(0, 3, offset.X());
+					Ref().SetValue(1, 3, offset.Y());
+					Ref().SetValue(2, 3, offset.Z());
+					Ref().SetValue(3, 0, scale.X());
+					Ref().SetValue(3, 1, scale.Y());
+					Ref().SetValue(3, 2, scale.Z());
 				}
 				virtual property bool  IsIdentity { bool get() { return Ref().IsIdentity(); }; }
 
 				virtual property double M11 {      double get() { return Ref().GetValue(0, 0); }; }
 				virtual property double M12 {      double get() { return Ref().GetValue(0, 1); }; }
 				virtual property double M13 {      double get() { return Ref().GetValue(0, 2); }; }
-				virtual property double ScaleX {      double get() { return Ref().GetValue(0, 3); }; }
+				virtual property double OffsetX {      double get() { return Ref().GetValue(0, 3); }; }
 				virtual property double M21 {      double get() { return Ref().GetValue(1, 0); }; }
 				virtual property double M22 {      double get() { return Ref().GetValue(1, 1); }; }
 				virtual property double M23 {      double get() { return Ref().GetValue(1, 2); }; }
-				virtual property double ScaleY {      double get() { return Ref().GetValue(1, 3); }; }
+				virtual property double OffsetY {      double get() { return Ref().GetValue(1, 3); }; }
 				virtual property double M31 {      double get() { return Ref().GetValue(2, 0); }; }
 				virtual property double M32 {      double get() { return Ref().GetValue(2, 1); }; }
 				virtual property double M33 {      double get() { return Ref().GetValue(2, 2); }; }
-				virtual property double ScaleZ {      double get() { return Ref().GetValue(2, 3); }; }
+				virtual property double OffsetZ {      double get() { return Ref().GetValue(2, 3); }; }
 				virtual property double M44 {         double get() { return Ref().GetValue(3, 3); }; }
-				virtual property double OffsetX {  double get() { return Ref().GetValue(3, 0); }; }
-				virtual property double OffsetY {  double get() { return Ref().GetValue(3, 1); }; }
-				virtual property double OffsetZ {  double get() { return Ref().GetValue(3, 2); }; }
+				virtual property double ScaleX {  double get() { return Ref().GetValue(3, 0); }; }
+				virtual property double ScaleY {  double get() { return Ref().GetValue(3, 1); }; }
+				virtual property double ScaleZ {  double get() { return Ref().GetValue(3, 2); }; }
 
-				gp_GTrsf Transform()
+				gp_Trsf Transform()
 				{
-					gp_GTrsf gTrsf; 
-					gTrsf.SetMat4(Ref()); 
-					return gTrsf;
+					try
+					{
+						gp_Trsf trsf;
+						trsf.SetValues(M11, M12, M13, OffsetX, M21, M22, M23, OffsetY, M31, M32, M33, OffsetZ);
+						return trsf;
+					}
+					catch (const Standard_Failure& )
+					{
+						throw gcnew Xbim::Geometry::Exceptions::XbimGeometryFactoryException("Error creating transform from XMatrix");
+					}
+
 				};
 				void SetScale(double x, double y, double z)
 				{
-					Ref().SetValue(0, 3, x);
-					Ref().SetValue(1, 3, y);
-					Ref().SetValue(2, 3, z);
+					Ref().SetValue(3, 0, x);
+					Ref().SetValue(3, 1, y);
+					Ref().SetValue(3, 2, z);
 				};
 				virtual property array<double>^ Values {
 					array<double>^ get()

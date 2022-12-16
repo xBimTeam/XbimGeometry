@@ -666,7 +666,7 @@ namespace Xbim
 					if ((double)transform->Scl == 1.0) //no scaling involved, append to the location
 					{
 						matrix = nullptr;
-						auto targetTransform = m->Transform().Trsf();
+						auto targetTransform = m->Transform();
 						auto newTranform = sourceTransform.Transformation() * targetTransform;
 						location = gcnew XLocation(newTranform);
 					}
@@ -682,7 +682,7 @@ namespace Xbim
 					if ((double)transform->Scl == 1.0) //no scaling involved, append to the location
 					{
 						matrix = nullptr;
-						auto targetTransform = m->Transform().Trsf();
+						auto targetTransform = m->Transform();
 						auto newTranform = sourceTransform.Transformation() * targetTransform;
 						location = gcnew XLocation(newTranform);
 					}
