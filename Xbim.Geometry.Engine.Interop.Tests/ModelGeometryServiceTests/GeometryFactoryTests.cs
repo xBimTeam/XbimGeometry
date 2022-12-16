@@ -21,7 +21,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [Fact]
         public void Can_Build_IfcCartesianTransformationOperator3D()
         {
-            var ct3d = IfcMoq.IfcCartesianTransformationOperator3DMoq();
+            var ct3d = IfcMoq.IfcCartesianTransformationOperator3DMoq(1);
             var ax3 = IfcMoq.IfcAxis2Placement3DMock();
             IXLocation loc;
             IXMatrix mat;

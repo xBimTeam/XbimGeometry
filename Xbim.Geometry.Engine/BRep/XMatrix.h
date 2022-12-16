@@ -3,7 +3,7 @@
 #include <gp_Trsf.hxx>
 #include <gp_GTrsf.hxx>
 #include "../XbimHandle.h"
-#include <Graphic3d_Mat4.hxx>
+#include <Graphic3d_Mat4d.hxx>
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
@@ -11,17 +11,17 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XMatrix : XbimHandle<Graphic3d_Mat4>, IXMatrix
+			public ref class XMatrix : XbimHandle<Graphic3d_Mat4d>, IXMatrix
 			{
 			public:
-				XMatrix() : XbimHandle(new Graphic3d_Mat4()) 
+				XMatrix() : XbimHandle(new Graphic3d_Mat4d())
 				{}
-				XMatrix(const gp_Trsf& trsf) : XbimHandle(new Graphic3d_Mat4())
+				XMatrix(const gp_Trsf& trsf) : XbimHandle(new Graphic3d_Mat4d())
 				{
 					trsf.GetMat4(Ref());
 				}
-				XMatrix(const gp_GTrsf& gTrsf) : XbimHandle(new Graphic3d_Mat4()) { gTrsf.GetMat4(Ref()); }
-				XMatrix(const gp_Mat& mat, const gp_Vec& offset, const gp_XYZ& scale) : XbimHandle(new Graphic3d_Mat4())
+				XMatrix(const gp_GTrsf& gTrsf) : XbimHandle(new Graphic3d_Mat4d()) { gTrsf.GetMat4(Ref()); }
+				XMatrix(const gp_Mat& mat, const gp_Vec& offset, const gp_XYZ& scale) : XbimHandle(new Graphic3d_Mat4d())
 				{
 					for (int r = 0; r < 4; r++)
 						for (int c = 0; c < 4; c++)
@@ -53,7 +53,12 @@ namespace Xbim
 				virtual property double OffsetY {  double get() { return Ref().GetValue(3, 1); }; }
 				virtual property double OffsetZ {  double get() { return Ref().GetValue(3, 2); }; }
 
-				gp_GTrsf Transform() { gp_GTrsf gTrsf; gTrsf.SetMat4(Ref()); return gTrsf; };
+				gp_GTrsf Transform()
+				{
+					gp_GTrsf gTrsf; 
+					gTrsf.SetMat4(Ref()); 
+					return gTrsf;
+				};
 				void SetScale(double x, double y, double z)
 				{
 					Ref().SetValue(0, 3, x);
