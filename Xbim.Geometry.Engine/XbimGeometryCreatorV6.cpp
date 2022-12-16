@@ -580,13 +580,14 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcSweptAreaSolid^ IIfcSolid, ILogger^)
 		{
-			IIfcExtrudedAreaSolid^ eas = dynamic_cast<IIfcExtrudedAreaSolid^>(IIfcSolid);
+			return gcnew XbimSolidSet(IIfcSolid, Logger());
+			/*IIfcExtrudedAreaSolid^ eas = dynamic_cast<IIfcExtrudedAreaSolid^>(IIfcSolid);
 			if (eas != nullptr) return CreateSolidSet(eas, Logger());
 			IIfcRevolvedAreaSolid^ ras = dynamic_cast<IIfcRevolvedAreaSolid^>(IIfcSolid);
 			if (ras != nullptr) return CreateSolidSet(ras, Logger());
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolidSet(scas, Logger());
-			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
+			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));*/
 
 		};
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
