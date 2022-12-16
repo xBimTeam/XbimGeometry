@@ -322,6 +322,7 @@
     <ClInclude Include="BRep\XBoundedSurface.h" />
     <ClInclude Include="BRep\XRectangleTrimmedSurface.h" />
     <ClInclude Include="BRep\XSurfaceOfLinearExtrusion.h" />
+    <ClInclude Include="BRep\XMatrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp" />
@@ -462,6 +463,7 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
     </ClCompile>
     <ClCompile Include="XbimWireSet.cpp" />
+    <ClCompile Include="BRep\XMatrix.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc" />

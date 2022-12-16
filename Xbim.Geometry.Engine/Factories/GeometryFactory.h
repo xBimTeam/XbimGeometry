@@ -18,7 +18,10 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TopLoc_Location.hxx>
 
+#include "../BRep/XMatrix.h"
+
 using namespace Xbim::Ifc4::MeasureResource;
+using namespace Xbim::Geometry::BRep;
 namespace Xbim
 {
 	namespace Geometry
@@ -71,14 +74,12 @@ namespace Xbim
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
 
-
 				virtual IXAxis2Placement2d^ GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
 				virtual IXDirection^ BuildDirection3d(double x, double y, double z);
 				virtual IXDirection^ BuildDirection2d(double x, double y);
 				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				virtual IXPoint^ BuildPoint2d(double x, double y);
-				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
-				bool BuildDirection3d(double x, double y, double z, gp_Vec& vec);
+				
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);
@@ -87,21 +88,27 @@ namespace Xbim
 				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ BuildLocation();
+
+				virtual IXMatrix^ BuildTransform(IIfcCartesianTransformationOperator^ transOp);
+				virtual IXLocation^ BuildLocation(IIfcAxis2Placement^ axis2);
 				static double GetDeterminant(double x1, double y1, double x2, double y2);
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 				gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement);
 				TopLoc_Location ToLocation(IIfcObjectPlacement^ placement);
 				bool MakeDir3d(IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v);
 
-				gp_GTrsf ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D);
+				XMatrix^ ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D);
 
-				gp_GTrsf2d ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
+				XMatrix^ ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
 
-				gp_Trsf2d ToTransform(IIfcCartesianTransformationOperator2D^ ct);
+				XMatrix^ ToTransform(IIfcCartesianTransformationOperator2D^ ct);
 
-				gp_Trsf ToTransform(IIfcCartesianTransformationOperator3D^ ct3D);
+				XMatrix^ ToTransform(IIfcCartesianTransformationOperator3D^ ct3D);
 
-				
+				virtual void BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix);
+
+				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
+				bool BuildDirection3d(double x, double y, double z, gp_Vec& vec);
 			};
 		}
 	}

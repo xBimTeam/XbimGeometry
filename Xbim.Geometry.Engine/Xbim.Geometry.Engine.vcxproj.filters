@@ -438,6 +438,9 @@
     <ClInclude Include="Primitives\GeometryPrimitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\XMatrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -762,6 +765,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Primitives\GeometryPrimitives.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XMatrix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

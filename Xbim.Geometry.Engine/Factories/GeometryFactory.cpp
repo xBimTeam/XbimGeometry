@@ -20,7 +20,7 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <gp_Mat2d.hxx>
 #include <math.h>
-
+#include <gp_Dir.hxx>
 
 
 #include "../BRep/XCompound.h"
@@ -33,7 +33,7 @@
 #include "../BRep/XDirection.h"
 #include "../visual//VisualMaterial.h"
 #include "../visual//XbimShapeColour.h"
-
+#include "../BRep/XMatrix.h"
 #include "../BRep/XAxisPlacement2d.h"
 #include "../BRep/XPlane.h"
 #include <ShapeAnalysis_Surface.hxx>
@@ -332,6 +332,53 @@ namespace Xbim
 				return gcnew XLocation();
 			}
 
+			IXMatrix^ GeometryFactory::BuildTransform(IIfcCartesianTransformationOperator^ transOp)
+			{
+				auto trans3d = dynamic_cast<IIfcCartesianTransformationOperator3D^>(transOp);
+				if (trans3d != nullptr)
+					return ToTransform(trans3d);
+				auto trans2d = dynamic_cast<IIfcCartesianTransformationOperator2D^>(transOp);
+				if (trans2d != nullptr)
+					return ToTransform(trans2d);
+				auto trans3dNU = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transOp);
+				if (trans3dNU != nullptr)
+					return ToTransform(trans3dNU);
+				auto trans2dNU = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(transOp);
+				if (trans2dNU != nullptr)
+					return ToTransform(trans2dNU);
+				throw RaiseGeometryFactoryException("Unsupported Transformation type", transOp);
+			}
+
+			IXLocation^ GeometryFactory::BuildLocation(IIfcAxis2Placement^ axis2)
+			{
+				auto axis3d = dynamic_cast<IIfcAxis2Placement3D^>(axis2);
+
+				if (axis3d != nullptr)
+				{
+					gp_Ax2 ax3d;
+					if (!BuildAxis2Placement3d(axis3d, ax3d))
+						throw RaiseGeometryFactoryException("Error building axis", axis2);
+					gp_Trsf transform;
+					gp_Ax3 ax(ax3d);
+					transform.SetTransformation(ax);
+					return gcnew XLocation(transform);
+				}
+				auto axis2d = dynamic_cast<IIfcAxis2Placement2D^>(axis2);
+				if (axis2d != nullptr)
+				{
+					gp_Ax22d ax2d;
+					if (!BuildAxis2Placement2d(axis2d, ax2d))
+						throw RaiseGeometryFactoryException("Error building axis", axis2);
+					gp_Trsf transform;
+					gp_Pnt2d p2d = ax2d.Location();
+					//gp_Dir2d d2d= ax2d.
+					gp_Ax3 ax(gp_Pnt(p2d.X(), p2d.Y(), 0.), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0.));
+					transform.SetTransformation(ax);
+					return gcnew XLocation(transform);
+				}
+				throw RaiseGeometryFactoryException("Unsupported axis placement type", axis2);
+			}
+
 			double GeometryFactory::GetDeterminant(double x1, double y1, double x2, double y2)
 			{
 				return x1 * y2 - x2 * y1;
@@ -492,218 +539,155 @@ namespace Xbim
 
 
 
-			gp_GTrsf GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D)
+			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D)
 			{
-				XbimVector3D U3; //Z Axis Direction
-				XbimVector3D U2; //X Axis Direction
-				XbimVector3D U1; //Y axis direction
-				if (ct3D->Axis3 != nullptr)
-				{
-					IIfcDirection^ dir = ct3D->Axis3;
-					U3 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U3 = U3.Normalized();
-				}
-				else
-					U3 = XbimVector3D(0., 0., 1.);
-				if (ct3D->Axis1 != nullptr)
-				{
-					IIfcDirection^ dir = ct3D->Axis1;
-					U1 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U1 = U1.Normalized();
-				}
-				else
-				{
-					XbimVector3D defXDir(1., 0., 0.);
-					if (U3 != defXDir)
-						U1 = defXDir;
-					else
-						U1 = XbimVector3D(0., 1., 0.);
-				}
-				XbimVector3D xVec = XbimVector3D::Multiply(XbimVector3D::DotProduct(U1, U3), U3);
-				XbimVector3D xAxis = XbimVector3D::Subtract(U1, xVec);
-				xAxis = xAxis.Normalized();
-
-				if (ct3D->Axis2 != nullptr)
-				{
-					IIfcDirection^ dir = ct3D->Axis2;
-					U2 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U2 = U2.Normalized();
-				}
-				else
-					U2 = XbimVector3D(0., 1., 0.);
-
-				XbimVector3D tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, U3), U3);
-				XbimVector3D yAxis = XbimVector3D::Subtract(U2, tmp);
-				tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, xAxis), xAxis);
-				yAxis = XbimVector3D::Subtract(yAxis, tmp);
-				yAxis = yAxis.Normalized();
-				U2 = yAxis;
-				U1 = xAxis;
-
-				XbimPoint3D LO(ct3D->LocalOrigin->X, ct3D->LocalOrigin->Y, ct3D->LocalOrigin->Z); //local origin
-
-				double s1 = ct3D->Scl * U1.X;
-				double s2 = ct3D->Scl2 * U2.Y;
-				double s3 = ct3D->Scl3 * U3.Z;
-				gp_GTrsf trsf(
-					gp_Mat(s1, U1.Y, U1.Z,
-						U2.X, s2, U2.Z,
-						U3.X, U3.Y, s3
-					),
-					gp_XYZ(LO.X, LO.Y, LO.Z));
-
-				return trsf;
+				auto matrix = ToTransform(dynamic_cast<IIfcCartesianTransformationOperator3D^>(ct3D));
+				matrix->SetScale(ct3D->Scl, ct3D->Scl2, ct3D->Scl3);
+				return matrix;
 			}
-			gp_GTrsf2d GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D)
+			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D)
 			{
-
-				gp_GTrsf2d m;
-				IIfcDirection^ axis1 = ct2D->Axis1;
-				IIfcDirection^ axis2 = ct2D->Axis2;
-				double s1 = ct2D->Scl;
-				double s2 = ct2D->Scl2;
-				IIfcCartesianPoint^ o = ct2D->LocalOrigin;
-				gp_Mat2d mat = m.VectorialPart();
-				if (axis1 != nullptr)
-				{
-					XbimVector3D d1(axis1->X, axis1->Y, axis1->Z);
-					d1 = d1.Normalized();
-					mat.SetValue(1, 1, d1.X * s1);
-					mat.SetValue(1, 2, d1.Y);
-					mat.SetValue(2, 1, -d1.Y);
-					mat.SetValue(2, 2, d1.X * s2);
-
-					if (axis2 != nullptr)
-					{
-						XbimVector3D v(-d1.Y, d1.X, 0);
-						double factor = XbimVector3D::DotProduct(XbimVector3D(axis2->X, axis2->Y, axis2->Z), v);
-						if (factor < 0)
-						{
-							mat.SetValue(2, 1, mat.Value(2, 1) * -1);
-							mat.SetValue(2, 2, mat.Value(2, 2) * -1);
-						}
-					}
-				}
-				else
-				{
-					if (axis2 != nullptr)
-					{
-						XbimVector3D d1(axis2->X, axis2->Y, axis2->Z);
-						d1 = d1.Normalized();
-						mat.SetValue(1, 1, d1.Y * s1);
-						mat.SetValue(1, 2, -d1.X);
-						mat.SetValue(2, 1, d1.X);
-						mat.SetValue(2, 2, d1.X * s2);
-					}
-				}
-				m.SetVectorialPart(mat);
-				m.SetTranslationPart(gp_XY(o->X, o->Y));
-				return m;
+				auto matrix = ToTransform(dynamic_cast<IIfcCartesianTransformationOperator2D^>(ct2D));
+				matrix->SetScale(ct2D->Scl, ct2D->Scl2, 1.0);
+				return matrix;
 			}
-			gp_Trsf2d GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2D^ ct)
+			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2D^ ct)
 			{
 				gp_Trsf2d m;
 				IIfcDirection^ axis1 = ct->Axis1;
 				IIfcDirection^ axis2 = ct->Axis2;
 				double scale = ct->Scl;
-				IIfcCartesianPoint^ o = ct->LocalOrigin;
-				gp_Mat2d mat = m.HVectorialPart();
+
 				if (axis1 != nullptr)
 				{
-					XbimVector3D d1(axis1->X, axis1->Y, axis1->Z);
-					d1 = d1.Normalized();
-					mat.SetValue(1, 1, d1.X);
-					mat.SetValue(1, 2, d1.Y);
-					mat.SetValue(2, 1, -d1.Y);
-					mat.SetValue(2, 2, d1.X);
+					gp_Dir2d d1(axis1->X, axis1->Y);
 
+					m.SetValues(d1.X(), d1.Y(), ct->LocalOrigin->X, -d1.Y(), d1.X(), ct->LocalOrigin->Y);
 					if (axis2 != nullptr)
 					{
-						XbimVector3D v(-d1.Y, d1.X, 0);
-						double factor = XbimVector3D::DotProduct(XbimVector3D(axis2->X, axis2->Y, axis2->Z), v);
+						gp_Dir2d v(-d1.Y(), d1.X());
+						gp_Vec2d axis2Vec(axis2->X, axis2->Y);
+						auto factor = axis2Vec.Dot(v);
+
 						if (factor < 0)
 						{
-							mat.SetValue(2, 1, d1.Y);
-							mat.SetValue(2, 2, -d1.X);
+							m.SetValues(d1.X(), d1.Y(), ct->LocalOrigin->X, d1.Y(), -d1.X(), ct->LocalOrigin->Y);
 						}
 					}
+
 				}
 				else
 				{
 					if (axis2 != nullptr)
 					{
-						XbimVector3D d1(axis2->X, axis2->Y, axis2->Z);
-						d1 = d1.Normalized();
-						mat.SetValue(1, 1, d1.Y);
-						mat.SetValue(1, 2, -d1.X);
-						mat.SetValue(2, 1, d1.X);
-						mat.SetValue(2, 2, d1.X);
+						gp_Dir2d d1(axis2->X, axis2->Y);
+						m.SetValues(d1.Y(), -d1.X(), ct->LocalOrigin->X, d1.X(), d1.Y(), ct->LocalOrigin->Y);
 					}
 				}
-
-				m.SetTranslationPart(gp_XY(o->X, o->Y));
-				return m;
+				return gcnew XMatrix(m);
 
 			}
-
-			gp_Trsf GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
+			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
 			{
-				XbimVector3D U3; //Z Axis Direction
-				XbimVector3D U2; //X Axis Direction
-				XbimVector3D U1; //Y axis direction
+				gp_Dir U3(gp::DZ()); //Z Axis Direction
+				gp_Dir U2(gp::DY()); //Y Axis Direction
+				gp_Dir U1(gp::DX()); //X axis direction
 				if (ct3D->Axis3 != nullptr)
 				{
 					IIfcDirection^ dir = ct3D->Axis3;
-					U3 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U3 = U3.Normalized();
+					U3 = gp_Dir(dir->X, dir->Y, dir->Z);
 				}
-				else
-					U3 = XbimVector3D(0., 0., 1.);
+
 				if (ct3D->Axis1 != nullptr)
 				{
 					IIfcDirection^ dir = ct3D->Axis1;
-					U1 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U1 = U1.Normalized();
+					U1 = gp_Dir(dir->X, dir->Y, dir->Z);
 				}
 				else
 				{
-					XbimVector3D defXDir(1., 0., 0.);
-					if (U3 != defXDir)
-						U1 = defXDir;
+					if (!U3.IsEqual(gp::DX(), Precision::Angular()))
+						U1 = gp::DX();
 					else
-						U1 = XbimVector3D(0., 1., 0.);
+						U1 = gp::DY();
 				}
-				XbimVector3D xVec = XbimVector3D::Multiply(XbimVector3D::DotProduct(U1, U3), U3);
-				XbimVector3D xAxis = XbimVector3D::Subtract(U1, xVec);
-				xAxis = xAxis.Normalized();
+				auto dotU1_U3 = U1.Dot(U3);
+				auto xVec = dotU1_U3 * U3;
+				gp_Dir xAxis = gp_Vec(U1) - xVec;
+
 
 				if (ct3D->Axis2 != nullptr)
 				{
 					IIfcDirection^ dir = ct3D->Axis2;
-					U2 = XbimVector3D(dir->X, dir->Y, dir->Z);
-					U2 = U2.Normalized();
+					U2 = gp_Dir(dir->X, dir->Y, dir->Z);
 				}
-				else
-					U2 = XbimVector3D(0., 1., 0.);
+				auto dotU2_U3 = U2.Dot(U3);
+				auto tmpVec = dotU2_U3 * U3;
+				gp_Dir yAxis = gp_Vec(U2) - tmpVec;
 
-				XbimVector3D tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, U3), U3);
-				XbimVector3D yAxis = XbimVector3D::Subtract(U2, tmp);
-				tmp = XbimVector3D::Multiply(XbimVector3D::DotProduct(U2, xAxis), xAxis);
-				yAxis = XbimVector3D::Subtract(yAxis, tmp);
-				yAxis = yAxis.Normalized();
+				auto dotU2_xAxis = U2.Dot(xAxis);
+				tmpVec = dotU2_xAxis * xAxis;
+				xAxis = gp_Vec(yAxis) - tmpVec;
+
 				U2 = yAxis;
 				U1 = xAxis;
 
-				XbimPoint3D LO(ct3D->LocalOrigin->X, ct3D->LocalOrigin->Y, ct3D->LocalOrigin->Z); //local origin
-
+				gp_Vec translation(ct3D->LocalOrigin->X, ct3D->LocalOrigin->Y, ct3D->LocalOrigin->Z); //local origin
 				gp_Trsf trsf;
-				trsf.SetValues(U1.X, U1.Y, U1.Z, 0,
-					U2.X, U2.Y, U2.Z, 0,
-					U3.X, U3.Y, U3.Z, 0);
+				trsf.SetValues(U1.X(), U1.Y(), U1.Z(), 0,
+					U2.X(), U2.Y(), U2.Z(), 0,
+					U3.X(), U3.Y(), U3.Z(), 0);
 
-				trsf.SetTranslationPart(gp_Vec(LO.X, LO.Y, LO.Z));
+				trsf.SetTranslationPart(translation);
 				trsf.SetScaleFactor(ct3D->Scl);
-				return trsf;
+				return gcnew XMatrix(trsf);
+			}
+
+			void GeometryFactory::BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix)
+			{
+				TopLoc_Location sourceTransform;
+
+				if (!ToLocation(origin, sourceTransform))
+					throw RaiseGeometryFactoryException("Invalid origin", origin);
+
+				if (dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transform) != nullptr)
+				{
+					matrix = ToTransform(static_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transform));
+					location = gcnew XLocation(sourceTransform);
+				}
+				else if (dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(transform) != nullptr)
+				{
+					matrix = ToTransform(static_cast<IIfcCartesianTransformationOperator2DnonUniform^>(transform));
+					location = gcnew XLocation(sourceTransform);
+				}
+				else if (dynamic_cast<IIfcCartesianTransformationOperator3D^>(transform) != nullptr)
+				{
+					auto m = ToTransform(static_cast<IIfcCartesianTransformationOperator3D^>(transform));
+					if ((double)transform->Scl == 1.0) //no scaling involved, append to the location
+					{
+						matrix = nullptr;
+						auto targetTransform = m->Transform().Trsf();
+						auto newTranform = sourceTransform.Transformation() * targetTransform;
+						location = gcnew XLocation(newTranform);
+					}
+					else
+						matrix = m;
+				}
+				else if (dynamic_cast<IIfcCartesianTransformationOperator2D^>(transform) != nullptr)
+				{
+					auto m = ToTransform(static_cast<IIfcCartesianTransformationOperator2D^>(transform));
+					if ((double)transform->Scl == 1.0) //no scaling involved, append to the location
+					{
+						matrix = nullptr;
+						auto targetTransform = m->Transform().Trsf();
+						auto newTranform = sourceTransform.Transformation() * targetTransform;
+						location = gcnew XLocation(newTranform);
+					}
+					else
+						matrix = m;
+				}
+				else
+					throw RaiseGeometryFactoryException("Unsupported transformation type", transform);
+
 			}
 		}
 	}
