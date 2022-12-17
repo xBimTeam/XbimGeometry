@@ -444,8 +444,8 @@ namespace Xbim
 					Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(hSegment);
 					if (boundedCurve.IsNull())
 						throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
-					if (!segment->SameSense)
-						boundedCurve->Reverse();
+					/*if (!segment->SameSense)
+						boundedCurve->Reverse();*/
 					segments.Append(boundedCurve);
 				}
 			}

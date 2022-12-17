@@ -54,6 +54,10 @@ namespace Xbim.Geometry.Engine.Interop
         {
             return GeometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
         }
+        public static IXGeometryEngineV6 CreateGeometryEngineV6(IModel model, ILoggerFactory loggerFactory)
+        {
+            return GeometryConverterFactory.CreateGeometryEngineV6(model, loggerFactory);
+        }
 
         public static IXbimGeometryEngine CreateGeometryEngine(XGeometryEngineVersion version, IModel model, ILoggerFactory loggerFactory)
         {

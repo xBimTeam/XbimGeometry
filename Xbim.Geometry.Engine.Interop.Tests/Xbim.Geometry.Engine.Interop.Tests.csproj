@@ -70,6 +70,9 @@
 		<None Update="TestFiles\arbritary_closed_profile_with_intersecting_voids_test.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\BooleanClippingWithHalfSpace.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\boolean_cut_failure.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

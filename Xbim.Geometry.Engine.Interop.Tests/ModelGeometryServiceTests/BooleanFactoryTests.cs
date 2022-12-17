@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
@@ -201,6 +202,21 @@ namespace Xbim.Geometry.NetCore.Tests
             var shape = booleanFactory.Build(booleanResult);
             shape.Should().NotBeNull();
         }
+
+        [Fact]
+        public void Can_Clip_With_HalfSpace()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/BooleanClippingWithHalfSpace.ifc"); 
+            var geomEngine = XbimGeometryEngine.CreateGeometryEngineV6(model, loggerFactory);
+            var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
+            var shape = geomEngine.Build(booleanOp);
+            shape.Should().NotBeNull();
+            shape.Should().BeAssignableTo<IXSolid>();
+            ((IXSolid)shape).Volume.Should().BeApproximately(125458771.93626986, 1e-5);
+        }
+
+
+
 #if !DEBUG
         //[Theory]
         //[InlineData(5)]

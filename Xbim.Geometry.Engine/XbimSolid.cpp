@@ -1356,13 +1356,13 @@ namespace Xbim
 				
 
 
-				gp_Pnt pointInMaterial = c.Translated(normalDir);
+				gp_Pnt pointInMaterial = c.Translated(normalDir * 10);
 				BRepPrimAPI_MakeHalfSpace hsMaker(face, pointInMaterial);
 				pSolid = new TopoDS_Solid();
 				*pSolid = hsMaker.Solid();
 				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require for a minimum gap
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(hs)->MinimumGap);
+				/*ShapeFix_ShapeTolerance tolFixer;
+				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(hs)->MinimumGap);*/
 			}
 		}
 

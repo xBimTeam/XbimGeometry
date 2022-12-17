@@ -751,19 +751,12 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 		BRep_Builder builder;
 		TopoDS_Wire wire;
 		TopoDS_Edge anEdge;
+		TopoDS_Vertex theFirstVertex;
+		gp_Pnt theFirstPoint;
+		int nbSegments = segments.Length();
+		int currentSegment = 0;
+		bool isClosed = false;
 
-		//std::ofstream myfile;
-		//myfile.open("segments.txt");
-		//for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
-		//{
-		//	Handle(Geom2d_Curve) segment = *it;
-		//	gp_Pnt2d segStartPoint2d = segment->Value(segment->FirstParameter()); //start and end of segment to add
-		//	gp_Pnt2d segEndPoint2d = segment->Value(segment->LastParameter());
-		//	
-		//	myfile << segStartPoint2d.X() << "," << segStartPoint2d.Y() << "-->" << segEndPoint2d.X() << "," << segEndPoint2d.Y() << std::endl;
-		//}
-		//
-		//myfile.close();
 		for (auto&& segIt : segments)
 		{
 			Handle(Geom2d_Curve) segment = segIt;
@@ -772,6 +765,9 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 			{
 				BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
 				anEdge = edgeMaker.Edge();
+				theFirstVertex = TopExp::FirstVertex(anEdge);
+				theFirstPoint = BRep_Tool::Pnt(theFirstVertex);
+				currentSegment++;
 			}
 			else //we need to add this segment to the start of end of the edges
 			{
@@ -788,11 +784,17 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
+				currentSegment++;
 				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
-				builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
+				if (currentSegment == nbSegments && theFirstPoint.Distance(segEndPoint) < gapSize) //its the last one
+				{
+					isClosed = true;
+				}
+				else
+					builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
 
-				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+				BRepBuilderAPI_MakeEdge2d edgeMaker(segment, TopExp::LastVertex(lastEdge), isClosed ? TopExp::FirstVertex(TopoDS::Edge(edges.First())) : segEndVertex);
 				if (!edgeMaker.IsDone())
 				{
 					Standard_Real cf = segment->FirstParameter();
@@ -812,16 +814,18 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 			else
 				Standard_Failure::Raise("Could not create 3d PCurves in NWireFactory::BuildWire");
 		}
-		//add the edges to the wire
-		builder.MakeWire(wire);
-		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+		if (edges.Length() > 0)
 		{
-			builder.Add(wire, *it);
+			//add the edges to the wire
+			builder.MakeWire(wire);
+			for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+			{
+				builder.Add(wire, *it);
+			}
+			if (isClosed) wire.Closed(true);
 		}
-		double closingGap = segments.First()->Value(segments.First()->FirstParameter()).Distance(segments.Last()->Value(segments.First()->LastParameter()));
-		if (closingGap < gapSize)
-			wire.Closed(true);
 		return wire;
+	
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -839,7 +843,11 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 		BRep_Builder builder;
 		TopoDS_Wire wire;
 		TopoDS_Edge anEdge;
-
+		TopoDS_Vertex theFirstVertex;
+		gp_Pnt theFirstPoint;
+		int nbSegments = segments.Length();
+		int currentSegment = 0;
+		bool isClosed = false;
 		for (auto&& segIt : segments)
 		{
 			Handle(Geom_Curve) segment = segIt;
@@ -848,6 +856,10 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(segment);
 				anEdge = edgeMaker.Edge();
+				theFirstVertex = TopExp::FirstVertex(anEdge);
+				theFirstPoint = BRep_Tool::Pnt(theFirstVertex);
+				currentSegment++;
+
 			}
 			else //we need to add this segment to the start of end of the edges
 			{
@@ -862,11 +874,17 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
+				currentSegment++;
 				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
-				builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
+				if (currentSegment == nbSegments && theFirstPoint.Distance(segEndPoint) < gapSize) //its the last one
+				{
+					isClosed = true;
+				}
+				else
+					builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
 
-				BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), segEndVertex);
+				BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), isClosed ? TopExp::FirstVertex(TopoDS::Edge(edges.First())) : segEndVertex);
 				if (!edgeMaker.IsDone())
 				{
 					Standard_Real cf = segment->FirstParameter();
@@ -880,21 +898,21 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 				}
 				anEdge = edgeMaker.Edge();
 			}
-			/*bool ok = BRepLib::BuildCurve3d(anEdge, tolerance);
-			if (ok)*/
+
 			edges.Append(anEdge);
-			/*else
-				Standard_Failure::Raise("Could not create 3d PCurves in NWireFactory::BuildWire");*/
+
 		}
-		//add the edges to the wire
-		builder.MakeWire(wire);
-		for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+		if (edges.Length() > 0)
 		{
-			builder.Add(wire, *it);
+			//add the edges to the wire
+			builder.MakeWire(wire);
+			for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+			{
+				builder.Add(wire, *it);
+			}
+			if (isClosed) wire.Closed(true);
+
 		}
-		double closingGap = segments.First()->Value(segments.First()->FirstParameter()).Distance(segments.Last()->Value(segments.First()->LastParameter()));
-		if (closingGap < gapSize)
-			wire.Closed(true);
 		return wire;
 	}
 	catch (const Standard_Failure& e)
