@@ -496,6 +496,7 @@ namespace Xbim
 			{
 				try
 				{
+					if (shape == nullptr) return  gcnew cli::array<System::Byte>(0);
 					TopoDS_Shape topoShape = ((XShape^)shape)->GetTopoShape();
 					std::stringstream output;
 					BinTools::Write(topoShape, output, withTriangles, withNormals, BinTools_FormatVersion::BinTools_FormatVersion_VERSION_3); //version is fixed at 3, the most current at time of authoring
