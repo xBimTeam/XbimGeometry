@@ -16,7 +16,7 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="NReco.Logging.File" Version="1.1.5" />
-		<PackageReference Include="Xbim.Ifc" Version="5.1.361-develop" />
+		<PackageReference Include="Xbim.Ifc" Version="5.9.372-develop" />
 		<PackageReference Include="Xbim.IO.Esent" Version="5.1.361-develop" />
 	</ItemGroup>
 	<ItemGroup>
