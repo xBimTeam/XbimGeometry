@@ -35,6 +35,7 @@ namespace Xbim
 				IXShape^ Convert(System::String^ brepStr);
 
 				virtual IXShape^ Build(IIfcSolidModel^ ifcSolid);
+				virtual IXSolid^ Build(IIfcExtrudedAreaSolid^ ifcExtrudedAreaSolid);
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);

@@ -15,7 +15,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.Logging
             this ILoggingBuilder builder)
         {
             builder.AddConfiguration();
-
+            
             builder.Services.TryAddEnumerable(
                 ServiceDescriptor.Singleton<ILoggerProvider, TestLoggerProvider>());
             return builder;
@@ -46,6 +46,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.Logging
         public static ILogger<T> Create<T>()
         {
             var logger = new NUnitLogger<T>();
+      
             return logger;
         }
 

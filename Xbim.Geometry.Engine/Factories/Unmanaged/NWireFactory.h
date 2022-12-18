@@ -46,7 +46,7 @@ public:
 
 	TopoDS_Wire BuildWire(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance, double gapSize);
 
-	void AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
+	bool AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap);
 	TopoDS_Wire BuildRectangleProfileDef(double xDim, double yDim);
 	TopoDS_Wire BuildCircleProfileDef(double radius, const gp_Ax22d& position);
 	TopoDS_Wire BuildOffset(TopoDS_Wire basisWire, double distance);

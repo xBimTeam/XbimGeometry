@@ -70,6 +70,9 @@
 		<None Update="TestFiles\ArbritaryClosedProfileWithCompositeCurveVoid.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\ArbritaryClosedProfileWithBadPrecisionOnClosingSegments.ifc">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\arbritary_closed_profile_with_intersecting_voids_test.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -96,6 +99,9 @@
 		</None>
 		<None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\ExtrudedAreaSolidFailsOnExtrusion.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\Github\Github_issue_281_minimal.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

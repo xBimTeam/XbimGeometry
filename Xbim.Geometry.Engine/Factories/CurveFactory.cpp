@@ -372,7 +372,7 @@ namespace Xbim
 				{
 					gp_Pnt2d start = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[0]);
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
+					if (start.IsEqual(end, ModelGeometryService->Precision))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 					Handle(Geom2d_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine2d(start, end);
 					if (lineSeg.IsNull())
@@ -1174,7 +1174,7 @@ namespace Xbim
 				{
 					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[0]);
 					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelGeometryService->MinimumGap))
+					if (start.IsEqual(end, ModelGeometryService->Precision))
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 					Handle(Geom_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine3d(start, end);
 					if (lineSeg.IsNull())

@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
@@ -325,6 +326,18 @@ namespace Xbim.Geometry.NetCore.Tests
             extrusion.Volume.Should().Be((Math.PI * 200 * 200) * 900);
         }
 
+        [Fact]
+        public void Can_extrude_arbitrary_profile_def_with_voids()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/ExtrudedAreaSolidFailsOnExtrusion.ifc");
+            var engine = XbimGeometryEngine.CreateGeometryEngineV6(model, loggerFactory);
+            var ifcExtrudedAreaSolid = model.Instances[1] as IIfcExtrudedAreaSolid;
+            var v6Solid = engine.SolidFactory.Build(ifcExtrudedAreaSolid);
+            Assert.NotNull(v6Solid);
+            var v5Solid = engine.CreateSolid(ifcExtrudedAreaSolid);
+            Assert.NotNull(v5Solid);
+            v5Solid.Volume.Should().BeApproximately(v6Solid.Volume, 1e-5);
+        }
         #endregion
     }
        

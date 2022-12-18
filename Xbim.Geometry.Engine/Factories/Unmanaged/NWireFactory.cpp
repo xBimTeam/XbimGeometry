@@ -745,12 +745,14 @@ TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt 
 
 TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance, double gapSize)
 {
+	ShapeFix_Edge toleranceFixer;
 	TopTools_SequenceOfShape edges;
 	try
 	{
 		BRep_Builder builder;
 		TopoDS_Wire wire;
 		TopoDS_Edge anEdge;
+		TopoDS_Edge theFirstEdge;
 		TopoDS_Vertex theFirstVertex;
 		gp_Pnt theFirstPoint;
 		int nbSegments = segments.Length();
@@ -759,12 +761,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 
 		for (auto&& segIt : segments)
 		{
+			bool tolerancesAdjusted = false;
 			Handle(Geom2d_Curve) segment = segIt;
 
 			if (edges.Length() == 0) //just add the first one
 			{
 				BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
 				anEdge = edgeMaker.Edge();
+				theFirstEdge = anEdge;
 				theFirstVertex = TopExp::FirstVertex(anEdge);
 				theFirstPoint = BRep_Tool::Pnt(theFirstVertex);
 				currentSegment++;
@@ -785,11 +789,13 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
 				currentSegment++;
-				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
+				tolerancesAdjusted = AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
 				if (currentSegment == nbSegments && theFirstPoint.Distance(segEndPoint) < gapSize) //its the last one
 				{
 					isClosed = true;
+					double closingGap = segEndPoint.Distance(theFirstPoint);
+					tolerancesAdjusted = AdjustVertexTolerance(TopExp::FirstVertex(TopoDS::Edge(edges.First())), theFirstPoint, segEndPoint, closingGap);
 				}
 				else
 					builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
@@ -807,6 +813,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 					Standard_Failure::Raise(msg);
 				}
 				anEdge = edgeMaker.Edge();
+				if (tolerancesAdjusted) //fix up any edge issues arising
+				{
+					if (isClosed)
+						toleranceFixer.FixVertexTolerance(theFirstEdge);
+					else
+						toleranceFixer.FixVertexTolerance(lastEdge);
+					toleranceFixer.FixVertexTolerance(anEdge);
+				}
 			}
 			bool ok = BRepLib::BuildCurve3d(anEdge, tolerance);
 			if (ok)
@@ -825,7 +839,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 			if (isClosed) wire.Closed(true);
 		}
 		return wire;
-	
+
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -837,6 +851,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 
 TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance, double gapSize)
 {
+	ShapeFix_Edge toleranceFixer;
 	TopTools_SequenceOfShape edges;
 	try
 	{
@@ -844,12 +859,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 		TopoDS_Wire wire;
 		TopoDS_Edge anEdge;
 		TopoDS_Vertex theFirstVertex;
+		TopoDS_Edge theFirstEdge;
 		gp_Pnt theFirstPoint;
 		int nbSegments = segments.Length();
 		int currentSegment = 0;
 		bool isClosed = false;
 		for (auto&& segIt : segments)
 		{
+			bool tolerancesAdjusted = false;
 			Handle(Geom_Curve) segment = segIt;
 
 			if (edges.Length() == 0) //just add the first one
@@ -875,11 +892,13 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
 				currentSegment++;
-				AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
+				tolerancesAdjusted = AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
 				if (currentSegment == nbSegments && theFirstPoint.Distance(segEndPoint) < gapSize) //its the last one
 				{
 					isClosed = true;
+					double closingGap = segEndPoint.Distance(theFirstPoint);
+					tolerancesAdjusted = AdjustVertexTolerance(TopExp::FirstVertex(TopoDS::Edge(edges.First())), theFirstPoint, segEndPoint, closingGap);
 				}
 				else
 					builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
@@ -897,6 +916,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 					Standard_Failure::Raise(msg);
 				}
 				anEdge = edgeMaker.Edge();
+				if (tolerancesAdjusted) //fix up any edge issues arising
+				{
+					if (isClosed)
+						toleranceFixer.FixVertexTolerance(theFirstEdge);
+					else
+						toleranceFixer.FixVertexTolerance(lastEdge);
+					toleranceFixer.FixVertexTolerance(anEdge);
+				}
 			}
 
 			edges.Append(anEdge);
@@ -923,7 +950,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 	return TopoDS_Wire();
 }
 
-void NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap)
+bool NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt pointToJoinTo, gp_Pnt pointToJoin, double gap)
 {
 
 	double tolE = BRep_Tool::Tolerance(vertexToJoinTo);
@@ -936,12 +963,17 @@ void NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt p
 		gp_Pnt PC(cW * pointToJoinTo.X() + cE * pointToJoin.X(), cW * pointToJoinTo.Y() + cE * pointToJoin.Y(), cW * pointToJoinTo.Z() + cE * pointToJoin.Z());
 
 		b.UpdateVertex(vertexToJoinTo, PC, maxtol);
+		return true;
 	}
 	else //just set the tolerance to the larger of the distance or the exisiting tolerance
 	{
 		if (gap > tolE)
+		{
 			b.UpdateVertex(vertexToJoinTo, pointToJoinTo, gap);
+			return true;
+		}
 	}
+	return false;
 }
 
 TopoDS_Wire NWireFactory::BuildRectangleProfileDef(double xDim, double yDim)

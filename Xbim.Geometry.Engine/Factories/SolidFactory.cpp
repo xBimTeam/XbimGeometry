@@ -67,6 +67,11 @@ namespace Xbim
 				return  ShapeFactory::GetXbimShape(topoShape);
 			}
 
+			IXSolid^ SolidFactory::Build(IIfcExtrudedAreaSolid^ ifcExtrudedAreaSolid)
+			{
+				TopoDS_Solid solid = BuildExtrudedAreaSolid(ifcExtrudedAreaSolid);
+				return  gcnew XSolid(solid);
+			}
 
 			///this method builds all solid models and is the main entry point
 			//all methods called will throw an excpetion if they cannot build their part of a solid
