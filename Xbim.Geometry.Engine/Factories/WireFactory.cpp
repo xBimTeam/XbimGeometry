@@ -2,7 +2,7 @@
 #include "CurveFactory.h"
 #include "GeometryFactory.h"
 #include "EdgeFactory.h"
-
+#include "ProfileFactory.h"
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <TopoDS.hxx>
@@ -297,9 +297,7 @@ namespace Xbim
 
 			IXWire^ WireFactory::Build(IIfcProfileDef^ ifcProfileDef)
 			{
-				throw gcnew Exception("This needs to be re-routed");
-				/*TopoDS_Wire wire = BuildProfile(ifcProfileDef);
-				return gcnew XWire(wire);*/
+				return PROFILE_FACTORY->BuildWire(ifcProfileDef);
 			}
 
 

@@ -17,11 +17,13 @@ namespace Xbim
 
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
 				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);
+				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
 			internal:
 				
 				TopoDS_Face BuildProfileFace(const TopoDS_Wire& wire);
 				TopoDS_Face BuildProfileFace(IIfcProfileDef^ ifcProfileDef);
+				TopoDS_Face BuildProfileFace(IIfcArbitraryProfileDefWithVoids^ arbitraryClosedProfile);
 				TopoDS_Face BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcParameterizedProfileDef^ ifcParameterizedProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef);

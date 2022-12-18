@@ -47,14 +47,30 @@ namespace Xbim
 			}*/
 			IXFace^ ProfileFactory::BuildFace(IIfcProfileDef^ profileDef)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Face face = BuildProfileFace(profileDef);
+				return gcnew XFace(face);
 			}
 			IXWire^ ProfileFactory::BuildWire(IIfcProfileDef^ profileDef)
 			{
 				throw gcnew System::NotImplementedException();
 				// TODO: insert return statement here
 			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
+			{
+				//validation
+				//WR1 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
+				//WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve.
+				if (dynamic_cast<IIfcLine^>(arbitraryClosedProfile->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", arbitraryClosedProfile);
+				//WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve.
+				if (dynamic_cast<IIfcOffsetCurve2D^>(arbitraryClosedProfile->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
+
+				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
+				return wire;
+			}
+
 			IXEdge^ ProfileFactory::BuildEdge(IIfcProfileDef^ profileDef)
 			{
 				throw gcnew System::NotImplementedException();
@@ -80,10 +96,10 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
 				switch (profileType)
 				{
-				case XProfileDefType::IfcArbitraryClosedProfileDef:
-					return BuildProfileFace(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));
 				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
 					return BuildProfileFace(static_cast<IIfcArbitraryProfileDefWithVoids^>(profileDef));
+				case XProfileDefType::IfcArbitraryClosedProfileDef:
+					return BuildProfileFace(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));			
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
 					return BuildProfileFace(static_cast<IIfcArbitraryOpenProfileDef^>(profileDef));
 				case XProfileDefType::IfcCenterLineProfileDef:
@@ -127,20 +143,27 @@ namespace Xbim
 				}
 
 			}
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryProfileDefWithVoids^ arbitraryClosedProfileWithVoids)
+			{
+				TopoDS_Wire outerProfile = BuildProfileWire(static_cast<IIfcArbitraryClosedProfileDef^>(arbitraryClosedProfileWithVoids));
+				TopTools_SequenceOfShape innerLoops;
+				for each (auto innerWire in arbitraryClosedProfileWithVoids->InnerCurves)
+				{
+					TopoDS_Wire wire = WIRE_FACTORY->BuildWire(innerWire, false); //throws exception
+					innerLoops.Append(wire);
+				}
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(outerProfile, innerLoops);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create IfcArbitraryProfileDefWithVoids", arbitraryClosedProfileWithVoids);
+				else
+					return face;
+			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
 			{
-				//validation
-				//WR1 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
-				//WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve.
-				if (dynamic_cast<IIfcLine^>(arbitraryClosedProfile->OuterCurve) != nullptr)
-					throw RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", arbitraryClosedProfile);
-				//WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve.
-				if (dynamic_cast<IIfcOffsetCurve2D^>(arbitraryClosedProfile->OuterCurve) != nullptr)
-					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
 
-				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
-				TopoDS_Face face = OccHandle().MakeFace(wire);
+				TopoDS_Wire wire = BuildProfileWire(arbitraryClosedProfile); //throws exception
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
 
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Failed to create IfcArbitraryClosedProfileDef", arbitraryClosedProfile);

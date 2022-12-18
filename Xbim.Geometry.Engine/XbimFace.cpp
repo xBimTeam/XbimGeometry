@@ -63,7 +63,7 @@
 #include "XbimOccWriter.h"
 #include "./Services//ModelGeometryService.h"
 #include <ShapeBuild_ReShape.hxx>
-
+#include "Factories/ProfileFactory.h"
 using namespace System::Linq;
 using namespace Xbim::Geometry::Services;
 namespace Xbim
@@ -1091,113 +1091,9 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile, ILogger^ logger)
 		{
-			//IfcArbitraryProfileDefWithVoids must be defined by a 2D wire
-			if (2 != (int)profile->OuterCurve->Dim)
-			{
-				XbimGeometryCreator::LogWarning(logger, profile, "Invalid bound. It should be 2D");
-				return;
-			}		
-			XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
-			if (!loop->IsValid)
-			{
-				XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid bound. It should could not be built");
-				return;
-			}
-
-			
-			BRepBuilderAPI_MakeFace faceMaker(loop, true);
-			
-			ShapeFix_Face faceFixer;
-			faceFixer.FixSmallAreaWireMode() = Standard_True;
-			faceFixer.FixWireTool()->ModifyTopologyMode() = Standard_True;
-			faceFixer.FixWireTool()->FixVertexToleranceMode() = Standard_True;
-			if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
-			{
-				//have a go at making a fix
-				faceFixer.Init(faceMaker.Face());
-				faceFixer.SetContext(new ShapeBuild_ReShape());
-				faceFixer.Context()->ModeConsiderLocation() = Standard_True;
-				if (faceFixer.Perform())
-				{
-					if (BRepCheck_Analyzer(faceFixer.Face(), Standard_True).IsValid() == Standard_False)
-					{
-						XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid Outer bound. It could not be built correctly");
-						return;
-					}
-					else
-					{
-						pFace = new TopoDS_Face();
-						*pFace = faceFixer.Face();
-					}
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, profile->OuterCurve, "Invalid Outer bound. It could not be built correctly");
-					return;
-				}
-			}
-			else
-			{ //we have a valid face
-				pFace = new TopoDS_Face();
-				*pFace = faceMaker.Face();
-			}
-			gp_Dir faceNormal = NormalDir();
-			//some models incorrectly output overlapping / intersecting wires, don't process them
-			for each (IIfcCurve ^ curve in profile->InnerCurves)
-			{
-				faceMaker.Init(*pFace); //reset the faceMaker
-
-				XbimWire^ innerWire = gcnew XbimWire(curve, logger);
-
-				if (!innerWire->IsValid)
-				{
-					//allow building to procede, this may be a hole with no area for example
-					XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. Inner bound ignored", curve->EntityLabel);
-					continue;
-				}
-				//check if the wire has a valid normal, this indicates if it is a valid void
-				bool validNormal;
-				gp_Dir voidNormal = XbimWire::NormalDir(innerWire, validNormal);
-				if (!validNormal)
-				{
-					//allow building to procede, this may be a hole with no area for example
-					XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. Inner bound ignored", curve->EntityLabel);
-					continue;
-				}
-				if (!voidNormal.IsOpposite(faceNormal, 0.1)) //tolerance for opposite +-5 degrees, since we are dealing with 2d here there should be no problems
-					innerWire->Reverse();
-
-				faceMaker.Add(innerWire);
-				if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
-				{
-					//have a go at making a fix					
-					faceFixer.Init(faceMaker.Face());
-					faceFixer.SetContext(new ShapeBuild_ReShape());
-					faceFixer.Context()->ModeConsiderLocation() = Standard_True;
-					if (faceFixer.Perform())
-					{
-						if (BRepCheck_Analyzer(faceMaker.Face(), Standard_True).IsValid() == Standard_False)
-						{
-							XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. It has been ignored", curve->EntityLabel);
-							continue;
-						}
-						else
-						{							
-							*pFace = faceFixer.Face();
-						}
-
-					}
-					else
-					{
-						XbimGeometryCreator::LogWarning(logger, profile, "Invalid inner bound #{0}. It has been ignored", curve->EntityLabel);
-						return;
-					}
-				}
-				else //we have a valid face 
-				{ 
-					*pFace = faceMaker.Face();
-				}
-			}
+			TopoDS_Face f = ActiveModelGeometryService(profile)->GetProfileFactory()->BuildProfileFace(profile);
+			pFace = new TopoDS_Face();
+			*pFace = f;
 		}
 
 
