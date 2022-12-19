@@ -16,6 +16,7 @@ using namespace Xbim::Geometry::Abstractions;
 				 virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				 virtual IXPoint^ BuildPoint2d(double x, double y);
 				 virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
+				 virtual IXMatrix^ BuildMatrix(array<double>^ values);
 			 };
 
 		 }

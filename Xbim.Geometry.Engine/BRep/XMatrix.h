@@ -35,6 +35,10 @@ namespace Xbim
 					Ref().SetValue(3, 1, scale.Y());
 					Ref().SetValue(3, 2, scale.Z());
 				}
+				XMatrix(const Graphic3d_Mat4d& mat4d) : XbimHandle(new Graphic3d_Mat4d(mat4d))
+				{
+					
+				}
 				virtual property bool  IsIdentity { bool get() { return Ref().IsIdentity(); }; }
 
 				virtual property double M11 {      double get() { return Ref().GetValue(0, 0); }; }
