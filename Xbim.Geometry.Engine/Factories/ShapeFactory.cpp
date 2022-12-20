@@ -35,7 +35,6 @@
 
 #include "../BRep/XPolyLoop2d.h"
 #include "../XbimGeometryObject.h"
-//#include "../Storage/Unmanaged/NWexBimMesh.h"
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -313,78 +312,8 @@ namespace Xbim
 				return gTran.Shape();
 			}
 
-			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors)
-			{
-				shape->Triangulate(meshFactors);
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
-				bool hasCurves;
-				array<System::Byte>^ result = CreateWexBimMesh(topoShape, meshFactors->Tolerance, false, hasCurves);
-				BRepTools::Clean(topoShape);
-				return result;
-			}
-
-			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors)
-			{
-				TopoDS_Compound faceCompound;
-				BRep_Builder b;
-				b.MakeCompound(faceCompound);
-				for each (IXFace ^ face in faces)
-				{
-					face->Triangulate(meshFactors);
-					const TopoDS_Shape& topoShape = TOPO_FACE(face);
-					b.Add(faceCompound, topoShape);
-				}
-				bool hasCurves;
-				array<System::Byte>^ result = CreateWexBimMesh(faceCompound, meshFactors->Tolerance, false, hasCurves);
-				BRepTools::Clean(faceCompound);
-				return result;
-			}
-
-
-			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, bool% hasCurves)
-			{
-				shape->Triangulate(meshFactors);
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
-				array<System::Byte>^ result = CreateWexBimMesh(topoShape, meshFactors->Tolerance, true, hasCurves);
-				BRepTools::Clean(topoShape);
-				return result;
-			}
-
-			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors, bool% hasCurves)
-			{
-
-				TopoDS_Compound faceCompound;
-				BRep_Builder b;
-				b.MakeCompound(faceCompound);
-				for each (IXFace ^ face in faces)
-				{
-					face->Triangulate(meshFactors);
-					const TopoDS_Shape& topoShape = TOPO_FACE(face);
-					b.Add(faceCompound, topoShape);
-				}
-				array<System::Byte>^ result = CreateWexBimMesh(faceCompound, meshFactors->Tolerance, true, hasCurves);
-				BRepTools::Clean(faceCompound);
-				return result;
-			}
-
+		
 			
-
-			array<System::Byte>^ ShapeFactory::CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves)
-			{
-				throw gcnew System::NotImplementedException("Need to port WexbimMesh");
-				/*NWexBimMesh mesh = NWexBimMesh::CreateMesh(topoShape, tolerance, checkEdges);
-				hasCurves = mesh.HasCurves;
-				std::ostringstream byteStream;
-				mesh.WriteToStream(byteStream);
-				byteStream.flush();
-				int len = (int)byteStream.tellp();
-				const std::string& tmp = byteStream.str();
-				char* cstr = (char*)tmp.c_str();
-				array<System::Byte>^ byteArray = gcnew array<System::Byte>(len);
-				System::IntPtr ptr(cstr);
-				Marshal::Copy(ptr, byteArray, 0, len);
-				return byteArray;*/
-			}
 
 		}
 	}

@@ -441,6 +441,24 @@
     <ClInclude Include="BRep\XMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Services\ShapeService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NShapeService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NWexBimMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\PointInspector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AssemblyInfo.cpp">
@@ -768,6 +786,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BRep\XMatrix.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\ShapeService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NShapeService.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\PointInspector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -110,6 +110,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>OCCT_NO_PLUGINS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -129,6 +130,7 @@
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -149,6 +151,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -169,6 +172,7 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -265,6 +269,9 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
+    <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
+    <ClInclude Include="Services\Unmanaged\NShapeService.h" />
     <ClInclude Include="Primitives\GeometryPrimitives.h" />
     <ClInclude Include="Services\LoggingService.h" />
     <ClInclude Include="Services\MeshFactors.h" />
@@ -275,6 +282,9 @@
     <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
     <ClInclude Include="Factories\VertexFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NProjectionFactory.h" />
+    <ClInclude Include="Services\ShapeService.h" />
+    <ClInclude Include="Services\Unmanaged\NWexBimMesh.h" />
+    <ClInclude Include="Services\Unmanaged\PointInspector.h" />
     <ClInclude Include="Storage\BRepDocument.h" />
     <ClInclude Include="Storage\BRepDocumentManager.h" />
     <ClInclude Include="Storage\BRepDocumentItem.h" />
@@ -385,6 +395,8 @@
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="Factories\MaterialFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
+    <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
+    <ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
     <ClCompile Include="Primitives\GeometryPrimitives.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />
     <ClCompile Include="Services\MeshFactors.cpp" />
@@ -395,6 +407,9 @@
     <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
     <ClCompile Include="Factories\VertexFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NProjectionFactory.cpp" />
+    <ClCompile Include="Services\ShapeService.cpp" />
+    <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
+    <ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
     <ClCompile Include="Storage\BRepDocument.cpp" />
     <ClCompile Include="Storage\BRepDocumentManager.cpp" />
     <ClCompile Include="Storage\BRepDocumentItem.cpp" />

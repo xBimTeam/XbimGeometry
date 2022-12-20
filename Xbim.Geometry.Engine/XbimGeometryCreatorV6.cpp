@@ -187,6 +187,10 @@ namespace Xbim
 					if (objectLocation != nullptr) face->Move(objectLocation);
 					return face;
 				}
+				else if (dynamic_cast<IIfcCsgPrimitive3D^>(geomRep))
+				{
+					return CreateSolid(static_cast<IIfcCsgPrimitive3D^>(geomRep),Logger());
+				}
 				else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
 				{
 					XbimSolidSet^ solidSet = (XbimSolidSet^)CreateSolidSet((IIfcCsgSolid^)geomRep, Logger());

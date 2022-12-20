@@ -20,7 +20,7 @@ namespace Xbim
 			{
 			private:				
 				TopoDS_Shape Transform(TopoDS_Shape& shape, XbimMatrix3D matrix);
-				array<System::Byte>^ CreateWexBimMesh(const TopoDS_Shape& topoShape, double tolerance, bool checkEdges, bool% hasCurves);
+				
 			public:
 				ShapeFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NShapeFactory(modelService->Timeout)) {}
 
@@ -55,10 +55,7 @@ namespace Xbim
 				virtual IXFace^ Add(IXFace^ toFace, array<IXWire^>^ wires);
 
 				virtual IEnumerable<IXFace^>^ FixFace(IXFace^ face);
-				virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors);
-				virtual array<System::Byte>^ CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors);
-				virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, bool% hasCurves);
-				virtual array<System::Byte>^ CreateWexBimMesh(IEnumerable<IXFace^>^ faces, IXMeshFactors^ meshFactors, bool% hasCurves);
+				
 
 				
 			};

@@ -27,6 +27,7 @@ namespace Xbim
 				virtual property double Gap {double get(); };
 				virtual property bool IsVoid { bool get(); };
 				virtual IXAxisAlignedBoundingBox^  Union(IXAxisAlignedBoundingBox^ other);
+
 			};
 
 		}

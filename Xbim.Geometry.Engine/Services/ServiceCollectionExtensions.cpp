@@ -2,7 +2,7 @@
 #include "ServiceCollectionExtensions.h"
 #include "../storage/BRepDocumentManager.h"
 #include "../Primitives/GeometryPrimitives.h"
-
+#include "ShapeService.h"
 using namespace Microsoft::Extensions::DependencyInjection;
 
 IServiceCollection^ ServiceCollectionExtensions::AddGeometryEngineServices(IServiceCollection^ services)
@@ -10,6 +10,7 @@ IServiceCollection^ ServiceCollectionExtensions::AddGeometryEngineServices(IServ
 	ServiceCollectionServiceExtensions::AddSingleton<IXGeometryConverterFactory^, GeometryConverterFactory^>(services);
 	ServiceCollectionServiceExtensions::AddSingleton<IXBRepDocumentManager^, Xbim::Geometry::Storage::BRepDocumentManager^>(services);
 	ServiceCollectionServiceExtensions::AddSingleton<IXGeometryPrimitives^, Xbim::Geometry::Primitives::GeometryPrimitives^>(services);
+	ServiceCollectionServiceExtensions::AddSingleton<IXShapeService^, Xbim::Geometry::Services::ShapeService^>(services);
 	return services;
 };
 
