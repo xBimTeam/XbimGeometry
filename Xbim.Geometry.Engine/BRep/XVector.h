@@ -2,7 +2,7 @@
 #include <gp_Vec.hxx>
 using namespace Xbim::Geometry::Abstractions;
 
-
+using namespace Xbim::Geometry::Abstractions::WexBim;
 ///represents a vector as a normalised direction and a magnitude
 public ref struct XVector : public IXVector
 {

@@ -89,9 +89,9 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 	oStream.write((const char*)&numVertices, sizeof(numVertices)); //number of vertices
 	oStream.write((const char*)&numTriangles, sizeof(numTriangles)); //number of triangles
 	//write out vertices 
-	for (auto& it = Vertices().cbegin(); it != Vertices().cend(); it++)
+	for (auto&& vertex: Vertices())
 	{
-		Graphic3d_Vec3 aVec3(float(it->X()), float(it->Y()), float(it->Z()));
+		Graphic3d_Vec3 aVec3(float(vertex.X()), float(vertex.Y()), float(vertex.Z()));
 		oStream.write((const char*)aVec3.GetData(), sizeof(aVec3));
 	}
 	//write out the faces
