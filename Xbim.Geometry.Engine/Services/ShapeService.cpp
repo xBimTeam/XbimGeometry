@@ -150,7 +150,7 @@ namespace Xbim
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)
 			{
-				return CreateWexBimMesh(shape, meshFactors, scale, bounds, hasCurves,false,false,false);
+				return CreateWexBimMesh(shape, meshFactors, scale, bounds, hasCurves,false,true,true);
 			}
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds)

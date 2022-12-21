@@ -15,7 +15,7 @@ int NWexBimMesh::TriangleCount()
 	return triangleCount;
 }
 
-PackedNormal NWexBimMesh::ToPackedNormal(const Graphic3d_Vec3& vec)
+PackedNormal NWexBimMesh::ToPackedNormal(const gp_Dir& vec)
 {
 	const double PackSize = 252;
 	const double PackTolerance = std::tan(1 / PackSize);
@@ -31,31 +31,31 @@ PackedNormal NWexBimMesh::ToPackedNormal(const Graphic3d_Vec3& vec)
 	}*/
 
 	//the most basic case when normal points in Y direction (singular point)
-	if (std::abs(1 - vec.y()) < PackTolerance)
+	if (std::abs(1 - vec.Y()) < PackTolerance)
 		return SingularityPositiveY;
 	//the most basic case when normal points in -Y direction (second singular point)
-	if (std::abs(vec.y() + 1) < PackTolerance)
+	if (std::abs(vec.Y() + 1) < PackTolerance)
 		return SingularityNegativeY;
 
 	double lat; //effectively XY
 	double lon; //effectively Z
 	//special cases when vector is aligned to one of the axis
-	if (std::abs(vec.z() - 1) < PackTolerance)
+	if (std::abs(vec.Z() - 1) < PackTolerance)
 	{
 		lon = 0;
 		lat = HalfPI;
 	}
-	else if (std::abs(vec.z() + 1) < PackTolerance)
+	else if (std::abs(vec.Z() + 1) < PackTolerance)
 	{
 		lon = M_PI;
 		lat = HalfPI;
 	}
-	else if (std::abs(vec.x() - 1) < PackTolerance)
+	else if (std::abs(vec.X() - 1) < PackTolerance)
 	{
 		lon = HalfPI;
 		lat = HalfPI;
 	}
-	else if (std::abs(vec.x() + 1) < PackTolerance)
+	else if (std::abs(vec.X() + 1) < PackTolerance)
 	{
 		lon = PIplusHalfPI;
 		lat = HalfPI;
@@ -63,9 +63,9 @@ PackedNormal NWexBimMesh::ToPackedNormal(const Graphic3d_Vec3& vec)
 	else
 	{
 		//Atan2 takes care for quadrants (goes from positive Z to positive X and around)
-		lon = std::atan2(vec.x(), vec.z());
+		lon = std::atan2(vec.X(), vec.Z());
 		//latitude from 0 to PI starting at positive Y ending at negative Y
-		lat = std::acos(vec.y());
+		lat = std::acos(vec.Y());
 	}
 
 	//normalize values
@@ -89,7 +89,7 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 	oStream.write((const char*)&numVertices, sizeof(numVertices)); //number of vertices
 	oStream.write((const char*)&numTriangles, sizeof(numTriangles)); //number of triangles
 	//write out vertices 
-	for (auto&& vertex: Vertices())
+	for (auto&& vertex : Vertices())
 	{
 		Graphic3d_Vec3 aVec3(float(vertex.X()), float(vertex.Y()), float(vertex.Z()));
 		oStream.write((const char*)aVec3.GetData(), sizeof(aVec3));
@@ -141,7 +141,7 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 }
 NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale)
 {
-	return CreateMesh(shape, tolerance, linearDeflection, angularDeflection, scale, false, false, false);
+	return CreateMesh(shape, tolerance, linearDeflection, angularDeflection, scale, false, true, true);
 }
 
 NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale, bool checkEdges, bool cleanBefore, bool cleanAfter)
@@ -158,8 +158,8 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 				continue;
 			if (!mesh.HasCurves) mesh.HasCurves = aFaceIter.HasCurves;
 			mesh.saveNodes(aFaceIter, scale);
-			mesh.saveIndices(aFaceIter);
-			mesh.saveNormals(aFaceIter);
+			mesh.saveIndicesAndNormals(aFaceIter);
+
 		}
 		if (cleanAfter) BRepTools::Clean(shape); //remove triangulation
 
@@ -193,48 +193,44 @@ void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, double scale)
 // function : saveIndices
 // purpose  :
 // =======================================================================
-void NWexBimMesh::saveIndices(const NFaceMeshIterator& theFaceIter)
+void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 {
 	const Standard_Integer anElemLower = theFaceIter.ElemLower();
 	const Standard_Integer anElemUpper = theFaceIter.ElemUpper();
 	TriangleIndices triangleIndices;
-
-	for (Standard_Integer anElemIter = anElemLower; anElemIter <= anElemUpper; ++anElemIter)
-	{
-		Poly_Triangle aTri = theFaceIter.TriangleOriented(anElemIter);
-		aTri(1) -= anElemLower;
-		aTri(2) -= anElemLower;
-		aTri(3) -= anElemLower;
-		triangleIndices.Append(Vec3OfInt(aTri(1), aTri(2), aTri(3)));
-	}
-	AddTriangleIndices(triangleIndices);
-}
-
-// =======================================================================
-// function : saveNormals
-// purpose  :
-// =======================================================================
-void NWexBimMesh::saveNormals(NFaceMeshIterator& theFaceIter)
-{
-	if (!theFaceIter.HasNormals())
-	{
-		return;
-	}
+	bool donePlanar = false;
 	Handle(Geom_Surface) surf = BRep_Tool::Surface(theFaceIter.Face()); //the surface
 	Handle(Geom_Plane) hPlane = Handle(Geom_Plane)::DownCast(surf);
 	bool isPlanar = !hPlane.IsNull();
-	const Standard_Integer aNodeUpper = theFaceIter.NodeUpper();
 	VectorOfPackedNormal normals;
-	for (Standard_Integer aNodeIter = theFaceIter.NodeLower(); aNodeIter <= aNodeUpper; ++aNodeIter)
+	bool hasNormals = theFaceIter.HasNormals();
+	for (Standard_Integer anElemIter = anElemLower; anElemIter <= anElemUpper; ++anElemIter)
 	{
-		const gp_Dir aNormal = theFaceIter.NormalTransformed(aNodeIter);
-		Graphic3d_Vec3 aVecNormal((float)aNormal.X(), (float)aNormal.Y(), (float)aNormal.Z());
-		//myCSTrsf.TransformNormal(aVecNormal);
-		normals.push_back(NWexBimMesh::ToPackedNormal(aVecNormal));
-		if (isPlanar)
-			break; //just do one normal for a planar face
-	}
+		Poly_Triangle aTri = theFaceIter.TriangleOriented(anElemIter);
+		Poly_Triangle aFaceTri;
 
+
+		//lookup up the actual node index, in the unique node list
+		aFaceTri(1) = vertexIndexlookup[aTri(1) - 1] - anElemLower;
+		aFaceTri(2) = vertexIndexlookup[aTri(2) - 1] - anElemLower;
+		aFaceTri(3) = vertexIndexlookup[aTri(3) - 1] - anElemLower;
+		triangleIndices.Append(Vec3OfInt(aFaceTri(1), aFaceTri(2), aFaceTri(3)));
+
+		if (hasNormals)
+		{
+			if (donePlanar)
+				continue;
+			else
+				if (isPlanar) donePlanar = true;
+			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));
+			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+			aNormal = theFaceIter.NormalTransformed(aTri(2));
+			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+			aNormal = theFaceIter.NormalTransformed(aTri(3));
+			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+		}
+	}
+	AddTriangleIndices(triangleIndices);
 	AddNormals(normals);
 }
 

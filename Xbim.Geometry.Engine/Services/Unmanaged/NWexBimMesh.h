@@ -64,7 +64,7 @@ public:
 	void AddNormals(VectorOfPackedNormal normals) { normalsPerFace.push_back(normals); };
 	int FaceCount() { return indicesPerFace.Length(); }
 	int TriangleCount();
-	static PackedNormal ToPackedNormal(const Graphic3d_Vec3& vec3);
+	static PackedNormal ToPackedNormal(const gp_Dir& vec3);
 	const VectorOfTriangleNormals& NormalsPerFace() {return normalsPerFace;}
 	std::streampos ByteOffet;
 	void WriteToStream(std::ostream & oStream);
@@ -72,8 +72,8 @@ public:
 	Graphic3d_BndBox3d          BndBox;        //!< bounding box
 	
 private:
-	void saveIndices(const NFaceMeshIterator& theFaceIter) ;
-	void saveNormals(NFaceMeshIterator& theFaceIter);
+	void saveIndicesAndNormals(NFaceMeshIterator& theFaceIter) ;
+	
 	void saveNodes(const NFaceMeshIterator& theFaceIter, double scale);
 	
 };

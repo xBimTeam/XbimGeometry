@@ -19,13 +19,7 @@ public:
 		double angularDeflection, 
 		bool checkEdges);
 	NFaceMeshIterator(const TopoDS_Shape& shape, bool checkEdges);
-	~NFaceMeshIterator()
-	{
-		if (!myShape.IsNull())
-		{
-			BRepTools::Clean(myShape); //remove any triangulation
-		}
-	}
+	
 	//! Return true if iterator points to the valid triangulation.
 	bool More() const { return !myPolyTriang.IsNull(); }
 
@@ -117,7 +111,8 @@ public:
 	Poly_Triangle TriangleOriented(Standard_Integer theElemIndex) const
 	{
 		Poly_Triangle aTri = triangle(theElemIndex);
-		if ((myFace.Orientation() == TopAbs_REVERSED) ^ myIsMirrored)
+		auto myReversed = (myFace.Orientation() == TopAbs_REVERSED);
+		if (myReversed ^ myIsMirrored)
 		{
 			return Poly_Triangle(aTri.Value(1), aTri.Value(3), aTri.Value(2));
 		}
