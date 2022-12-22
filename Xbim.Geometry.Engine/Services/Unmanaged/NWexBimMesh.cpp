@@ -211,9 +211,9 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 
 
 		//lookup up the actual node index, in the unique node list
-		aFaceTri(1) = vertexIndexlookup[aTri(1) - 1] - anElemLower;
-		aFaceTri(2) = vertexIndexlookup[aTri(2) - 1] - anElemLower;
-		aFaceTri(3) = vertexIndexlookup[aTri(3) - 1] - anElemLower;
+		aFaceTri(1) = vertexIndexlookup[aTri(1) - anElemLower ];
+		aFaceTri(2) = vertexIndexlookup[aTri(2) - anElemLower ];
+		aFaceTri(3) = vertexIndexlookup[aTri(3) - anElemLower ];
 		triangleIndices.Append(Vec3OfInt(aFaceTri(1), aFaceTri(2), aFaceTri(3)));
 
 		if (hasNormals)
@@ -224,10 +224,13 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 				if (isPlanar) donePlanar = true;
 			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));
 			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
-			aNormal = theFaceIter.NormalTransformed(aTri(2));
-			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
-			aNormal = theFaceIter.NormalTransformed(aTri(3));
-			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+			if (!isPlanar)
+			{
+				aNormal = theFaceIter.NormalTransformed(aTri(2));
+				normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+				aNormal = theFaceIter.NormalTransformed(aTri(3));
+				normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
+			}
 		}
 	}
 	AddTriangleIndices(triangleIndices);

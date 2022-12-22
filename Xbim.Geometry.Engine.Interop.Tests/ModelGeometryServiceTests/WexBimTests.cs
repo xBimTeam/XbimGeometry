@@ -44,6 +44,7 @@ namespace Xbim.Geometry.NetCore.Tests
             wexBimMesh.Vertices.Count().Should().Be(8);
             wexBimMesh.TriangleCount.Should().Be(12);
             wexBimMesh.FaceCount.Should().Be(6);
+            
         }
 
         [Fact]
