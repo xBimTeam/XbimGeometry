@@ -342,9 +342,6 @@
     <ClInclude Include="BRep\XAxis1Placement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BRep\XAxis2Placement2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BRep\XAxis2Placement3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>

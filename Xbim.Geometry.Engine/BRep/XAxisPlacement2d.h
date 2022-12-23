@@ -13,7 +13,7 @@ namespace Xbim
 		namespace BRep
 		{
 
-			public ref class XAxisPlacement2d : XbimHandle<Handle(Geom2d_AxisPlacement)>, IXAxis2Placement2d
+			public ref class XAxisPlacement2d : XbimHandle<Handle(Geom2d_AxisPlacement)>, IXAxisPlacement2d
 			{
 			public:
 				XAxisPlacement2d(Handle(Geom2d_AxisPlacement) axis1) : XbimHandle(new Handle(Geom2d_AxisPlacement)(axis1)) {};

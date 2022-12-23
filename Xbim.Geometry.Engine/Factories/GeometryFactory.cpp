@@ -3,6 +3,8 @@
 
 #include "GeometryFactory.h"
 #include "CurveFactory.h"
+#include "../BRep/XAxisPlacement2d.h"
+#include "../BRep/XAxis2Placement3d.h"
 #include "../Services//ModelGeometryService.h"
 #include <gp_Ax2.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
@@ -39,8 +41,10 @@
 #include <ShapeAnalysis_Surface.hxx>
 #include <GeomLProp_SLProps.hxx>
 #include <GeomLib_Tool.hxx>
+#include <Geom_Axis2Placement.hxx>
+#include <Geom2d_AxisPlacement.hxx>
 using namespace Xbim::Geometry::BRep;
-
+using namespace System::Linq;
 namespace Xbim
 {
 	namespace Geometry
@@ -176,14 +180,20 @@ namespace Xbim
 				}
 			}
 
-			IXAxis2Placement2d^ GeometryFactory::GetAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection)
+			IXAxisPlacement2d^ GeometryFactory::BuildAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection)
 			{
-				gp_Ax2d axis = gp_Ax2d(
-					gp_Pnt2d(location->X, location->Y),
-					gp_Dir2d(XaxisDirection->X, XaxisDirection->Y)
-				);
-				Handle(Geom2d_AxisPlacement) hPlacement = new Geom2d_AxisPlacement(axis);
+				Handle(Geom2d_AxisPlacement) hPlacement = new Geom2d_AxisPlacement(gp_Pnt2d(location->X, location->Y), gp_Dir2d(XaxisDirection->X, XaxisDirection->Y));
 				return gcnew XAxisPlacement2d(hPlacement);
+			}
+
+			IXAxis2Placement3d^ GeometryFactory::BuildAxis2Placement3d(IXPoint^ location, IXVector^ XaxisDirection, IXVector^ ZaxisDirection)
+			{
+				gp_Ax2 axis = gp_Ax2(
+					gp_Pnt(location->X, location->Y, location->Z),
+					gp_Dir(XaxisDirection->X, XaxisDirection->Y, XaxisDirection->Z)
+				);
+				Handle(Geom_Axis2Placement) hPlacement = new Geom_Axis2Placement(gp_Pnt(location->X, location->Y, location->Z), gp_Dir(ZaxisDirection->X, ZaxisDirection->Y, ZaxisDirection->Z), gp_Dir(XaxisDirection->X, XaxisDirection->Y, XaxisDirection->Z));
+				return gcnew XAxis2Placement3d(hPlacement);
 			}
 
 			void GeometryFactory::GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)

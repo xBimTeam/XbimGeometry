@@ -201,7 +201,6 @@
     <ClInclude Include="BRep\X2dPoint.h" />
     <ClInclude Include="BRep\X2dVector.h" />
     <ClInclude Include="BRep\XAxis1Placement.h" />
-    <ClInclude Include="BRep\XAxis2Placement2d.h" />
     <ClInclude Include="BRep\XAxis2Placement3d.h" />
     <ClInclude Include="BRep\XAxisAlignedBox.h" />
     <ClInclude Include="BRep\XAxisPlacement2d.h" />
