@@ -31,31 +31,32 @@ class NWexBimMesh
 {
 private:
 	double myTolerance;
+	double myScale;
 	PointInspector pointInspector;
 	VectorOfInt vertexIndexlookup;
 	NCollection_CellFilter<PointInspector> pointFilter;
 	VectorOfTriangleIndices indicesPerFace;
 	VectorOfTriangleNormals normalsPerFace;
-	
-	
+
+
 public:
 	const unsigned char Version = 1;
 	bool HasCurves = false;
 	static NWexBimMesh CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale, bool checkEdges, bool cleanBefore, bool cleanAfter);
 	static NWexBimMesh CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale);
-	
-	NWexBimMesh::NWexBimMesh(double tolerance) :myTolerance(tolerance), pointInspector(tolerance), pointFilter(tolerance), ByteOffet(0) {};
-	
+
+	NWexBimMesh::NWexBimMesh(double tolerance, double scale) :myTolerance(tolerance), myScale(scale), pointInspector(tolerance* scale), pointFilter(tolerance* scale), ByteOffet(0) {};
+
 	void WriteTriangleIndicesWithNormals(
-		std::ostream& oStream, 
+		std::ostream& oStream,
 		const NCollection_Vec3<int>& triangle,
 		const PackedNormal& a,
 		const PackedNormal& b,
-		const PackedNormal& c, 
+		const PackedNormal& c,
 		unsigned int maxVertices);
 
 	void WriteTriangleIndices(std::ostream& oStream, NCollection_Vec3<int> triangle, unsigned int numTriangles);
-	
+
 	int AddPoint(gp_XYZ point);
 	int VertexCount() { return pointInspector.myPoints.Length(); }
 	const VectorOfXYZ& Vertices() { return pointInspector.myPoints; }
@@ -65,15 +66,15 @@ public:
 	int FaceCount() { return indicesPerFace.Length(); }
 	int TriangleCount();
 	static PackedNormal ToPackedNormal(const gp_Dir& vec3);
-	const VectorOfTriangleNormals& NormalsPerFace() {return normalsPerFace;}
+	const VectorOfTriangleNormals& NormalsPerFace() { return normalsPerFace; }
 	std::streampos ByteOffet;
-	void WriteToStream(std::ostream & oStream);
-	
+	void WriteToStream(std::ostream& oStream);
+
 	Graphic3d_BndBox3d          BndBox;        //!< bounding box
-	
+
 private:
-	void saveIndicesAndNormals(NFaceMeshIterator& theFaceIter) ;
-	
-	void saveNodes(const NFaceMeshIterator& theFaceIter, double scale);
-	
+	void saveIndicesAndNormals(NFaceMeshIterator& theFaceIter);
+
+	void saveNodes(const NFaceMeshIterator& theFaceIter, std::vector<int>& nodeIndexes);
+
 };

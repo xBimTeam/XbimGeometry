@@ -146,7 +146,7 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 
 NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale, bool checkEdges, bool cleanBefore, bool cleanAfter)
 {
-	NWexBimMesh mesh(tolerance);
+	NWexBimMesh mesh(tolerance,scale);
 	try
 	{
 		if (cleanBefore) BRepTools::Clean(shape); //remove triangulation
@@ -157,7 +157,6 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 			if (aFaceIter.IsEmptyMesh())
 				continue;
 			if (!mesh.HasCurves) mesh.HasCurves = aFaceIter.HasCurves;
-			mesh.saveNodes(aFaceIter, scale);
 			mesh.saveIndicesAndNormals(aFaceIter);
 
 		}
@@ -175,16 +174,16 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 // function : saveNodes
 // purpose  :
 // =======================================================================
-void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, double scale)
+void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, std::vector<int>& nodeIndexes)
 {
 	const Standard_Integer aNodeUpper = theFaceIter.NodeUpper();
 	for (Standard_Integer aNodeIter = theFaceIter.NodeLower(); aNodeIter <= aNodeUpper; ++aNodeIter)
 	{
 		gp_XYZ aNode = theFaceIter.NodeTransformed(aNodeIter).XYZ();
-		aNode.Multiply(scale);
+		aNode.Multiply(myScale);
 		//myCSTrsf.TransformPosition(aNode);
 		BndBox.Add(BVH_Vec3d(aNode.X(), aNode.Y(), aNode.Z()));
-		AddPoint(aNode);;
+		nodeIndexes.push_back(AddPoint(aNode));
 	}
 }
 
@@ -204,6 +203,10 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 	bool isPlanar = !hPlane.IsNull();
 	VectorOfPackedNormal normals;
 	bool hasNormals = theFaceIter.HasNormals();
+
+	//first save the nodes for this face and remvoe duplicates
+	std::vector<int> nodeIndexes;
+	saveNodes(theFaceIter, nodeIndexes);
 	for (Standard_Integer anElemIter = anElemLower; anElemIter <= anElemUpper; ++anElemIter)
 	{
 		Poly_Triangle aTri = theFaceIter.TriangleOriented(anElemIter);
@@ -211,9 +214,9 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 
 
 		//lookup up the actual node index, in the unique node list
-		aFaceTri(1) = vertexIndexlookup[aTri(1) - anElemLower ];
-		aFaceTri(2) = vertexIndexlookup[aTri(2) - anElemLower ];
-		aFaceTri(3) = vertexIndexlookup[aTri(3) - anElemLower ];
+		aFaceTri(1) = nodeIndexes[aTri(1) - anElemLower ];
+		aFaceTri(2) = nodeIndexes[aTri(2) - anElemLower ];
+		aFaceTri(3) = nodeIndexes[aTri(3) - anElemLower ];
 		triangleIndices.Append(Vec3OfInt(aFaceTri(1), aFaceTri(2), aFaceTri(3)));
 
 		if (hasNormals)
