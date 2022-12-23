@@ -54,7 +54,7 @@ namespace Xbim
 				virtual property float Transparency { float get(); void set(float transparency); }
 				
 				virtual property NodeType NodeType {
-					Xbim::Geometry::Abstractions::NodeType get() { return Xbim::Geometry::Abstractions::NodeType::IfcColour; };
+					Xbim::Geometry::Abstractions::NodeType get() { return Xbim::Geometry::Abstractions::NodeType::Colour; };
 					void set(Xbim::Geometry::Abstractions::NodeType nodeType) { };
 				}
 			
