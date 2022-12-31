@@ -250,11 +250,11 @@ namespace Xbim
 				{
 					gp_Vec zDir;
 					if (!BuildDirection3d(axis3D->Axis, zDir))
-						throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Axis Direction is invalid ", axis3D->Axis);
+						throw RaiseGeometryFactoryException("IIfcAxis2Placement3D Axis Direction is invalid ", axis3D->Axis);
 					zDir.Normalize();
 					gp_Vec xDir;
-					if (BuildDirection3d(axis3D->RefDirection, xDir))
-						throw RaiseGeometryFactoryException("IIfcAxis2Placement2D Reference Direction is invalid ", axis3D->RefDirection);
+					if (!BuildDirection3d(axis3D->RefDirection, xDir))
+						throw RaiseGeometryFactoryException("IIfcAxis2Placement3D Reference Direction is invalid ", axis3D->RefDirection);
 					xDir.Normalize();
 					trsf.SetTransformation(gp_Ax3(loc, zDir, xDir), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
 				}
