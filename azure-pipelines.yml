@@ -117,6 +117,7 @@ jobs:
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
+      vsVersion: '16.0' # vs2019
       msbuildArgs: '/t:build'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
