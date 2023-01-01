@@ -429,6 +429,13 @@ namespace Xbim
 			}
 		}
 
+		void XbimShell::Move(IIfcAxis2Placement3D^ position)
+		{
+			if (!IsValid) return;
+			gp_Trsf toPos = XbimConvert::ToTransform(position);
+			pShell->Move(toPos);
+		}
+
 		void XbimShell::Move(TopLoc_Location loc)
 		{
 			if (IsValid) pShell->Move(loc);

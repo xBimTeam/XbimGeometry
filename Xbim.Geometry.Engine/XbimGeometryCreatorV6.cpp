@@ -138,18 +138,26 @@ namespace Xbim
 				else if (dynamic_cast<IIfcPolygonalFaceSet^>(geomRep))
 				{
 					IIfcPolygonalFaceSet^ polySet = (IIfcPolygonalFaceSet^)geomRep;
+					
 					if (polySet->Closed.HasValue && polySet->Closed.Value)
 					{
-						XbimSolidSet^ ss = gcnew XbimSolidSet(CreateSolid(polySet, Logger()));
+						XbimSolidSet^ ss = gcnew XbimSolidSet(GetSolidFactory()->BuildPolygonalFaceSet(polySet));
 						if (objectLocation != nullptr) ss->Move(objectLocation);
 						return ss;
 					}
 					else
 					{
-						XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcPolygonalFaceSet^)geomRep, Logger());
+						CheckClosedStatus checkClosed;
+						XbimShell^ comp = gcnew XbimShell(GetShellFactory()->BuildPolygonalFaceSet(polySet, checkClosed));
 						if (objectLocation != nullptr) comp->Move(objectLocation);
 						return comp;
 					}
+				}
+				else if (dynamic_cast<IIfcTessellatedFaceSet^>(geomRep))
+				{
+					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcTessellatedFaceSet^)geomRep, Logger());
+					if (objectLocation != nullptr) comp->Move(objectLocation);
+					return comp;
 				}
 				else if (dynamic_cast<IIfcSectionedSpine^>(geomRep))
 				{
