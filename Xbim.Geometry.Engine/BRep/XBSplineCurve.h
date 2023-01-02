@@ -19,8 +19,7 @@ namespace Xbim
 			public ref class XBSplineCurve :XCurve, IXBSplineCurve
 			{
 			public:
-				XBSplineCurve(Handle(Geom_BSplineCurve) hSpline) : XCurve(hSpline) { };
-				virtual property XCurveType CurveType {XCurveType get() override{ return XCurveType::IfcCompositeCurve; }; };
+				XBSplineCurve(Handle(Geom_BSplineCurve) hSpline) : XCurve(hSpline, XCurveType::IfcCompositeCurve) { };
 				
 				virtual property bool IsPeriodic {bool get() { return OccBSplineCurve()->IsPeriodic(); } }
 				virtual property bool IsRational {bool get() { return OccBSplineCurve()->IsRational(); } }				

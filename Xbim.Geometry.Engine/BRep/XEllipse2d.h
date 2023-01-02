@@ -14,8 +14,7 @@ namespace Xbim
 			public ref class XEllipse2d : XCurve2d, IXEllipse
 			{
 			public:
-				XEllipse2d(Handle(Geom2d_Ellipse) hEllipse) : XCurve2d(hEllipse) { };
-				virtual property XCurveType CurveType {XCurveType get() override{ return XCurveType::IfcEllipse; }; };
+				XEllipse2d(Handle(Geom2d_Ellipse) hEllipse) : XCurve2d(hEllipse, XCurveType::IfcEllipse) { };
 				
 				virtual property double MajorRadius {double get() { return OccEllipse2d()->MajorRadius(); }};
 				virtual property double MinorRadius {double get() { return OccEllipse2d()->MinorRadius(); }};

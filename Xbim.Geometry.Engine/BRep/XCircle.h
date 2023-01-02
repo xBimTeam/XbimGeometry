@@ -17,9 +17,8 @@ namespace Xbim
 			public ref class XCircle :XCurve, IXCircle
 			{
 			public:
-				XCircle(Handle(Geom_Circle) hCircle) : XCurve(hCircle) { };
-				virtual property XCurveType CurveType {XCurveType get() override { return XCurveType::IfcCircle; }; };
-
+				XCircle(Handle(Geom_Circle) hCircle) : XCurve(hCircle, XCurveType::IfcCircle) { };
+				
 				virtual property double Radius {double get() { return OccCircle()->Radius(); }};
 				virtual property IXAxisPlacement^ Position {IXAxisPlacement^ get() { return gcnew XAxis2Placement3d(new Geom_Axis2Placement(OccCircle()->Position())); }};
 				

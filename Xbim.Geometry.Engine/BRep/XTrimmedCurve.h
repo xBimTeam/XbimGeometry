@@ -16,8 +16,8 @@ namespace Xbim
 			public ref class XTrimmedCurve : XCurve, IXTrimmedCurve
 			{
 			public:
-				XTrimmedCurve(Handle(Geom_TrimmedCurve) hTrimmedCurve) : XCurve(hTrimmedCurve) {};
-				virtual property XCurveType CurveType {XCurveType get() override { return XCurveType::IfcTrimmedCurve; }; };			
+				XTrimmedCurve(Handle(Geom_TrimmedCurve) hTrimmedCurve) : XCurve(hTrimmedCurve, XCurveType::IfcTrimmedCurve) {};
+					
 				virtual property IXCurve^ BasisCurve {IXCurve^ get(); };
 				virtual property IXPoint^ StartPoint {IXPoint^ get(); };
 				virtual property IXPoint^ EndPoint {IXPoint^ get(); };

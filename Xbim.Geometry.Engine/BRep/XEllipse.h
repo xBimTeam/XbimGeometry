@@ -17,8 +17,8 @@ namespace Xbim
 			public ref class XEllipse : XCurve, IXEllipse
 			{
 			public:
-				XEllipse(Handle(Geom_Ellipse) hEllipse) : XCurve(hEllipse) { };
-				virtual property XCurveType CurveType {XCurveType get() override{ return XCurveType::IfcEllipse; }; };								
+				XEllipse(Handle(Geom_Ellipse) hEllipse) : XCurve(hEllipse, XCurveType::IfcEllipse) { };
+										
 				virtual property double MajorRadius {double get() { return OccEllipse()->MajorRadius(); }};
 				virtual property double MinorRadius {double get() { return OccEllipse()->MinorRadius(); }};
 				virtual property IXAxisPlacement^ Position {IXAxisPlacement^ get() { return gcnew XAxis2Placement3d(new Geom_Axis2Placement(OccEllipse()->Position())); }};
