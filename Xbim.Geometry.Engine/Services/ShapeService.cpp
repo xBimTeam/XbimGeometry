@@ -115,8 +115,10 @@ namespace Xbim
 
 			IXShape^ ShapeService::Moved(IXShape^ shape, IXLocation^ location)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
+				auto xLoc = static_cast<XLocation^>(location);
+				topoShape.Move(xLoc->Ref());
+				return  XShape::GetXbimShape(topoShape);
 			}
 
 			IXShape^ ShapeService::Scaled(IXShape^ shape, double scale)
