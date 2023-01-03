@@ -58,6 +58,7 @@ namespace Xbim
 				virtual property double ScaleY {  double get() { return Ref().GetValue(3, 1); }; }
 				virtual property double ScaleZ {  double get() { return Ref().GetValue(3, 2); }; }
 
+				virtual IXMatrix^ Multiply(IXMatrix^ other);
 				gp_Trsf Transform()
 				{
 					try
