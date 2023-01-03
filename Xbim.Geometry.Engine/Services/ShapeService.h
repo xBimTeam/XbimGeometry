@@ -63,6 +63,8 @@ namespace Xbim
 
                 virtual IXShape^ Combine(IEnumerable<IXShape^>^ shapes);
 
+                virtual bool IsColliding(IXShape^ shape1, IXShape^ shape2, double precision);
+
                 virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds,  bool% hasCurves);
                
                 virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds);
