@@ -51,7 +51,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="true">
+		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win10-x64\%(Filename)%(Extension)</Link>
 		</None>

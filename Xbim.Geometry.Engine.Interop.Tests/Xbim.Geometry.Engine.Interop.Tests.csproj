@@ -11,7 +11,12 @@
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
-
+  <PropertyGroup Condition="'$(Platform)'=='x86'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x86.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'!='x86'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\..\test.x64.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 
 
 	<ItemGroup>
