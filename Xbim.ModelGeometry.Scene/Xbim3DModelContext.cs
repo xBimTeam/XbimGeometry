@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xbim.Common;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
@@ -876,6 +877,7 @@ namespace Xbim.ModelGeometry.Scene
             //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
             Parallel.ForEach(openingAndProjectionOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count), contextHelper.ParallelOptions, openingAndProjectionOp =>
             {
+                using var _ = _logger.BeginScope("WriteProductsWithFeaturesBooleans {entityLabel}", openingAndProjectionOp.ProductLabel);
                 Interlocked.Increment(ref localTally);
                 var elementLabel = 0;
                 try
