@@ -14,9 +14,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 	public class ShapeAdjustementTests
 	{
         
-        static private ILogger logger;
 
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        static private ILogger logger = loggerFactory.CreateLogger<ShapeAdjustementTests>();
         
 
         [Fact]
