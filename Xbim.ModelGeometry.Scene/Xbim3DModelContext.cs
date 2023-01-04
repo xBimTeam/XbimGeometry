@@ -913,7 +913,7 @@ namespace Xbim.ModelGeometry.Scene
                     // make the finished shape
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && openingAndProjectionOp.ProjectGeometries.Any())
                     {
-                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision);
+                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision, _logger);
                         if (nextGeom.IsValid)
                         {
                             if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -932,7 +932,7 @@ namespace Xbim.ModelGeometry.Scene
                         try
                         {
                             //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
-                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
+                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision, _logger);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
