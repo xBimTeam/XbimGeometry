@@ -74,7 +74,7 @@ namespace Xbim
 					}
 					else if (sr != nullptr)
 						Shininess = (float)sr->Value;
-					Transparency = rendering->Transparency.HasValue ? (float)rendering->Transparency.Value : 0.0f;
+					Transparency = rendering->Transparency.HasValue ? (float)rendering->Transparency.Value : 1.0f;
 
 					return;
 				}
@@ -82,7 +82,7 @@ namespace Xbim
 				{
 					IIfcColourRgb^ surface = shading->SurfaceColour;
 					AmbientColor = gcnew ColourRGB(surface->Red, surface->Green, surface->Blue);
-					Transparency = shading->Transparency.HasValue ? (float)shading->Transparency.Value : 0.0f;
+					Transparency = shading->Transparency.HasValue ? (float)shading->Transparency.Value : 1.0f;
 
 					return;
 				}
