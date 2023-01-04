@@ -824,6 +824,7 @@ namespace Xbim.ModelGeometry.Scene
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = elementToFeatureGroup.Key;
+                using var _ = _logger.BeginScope("WriteProductsWithFeatures {entityLabel}", element.EntityLabel);
                 _logger.LogTrace("Processing features for {0}", element.EntityLabel);
 
                 // here is where the feature's geometry are calculated
@@ -1058,6 +1059,7 @@ namespace Xbim.ModelGeometry.Scene
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
             {
+                using var _ = _logger.BeginScope("WriteProductShapes {entityLabel}", product.EntityLabel);
                 // select representations that are in the required context
                 // only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                 // we can only handle one representation in a context and this is in an implementers agreement
@@ -1227,6 +1229,7 @@ namespace Xbim.ModelGeometry.Scene
             progDelegate?.Invoke(-1, "WriteMappedItems (" + contextHelper.MappedShapeIds.Count + " items)");
             Parallel.ForEach(contextHelper.MappedShapeIds, contextHelper.ParallelOptions, mapId =>
             {
+                using var _ = _logger.BeginScope("PrepareMapGeometryReferences {entityLabel}", mapId);
                 var entity = _model.Instances[mapId];
                 if (!(entity is IIfcMappedItem map))
                 {
@@ -1358,6 +1361,7 @@ namespace Xbim.ModelGeometry.Scene
                 //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
+                    using var _ = _logger.BeginScope("WriteShapeGeometry {entityLabel}", shapeId);
                     Stopwatch productMeshingTime = new Stopwatch();
                     productMeshingTime.Start();
                     // Console.WriteLine($"{c} - {shapeId}");
