@@ -501,14 +501,18 @@ namespace Xbim.ModelGeometry.Scene
 
         internal void LogWarning(object entity, string format, params object[] args)
         {
+            LogWarning(null, entity, format, args);
+        }
+        internal void LogWarning(Exception ex, object entity, string format, params object[] args)
+        {
             if (_logger != null)
             {
                 var msg = String.Format(format, args);
                 if (entity is IPersistEntity ifcEntity)
-                    _logger.LogWarning("GeomScene: #{entityLabel}={entityType} [{message}]",
+                    _logger.LogWarning(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
                         ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogWarning("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
+                    _logger.LogWarning(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -528,14 +532,19 @@ namespace Xbim.ModelGeometry.Scene
 
         internal void LogError(object entity, string format, params object[] args)
         {
+            LogError(null, entity, format, args);
+        }
+
+        internal void LogError(Exception ex, object entity, string format, params object[] args)
+        {
             if (_logger != null)
             {
                 var msg = String.Format(format, args);
                 if (entity is IPersistEntity ifcEntity)
-                    _logger.LogError("GeomScene: #{entityLabel}={entityType} [{message}]",
+                    _logger.LogError(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
                         ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogError("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
+                    _logger.LogError(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -904,7 +913,7 @@ namespace Xbim.ModelGeometry.Scene
                     // make the finished shape
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && openingAndProjectionOp.ProjectGeometries.Any())
                     {
-                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision);
+                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision, _logger);
                         if (nextGeom.IsValid)
                         {
                             if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -923,7 +932,7 @@ namespace Xbim.ModelGeometry.Scene
                         try
                         {
                             //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
-                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
+                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision, _logger);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -996,8 +1005,8 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (Exception e)
                 {
-                    LogWarning(_model.Instances[elementLabel],
-                        "Contains openings but  its basic geometry can not be built, {0}", e.Message);
+                    LogWarning(e, _model.Instances[elementLabel],
+                        "Contains openings but its basic geometry can not be built, {0}", e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             });
@@ -1396,7 +1405,7 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
                             string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
-                            _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
+                            _logger.LogWarning(fse, "Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
 
                             //just mesh the big shape as we have no idea what we shoudl have               
                             shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
@@ -1473,9 +1482,9 @@ namespace Xbim.ModelGeometry.Scene
             }
             catch (AggregateException e)
             {
-                foreach (var item in e.InnerExceptions)
+                foreach (var ex in e.InnerExceptions)
                 {
-                    LogError("Processing failure", item);
+                    LogError("Processing failure", ex);
                 }
                 throw new XbimException("Processing halted due to model error, see logs", e);
             }
@@ -1596,7 +1605,7 @@ namespace Xbim.ModelGeometry.Scene
             }
             catch (Exception e)
             {
-                LogError(_model.Instances[product.EntityLabel], "Failed to create geometry, {0}", e.Message);
+                LogError(e, _model.Instances[product.EntityLabel], "Failed to create geometry, {0}", e.Message);
             }
 
 
