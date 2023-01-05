@@ -29,7 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             var block = _modelGeomService.SolidFactory.Build(blockMoq);
             var cylinder = _modelGeomService.SolidFactory.Build(cylinderMoq);
 
-            var result = _shapeService.IsColliding(block, cylinder, 0.001);
+            var result = _shapeService.IsOverlapping(block, cylinder, 0.001);
 
             result.Should().Be(true);
         }
@@ -46,7 +46,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             var block = _modelGeomService.SolidFactory.Build(blockMoq);
             var cylinder = _modelGeomService.SolidFactory.Build(cylinderMoq);
 
-            var result = _shapeService.IsColliding(block, cylinder, 0.001);
+            var result = _shapeService.IsOverlapping(block, cylinder, 0.001);
 
             result.Should().Be(false);
         }
