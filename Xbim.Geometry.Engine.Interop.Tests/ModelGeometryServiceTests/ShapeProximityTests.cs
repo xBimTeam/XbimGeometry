@@ -8,20 +8,20 @@ using Xunit;
 
 namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
 {
-    public class CollisionDetectionTests
+    public class ShapeProximityTests
     {
         private readonly IXShapeService _shapeService;
         private readonly IXModelGeometryService _modelGeomService;
         private MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
 
-        public CollisionDetectionTests(IXShapeService shapeService, IXGeometryConverterFactory geometryConverterFactory, ILoggerFactory loggerFactory)
+        public ShapeProximityTests(IXShapeService shapeService, IXGeometryConverterFactory geometryConverterFactory, ILoggerFactory loggerFactory)
         {
             _shapeService = shapeService;
             _modelGeomService = geometryConverterFactory.CreateModelGeometryService(_dummyModel, loggerFactory);
         }
 
         [Fact]
-        public void GivenTwoCollidingShapes_IsColliding_ShouldReturnTrue()
+        public void GivenTwoOverlappingShapes_IsOverlapping_ShouldReturnTrue()
         {
             var blockMoq = IfcMoq.IfcBlockMoq();
             var cylinderMoq = IfcMoq.IfcRightCircularCylinderMoq();
@@ -36,7 +36,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
 
 
         [Fact]
-        public void GivenTwoNonCollidingShapes_IsColliding_ShouldReturnFalse()
+        public void GivenTwoNonOverlappingShapes_IsOverlapping_ShouldReturnFalse()
         {
             var blockMoq = IfcMoq.IfcBlockMoq();
             var cylinderMoq = IfcMoq.IfcRightCircularCylinderMoq(
