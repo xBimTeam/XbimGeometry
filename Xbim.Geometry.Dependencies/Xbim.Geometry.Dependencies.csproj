@@ -33,7 +33,7 @@
 	<ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.31" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.31" />
-    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.235" />
+    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.236" />
 	</ItemGroup>
 	
 	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">
