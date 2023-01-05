@@ -201,7 +201,6 @@
     <ClInclude Include="BRep\X2dPoint.h" />
     <ClInclude Include="BRep\X2dVector.h" />
     <ClInclude Include="BRep\XAxis1Placement.h" />
-    <ClInclude Include="BRep\XAxis2Placement2d.h" />
     <ClInclude Include="BRep\XAxis2Placement3d.h" />
     <ClInclude Include="BRep\XAxisAlignedBox.h" />
     <ClInclude Include="BRep\XAxisPlacement2d.h" />
@@ -271,6 +270,7 @@
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
     <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
+    <ClInclude Include="Services\Unmanaged\NCollisionDetectionService.h" />
     <ClInclude Include="Services\Unmanaged\NShapeService.h" />
     <ClInclude Include="Primitives\GeometryPrimitives.h" />
     <ClInclude Include="Services\LoggingService.h" />
@@ -396,6 +396,7 @@
     <ClCompile Include="Factories\MaterialFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
     <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
+    <ClCompile Include="Services\Unmanaged\NCollisionDetectionService.cpp" />
     <ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
     <ClCompile Include="Primitives\GeometryPrimitives.cpp" />
     <ClCompile Include="Services\LoggingService.cpp" />

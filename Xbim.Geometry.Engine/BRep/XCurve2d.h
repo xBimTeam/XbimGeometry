@@ -13,14 +13,16 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XCurve2d abstract : XbimHandle<Handle(Geom2d_Curve)>, IXCurve
+			public ref class XCurve2d  : XbimHandle<Handle(Geom2d_Curve)>, IXCurve
 			{
+			private:
+				XCurveType _curveType = XCurveType::IfcCurve;
 			public:
-				XCurve2d(Handle(Geom2d_Curve) curve) : XbimHandle(new Handle(Geom2d_Curve)(curve))
+				XCurve2d(Handle(Geom2d_Curve) curve, XCurveType curveType) : XbimHandle(new Handle(Geom2d_Curve)(curve))
 				{
-				}
-				property XCurveType CurveType {virtual XCurveType get()  abstract; }
-
+					_curveType = curveType;
+				}			
+				virtual property XCurveType CurveType {XCurveType get() { return _curveType; }; };
 				property bool Is3d {virtual bool get() { return false; }; }
 				virtual property double FirstParameter {double get()
 				{

@@ -20,8 +20,8 @@ namespace Xbim
 			{
 					
 			public:				
-				XLine(Handle(Geom_Line) hLine) : XCurve(hLine) {};
-				virtual property XCurveType CurveType {XCurveType get() override {return XCurveType::IfcLine;}; };
+				XLine(Handle(Geom_Line) hLine) : XCurve(hLine, XCurveType::IfcLine) {};
+				
 				virtual property IXPoint^ Origin {IXPoint^ get(); };
 				virtual property IXVector^ Direction {IXVector^ get(); };
 				virtual property double ParametricUnit {double get(); };

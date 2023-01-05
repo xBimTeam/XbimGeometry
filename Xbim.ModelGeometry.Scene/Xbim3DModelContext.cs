@@ -11,6 +11,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Xbim.Common;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
@@ -501,14 +502,18 @@ namespace Xbim.ModelGeometry.Scene
 
         internal void LogWarning(object entity, string format, params object[] args)
         {
+            LogWarning(null, entity, format, args);
+        }
+        internal void LogWarning(Exception ex, object entity, string format, params object[] args)
+        {
             if (_logger != null)
             {
                 var msg = String.Format(format, args);
                 if (entity is IPersistEntity ifcEntity)
-                    _logger.LogWarning("GeomScene: #{entityLabel}={entityType} [{message}]",
+                    _logger.LogWarning(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
                         ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogWarning("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
+                    _logger.LogWarning(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -528,14 +533,19 @@ namespace Xbim.ModelGeometry.Scene
 
         internal void LogError(object entity, string format, params object[] args)
         {
+            LogError(null, entity, format, args);
+        }
+
+        internal void LogError(Exception ex, object entity, string format, params object[] args)
+        {
             if (_logger != null)
             {
                 var msg = String.Format(format, args);
                 if (entity is IPersistEntity ifcEntity)
-                    _logger.LogError("GeomScene: #{entityLabel}={entityType} [{message}]",
+                    _logger.LogError(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
                         ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
                 else
-                    _logger.LogError("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
+                    _logger.LogError(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
             }
         }
 
@@ -815,6 +825,7 @@ namespace Xbim.ModelGeometry.Scene
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = elementToFeatureGroup.Key;
+                using var _ = _logger.BeginScope("WriteProductsWithFeatures {entityLabel}", element.EntityLabel);
                 _logger.LogTrace("Processing features for {0}", element.EntityLabel);
 
                 // here is where the feature's geometry are calculated
@@ -866,6 +877,7 @@ namespace Xbim.ModelGeometry.Scene
             //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
             Parallel.ForEach(openingAndProjectionOps.OrderByDescending(b => b.CutGeometries.Count + b.ProjectGeometries.Count), contextHelper.ParallelOptions, openingAndProjectionOp =>
             {
+                using var _ = _logger.BeginScope("WriteProductsWithFeaturesBooleans {entityLabel}", openingAndProjectionOp.ProductLabel);
                 Interlocked.Increment(ref localTally);
                 var elementLabel = 0;
                 try
@@ -904,7 +916,7 @@ namespace Xbim.ModelGeometry.Scene
                     // make the finished shape
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && openingAndProjectionOp.ProjectGeometries.Any())
                     {
-                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision);
+                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision, _logger);
                         if (nextGeom.IsValid)
                         {
                             if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -923,7 +935,7 @@ namespace Xbim.ModelGeometry.Scene
                         try
                         {
                             //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
-                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision);
+                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision, _logger);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -996,8 +1008,8 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (Exception e)
                 {
-                    LogWarning(_model.Instances[elementLabel],
-                        "Contains openings but  its basic geometry can not be built, {0}", e.Message);
+                    LogWarning(e, _model.Instances[elementLabel],
+                        "Contains openings but its basic geometry can not be built, {0}", e.Message);
                 }
                 //if (progDelegate != null) progDelegate(101, "FeatureElement, (#" + element.EntityLabel + " ended)");
             });
@@ -1049,6 +1061,7 @@ namespace Xbim.ModelGeometry.Scene
 
             Parallel.ForEach(products, contextHelper.ParallelOptions, product =>
             {
+                using var _ = _logger.BeginScope("WriteProductShapes {entityLabel}", product.EntityLabel);
                 // select representations that are in the required context
                 // only want solid representations for this context, but rep type is optional so just filter identified 2d elements
                 // we can only handle one representation in a context and this is in an implementers agreement
@@ -1218,6 +1231,7 @@ namespace Xbim.ModelGeometry.Scene
             progDelegate?.Invoke(-1, "WriteMappedItems (" + contextHelper.MappedShapeIds.Count + " items)");
             Parallel.ForEach(contextHelper.MappedShapeIds, contextHelper.ParallelOptions, mapId =>
             {
+                using var _ = _logger.BeginScope("PrepareMapGeometryReferences {entityLabel}", mapId);
                 var entity = _model.Instances[mapId];
                 if (!(entity is IIfcMappedItem map))
                 {
@@ -1349,6 +1363,7 @@ namespace Xbim.ModelGeometry.Scene
                 //contextHelper.ParallelOptions.MaxDegreeOfParallelism = 1;
                 Parallel.ForEach(contextHelper.ProductShapeIds, contextHelper.ParallelOptions, (shapeId) =>
                 {
+                    using var _ = _logger.BeginScope("WriteShapeGeometry {entityLabel}", shapeId);
                     Stopwatch productMeshingTime = new Stopwatch();
                     productMeshingTime.Start();
                     // Console.WriteLine($"{c} - {shapeId}");
@@ -1396,7 +1411,7 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             int faceSetEntityLabel = (int)fse.Data["LargeFaceSetLabel"];
                             string faceSetEntityType = (string)fse.Data["LargeFaceSetType"];
-                            _logger.LogWarning("Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
+                            _logger.LogWarning(fse, "Large Face Set #{0} {1} detected and handled as Mesh", faceSetEntityLabel, faceSetEntityType);
 
                             //just mesh the big shape as we have no idea what we shoudl have               
                             shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
@@ -1473,9 +1488,9 @@ namespace Xbim.ModelGeometry.Scene
             }
             catch (AggregateException e)
             {
-                foreach (var item in e.InnerExceptions)
+                foreach (var ex in e.InnerExceptions)
                 {
-                    LogError("Processing failure", item);
+                    LogError("Processing failure", ex);
                 }
                 throw new XbimException("Processing halted due to model error, see logs", e);
             }
@@ -1596,7 +1611,7 @@ namespace Xbim.ModelGeometry.Scene
             }
             catch (Exception e)
             {
-                LogError(_model.Instances[product.EntityLabel], "Failed to create geometry, {0}", e.Message);
+                LogError(e, _model.Instances[product.EntityLabel], "Failed to create geometry, {0}", e.Message);
             }
 
 

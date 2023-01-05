@@ -1,5 +1,6 @@
 #include "ShapeService.h"
 #include "Unmanaged/NWexBimMesh.h"
+#include "Unmanaged/NCollisionDetectionService.h"
 #include "ModelGeometryService.h"
 #include "../BRep//XShape.h"
 #include <vector>
@@ -114,9 +115,11 @@ namespace Xbim
 			}
 
 			IXShape^ ShapeService::Moved(IXShape^ shape, IXLocation^ location)
-			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+			{	
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
+				auto xLoc = static_cast<XLocation^>(location);
+				topoShape.Move(xLoc->Ref());
+				return  XShape::GetXbimShape(topoShape);
 			}
 
 			IXShape^ ShapeService::Scaled(IXShape^ shape, double scale)
@@ -146,6 +149,17 @@ namespace Xbim
 			{
 				throw gcnew System::NotImplementedException();
 				// TODO: insert return statement here
+			}
+
+			bool ShapeService::IsColliding(IXShape^ shape1, IXShape^ shape2, double precision)
+			{
+				const double linearDeflection = 0.01;
+				const double angularDeflection = 0.01;
+
+				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
+				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
+				bool result = NCollisionDetectionService::IsColliding(topoShape1, topoShape2, precision, linearDeflection, angularDeflection);
+				return result;
 			}
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)

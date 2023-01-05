@@ -16,8 +16,8 @@ namespace Xbim
 					
 			public:
 				
-				XLine2d(Handle(Geom2d_LineWithMagnitude) hLine) : XCurve2d(hLine) {};
-				virtual property XCurveType CurveType {XCurveType get() override { return XCurveType::IfcLine; }; };
+				XLine2d(Handle(Geom2d_LineWithMagnitude) hLine) : XCurve2d(hLine, XCurveType::IfcLine) {};
+				
 				virtual property IXPoint^ Origin {IXPoint^ get(); };
 				virtual property IXVector^ Direction {IXVector^ get(); };
 				virtual property double ParametricUnit {double get() { return OccLine2d()->Magnitude(); }; };

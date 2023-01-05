@@ -18,7 +18,7 @@ namespace Xbim
 		ref class XbimShell : IXbimShell, XbimOccShape
 		{
 		private:
-			
+
 			System::IntPtr ptrContainer;
 			virtual property TopoDS_Shell* pShell
 			{
@@ -38,8 +38,8 @@ namespace Xbim
 			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
 			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 			//destructors
-			~XbimShell(){ InstanceCleanup(); }
-			!XbimShell(){ InstanceCleanup(); }
+			~XbimShell() { InstanceCleanup(); }
+			!XbimShell() { InstanceCleanup(); }
 
 #pragma region Equality Overrides
 			virtual bool Equals(Object^ v) override;
@@ -51,13 +51,13 @@ namespace Xbim
 
 #pragma region IXbimShell Interface	
 			virtual property bool IsEmpty {bool get(); }
-			virtual property bool IsValid{bool get() override { return pShell != nullptr && !pShell->IsNull(); }; }
-			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimShellType; }; }
-			virtual property IXbimFaceSet^ Faces{ IXbimFaceSet^ get(); }
-			virtual property IXbimEdgeSet^ Edges{ IXbimEdgeSet^ get(); }
-			virtual property IXbimVertexSet^ Vertices{IXbimVertexSet^ get(); }
-			virtual property XbimRect3D BoundingBox{XbimRect3D get() override; }
-			virtual property bool IsClosed{bool get(); }
+			virtual property bool IsValid {bool get() override { return pShell != nullptr && !pShell->IsNull(); }; }
+			virtual property  XbimGeometryObjectType GeometryType {XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimShellType; }; }
+			virtual property IXbimFaceSet^ Faces { IXbimFaceSet^ get(); }
+			virtual property IXbimEdgeSet^ Edges { IXbimEdgeSet^ get(); }
+			virtual property IXbimVertexSet^ Vertices {IXbimVertexSet^ get(); }
+			virtual property XbimRect3D BoundingBox {XbimRect3D get() override; }
+			virtual property bool IsClosed {bool get(); }
 			virtual property double SurfaceArea { double get(); }
 			virtual property bool IsPolyhedron { bool get(); }
 			virtual IXbimGeometryObjectSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
@@ -67,34 +67,35 @@ namespace Xbim
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimGeometryObjectSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimFaceSet^ Section(IXbimFace^ face, double tolerance, ILogger^ logger);
-			
+
 			virtual IXbimSolid^ MakeSolid();
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual property bool HasValidTopology{bool get(); }
-			virtual bool CanCreateSolid(){ return IsClosed; };
-			virtual IXbimSolid^ CreateSolid(){ return MakeSolid(); };
+			virtual property bool HasValidTopology {bool get(); }
+			virtual bool CanCreateSolid() { return IsClosed; };
+			virtual IXbimSolid^ CreateSolid() { return MakeSolid(); };
 			virtual void SaveAsBrep(System::String^ fileName);
 #pragma endregion
-			
+
 #pragma region operators
 			operator const TopoDS_Shell& () { return *pShell; }
 			virtual operator const TopoDS_Shape& () override { return *pShell; }
 #pragma endregion
 
 			//change the direction of the loop
-			void Reverse(); 
+			void Reverse();
+			void Move(IIfcAxis2Placement3D^ position);
 			//if the shell is closed make sure it is facing the correct way
 			void Orientate();
 			void FixTopology();
 
 			// Inherited via XbimOccShape
-			virtual XbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
+			virtual XbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator^ transformation) override;
 
 			// Inherited via XbimOccShape
-			virtual XbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
-			virtual XbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
-				virtual void Move(TopLoc_Location loc);
+			virtual XbimGeometryObject^ Moved(IIfcPlacement^ placement) override;
+			virtual XbimGeometryObject^ Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger) override;
+			virtual void Move(TopLoc_Location loc);
 		};
 	}
 }
