@@ -1,4 +1,4 @@
-#include "NCollisionDetectionService.h" 
+#include "NShapeProximityUtils.h" 
 #include <TopoDS_Shape.hxx> 
 #include "NLoggingService.h" 
 #include <TopoDS_Compound.hxx>
@@ -12,7 +12,7 @@
 
 
 
-bool NCollisionDetectionService::IsColliding(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection)
+int NShapeProximityUtils::GetOverlappingSubShapesCount(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection)
 {
 	BRepMesh_IncrementalMesh aMesh1(shape1, linearDeflection, Standard_False, angularDeflection);
 	BRepMesh_IncrementalMesh aMesh2(shape2, linearDeflection, Standard_False, angularDeflection);
@@ -20,6 +20,9 @@ bool NCollisionDetectionService::IsColliding(const TopoDS_Shape& shape1, const T
 	BRepExtrema_ShapeProximity proximity(shape1, shape2, precision);
 	proximity.Perform();
 	    
-	return proximity.IsDone() && proximity.OverlapSubShapes1().Size() > 0;
+	if (proximity.IsDone())
+		return proximity.OverlapSubShapes1().Size();
+	
+	return 0;
 }
 
