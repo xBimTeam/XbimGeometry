@@ -52,8 +52,13 @@ jobs:
     displayName: 'Setting Prerelease FileVersion'
     condition: ne(variables['Build.SourceBranch'], 'refs/heads/master')
   
-  #Task group has not been exported, task groups are not supported yet
-  
+
+  - task: UseDotNet@2
+    displayName: Use .NET 6.0
+    inputs:
+      packageType: 'sdk'
+      version: '6.0.x'
+
   - task: NuGetToolInstaller@0
     displayName: 'Use a new NuGet'
     inputs:
