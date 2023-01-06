@@ -2,6 +2,7 @@
 #include "Unmanaged/NWexBimMesh.h"
 #include "Unmanaged/NShapeProximityUtils.h"
 #include "ModelGeometryService.h"
+#include "BRepBuilderAPI_Transform.hxx"
 #include "../BRep//XShape.h"
 #include "../BRep//XCompound.h"
 #include "../BRep//XFace.h"
@@ -123,13 +124,17 @@ namespace Xbim
 				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				auto xLoc = static_cast<XLocation^>(location);
 				topoShape.Move(xLoc->Ref());
-				return  XShape::GetXbimShape(topoShape);
+				return XShape::GetXbimShape(topoShape);
 			}
 
 			IXShape^ ShapeService::Scaled(IXShape^ shape, double scale)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
+				gp_Trsf scaler;
+				scaler.SetScaleFactor(scale);
+				BRepBuilderAPI_Transform tr = BRepBuilderAPI_Transform(topoShape, scaler);
+
+				return XShape::GetXbimShape(tr.Shape());
 			}
 
 			IXShape^ ShapeService::Combine(IXShape^ shape, IEnumerable<IXShape^>^ merge)
