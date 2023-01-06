@@ -51,6 +51,7 @@ namespace Xbim.ModelGeometry.Scene
             private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
+            
 
             public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
             {
@@ -486,7 +487,7 @@ namespace Xbim.ModelGeometry.Scene
         static public int BooleanTimeOutMilliSeconds;
         private readonly IfcRepresentationContextCollection _contexts;
         private readonly IXbimGeometryEngine _engine;
-
+        private bool isGeometryV6 = false;
 
         private IXbimGeometryEngine Engine => _engine;
 
@@ -584,8 +585,8 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
-
-            _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());
+            isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
+             _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());
             _model = model;
             if(loggerFactory==null) loggerFactory= XbimLogging.LoggerFactory;
             _engine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
@@ -692,7 +693,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <returns></returns>
         public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
         {
-            _logger.LogInformation("Starting creation of model scene");
+            _logger.LogTrace("Starting creation of model scene");
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
             var geomStorageType = XbimGeometryType.PolyhedronBinary;
             if (_contexts == null || Engine == null)
@@ -759,7 +760,7 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 geometryTransaction.Commit();
             }
-            _logger.LogInformation("Finished creation of model scene");
+            _logger.LogTrace("Finished creation of model scene");
             return true;
         }
 
@@ -1397,7 +1398,7 @@ namespace Xbim.ModelGeometry.Scene
                     // Console.WriteLine(shape.GetType().Name);
                     XbimShapeGeometry shapeGeom = null;
                     IXbimGeometryObject geomModel = null;
-                    if (!isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
+                    if (!isGeometryV6 && !isFeatureElementShape && !isVoidedProductShape &&  xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
                     {
                         shapeGeom = xbimTessellator.Mesh(shape);
                     }

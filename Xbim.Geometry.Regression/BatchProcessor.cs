@@ -1,13 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using NReco.Logging.File;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using Xbim.Common;
+using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
@@ -23,10 +22,38 @@ namespace XbimRegression
     {
 
         readonly Params _params;
+        private readonly ILoggerFactory _loggerFactory;
+        private string _currentLogFileName = "BatchProcessor.log";
+        private readonly ILogger<BatchProcessor> _logger;
 
         public BatchProcessor(Params arguments)
         {
             _params = arguments;
+            _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace)
+           .AddFile("{0}", fileLoggerOpts =>
+           {
+               fileLoggerOpts.FormatLogFileName = fName =>
+               {
+                   return String.Format(fName, _currentLogFileName);
+               };
+               fileLoggerOpts.FormatLogEntry = (msg) =>
+               {
+                   var sb = new System.Text.StringBuilder();
+                   StringWriter sw = new StringWriter(sb);
+                   var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                   jsonWriter.WriteStartArray();
+                   jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                   jsonWriter.WriteValue(msg.LogLevel.ToString());
+                   jsonWriter.WriteValue(msg.EventId.Id);
+                   jsonWriter.WriteValue(msg.Message);
+                   jsonWriter.WriteValue(msg.Exception?.ToString());
+                   jsonWriter.WriteEndArray();
+                   return sb.ToString();
+               };
+               fileLoggerOpts.MinLevel = LogLevel.Trace;
+           }));
+            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
+            XbimLogging.LoggerFactory = _loggerFactory;
         }
 
         public Params Params
@@ -42,48 +69,27 @@ namespace XbimRegression
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
 
-
-
             // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
 
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
             {
+                
                 //set up a  log file for this file run                 
-                var logFile = Path.ChangeExtension(file.FullName, "log");
-                ProcessResult result;
-                using (var loggerFactory = new LoggerFactory())
-                {
-                    var logProvider = new FileLoggerProvider(logFile, false);
-                    logProvider.FormatLogEntry = (msg) =>
-                    {
-                        var sb = new System.Text.StringBuilder();
-                        StringWriter sw = new StringWriter(sb);
-                        var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                        jsonWriter.WriteStartArray();
-                        jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                        jsonWriter.WriteValue(msg.LogLevel.ToString());
-                        jsonWriter.WriteValue(msg.EventId.Id);
-                        jsonWriter.WriteValue(msg.Message);
-                        jsonWriter.WriteValue(msg.Exception?.ToString());
-                        jsonWriter.WriteEndArray();
-                        return sb.ToString();
-                    };
-                    logProvider.MinLevel = LogLevel.Trace;//Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Debug;// if doing one at a time, we want to trace progress.
-                    loggerFactory.AddProvider(logProvider);
+                _currentLogFileName = Path.ChangeExtension(file.FullName, "log");
+                var runLogFileName = _currentLogFileName;
+                if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
+                Console.WriteLine($"Processing {file}");
+                ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
+                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                _currentLogFileName = "BatchProcessor.log";
 
-                    XbimLogging.LoggerFactory = loggerFactory;
-                    ILogger logger = loggerFactory.CreateLogger<BatchProcessor>();
-                    Console.WriteLine($"Processing {file}");
-                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, loggerFactory);
-                    XbimLogging.LoggerFactory = null; // uses a default loggerFactory
-                };
-
-             
-                var txt = File.ReadAllText(logFile);
+                _logger.LogInformation($"Processing run results from log file {runLogFileName}");
+                var txt = File.ReadAllText(runLogFileName);
+                
                 if (string.IsNullOrEmpty(txt))
                 {
-                    File.Delete(logFile);
+                    File.Delete(runLogFileName);
                     result.Errors = 0;
                     result.Warnings = 0;
                     result.Information = 0;
@@ -105,6 +111,7 @@ namespace XbimRegression
                 }
                 result.FileName = file.Name;
                 writer.WriteLine(result.ToCsv());
+                _logger.LogInformation($"Writing run results to {file.Name}");
                 writer.Flush();
             }
 
@@ -173,7 +180,7 @@ namespace XbimRegression
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        var context = new Xbim3DModelContext(model, logger: logger);
+                        var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, XGeometryEngineVersion.V6);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;

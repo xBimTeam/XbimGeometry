@@ -5,7 +5,8 @@
 #include "XbimSolidSet.h"
 #include "XbimOccWriter.h"
 #include "XbimConvert.h"
-
+#include "./Services/Unmanaged/NWexBimMesh.h"
+#include "./Services/MeshFactors.h"
 
 #include "./Factories/SolidFactory.h"
 #include "./Factories/FaceFactory.h"
@@ -21,8 +22,10 @@
 #include <Standard_Type.hxx>
 #include <GeomLib.hxx>
 #include <Geom2d_Line.hxx>
+#include "BRep/XShape.h"
+#include "BRep/XCompound.h"
 
-
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -138,7 +141,7 @@ namespace Xbim
 				else if (dynamic_cast<IIfcPolygonalFaceSet^>(geomRep))
 				{
 					IIfcPolygonalFaceSet^ polySet = (IIfcPolygonalFaceSet^)geomRep;
-					
+
 					if (polySet->Closed.HasValue && polySet->Closed.Value)
 					{
 						XbimSolidSet^ ss = gcnew XbimSolidSet(GetSolidFactory()->BuildPolygonalFaceSet(polySet));
@@ -197,7 +200,7 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcCsgPrimitive3D^>(geomRep))
 				{
-					return CreateSolid(static_cast<IIfcCsgPrimitive3D^>(geomRep),Logger());
+					return CreateSolid(static_cast<IIfcCsgPrimitive3D^>(geomRep), Logger());
 				}
 				else if (dynamic_cast<IIfcCsgSolid^>(geomRep))
 				{
@@ -213,7 +216,7 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcGeometricSet^>(geomRep))
 				{
-					if (objectLocation != nullptr) LogError(Logger(), geomRep, "Move is not implemented for IIfcGeometricSet");
+					if (objectLocation != nullptr) this->LogError(geomRep, "Move is not implemented for IIfcGeometricSet");
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep, Logger());
 				}
 				throw gcnew System::NotSupportedException("Geometry Representation Item is not supported");
@@ -772,112 +775,71 @@ namespace Xbim
 		void XbimGeometryCreatorV6::WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
 
-
-			XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(shape);
-			if (xShape != nullptr)
-			{
-				xShape->WriteTriangulation(tw, tolerance, deflection, angle);
-				return;
-			}
+			throw gcnew System::NotSupportedException("WriteTriangulation to a textWroter is no longer supported");
 
 		}
-
 		void XbimGeometryCreatorV6::WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
-
-			XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(shape);
-			if (xShape != nullptr)
-			{
-				xShape->WriteTriangulation(bw, tolerance, deflection, angle);
-				return;
-			}
+			auto xShape = (XShape^)XbimGeometryObject::ToXShape(shape);
+			Bnd_Box bounds;
+			array<System::Byte>^ bytes = WriteTriangulation(xShape, tolerance, deflection, angle, bounds);
+			bw->Write(bytes);
 		}
+
+		array<System::Byte>^ XbimGeometryCreatorV6::WriteTriangulation(IXShape^ shape, double tolerance, double deflection, double angle, Bnd_Box& bounds)
+		{
+			const TopoDS_Shape& topoShape = ((XShape^)shape)->GetTopoShape();
+			auto mesh = NWexBimMesh::CreateMesh(topoShape, tolerance, deflection, angle, /*scale*/ 1.0);
+			auto bMin = mesh.BndBox.CornerMin();
+			auto bMax = mesh.BndBox.CornerMax();
+			bounds = Bnd_Box(gp_Pnt(bMin[0], bMin[1], bMin[2]), gp_Pnt(bMax[0], bMax[1], bMax[2]));
+			std::stringstream output;
+			mesh.WriteToStream(output);
+
+			int size = (int)output.str().length();
+			auto buffer = std::make_unique<char[]>(size);
+			output.seekg(0);
+			output.read(buffer.get(), size);
+			cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
+			Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+
+			return byteArray;
+		}
+
 
 		XbimShapeGeometry^ XbimGeometryCreatorV6::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ /*logger*/)
 		{
 			XbimShapeGeometry^ shapeGeom = gcnew XbimShapeGeometry();
-
-			if (geometryObject->IsSet)
+			if (storageType != XbimGeometryType::PolyhedronBinary) throw gcnew System::Exception("Text format no longer supported");
+			XShape^ xShape = nullptr;
+			IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
+			if (set != nullptr)
 			{
-				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
-				if (set != nullptr)
+				BRep_Builder builder;
+				TopoDS_Compound occCompound;
+				builder.MakeCompound(occCompound);
+				for each (IXbimGeometryObject ^ geom in set)
 				{
-					MemoryStream^ memStream = gcnew MemoryStream(0x4000);
-					if (storageType == XbimGeometryType::PolyhedronBinary)
+					XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geom);
+					if (xShape != nullptr)
 					{
-						BRep_Builder builder;
-						BinaryWriter^ bw = gcnew BinaryWriter(memStream);
-						TopoDS_Compound occCompound;
-						builder.MakeCompound(occCompound);
-						for each (IXbimGeometryObject ^ geom in set)
-						{
-							XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(geom);
-							if (xShape != nullptr)
-							{
-								builder.Add(occCompound, xShape);
-							}
-						}
-						XbimCompound^ compound = gcnew XbimCompound(occCompound, false, precision);
-						WriteTriangulation(bw, compound, precision, deflection, angle);
-						bw->Close();
-						delete bw;
-					}
-					else //default to text
-					{
-						throw gcnew System::Exception("Text format no longer supported");
-						/*StreamWriter^ tw = gcnew StreamWriter(memStream);
-						for each (IXbimGeometryObject ^ geom in set)
-						{
-							WriteTriangulation(tw, geom, precision, deflection, angle);
-						}
-						tw->Close();
-						delete tw;*/
-					}
-					memStream->Flush();
-					((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
-					delete memStream;
-
-					if (shapeGeom->ShapeData->Length > 0)
-					{
-						((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
-						((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
-							((XbimShapeGeometry^)shapeGeom)->Format = storageType;
-						return shapeGeom;
+						builder.Add(occCompound, xShape);
 					}
 				}
+				xShape = gcnew XCompound(occCompound);
 			}
 			else
 			{
-				MemoryStream^ memStream = gcnew MemoryStream(0x4000);
-				if (storageType == XbimGeometryType::PolyhedronBinary)
-				{
-					BinaryWriter^ bw = gcnew BinaryWriter(memStream);
-					WriteTriangulation(bw, geometryObject, precision, deflection, angle);
-					bw->Close();
-					delete bw;
-				}
-				else //default to text
-				{
-					throw gcnew System::Exception("Text format no longer supported");
-					/*TextWriter^ tw = gcnew StreamWriter(memStream);
-					WriteTriangulation(tw, geometryObject, precision, deflection, angle);
-					tw->Close();
-					delete tw;*/
-				}
-				memStream->Flush();
-
-				((IXbimShapeGeometryData^)shapeGeom)->ShapeData = memStream->ToArray();
-				delete memStream;
-				if (shapeGeom->ShapeData->Length > 0)
-				{
-					((XbimShapeGeometry^)shapeGeom)->BoundingBox = geometryObject->BoundingBox;
-					((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified,
-						((XbimShapeGeometry^)shapeGeom)->Format = storageType;
-				}
+				xShape = static_cast<XShape^>(XbimGeometryObject::ToXShape(geometryObject));
 			}
-
+			Bnd_Box bounds;
+			((IXbimShapeGeometryData^)shapeGeom)->ShapeData = WriteTriangulation(xShape, precision, deflection, angle, bounds);
+			const gp_Pnt& cMin = bounds.CornerMin();
+			const gp_Pnt& cMax = bounds.CornerMax();
+			((XbimShapeGeometry^)shapeGeom)->BoundingBox = XbimRect3D(cMin.X(), cMin.Y(), cMin.Z(), cMax.X() - cMin.X(), cMax.Y() - cMin.Y(), cMax.Z() - cMin.Z());
+			((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified;
+			((XbimShapeGeometry^)shapeGeom)->Format = storageType;
 			return shapeGeom;
-
 		}
 
 #pragma endregion
@@ -899,6 +861,7 @@ namespace Xbim
 			List<System::Tuple<int, XbimCurve2D^>^>^ VCurves = gcnew List<System::Tuple<int, XbimCurve2D^>^>();
 			List<System::Tuple<int, XbimCurve2D^>^>^ WCurves = gcnew List<System::Tuple<int, XbimCurve2D^>^>();
 			List<XbimPoint3D>^ intersections = gcnew List<XbimPoint3D>();
+
 
 			for each (IIfcGridAxis ^ axis in grid->UAxes)
 			{
@@ -945,7 +908,7 @@ namespace Xbim
 
 			if (bb.SizeX < precision || bb.SizeY < precision)
 			{
-				LogWarning(Logger(), grid, "Extent of grid is near zero. Found "
+				this->LogWarning(grid, "Extent of grid is near zero. Found "
 					+ intersections->Count + " axis intersections having " + (UCurves->Count + VCurves->Count + WCurves->Count) + " grid axis.");
 				XbimPoint3D c = bb.Centroid();
 				bb = XbimRect3D(c.X - 75 * mm, c.Y - 75 * mm, c.Z - 75 * mm, 150 * mm, 150 * mm, 150 * mm);
@@ -1068,18 +1031,18 @@ namespace Xbim
 					System::String^ err = gcnew System::String(sf.GetMessageString());
 
 					failedGridLines = true;
-					LogWarning(Logger(), grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
+					this->LogWarning(grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
 					failedGridLines = true;
 				}
 				catch (...)
 				{
-					LogWarning(Logger(), grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
+					this->LogWarning(grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
 					failedGridLines = true;
 				}
 
 			}
 			if (failedGridLines)
-				LogWarning(Logger(), grid, "One or more grid lines has failed to convert successfully");
+				this->LogWarning(grid, "One or more grid lines has failed to convert successfully");
 
 			return  gcnew XbimSolidSet(solidResults);
 		}
