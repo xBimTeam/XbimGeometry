@@ -1,6 +1,6 @@
 #include "ShapeService.h"
 #include "Unmanaged/NWexBimMesh.h"
-#include "Unmanaged/NCollisionDetectionService.h"
+#include "Unmanaged/NShapeProximityUtils.h"
 #include "ModelGeometryService.h"
 #include "../BRep//XShape.h"
 #include <vector>
@@ -151,14 +151,18 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
-			bool ShapeService::IsColliding(IXShape^ shape1, IXShape^ shape2, double precision)
+			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, double precision)
 			{
 				const double linearDeflection = 0.01;
 				const double angularDeflection = 0.01;
 
 				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
 				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
-				bool result = NCollisionDetectionService::IsColliding(topoShape1, topoShape2, precision, linearDeflection, angularDeflection);
+
+				int result = NShapeProximityUtils::GetOverlappingSubShapesCount
+							(topoShape1, topoShape2, precision, linearDeflection, angularDeflection);
+
+
 				return result;
 			}
 
