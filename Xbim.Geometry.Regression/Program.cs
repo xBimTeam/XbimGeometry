@@ -1,4 +1,7 @@
-﻿using Xbim.Ifc;
+﻿using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using Xbim.Ifc;
 
 namespace XbimRegression
 {
@@ -14,7 +17,7 @@ namespace XbimRegression
             var arguments = new Params(args);
             if (!arguments.IsValid)
                 return;
-           
+            
             var processor = new BatchProcessor(arguments);
             processor.Run();
         }
