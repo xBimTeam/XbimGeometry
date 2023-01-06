@@ -1,5 +1,6 @@
 #pragma once
 #include "./Services//ModelGeometryService.h"
+#include "Services/ShapeService.h"
 using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
@@ -16,7 +17,7 @@ namespace Xbim
 
 			static System::String^ SurfaceOfLinearExtrusion = "#SurfaceOfLinearExtrusion";
 			static System::String^ PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
-
+			ShapeService^ _shapeService;
 		private:
 
 			IXbimGeometryObject^ Trim(XbimSetObject^ geometryObject);
@@ -50,7 +51,10 @@ namespace Xbim
 			}
 		public:
 
-			XbimGeometryCreatorV6(IModel^ model, ILoggerFactory^ loggerFactory) : Xbim::Geometry::Services::ModelGeometryService(model, loggerFactory){ }
+			XbimGeometryCreatorV6(IModel^ model, ILoggerFactory^ loggerFactory) : Xbim::Geometry::Services::ModelGeometryService(model, loggerFactory)
+			{
+				_shapeService = gcnew ShapeService();
+			}
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
@@ -227,6 +231,7 @@ namespace Xbim
 			virtual void WriteTriangulation(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
+			array<System::Byte>^ WriteTriangulation(IXShape^ shape, double tolerance, double deflection, double angle, Bnd_Box& bounds);
 		};
 	}
 }
