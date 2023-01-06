@@ -17,7 +17,7 @@ namespace Xbim
 			{
 			public:
 				XCompound(const TopoDS_Compound& hCompound) : XShape(new TopoDS_Compound(hCompound)) { };
-
+		
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Compound; } };
 
 				virtual property bool IsCompoundsOnly {bool get(); };

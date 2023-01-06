@@ -3,8 +3,12 @@
 #include "Unmanaged/NShapeProximityUtils.h"
 #include "ModelGeometryService.h"
 #include "../BRep//XShape.h"
+#include "../BRep//XCompound.h"
+#include "../BRep//XFace.h"
 #include <vector>
-
+#include <BRep_Builder.hxx>
+#include <TopoDS_Compound.hxx>
+#include <BRepGProp_Face.hxx>
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -128,7 +132,7 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
-			IXShape^ ShapeService::Combine(IXShape^ shape, IEnumerable<IXShape^>^ intersect)
+			IXShape^ ShapeService::Combine(IXShape^ shape, IEnumerable<IXShape^>^ merge)
 			{
 				throw gcnew System::NotImplementedException();
 				// TODO: insert return statement here
@@ -136,7 +140,19 @@ namespace Xbim
 
 			bool ShapeService::IsFacingAwayFrom(IXFace^ face, IXDirection^ direction)
 			{
-				return false;
+				if (direction->IsNull) return false;
+				gp_Vec toward(direction->X, direction->Y, direction->Z);
+				XFace^ xFace = static_cast<XFace^>(face);
+				const TopoDS_Face& topoFace = TopoDS::Face(xFace->GetTopoShape());
+				BRepGProp_Face prop(topoFace);
+				gp_Pnt centre;
+				gp_Vec faceNormal;
+				double u1, u2, v1, v2;
+				prop.Bounds(u1, u2, v1, v2);
+				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, faceNormal);
+
+				double angle = faceNormal.AngleWithRef(toward, toward);
+				return angle < M_PI_2 - 0.1;
 			}
 
 			IXbimGeometryObject^ ShapeService::ConvertToV5(IXShape^ shape)
@@ -147,8 +163,14 @@ namespace Xbim
 
 			IXShape^ ShapeService::Combine(IEnumerable<IXShape^>^ shapes)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				BRep_Builder builder;
+				TopoDS_Compound topoCompound;
+				builder.MakeCompound(topoCompound);
+				auto compound = gcnew XCompound(topoCompound);
+				for each (IXShape ^ shape in shapes)
+				{
+					compound->Add(shape);
+				}return compound;
 			}
 
 			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, double precision)
