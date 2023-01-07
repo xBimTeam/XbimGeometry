@@ -1,6 +1,8 @@
 #include "GeometryPrimitives.h"
 #include "../BRep/XLocation.h"
 #include "../BRep/XMatrix.h"
+#include "../BRep/XAxisAlignedBox.h"
+
 using namespace Xbim::Geometry::BRep;
 
 namespace Xbim
@@ -45,6 +47,20 @@ namespace Xbim
 
 				}
 				return  gcnew XMatrix(mat4d);
+			}
+			IXAxisAlignedBoundingBox^ GeometryPrimitives::BuildBoundingBox()
+			{
+				return gcnew XAxisAlignedBox();
+			}
+			IXAxisAlignedBoundingBox^ GeometryPrimitives::Moved(IXAxisAlignedBoundingBox^ box, IXLocation^ newLocation)
+			{
+				if (box->IsVoid) return box;
+				auto xbimLoc = dynamic_cast<XLocation^>(newLocation);
+				if (newLocation == nullptr || xbimLoc == nullptr || xbimLoc->IsIdentity) return box;
+				Bnd_Box bBox(gp_Pnt(box->CornerMin->X, box->CornerMin->Y, box->CornerMin->Z),
+					gp_Pnt(box->CornerMax->X, box->CornerMax->Y, box->CornerMax->Z));
+				Bnd_Box movedBox = bBox.Transformed(xbimLoc->Ref());
+				return gcnew XAxisAlignedBox(movedBox);
 			}
 		}
 	}
