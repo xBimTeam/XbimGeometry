@@ -20,8 +20,8 @@
   </ItemGroup>
  
   <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}</ProjectGuid>
     <Keyword>NetCoreCProj</Keyword>
     <RootNamespace>Xbim::Geometry</RootNamespace>
@@ -29,7 +29,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <OutputFolder>net6.0</OutputFolder>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-  
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
