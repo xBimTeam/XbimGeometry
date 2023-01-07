@@ -29,6 +29,7 @@
     <SignAssembly>true</SignAssembly>   
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>   
     <DelaySign>false</DelaySign>
+    <EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
   </PropertyGroup>
 
 </Project>
