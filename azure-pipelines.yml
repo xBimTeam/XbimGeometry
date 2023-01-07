@@ -9,8 +9,8 @@ trigger:
     - README.md
     - CHANGELOG.md
     - CONTRIBUTING.md
-#pool:
-#  vmImage: 'windows-2022'
+pool:
+  vmImage: 'windows-2022'
   
 variables:
   BuildConfiguration: 'Release'
