@@ -498,14 +498,21 @@
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
-    <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
-    <MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />
+  <Target Name="BuildFunction" AfterTargets="Build">
+    <!-- Run builds for all platforms sequentially - The GE.Interop project expects all Platform targets to be built before it starts, so we chain the platform builds together
+    x64 calls Win32; or Win32 calls x64.
+    In future when we add ARM etc we just need a sequence: Win32 => x64 => Arm64 => Win32 to guarantee all built. 
+    (and then we can just target AnyCPU. Presently we need x86 targets so we can run GE on ARM under Rosetta. Otherwise AnyCPU => ARM64)
+    -->
+    <Message Condition="'$(Platform)'=='Win32'" Text="------ Platform Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
+    <Message Condition="'$(Platform)'=='x64'"   Text="------ Platform Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) Win32 ------" Importance="High" />
+    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true"  />
+    <MSBuild Condition="'$(Platform)'=='x64'"   Projects="$(MSBuildProjectFile)" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
+    <!-- TODO: ARM64 target here -->
   </Target>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets'))" />
+  <Target Name="CleanAll" AfterTargets="Clean">
+    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true"  />
+    <MSBuild Condition="'$(Platform)'=='x64'"   Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
   </Target>
+ 
 </Project>
