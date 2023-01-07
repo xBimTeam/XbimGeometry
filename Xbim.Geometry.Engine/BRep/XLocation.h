@@ -67,7 +67,7 @@ namespace Xbim
 						array<double>^ values = gcnew array<double>(16);
 						int i = 0;
 						for (int r = 1; r < 3; r++)
-							for (int c = 1; c < 3; c++)
+							for (int c = 1; c < 4; c++)
 								values[i++] = Ref().Value(r, c);
 
 						//fill the last row with 1s
@@ -77,6 +77,23 @@ namespace Xbim
 						}
 						return values;
 					};
+				}
+				virtual array<System::Byte>^ ToByteArray()
+				{
+					auto ms = gcnew System::IO::MemoryStream(16 * sizeof(double));
+					auto bw = gcnew System::IO::BinaryWriter(ms);
+					int i = 0;
+					for (int r = 1; r < 3; r++)
+						for (int c = 1; c < 4; c++)
+							bw->Write(Ref().Value(r, c));
+					for (int i = 12; i < 16; i++)
+					{
+						bw->Write(1.0);
+					}
+					auto bytes = ms->ToArray();
+					delete bw;
+					delete ms;
+					return bytes;
 				}
 			};
 		}

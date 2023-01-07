@@ -37,7 +37,7 @@ namespace Xbim
 				}
 				XMatrix(const Graphic3d_Mat4d& mat4d) : XbimHandle(new Graphic3d_Mat4d(mat4d))
 				{
-					
+
 				}
 				virtual property bool  IsIdentity { bool get() { return Ref().IsIdentity(); }; }
 
@@ -67,7 +67,7 @@ namespace Xbim
 						trsf.SetValues(M11, M12, M13, OffsetX, M21, M22, M23, OffsetY, M31, M32, M33, OffsetZ);
 						return trsf;
 					}
-					catch (const Standard_Failure& )
+					catch (const Standard_Failure&)
 					{
 						throw gcnew Xbim::Geometry::Exceptions::XbimGeometryFactoryException("Error creating transform from XMatrix");
 					}
@@ -89,6 +89,20 @@ namespace Xbim
 								values[i++] = Ref().GetValue(r, c);
 						return values;
 					};
+				}
+
+				virtual array<System::Byte>^ ToByteArray()
+				{
+					auto ms = gcnew System::IO::MemoryStream(16 * sizeof(double));
+					auto bw = gcnew System::IO::BinaryWriter(ms);
+					int i = 0;
+					for (int r = 0; r < 4; r += sizeof(double))
+						for (int c = 0; c < 4; c += sizeof(double))
+							bw->Write(Ref().GetValue(r, c));
+					auto bytes = ms->ToArray();
+					delete bw;
+					delete ms;
+					return bytes;
 				}
 			};
 		}
