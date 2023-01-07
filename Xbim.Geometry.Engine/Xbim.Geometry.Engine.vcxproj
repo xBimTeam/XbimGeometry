@@ -18,7 +18,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
- 
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
@@ -62,12 +61,10 @@
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x86\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x86\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x86\</PackagesDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
     <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x64\</OutDir>
     <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x64\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x64\</PackagesDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -489,45 +486,18 @@
     <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
-      <HintPath>$(PackagesDir)Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.Logging">
-      <HintPath>$(PackagesDir)Microsoft.Extensions.Logging.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection">
-      <HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc4">
-      <HintPath>$(PackagesDir)Xbim.Ifc4.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Ifc2x3">
-      <HintPath>$(PackagesDir)Xbim.Ifc2x3.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.IO.MemoryModel">
-      <HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Tessellator">
-      <HintPath>$(PackagesDir)Xbim.Tessellator.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Common">
-      <HintPath>$(PackagesDir)Xbim.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Xbim.Geometry.Abstractions">
-      <HintPath>$(PackagesDir)Xbim.Geometry.Abstractions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xbim.Geometry.Abstractions">
+      <Version>6.2.248</Version>
+    </PackageReference>
+    <PackageReference Include="Xbim.Geometry.Occt">
+      <Version>7.7.0-beta</Version>
+    </PackageReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="OcctLibraries">
-    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
-  </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
     <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
     <MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />

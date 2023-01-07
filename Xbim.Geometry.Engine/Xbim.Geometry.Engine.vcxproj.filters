@@ -456,6 +456,9 @@
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Services\Unmanaged\NCollisionDetectionService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Services\Unmanaged\NShapeProximityUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -801,6 +804,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\Unmanaged\PointInspector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\NCollisionDetectionService.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\Unmanaged\NShapeProximityUtils.cpp">

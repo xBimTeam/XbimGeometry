@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164} = {E847C989-FCE5-4DBD-AD7D-575007DF2164}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F9422C17-8390-4E20-80BA-02E8C51E614B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -36,8 +33,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.ModelGeometry.Scene", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XbimRegression", "Xbim.Geometry.Regression\XbimRegression.csproj", "{592094B6-DA55-40BC-8030-0E9B6EFE36CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Dependencies", "Xbim.Geometry.Dependencies\Xbim.Geometry.Dependencies.csproj", "{E847C989-FCE5-4DBD-AD7D-575007DF2164}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry", "Xbim.Geometry\Xbim.Geometry.csproj", "{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}"
 EndProject
 Global
@@ -61,6 +56,7 @@ Global
 		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}.Release|x64.ActiveCfg = Release|x64
 		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}.Release|x64.Build.0 = Release|x64
 		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}.Release|x86.ActiveCfg = Release|Win32
+		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}.Release|x86.Build.0 = Release|Win32
 		{F9422C17-8390-4E20-80BA-02E8C51E614B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F9422C17-8390-4E20-80BA-02E8C51E614B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9422C17-8390-4E20-80BA-02E8C51E614B}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -109,18 +105,6 @@ Global
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x64.Build.0 = Release|Any CPU
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x86.ActiveCfg = Release|Any CPU
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x86.Build.0 = Release|Any CPU
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|x64.ActiveCfg = Debug|x64
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|x64.Build.0 = Debug|x64
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|x86.ActiveCfg = Debug|x86
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Debug|x86.Build.0 = Debug|x86
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x64.ActiveCfg = Release|x64
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x64.Build.0 = Release|x64
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x86.ActiveCfg = Release|x86
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164}.Release|x86.Build.0 = Release|x86
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Debug|x64.ActiveCfg = Debug|Any CPU
