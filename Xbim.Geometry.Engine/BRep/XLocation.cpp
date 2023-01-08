@@ -13,9 +13,9 @@ IXLocation^ Xbim::Geometry::BRep::XLocation::Multiplied(IXLocation^ location)
 
 IXLocation^ Xbim::Geometry::BRep::XLocation::ScaledBy(double scale)
 {
-	gp_Trsf scaler;
-	scaler.SetScaleFactor(scale);
-	return gcnew XLocation(Ref().Multiplied(scaler));
+	gp_Trsf tr(Ref());
+	tr.SetScaleFactor(scale);
+	return gcnew XLocation(tr);
 }
 
 IXMatrix^ Xbim::Geometry::BRep::XLocation::Multiply(IXMatrix^ matrix)
