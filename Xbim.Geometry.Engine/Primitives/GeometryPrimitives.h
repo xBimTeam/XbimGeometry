@@ -18,7 +18,7 @@ using namespace Xbim::Geometry::Abstractions;
 				 virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 				 virtual IXMatrix^ BuildMatrix(array<double>^ values);
 				 virtual IXAxisAlignedBoundingBox^ BuildBoundingBox();
-
+				 virtual IXAxisAlignedBoundingBox^ BuildBoundingBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ);
 				 virtual IXAxisAlignedBoundingBox^ Moved(IXAxisAlignedBoundingBox^ box, IXLocation^ newLocation);
 			 };
 

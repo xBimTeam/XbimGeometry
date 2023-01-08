@@ -18,6 +18,8 @@ namespace Xbim
 				XAxisAlignedBox(const Bnd_Box& box) : XbimHandle(new Bnd_Box(box)) { };
 				XAxisAlignedBox(Bnd_Box* pBox) : XbimHandle(pBox) { };
 				XAxisAlignedBox() : XbimHandle(new Bnd_Box()) { Ref().SetVoid(); };
+				XAxisAlignedBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ) : XbimHandle(new Bnd_Box(gp_Pnt(x, y, z), gp_Pnt(x + sizeX, y + sizeY, z + sizeZ))) { };
+
 				virtual property IXPoint^ CornerMin {IXPoint^ get(); };
 				virtual property IXPoint^ CornerMax {IXPoint^ get(); };
 				virtual property System::String^ Json {System::String^ get(); };
@@ -26,8 +28,8 @@ namespace Xbim
 				virtual property double LenZ {double get(); };
 				virtual property double Gap {double get(); };
 				virtual property bool IsVoid { bool get(); };
-				virtual IXAxisAlignedBoundingBox^  Union(IXAxisAlignedBoundingBox^ other);
-
+				virtual IXAxisAlignedBoundingBox^ Union(IXAxisAlignedBoundingBox^ other);
+				virtual property IXPoint^ Centroid {IXPoint^ get(); };
 			};
 
 		}

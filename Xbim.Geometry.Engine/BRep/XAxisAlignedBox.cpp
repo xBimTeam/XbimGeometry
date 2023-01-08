@@ -58,7 +58,12 @@ namespace Xbim
 				otherBbox.Add(Ref());
 				return gcnew XAxisAlignedBox(otherBbox);
 			}
-
+			IXPoint^ XAxisAlignedBox::Centroid::get()
+			{
+				auto vCentroid = gp_Vec(Ref().CornerMin(), Ref().CornerMax()) / 2;
+				auto centroid = Ref().CornerMin().Translated(vCentroid);
+				return gcnew XPoint(centroid);
+			}
 		}
 	}
 }
