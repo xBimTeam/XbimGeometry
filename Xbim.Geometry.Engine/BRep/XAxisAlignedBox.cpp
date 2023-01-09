@@ -58,6 +58,13 @@ namespace Xbim
 				otherBbox.Add(Ref());
 				return gcnew XAxisAlignedBox(otherBbox);
 			}
+			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Translated(double x, double y, double z)
+			{
+				gp_Vec translation(x, y, z);
+				Bnd_Box bBox(Ref().CornerMin().Translated(translation), Ref().CornerMax().Translated(translation));
+				return gcnew XAxisAlignedBox(bBox);		
+			}
+
 			IXPoint^ XAxisAlignedBox::Centroid::get()
 			{
 				auto vCentroid = gp_Vec(Ref().CornerMin(), Ref().CornerMax()) / 2;
