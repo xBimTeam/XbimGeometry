@@ -52,6 +52,10 @@ namespace Xbim
 			{
 				return gcnew XAxisAlignedBox();
 			}
+			IXAxisAlignedBoundingBox^ GeometryPrimitives::BuildBoundingBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ)
+			{
+				return gcnew XAxisAlignedBox(x,  y,  z,  sizeX,  sizeY,  sizeZ);
+			}
 			IXAxisAlignedBoundingBox^ GeometryPrimitives::Moved(IXAxisAlignedBoundingBox^ box, IXLocation^ newLocation)
 			{
 				if (box->IsVoid) return box;

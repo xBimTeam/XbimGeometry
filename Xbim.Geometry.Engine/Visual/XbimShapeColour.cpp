@@ -50,8 +50,8 @@ namespace Xbim
 						double ratio = (double)nrm->Value;
 						EmissiveColor = gcnew ColourRGB(ratio * surface->Red, ratio * surface->Green, ratio * surface->Blue);
 					}
-					else
-						EmissiveColor = gcnew ColourRGB(0, 0, 0);
+					/*else
+						EmissiveColor = gcnew ColourRGB(0, 0, 0);*/
 
 					IIfcColourRgb^ specular = dynamic_cast<IIfcColourRgb^>(rendering->SpecularColour);
 					nrm = dynamic_cast<IfcNormalisedRatioMeasure^>(rendering->SpecularColour);
@@ -62,8 +62,8 @@ namespace Xbim
 						double ratio = (double)nrm->Value;
 						SpecularColor = gcnew ColourRGB(ratio * surface->Red, ratio * surface->Green, ratio * surface->Blue);
 					}
-					else
-						SpecularColor = gcnew ColourRGB(0.2, 0.2, 0.2);
+					/*else
+						SpecularColor = gcnew ColourRGB(0.2, 0.2, 0.2);*/
 
 					IfcSpecularExponent^ se = dynamic_cast<IfcSpecularExponent^>(rendering->SpecularHighlight);
 					IfcSpecularRoughness^ sr = dynamic_cast<IfcSpecularRoughness^>(rendering->SpecularHighlight);

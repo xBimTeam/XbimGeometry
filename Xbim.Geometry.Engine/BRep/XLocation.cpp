@@ -4,6 +4,7 @@
 
 #include "XMatrix.h"
 
+
 IXLocation^ Xbim::Geometry::BRep::XLocation::Multiplied(IXLocation^ location)
 {
 	auto xbimLoc = dynamic_cast<XLocation^>(location);
@@ -11,11 +12,19 @@ IXLocation^ Xbim::Geometry::BRep::XLocation::Multiplied(IXLocation^ location)
 	return gcnew XLocation(xbimLoc->Ref().Multiplied(Ref()));
 }
 
+IXLocation^ Xbim::Geometry::BRep::XLocation::Translated(double x, double y, double z)
+{
+	auto copyofMe = gp_Trsf(Ref());
+	copyofMe.SetTranslationPart(gp_Vec(x, y, z));
+	return gcnew XLocation(copyofMe);
+
+}
+
 IXLocation^ Xbim::Geometry::BRep::XLocation::ScaledBy(double scale)
 {
-	gp_Trsf scaler;
-	scaler.SetScaleFactor(scale);
-	return gcnew XLocation(Ref().Multiplied(scaler));
+	gp_Trsf tr(Ref());
+	tr.SetScaleFactor(scale);
+	return gcnew XLocation(tr);
 }
 
 IXMatrix^ Xbim::Geometry::BRep::XLocation::Multiply(IXMatrix^ matrix)
