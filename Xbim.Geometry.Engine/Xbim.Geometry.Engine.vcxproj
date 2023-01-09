@@ -491,7 +491,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.248</Version>
+      <Version>6.2.256</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
       <Version>7.7.0-beta</Version>
@@ -505,14 +505,13 @@
     (and then we can just target AnyCPU. Presently we need x86 targets so we can run GE on ARM under Rosetta. Otherwise AnyCPU => ARM64)
     -->
     <Message Condition="'$(Platform)'=='Win32'" Text="------ Platform Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
-    <Message Condition="'$(Platform)'=='x64'"   Text="------ Platform Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) Win32 ------" Importance="High" />
-    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true"  />
-    <MSBuild Condition="'$(Platform)'=='x64'"   Projects="$(MSBuildProjectFile)" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
+    <Message Condition="'$(Platform)'=='x64'" Text="------ Platform Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) Win32 ------" Importance="High" />
+    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true" />
+    <MSBuild Condition="'$(Platform)'=='x64'" Projects="$(MSBuildProjectFile)" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
     <!-- TODO: ARM64 target here -->
   </Target>
   <Target Name="CleanAll" AfterTargets="Clean">
-    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true"  />
-    <MSBuild Condition="'$(Platform)'=='x64'"   Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
+    <MSBuild Condition="'$(Platform)'=='Win32'" Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=x64;PlatFormTarget=x64" RunEachTargetSeparately="true" />
+    <MSBuild Condition="'$(Platform)'=='x64'" Projects="$(MSBuildProjectFile)" Targets="Clean" Properties="Platform=Win32;PlatFormTarget=x86" RunEachTargetSeparately="true" />
   </Target>
- 
 </Project>
