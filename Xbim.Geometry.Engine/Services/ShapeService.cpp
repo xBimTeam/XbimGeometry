@@ -178,19 +178,15 @@ namespace Xbim
 				}return compound;
 			}
 
-			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, double precision)
+			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors)
 			{
-				const double linearDeflection = 0.01;
-				const double angularDeflection = 0.01;
-
 				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
 				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
 
 				int result = NShapeProximityUtils::GetOverlappingSubShapesCount
-							(topoShape1, topoShape2, precision, linearDeflection, angularDeflection);
+							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
 
-
-				return result;
+				return result > 0;
 			}
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)
