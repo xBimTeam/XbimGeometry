@@ -31,6 +31,7 @@ namespace Xbim
 				virtual IXAxisAlignedBoundingBox^ Union(IXAxisAlignedBoundingBox^ other);
 				virtual property IXPoint^ Centroid {IXPoint^ get(); };
 				virtual IXAxisAlignedBoundingBox^ Translated(double x, double y, double z);
+				virtual IXAxisAlignedBoundingBox^ Translated(IXPoint^ translation);
 			};
 
 		}

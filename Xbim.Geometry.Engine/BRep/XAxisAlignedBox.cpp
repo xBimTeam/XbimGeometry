@@ -64,6 +64,10 @@ namespace Xbim
 				Bnd_Box bBox(Ref().CornerMin().Translated(translation), Ref().CornerMax().Translated(translation));
 				return gcnew XAxisAlignedBox(bBox);		
 			}
+			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Translated(IXPoint^ translation)
+			{
+				return Translated(translation->X, translation->Y, translation->Z);
+			}
 
 			IXPoint^ XAxisAlignedBox::Centroid::get()
 			{
