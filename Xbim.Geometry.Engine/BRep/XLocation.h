@@ -45,6 +45,7 @@ namespace Xbim
 					return Ref().Form() == gp_TrsfForm::gp_Identity;
 				}}
 				virtual void SetTranslation(double x, double y, double z) { Ref().SetTranslationPart(gp_Vec(x, y, z)); }
+				virtual IXLocation^ Translated(double x, double y, double z);
 				virtual IXLocation^ Inverted() { return gcnew XLocation(Ref().Inverted()); }
 				virtual IXLocation^ ScaledBy(double scale);
 				virtual IXMatrix^ Multiply(IXMatrix^ matrix);
