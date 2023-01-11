@@ -37,8 +37,8 @@ namespace Xbim
 					return OccHandle()->LastParameter();
 				}};
 				virtual IXPoint^ GetPoint(double uParam) ;
-				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXVector^% direction) ;
-				virtual IXPoint^ GetSecondDerivative(double uParam,  [Out] IXVector^% direction, [Out] IXVector^% normal);
+				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXDirection^% direction) ;
+				virtual IXPoint^ GetSecondDerivative(double uParam,  [Out] IXDirection^% direction, [Out] IXDirection^% normal);
 				virtual property double Length { double get()  { return GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(OccHandle())); } }
 			};
 		}

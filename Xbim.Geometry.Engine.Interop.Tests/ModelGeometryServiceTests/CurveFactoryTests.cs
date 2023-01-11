@@ -57,7 +57,7 @@ namespace Xbim.Geometry.NetCore.Tests
             Assert.Equal(ifcLine.Dir.Orientation.Z, line.Direction.Z);
             var p1 = line.GetPoint(500);
             
-            var p2 = line.GetFirstDerivative(500, out IXVector normal);
+            var p2 = line.GetFirstDerivative(500, out IXDirection normal);
             Assert.Equal(p1.X, p2.X);
             Assert.Equal(p1.Y, p2.Y);
             Assert.Equal(p1.Z, p2.Z);
@@ -92,7 +92,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
             trimmedLine.EndPoint.X.Should().Be(parametricLength * 100);
             var p1 = line.GetPoint(500);
-            var p2 = line.GetFirstDerivative(500, out IXVector normal);
+            var p2 = line.GetFirstDerivative(500, out IXDirection normal);
             Assert.Equal(p1.X, p2.X);
             Assert.Equal(p1.Y, p2.Y);
 
