@@ -58,12 +58,21 @@ namespace Xbim
 				OccHandle()->D0(u, pnt);
 				return gcnew XPoint(pnt);
 			}
-			IXPoint^ XCurve::GetFirstDerivative(double u, IXVector^% normal)
+			IXPoint^ XCurve::GetSecondDerivative(double uParam,  IXVector^% direction, IXVector^% normal)
+			{
+				gp_Pnt pnt;
+				gp_Vec dir, norm;
+				OccHandle()->D2(uParam, pnt, dir, norm);
+				direction = gcnew XVector(dir);
+				normal = gcnew XVector(norm);
+				return gcnew XPoint(pnt);
+			}
+			IXPoint^ XCurve::GetFirstDerivative(double u,   IXVector^% direction)
 			{
 				gp_Pnt pnt;
 				gp_Vec vec;
 				OccHandle()->D1(u, pnt, vec);
-				normal = gcnew XVector(vec);
+				direction = gcnew XVector(vec);
 				return gcnew XPoint(pnt);
 			}
 		}
