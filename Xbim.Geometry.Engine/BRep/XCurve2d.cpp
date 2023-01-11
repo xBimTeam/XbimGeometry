@@ -32,7 +32,7 @@ namespace Xbim
 			{
 				gp_Pnt2d pnt;
 				gp_Vec2d vec, norm;
-				OccHandle()->D1(u, pnt, vec);
+				OccHandle()->D2(u, pnt, vec, norm);
 				direction = gcnew X2dVector(vec);
 				normal = gcnew X2dVector(norm);
 				return gcnew X2dPoint(pnt);
