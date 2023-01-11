@@ -183,10 +183,8 @@ namespace Xbim
 				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
 				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
 
-				int result = NShapeProximityUtils::GetOverlappingSubShapesCount
+				return NShapeProximityUtils::IsOverlapping
 							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
-
-				return result > 0;
 			}
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)
