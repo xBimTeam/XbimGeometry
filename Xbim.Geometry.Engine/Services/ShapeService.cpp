@@ -157,7 +157,7 @@ namespace Xbim
 				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, faceNormal);
 
 				double angle = faceNormal.AngleWithRef(toward, toward);
-				return angle < M_PI_2 - 0.1;
+				return angle < M_PI_2 + 0.1;
 			}
 
 			IXbimGeometryObject^ ShapeService::ConvertToV5(IXShape^ shape)
