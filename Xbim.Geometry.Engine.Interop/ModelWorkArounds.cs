@@ -5,6 +5,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Xbim.Common;
+using Xbim.Common.Geometry;
+using Xbim.Ifc4.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Xbim.Geometry.Engine.Interop
 {
@@ -17,6 +20,72 @@ namespace Xbim.Geometry.Engine.Interop
         //this bug exists in all current Revit exported Ifc files
         public const string RevitSweptSurfaceExtrusionInFeet = "#RevitSweptSurfaceExtrusionInFeet";
         public const string PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
+
+        // Incorrect precision specified in Archicad models,
+        // we make the model more precise since Archicad is casual about it.
+        public const string ArchicadPrecisionWorkaround = "#ArchicadPrecisionWorkaround";
+
+
+        public static void AddArchicadWorkArounds(this IModel model, Microsoft.Extensions.Logging.ILogger _logger)
+        {
+            var header = model.Header;
+            var modelFactors = model.ModelFactors as XbimModelFactors;
+            string byPattern = @"by Graphisoft ArchiCAD";
+            
+            if (header.FileName == null || string.IsNullOrWhiteSpace(header.FileName.OriginatingSystem))
+                return; //nothing to do
+            var matches = Regex.Matches(header.FileName.OriginatingSystem, byPattern, RegexOptions.IgnoreCase);
+            if (matches.Count > 0) //looks like Archicad
+            {
+                if (modelFactors.ApplyWorkAround(ArchicadPrecisionWorkaround)) // if the workadound has been added then the precision is already been changed.
+                    return;
+                var evaluatingPrecision = modelFactors.Precision;
+                // faces of IFCCLOSEDSHELLs should be larger than precision
+                foreach (IIfcClosedShell shell in model.Instances.OfType< IIfcClosedShell>())
+                {
+                    foreach (var face in shell.CfsFaces)
+                    {
+                        foreach (var faceBound in face.Bounds)
+                        {
+                            var lpPrec = GetPrec(faceBound.Bound, evaluatingPrecision);
+                            if (lpPrec)
+                            {
+                                // we apply the workaround and exit
+                                _logger.LogWarning("Added ArchicadPrecisionWorkaround for #{0}.", faceBound.Bound.EntityLabel);
+                                modelFactors.Precision /= 100;
+                                modelFactors.AddWorkAround(ArchicadPrecisionWorkaround);
+                                return;
+                            }
+                        }
+                    }
+                }  
+            }
+        }
+
+        private static bool GetPrec(IIfcLoop bound, double precision)
+        {
+            if (bound is IIfcPolyLoop pl)
+            {
+                var dropped = 0;
+                var count = pl.Polygon.Count();
+                var last = pl.Polygon[count - 1]; // start from last, we measure all distances closing the loop
+                XbimPoint3D prevPoint = new XbimPoint3D(last.X, last.Y, last.Z);
+                for (int i = 0; i < count; i++)
+                {
+                    XbimPoint3D thisPoint = new XbimPoint3D(pl.Polygon[i].X, pl.Polygon[i].Y, pl.Polygon[i].Z);
+                    var dist = (prevPoint - thisPoint).Length;
+                    if (dist < precision)
+                    {
+                        dropped++;
+                    }
+                    prevPoint = thisPoint;
+                }
+                if (count - dropped < 3)
+                    return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Adds a work around for versions of the Revit exporter prior to and inclusing Version(17, 4, 0, 0);
         /// This did not correctly align linear extrusions bounds and surface due to a missing placement value

@@ -584,6 +584,8 @@ namespace Xbim.ModelGeometry.Scene
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context
 
+            model.AddArchicadWorkArounds(_logger);
+
             // because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 
             // build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
             // is fast on xbimModels that have been already generated (without the index).
