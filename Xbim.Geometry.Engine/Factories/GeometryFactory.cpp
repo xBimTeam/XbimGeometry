@@ -196,6 +196,22 @@ namespace Xbim
 				return gcnew XAxis2Placement3d(hPlacement);
 			}
 
+			IXAxisPlacement2d^ GeometryFactory::BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection)
+			{
+				Handle(Geom2d_AxisPlacement) hPlacement = new Geom2d_AxisPlacement(gp_Pnt2d(location->X, location->Y), gp_Dir2d(XaxisDirection->X, XaxisDirection->Y));
+				return gcnew XAxisPlacement2d(hPlacement);
+			}
+
+			IXAxis2Placement3d^ GeometryFactory::BuildAxis2Placement3d(IXPoint^ location, IXDirection^ XaxisDirection, IXDirection^ ZaxisDirection)
+			{
+				gp_Ax2 axis = gp_Ax2(
+					gp_Pnt(location->X, location->Y, location->Z),
+					gp_Dir(XaxisDirection->X, XaxisDirection->Y, XaxisDirection->Z)
+				);
+				Handle(Geom_Axis2Placement) hPlacement = new Geom_Axis2Placement(gp_Pnt(location->X, location->Y, location->Z), gp_Dir(ZaxisDirection->X, ZaxisDirection->Y, ZaxisDirection->Z), gp_Dir(XaxisDirection->X, XaxisDirection->Y, XaxisDirection->Z));
+				return gcnew XAxis2Placement3d(hPlacement);
+			}
+
 			void GeometryFactory::GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points)
 			{
 

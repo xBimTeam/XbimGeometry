@@ -73,7 +73,8 @@ namespace Xbim
 
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
-
+				virtual IXAxisPlacement2d^ BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection);
+				virtual IXAxis2Placement3d^ BuildAxis2Placement3d(IXPoint^ location, IXDirection^ XaxisDirection, IXDirection^ ZaxisDirection);
 				virtual IXAxisPlacement2d^ BuildAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
 				virtual IXAxis2Placement3d^ BuildAxis2Placement3d(IXPoint^ location, IXVector^ XaxisDirection, IXVector^ ZaxisDirection);
 				virtual IXDirection^ BuildDirection3d(double x, double y, double z);
