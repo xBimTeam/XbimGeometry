@@ -71,7 +71,7 @@ namespace Xbim
 			}
 
 			/// <summary>
-			/// This method can be made more aware of model variations in how contexts are specified
+			/// This method can be made more aware of model variations in how contexts are specified, it could be tuned to specific vendors, most now comply with the standard, so this is largely for old models
 			/// </summary>
 			/// <returns></returns>
 			ISet<IIfcGeometricRepresentationContext^>^ ModelGeometryService::GetTypical3dContexts()
@@ -80,8 +80,10 @@ namespace Xbim
 
 				for each (IIfcGeometricRepresentationSubContext ^ c in Model->Instances->OfType<IIfcGeometricRepresentationSubContext^>())
 				{
-					if ((String::Compare(c->ContextIdentifier.ToString(), "body", true) == 0 || String::IsNullOrWhiteSpace(c->ContextIdentifier.ToString()))
-						&& String::Compare(c->ContextType.ToString(), "model", true) == 0)
+					
+					String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
+
+					if (str->Contains("model") || str->Contains("body"))
 					{
 						results->Add(c);
 						results->Add(c->ParentContext);
@@ -91,8 +93,8 @@ namespace Xbim
 				{
 					for each (IIfcGeometricRepresentationContext ^ c in Model->Instances->OfType<IIfcGeometricRepresentationContext^>())
 					{
-						if ((String::Compare(c->ContextIdentifier.ToString(), "body", true) == 0 || String::IsNullOrWhiteSpace(c->ContextIdentifier.ToString()))
-							&& String::Compare(c->ContextType.ToString(), "model", true) == 0)
+						String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
+						if (str->Contains("model") || str->Contains("body"))
 							results->Add(c);
 					}
 				}
@@ -213,7 +215,7 @@ namespace Xbim
 				return _bimAuthoringToolWorkArounds;
 			}
 
-			
+
 
 			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
 			IXVertexFactory^ ModelGeometryService::VertexFactory::get() { return GetVertexFactory(); }
