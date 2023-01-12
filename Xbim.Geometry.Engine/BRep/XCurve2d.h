@@ -35,7 +35,8 @@ namespace Xbim
 				}};
 				static const Handle(Geom2d_Curve) GeomCurve2d(IXCurve^ xCurve);
 				virtual IXPoint^ GetPoint(double uParam);
-				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXVector^% normal);
+				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXDirection^% direction);
+				virtual IXPoint^ GetSecondDerivative(double uParam, [Out] IXDirection^% direction, [Out] IXDirection^% normal);
 				virtual property double Length { double get() { return GCPnts_AbscissaPoint::Length(Geom2dAdaptor_Curve(OccHandle())); } };
 			};
 		}

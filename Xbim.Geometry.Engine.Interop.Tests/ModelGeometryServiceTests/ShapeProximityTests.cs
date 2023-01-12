@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.NetCore.Tests;
 using Xbim.Ifc4;
@@ -28,8 +29,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
 
             var block = _modelGeomService.SolidFactory.Build(blockMoq);
             var cylinder = _modelGeomService.SolidFactory.Build(cylinderMoq);
-
-            var result = _shapeService.IsOverlapping(block, cylinder, 0.001);
+            var meshFactors = new Mock<IXMeshFactors>();
+            meshFactors.Setup(s => s.OneMeter).Returns(1);
+            meshFactors.Setup(s => s.Tolerance).Returns(0.001);
+            meshFactors.Setup(s => s.AngularDeflection).Returns(0.26179938);
+            meshFactors.Setup(s => s.LinearDefection).Returns(0.012);
+            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object);
 
             result.Should().Be(true);
         }
@@ -45,10 +50,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
 
             var block = _modelGeomService.SolidFactory.Build(blockMoq);
             var cylinder = _modelGeomService.SolidFactory.Build(cylinderMoq);
-
-            var result = _shapeService.IsOverlapping(block, cylinder, 0.001);
+            var meshFactors = new Mock<IXMeshFactors>();
+            meshFactors.Setup(s => s.OneMeter).Returns(1);
+            meshFactors.Setup(s => s.Tolerance).Returns(0.001);
+            meshFactors.Setup(s => s.AngularDeflection).Returns(0.26179938);
+            meshFactors.Setup(s => s.LinearDefection).Returns(0.012);
+            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object);
 
             result.Should().Be(false);
+
         }
     }
 }

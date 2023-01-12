@@ -13,7 +13,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.256" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.268" />
 	</ItemGroup>
 
 	<PropertyGroup>
