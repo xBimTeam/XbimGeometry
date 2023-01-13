@@ -61,18 +61,32 @@ namespace Xbim
 			IXPoint^ XCurve::GetSecondDerivative(double uParam, IXDirection^% direction, IXDirection^% normal)
 			{
 				gp_Pnt pnt;
-				gp_Vec dir, norm;
-				OccHandle()->D2(uParam, pnt, dir, norm);
-				direction = gcnew XDirection(dir);
-				normal = gcnew XDirection(norm);
+				try
+				{
+					
+					gp_Vec dir3d, norm3d;
+					OccHandle()->D2(uParam, pnt, dir3d, norm3d);
+					
+					auto dir = gcnew XDirection(dir3d);
+					direction = dir;
+					auto norm = gcnew XDirection(norm3d.X(),norm3d.Y(),norm3d.Z());
+					normal = norm;
+					//normal can be null			
+				}
+				catch (const Standard_ConstructionError&) //catch if we break the OCC rule that a direction cannot have all coords as 0
+				{
+					auto norm = gcnew XDirection();
+					normal = norm;
+				}
 				return gcnew XPoint(pnt);
 			}
-			IXPoint^ XCurve::GetFirstDerivative(double u,   IXDirection^% direction)
+			IXPoint^ XCurve::GetFirstDerivative(double u, IXDirection^% direction)
 			{
 				gp_Pnt pnt;
 				gp_Vec vec;
 				OccHandle()->D1(u, pnt, vec);
-				direction = gcnew XDirection(vec);
+				auto dir = gcnew XDirection(vec);
+				direction = dir;
 				return gcnew XPoint(pnt);
 			}
 		}

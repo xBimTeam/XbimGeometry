@@ -215,127 +215,66 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 }
 
 
-//trims the polyline to the parameters, if they are >=0, nb this method does not check for intersecting or notched lines
+//creates polyline removes  segments if they are >= tolerance in length, nb this method does not check for intersecting or notched lines
 TopoDS_Wire NWireFactory::BuildPolyline3d(
-	const TColgp_Array1OfPnt& points,/* double startParam, double endParam,*/
+	const TColgp_Array1OfPnt& points,
 	double tolerance)
 {
-	//3d polylines don't necessarily sit on a surface, they may in the case of an brep face, 
-	//in these cases we have a surface and the BuildPolyline method with a surface should be called
-	//no checks ar eperformed here apart from stopping zero length edges
+
 	try
 	{
-		double startParam = -1;
-		double endParam = -1;
-		int id = 0;
-		NCollection_Vector<KeyedPnt> pointSeq;
-		for (auto&& point : points)
-		{
-			pointSeq.Append(KeyedPnt(point.XYZ(), ++id));
-		}
-
 		BRep_Builder builder;
-
-		//make the polygon
-
 		TopoDS_Wire wire;
 		builder.MakeWire(wire);
-		double offset = 0;
 		TopTools_SequenceOfShape vertices;
-		gp_Pnt start = pointSeq.cbegin()->myPnt;
-		gp_Pnt end = pointSeq.Last().myPnt;
-		double d = start.Distance(end);
+		const gp_Pnt& originalStart = points.First();
+		const gp_Pnt& originalEnd = points.Last();
+		double d = originalStart.Distance(originalEnd);
 		bool closed = d <= tolerance; //check if the polyline is specified as closed (end repeats the start point)
 
-		for (int i = 1; i < pointSeq.Length(); i++)
+		for (int i = 1; i < points.Length(); i++)
 		{
-			const KeyedPnt& startKP = pointSeq.Value(i - 1);
-			const KeyedPnt& endKP = pointSeq.Value(i);
+			const gp_Pnt& start = points.Value(i - 1);
+			const gp_Pnt& end = points.Value(i);
 			int vCount = vertices.Length();
 
-			gp_Pnt startPoint = vCount == 0 ? startKP.myPnt : BRep_Tool::Pnt(TopoDS::Vertex(vertices.Last()));
+		//	gp_Pnt startPoint = vCount == 0 ? startKP : BRep_Tool::Pnt(TopoDS::Vertex(vertices.Last()));
 			double pointTolerance = tolerance + (vCount == 0 ? Precision::Confusion() : BRep_Tool::Tolerance(TopoDS::Vertex(vertices.Last())));
-			gp_Pnt endPoint = endKP.myPnt;
-			gp_Vec edgeVec(startPoint, endPoint);
+			
+			gp_Vec edgeVec(start, end);
 			double segLength = edgeVec.Magnitude();
 			if (segLength < pointTolerance)
 			{
 				char message[128];
-				sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", endKP.myID, startKP.myID);
+				sprintf_s(message, 128, "Polyline point ignored: #(%x,%y,%z) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
 				pLoggingService->LogInformation(message);
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two
-				startPoint.Translate(displacement);
+				gp_Pnt startTranslated = start.Translated(displacement);
 
 				if (vertices.Length() == 0)
 				{
 					TopoDS_Vertex startVertex;
-					builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
+					builder.MakeVertex(startVertex, startTranslated, Precision::Confusion());
 					vertices.Append(startVertex);
 				}
 				else
 				{
 					double toleranceOfFound = BRep_Tool::Tolerance(TopoDS::Vertex(vertices.Last()));
 					double requiredTolerance = std::max(segLength + toleranceOfFound, segLength + Precision::Confusion());
-					builder.UpdateVertex(TopoDS::Vertex(vertices.Last()), startPoint, requiredTolerance); //make the found point a surrogate for both points
+					builder.UpdateVertex(TopoDS::Vertex(vertices.Last()), startTranslated, requiredTolerance); //make the found point a surrogate for both points
 				}
 				continue;
 			}
-
-			if (startParam >= 0) //we want to clip, adjust the vertices if necessary
+			if (vertices.Length() == 0) //we have not added a point, put the first one in
 			{
-				if (startParam >= offset && startParam < offset + segLength) //trim this edge its the first one, will only enter the first time
-				{
-					if (vertices.Length() == 0) //only add the start in once, if the length is > 0 then we have a small first segment and a point waiting to use
-					{
-						edgeVec.Normalize();
-						startPoint.Translate(edgeVec * (startParam - offset)); //move the start point	
-						TopoDS_Vertex startVertex;
-						builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
-						vertices.Append(startVertex);
-					}
-					//check if it is also the last one
-					if (endParam > 0 && endParam <= offset + segLength)
-					{
-						//trim this edge to start and end and give in
-						endPoint = startPoint.Translated(edgeVec * (endParam - offset));
-						TopoDS_Vertex endVertex;
-						builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
-						vertices.Append(endVertex);
-						break; //all done
-					}
-					startParam = -1; //don't look for anymore start edges
-					TopoDS_Vertex endVertex;
-					builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
-					vertices.Append(endVertex);
-				}
+				TopoDS_Vertex startVertex;
+				builder.MakeVertex(startVertex, start, Precision::Confusion());
+				vertices.Append(startVertex);
 			}
-			else  //(startParam < 0) we want this
-			{
-				if (vertices.Length() == 0) //we have not added a point, put the first one in
-				{
-					TopoDS_Vertex startVertex;
-					builder.MakeVertex(startVertex, startPoint, Precision::Confusion());
-					vertices.Append(startVertex);
-				}
-				if (endParam > offset && endParam < (offset + segLength)) //need to trim its the last seg
-				{
-					edgeVec.Normalize();
-					endPoint = startPoint.Translated(edgeVec * (endParam - offset));
-					TopoDS_Vertex endVertex;
-					builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
-					vertices.Append(endVertex);
-
-					break; //don't do anymore
-				}
-				else
-				{
-					TopoDS_Vertex endVertex;
-					builder.MakeVertex(endVertex, endPoint, Precision::Confusion());
-					vertices.Append(endVertex);
-				}
-			}
-			offset += segLength;
+			TopoDS_Vertex endVertex;
+			builder.MakeVertex(endVertex, end, Precision::Confusion());
+			vertices.Append(endVertex);
 		}
 
 		for (int i = 2; i <= vertices.Length(); i++)
@@ -349,9 +288,6 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 		}
 		if (closed)
 		{
-			int actualPointCount = vertices.Size();
-			BRepBuilderAPI_MakeEdge edgeMaker(TopoDS::Vertex(vertices.Value(actualPointCount)), TopoDS::Vertex(vertices.Value(1)));
-			builder.Add(wire, edgeMaker.Edge());
 			wire.Closed(true);
 		}
 		return wire;

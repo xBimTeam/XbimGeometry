@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
@@ -25,7 +26,9 @@ namespace Xbim.Geometry.NetCore.Tests
 
             var p1 = tc.GetFirstDerivative(1,out var direction1);
             var p2 = tc.GetSecondDerivative(1, out var direction2,out var normal2);
-
+            double.IsNaN(normal2.X).Should().BeTrue();
+            double.IsNaN(normal2.Y).Should().BeTrue();
+            double.IsNaN(normal2.Z).Should().BeTrue();
         }
     }
 }

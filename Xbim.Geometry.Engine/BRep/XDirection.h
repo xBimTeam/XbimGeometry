@@ -11,7 +11,7 @@ namespace Xbim
 		namespace BRep
 		{
 			//Represents a unit vector
-			public ref struct XDirection : public IXDirection
+			public ref class XDirection : public IXDirection
 			{
 
 			private:
@@ -32,7 +32,7 @@ namespace Xbim
 						this->y = v.Y();
 						this->z = v.Z();
 					}
-					catch (const Standard_Failure& )
+					catch (const Standard_Failure&)
 					{
 						x = double::NaN;
 						y = double::NaN;
@@ -47,12 +47,14 @@ namespace Xbim
 						v.Normalize();
 						this->x = v.X();
 						this->y = v.Y();
-					}
-					catch (const Standard_Failure& )
-					{
 						
+					}
+					catch (const Standard_Failure&)
+					{
+
 						x = double::NaN;
 						y = double::NaN;
+						z = double::NaN;
 					}
 				};
 				// Create a normalised unit vector with direction of d 
@@ -63,7 +65,10 @@ namespace Xbim
 				virtual property bool Is3d { bool get() { return !double::IsNaN(z); }; };
 				virtual property double X { double get() { return x; }; void set(double v) { x = v; }};
 				virtual property double Y { double get() { return y; }; void set(double v) { y = v; }};
-				virtual property double Z { double get() { return z; }; void set(double v) { z = v; }};
+				virtual property double Z {
+					double get() { Is3d ? z : throw gcnew XbimGeometryFactoryException("2d directions do not support Z values"); };
+					void set(double v) { Is3d ? z = v : throw gcnew XbimGeometryFactoryException("2d directions do not support Z values"); }
+				};
 			};
 
 		}

@@ -22,8 +22,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         
         static private ILogger logger = NullLogger<LocationAndPlacementTests>.Instance;
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-       
-
+        
         [Fact]
         // [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
         public void LargeCoordinatesDisplacementTest()
