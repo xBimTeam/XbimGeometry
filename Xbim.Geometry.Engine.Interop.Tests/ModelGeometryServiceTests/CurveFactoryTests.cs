@@ -257,16 +257,57 @@ namespace Xbim.Geometry.NetCore.Tests
 
 
         //}
-        [Fact]
-        public void Can_convert_ifc_trimmed_circle_2d()
+        [Theory] //see the IFC definition https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/link/ifctrimmedcurve.htm
+        [InlineData(90, 180, true, 1)] //Ifc Case 1
+        [InlineData(180, 90, true, 2)] //Ifc Case 2
+        [InlineData(180, 90, false, 3)]//Ifc Case 3
+        [InlineData(90, 180, false, 4)]//Ifc Case 4
+      
+        public void Can_convert_ifc_trimmed_circle_2d(double trim1, double trim2, bool sameSense, int ifcCase)
         {
-           
-            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcCircle2dMock());
+            double radius = 10;
+            var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(
+                trimParam1: trim1,
+                trimParam2: trim2,
+                sense: sameSense,
+                basisCurve: IfcMoq.IfcCircle2dMock(radius: radius));
+
             var curveFactory = _modelSvc.CurveFactory;
             var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
             Assert.Equal(XCurveType.IfcTrimmedCurve, tc.CurveType);
             Assert.Equal(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
-            Assert.False(tc.Is3d);
+            var basisCurve = tc.BasisCurve as IXCircle;
+            Assert.NotNull(basisCurve);
+            var origin = basisCurve.Position as IXAxisPlacement2d;
+            Assert.NotNull(origin);
+           
+            switch (ifcCase)
+            {
+                case 1:
+                    (radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
+                    (tc.StartPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
+                    (tc.EndPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+
+                    break;
+                case 2:
+                    (3 * radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
+                    (tc.EndPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
+                    (tc.StartPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    break;
+                case 3:
+                    (radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
+                    (tc.EndPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
+                    (tc.StartPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    break;
+                case 4:
+                    (3 * radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
+                    (tc.StartPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
+                    (tc.EndPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    break;
+                default:
+                    break;
+            }
+            tc.Is3d.Should().BeFalse();
         }
 
         [Theory] //see the IFC definition https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/link/ifctrimmedcurve.htm

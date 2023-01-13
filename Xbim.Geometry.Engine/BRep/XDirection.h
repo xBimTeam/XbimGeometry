@@ -66,7 +66,7 @@ namespace Xbim
 				virtual property double X { double get() { return x; }; void set(double v) { x = v; }};
 				virtual property double Y { double get() { return y; }; void set(double v) { y = v; }};
 				virtual property double Z {
-					double get() { Is3d ? z : throw gcnew XbimGeometryFactoryException("2d directions do not support Z values"); };
+					double get() { return Is3d ? z : throw gcnew XbimGeometryFactoryException("2d directions do not support Z values"); };
 					void set(double v) { Is3d ? z = v : throw gcnew XbimGeometryFactoryException("2d directions do not support Z values"); }
 				};
 			};

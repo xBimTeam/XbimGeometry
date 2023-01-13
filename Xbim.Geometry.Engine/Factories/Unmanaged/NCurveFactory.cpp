@@ -309,7 +309,11 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 			}
 			GC_MakeArcOfCircle arcMaker(circle->Circ(), u1, u2, sense);
 			if (!arcMaker.IsDone()) Standard_Failure::Raise("Could not build arc segment from circle");
-			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			//if (!sense)
+			//{
+			//	arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			//	
+			//}
 			return arcMaker.Value();
 		}
 		Handle(Geom_EllipseWithSemiAxes) elipse = Handle(Geom_EllipseWithSemiAxes)::DownCast(basisCurve);
@@ -484,7 +488,7 @@ Handle(Geom2d_TrimmedCurve) NCurveFactory::BuildTrimmedCurve2d(const Handle(Geom
 			GCE2d_MakeArcOfCircle arcMaker(circle->Circ2d(), u1, u2, sense);
 			if (!arcMaker.IsDone())
 				Standard_Failure::Raise("Could not build arc segment from circle");
-			if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
+			//if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
 			return arcMaker.Value();
 		}
 		Handle(Geom2d_EllipseWithSemiAxes) elipse = Handle(Geom2d_EllipseWithSemiAxes)::DownCast(basisCurve);
