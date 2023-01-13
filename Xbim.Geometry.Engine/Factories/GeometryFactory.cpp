@@ -377,6 +377,12 @@ namespace Xbim
 
 			IXLocation^ GeometryFactory::BuildLocation(IIfcAxis2Placement^ axis2)
 			{
+				TopLoc_Location location = BuildAxis2PlacementLocation(axis2);
+				return gcnew XLocation(location);
+			}
+
+			TopLoc_Location GeometryFactory::BuildAxis2PlacementLocation(IIfcAxis2Placement^ axis2)
+			{
 				auto axis3d = dynamic_cast<IIfcAxis2Placement3D^>(axis2);
 
 				if (axis3d != nullptr)
@@ -387,7 +393,7 @@ namespace Xbim
 					gp_Trsf transform;
 					gp_Ax3 ax(ax3d);
 					transform.SetTransformation(ax);
-					return gcnew XLocation(transform);
+					return transform;
 				}
 				auto axis2d = dynamic_cast<IIfcAxis2Placement2D^>(axis2);
 				if (axis2d != nullptr)
@@ -400,7 +406,7 @@ namespace Xbim
 					//gp_Dir2d d2d= ax2d.
 					gp_Ax3 ax(gp_Pnt(p2d.X(), p2d.Y(), 0.), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0.));
 					transform.SetTransformation(ax);
-					return gcnew XLocation(transform);
+					return transform;
 				}
 				throw RaiseGeometryFactoryException("Unsupported axis placement type", axis2);
 			}

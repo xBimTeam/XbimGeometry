@@ -2,7 +2,7 @@
 
 #include "./Unmanaged/NProfileFactory.h"
 #include "FactoryBase.h"
-
+#include "GeometryFactory.h"
 
 namespace Xbim
 {
@@ -12,12 +12,19 @@ namespace Xbim
 		{
 			public ref class ProfileFactory : public FactoryBase<NProfileFactory>, IXProfileFactory
 			{	
+			private:
+				GeometryFactory^ _geometryFactory;
 			public:
-				ProfileFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProfileFactory()) {};
+				ProfileFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProfileFactory()) 
+				{
+					_geometryFactory = gcnew GeometryFactory(modelService);
+				};
 
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
 				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
 			internal:
 				

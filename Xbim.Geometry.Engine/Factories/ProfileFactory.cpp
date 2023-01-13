@@ -7,9 +7,14 @@
 #include "../BRep/XWire.h"
 #include "../BRep/XFace.h"
 #include "../BRep/XEdge.h"
+#include <GC_MakeCircle.hxx>
+#include <BRepBuilderAPI_MakeWire.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <GCE2d_MakeCircle.hxx>
 
 using namespace System;
 using namespace Xbim::Geometry::BRep;
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -70,6 +75,27 @@ namespace Xbim
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
 				return wire;
 			}
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile)
+			{
+				auto edge = BuildProfileEdge(arbitraryClosedProfile); //throws an exception
+				auto wire = EXEC_NATIVE->MakeWire(edge);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", arbitraryClosedProfile);
+				else
+					return wire;
+			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile)
+			{
+				TopLoc_Location location;
+				if (rectangleProfile != nullptr)
+					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(rectangleProfile->Position);
+				auto wire = EXEC_NATIVE->BuildRectangle(rectangleProfile->XDim, rectangleProfile->YDim, location);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", rectangleProfile);
+				else
+					return wire;
+			}
 
 			IXEdge^ ProfileFactory::BuildEdge(IIfcProfileDef^ profileDef)
 			{
@@ -99,7 +125,7 @@ namespace Xbim
 				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
 					return BuildProfileFace(static_cast<IIfcArbitraryProfileDefWithVoids^>(profileDef));
 				case XProfileDefType::IfcArbitraryClosedProfileDef:
-					return BuildProfileFace(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));			
+					return BuildProfileFace(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
 					return BuildProfileFace(static_cast<IIfcArbitraryOpenProfileDef^>(profileDef));
 				case XProfileDefType::IfcCenterLineProfileDef:
@@ -145,6 +171,7 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryProfileDefWithVoids^ arbitraryClosedProfileWithVoids)
 			{
+
 				TopoDS_Wire outerProfile = BuildProfileWire(static_cast<IIfcArbitraryClosedProfileDef^>(arbitraryClosedProfileWithVoids));
 				TopTools_SequenceOfShape innerLoops;
 				for each (auto innerWire in arbitraryClosedProfileWithVoids->InnerCurves)
@@ -181,11 +208,25 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCircleProfileDef);
+				auto wire = BuildProfileWire(ifcCircleProfileDef); //throws an exception
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create IfcCircleProfileDef, invalid wire", ifcCircleProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcCircleProfileDef);
+				else
+					return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcRectangleProfileDef);
+				auto wire = BuildProfileWire(ifcRectangleProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcRectangleProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcRectangleProfileDef);
+				else
+					return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef)
 			{
@@ -221,7 +262,7 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{
-				
+
 				throw RaiseGeometryFactoryException("Failed to create Profile", ifcArbitraryOpenProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
@@ -307,7 +348,27 @@ namespace Xbim
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcCircleProfileDef^ ifcCircleProfileDef)
 			{
-				return TopoDS_Edge();
+				if (ifcCircleProfileDef->Radius <= 0)
+					throw RaiseGeometryFactoryException("IfcCircleProfileDef cannot be built with radius that is not a positive value", ifcCircleProfileDef);
+
+				gp_Ax22d gpax2;
+				IIfcAxis2Placement2D^ ax2 = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircleProfileDef->Position);
+				if (ax2 != nullptr)
+				{
+					gpax2.SetLocation(gp_Pnt2d(ax2->Location->X, ax2->Location->Y));
+					if (ax2->RefDirection == nullptr)
+						gpax2.SetXDirection(gp_Dir2d(1, 0));
+					else
+						gpax2.SetXDirection(gp_Dir2d(ax2->RefDirection->X, ax2->RefDirection->Y));
+				}
+				//make the outer wire
+				gp_Circ2d outer(gpax2, ifcCircleProfileDef->Radius);
+				Handle(Geom2d_Circle) hOuter = GCE2d_MakeCircle(outer);
+				TopoDS_Edge  edge = EXEC_NATIVE->MakeEdge2d(hOuter);
+				if (edge.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create IfcCircleProfileDef, invalid edge", ifcCircleProfileDef);
+				else
+					return edge;
 			}
 
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef)

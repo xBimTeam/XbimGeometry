@@ -4,7 +4,9 @@
 #include <Geom_Plane.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Edge.hxx>
 #include <TopTools_SequenceOfShape.hxx>
+#include <Geom2d_Curve.hxx>
 class NProfileFactory : public NFactoryBase
 {
 private:
@@ -18,7 +20,11 @@ public:
 	TopoDS_Compound MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2);
 	//Build a face and an outer bound, as profile defs are 2d  the xy plane is assumed for the surface
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire);
+	TopoDS_Edge MakeEdge(const Handle(Geom_Curve)& hCurve);
+	TopoDS_Edge MakeEdge2d(const Handle(Geom2d_Curve)& hCurve2d);
+	TopoDS_Wire MakeWire(const TopoDS_Edge& edge);
 	//Build a face and an outer bound and inner wire loops, as profile defs are 2d the xy plane is assumed for the surface
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops);
+	TopoDS_Wire BuildRectangle(double dimX, double dimY, const TopLoc_Location& location);
 };
 

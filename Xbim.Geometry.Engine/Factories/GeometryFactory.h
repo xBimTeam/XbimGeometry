@@ -111,6 +111,7 @@ namespace Xbim
 
 				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
 				bool BuildDirection3d(double x, double y, double z, gp_Vec& vec);
+				TopLoc_Location BuildAxis2PlacementLocation(IIfcAxis2Placement^ axis2);
 			};
 		}
 	}
