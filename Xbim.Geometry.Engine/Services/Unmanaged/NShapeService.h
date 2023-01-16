@@ -6,9 +6,6 @@
 class NShapeService
 {
 public:
-	//static bool AnalyseShape(const TopTools_IndexedMapOfShape& faceMap, bool& isPolyhedron, std::vector<bool>& seams);
-
-	//static int TriangulateNonPolygonalFace(const TopoDS_Shape& shape, double oneMeter, double tolerance, double linearDeflection, double angularDeflection);
-
+	
 };
 

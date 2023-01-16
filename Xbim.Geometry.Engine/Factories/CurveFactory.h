@@ -5,6 +5,7 @@
 #include <TColGeom2d_SequenceOfBoundedCurve.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 using namespace Xbim::Ifc4::MeasureResource;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -15,7 +16,10 @@ namespace Xbim
 			{
 
 			public:
-				CurveFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NCurveFactory()) {}
+				CurveFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NCurveFactory()) 
+				{
+					
+				}
 
 				//Top level abstraction for building any curve
 
@@ -72,6 +76,7 @@ namespace Xbim
 				Handle(Geom_Curve) BuildCompositeCurveSegment3d(IfcType ifcCurve, bool sameSense);
 				Handle(Geom_Ellipse) BuildCurve3d(IIfcEllipse^ ifcEllipse);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
+				void BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments);
 				void BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments);
 
 				Handle(Geom_LineWithMagnitude) BuildCurve3d(IIfcLine^ ifcLine);

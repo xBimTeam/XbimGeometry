@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Linq;
+using Xbim.Geometry.Abstractions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
@@ -12,13 +13,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
     public class IfcExtrudedAreaSolidTests
     {
 
-        static private ILogger logger = NullLogger<IfcExtrudedAreaSolidTests>.Instance;
-
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        
+        private ILogger _logger;
+        private readonly IXGeometryConverterFactory _geomConverterFactory;
+        private ILoggerFactory _loggerFactory;
+        public IfcExtrudedAreaSolidTests(ILoggerFactory loggerFactory, ILogger<IfcExtrudedAreaSolidTests> logger, IXGeometryConverterFactory geomConverterFactory)
+        {
+            _loggerFactory = loggerFactory;
+            _logger = logger;
+            _geomConverterFactory = geomConverterFactory;
+        }
 
         /// <summary>
-        /// This is a precast concrete plank with holes through it, but all the holes are on top of each other
+        /// This is a precast concrete plank with holes through it, but all 6 holes are on top of each other
         /// </summary>
         [Fact]
         public void arbritary_closed_profile_with_intersecting_voids_test()
@@ -26,10 +32,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(arbritary_closed_profile_with_intersecting_voids_test)))
             {
                 er.Entity.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(er.Entity.Model, loggerFactory);
-                var solidSet = geomEngine.CreateSolidSet(er.Entity, logger);
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
+                var v6GeomEngine = _geomConverterFactory.CreateGeometryEngineV6(er.Entity.Model, _loggerFactory);
+                var v6Shape = v6GeomEngine.Build(er.Entity);
+                var solidSet = geomEngine.CreateSolidSet(er.Entity, _logger);
                 solidSet.Count.Should().Be(1, "This solid set should have 1 solid");
-                solidSet.First().Faces.Count.Should().Be(28);
+                solidSet.First().Faces.Count.Should().Be(34);
+                v6Shape.AllFaces().Count().Should().Be(34);
             }
 
         }
@@ -39,9 +48,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         {
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(IfcExtrudedAreaSolidInvalidPlacementTest)))
             {
-                var geomEngine = new XbimGeometryEngine(er.Entity.Model, loggerFactory);
+                var v6GeomEngine = _geomConverterFactory.CreateGeometryEngineV6(er.Entity.Model, _loggerFactory);
+                var v6Shape = v6GeomEngine.Build(er.Entity);
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 er.Entity.Should().NotBeNull();
-                var solid = geomEngine.CreateSolid(er.Entity, logger);
+                var solid = geomEngine.CreateSolid(er.Entity, _logger);
                 solid.Faces.Count.Should().Be(6, "This solid should have 6 faces");
             }
 
@@ -49,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
 
         [Theory]
         [InlineData("SweptDiskSolid_1", 15902.721708130202/*, DisplayName = "Directrix is polyline"*/)]
-        [InlineData("SweptDiskSolid_2", 5720688.107912736/*, DisplayName = "Directrix is trimmed"*/)]
+        [InlineData("SweptDiskSolid_2", 5720687.83036694/*, DisplayName = "Directrix is trimmed"*/)]
         [InlineData("SweptDiskSolid_3", 129879.77474359272/*, DisplayName = "Directrix is indexed polyline"*/)]
         [InlineData("SweptDiskSolid_4", 129879.77474359272/*, DisplayName = "Ifc reference test"*/)]
         public void SweptDiskSolidTest(string fileName, double requiredVolume)
@@ -58,8 +69,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             {
                 var sweptDisk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 sweptDisk.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(model, loggerFactory);
-                var solid = geomEngine.CreateSolid(sweptDisk, logger);
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
+                var solid = geomEngine.CreateSolid(sweptDisk, _logger);
                 solid.Should().NotBeNull();
                 solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
@@ -71,10 +82,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
-                var geomEngine = new XbimGeometryEngine(model, loggerFactory);
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var sweptSolid = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 sweptSolid.Should().NotBeNull();
-                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid, logger);
+                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid, _logger);
                 sweptDiskSolid.Should().NotBeNull();
                 sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }

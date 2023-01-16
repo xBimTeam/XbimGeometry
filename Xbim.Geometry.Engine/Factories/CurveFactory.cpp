@@ -42,8 +42,12 @@ using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Ifc4::MeasureResource;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Common::Metadata;
+using namespace Xbim::Common;
 using namespace System::Linq;
 
+using namespace System::Collections::Generic;
+using namespace Xbim::Common::Collections;
+using namespace Xbim::Ifc4::Interfaces;
 
 namespace Xbim
 {
@@ -54,13 +58,14 @@ namespace Xbim
 
 			IXCurve^ CurveFactory::Build(IIfcCurve^ curve)
 			{
-
+				
 				int dim = (int)curve->Dim;
 
 				XCurveType curveType;
 
 				if (dim == 2)
 				{
+					
 					Handle(Geom2d_Curve) hCurve2d = BuildCurve2d(curve, curveType); //this will throw an exception if it fails		
 					return BuildXCurve(hCurve2d, curveType);
 				}
@@ -116,10 +121,12 @@ namespace Xbim
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
+				
 				if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots)) return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots));
 				//all control points shall have the same dimensionality of 2
 				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
 				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
+				
 				int numKnotMultiplicities = ifcBSplineCurveWithKnots->KnotMultiplicities->Count;
 
 				if (numKnots != numKnotMultiplicities)
@@ -693,6 +700,12 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
 				return bspline;
 			}
+			void CurveFactory::BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments)
+			{
+				TColgp_Array1OfPnt points(1, ifcPolyline->Points->Count);
+				GEOMETRY_FACTORY->GetPolylinePoints3d(ifcPolyline, points);
+				EXEC_NATIVE->Get3dLinearSegments(points, ModelGeometryService->MinimumGap, segments);
+			}
 
 			void CurveFactory::BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments)
 			{
@@ -791,8 +804,10 @@ namespace Xbim
 
 			Handle(Geom_Curve) CurveFactory::BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam, XCurveType% curveType)
 			{
-				double sameParams = Math::Abs(endParam - startParam) < ModelGeometryService->Precision;
-				if (sameParams || ((startParam == -1 || endParam == -1) && !IsBoundedCurve(curve)))
+				//wee need to observe the correct parametric space, conics in radians oother length
+
+				bool sameParams = Math::Abs(endParam - startParam) < ModelGeometryService->Precision;
+				if (sameParams && !IsBoundedCurve(curve))
 					throw RaiseGeometryFactoryException("DirectrixBounded: If the values for StartParam or EndParam are omited, then the Directrix has to be a bounded or closed curve.");
 				if (3 != (int)curve->Dim)
 					throw RaiseGeometryFactoryException("DirectrixDim: The Directrix shall be a curve in three dimensional space.");
@@ -806,10 +821,23 @@ namespace Xbim
 				{
 					if (startParam == -1) startParam = geomCurve->FirstParameter();
 					if (endParam == -1) endParam = geomCurve->LastParameter();
-					Handle(Geom_Curve)  geomCurveTrimmed = OccHandle().TrimDirectrix(geomCurve, startParam, endParam, ModelGeometryService->Precision);
-					if (geomCurve.IsNull())
-						throw RaiseGeometryFactoryException("Directrix could not be trimmed");
-					return geomCurveTrimmed;
+					if (geomCurve->IsPeriodic())
+					{
+						//the parameters must be in radians
+						if (startParam > 2 * Math::PI || endParam > Math::PI * 2)
+							LogInformation(curve, "Directix trims parameters of periodice curves should be in radians");
+						Handle(Geom_Curve)  geomCurveTrimmed = new Geom_TrimmedCurve(geomCurve, startParam, endParam);
+						if (geomCurve.IsNull())
+							throw RaiseGeometryFactoryException("Directrix could not be trimmed");
+						return geomCurveTrimmed;
+					}
+					else
+					{
+						Handle(Geom_Curve)  geomCurveTrimmed = OccHandle().TrimDirectrix(geomCurve, startParam, endParam, ModelGeometryService->Precision);
+						if (geomCurve.IsNull())
+							throw RaiseGeometryFactoryException("Directrix could not be trimmed");
+						return geomCurveTrimmed;
+					}
 				}
 				return geomCurve;
 
@@ -843,10 +871,10 @@ namespace Xbim
 
 				case XCurveType::IfcEllipse:
 					return gcnew XEllipse(Handle(Geom_Ellipse)::DownCast(curve));
-					
+
 				case XCurveType::IfcLine:
 					return gcnew Xbim::Geometry::BRep::XLine(Handle(Geom_LineWithMagnitude)::DownCast(curve));
-					
+
 				case XCurveType::IfcTrimmedCurve:
 					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
 				case XCurveType::IfcIndexedPolyCurve:
@@ -990,15 +1018,30 @@ namespace Xbim
 						throw RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
 					if (!IsBoundedCurve(segment->ParentCurve))
 						throw RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
-					Handle(Geom_Curve) hSegment = BuildCompositeCurveSegment3d(segment->ParentCurve, segment->SameSense);
-					if (hSegment.IsNull())
-						throw RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
-					Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
-					if (boundedCurve.IsNull())
-						throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
-					if (!segment->SameSense)
-						boundedCurve->Reverse();
-					segments.Append(boundedCurve);
+					//if the segment is a polyline or an indexedpolycurve we need to add in the individual edge
+					auto polylineSegment = dynamic_cast<IIfcPolyline^>(segment->ParentCurve);
+					auto indexPolyCurveSegment = dynamic_cast<IIfcIndexedPolyCurve^>(segment->ParentCurve);
+					if (polylineSegment != nullptr)
+					{
+						BuildPolylineSegments3d(polylineSegment, segments);
+					}
+					else if (indexPolyCurveSegment != nullptr)
+					{
+						BuildIndexPolyCurveSegments3d(indexPolyCurveSegment, segments);
+					}
+					else
+					{
+						Handle(Geom_Curve) hSegment = BuildCompositeCurveSegment3d(segment->ParentCurve, segment->SameSense);
+						if (hSegment.IsNull())
+							throw RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
+						Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
+						if (boundedCurve.IsNull())
+							throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
+						if (!segment->SameSense)
+							boundedCurve->Reverse();
+						segments.Append(boundedCurve);
+					}
+
 				}
 			}
 

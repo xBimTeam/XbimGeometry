@@ -39,6 +39,7 @@ public:
 	Handle(Geom2d_LineWithMagnitude) BuildLine2d(const gp_Pnt2d& pnt, const gp_Vec2d& dir, double magnitude);
 	Handle(Geom2d_OffsetCurve) BuildOffsetCurve2d(const Handle(Geom2d_Curve)& basisCurve, double offset);
 	Handle(Geom2d_BSplineCurve) BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
+	int Get3dLinearSegments(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& segments);
 	Handle(Geom2d_BSplineCurve) BuildRationalBSplineCurve2d(const TColgp_Array1OfPnt2d& poles, const TColStd_Array1OfReal& weights, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree);
 
 
@@ -73,6 +74,7 @@ public:
 	/// </summary>
 	static bool LocateVertexOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance);
 	bool Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent);
+	static Handle(Geom_Curve) GetBasisCurve(const Handle(Geom_Curve)& geomCurve);
 #pragma endregion
 
 };

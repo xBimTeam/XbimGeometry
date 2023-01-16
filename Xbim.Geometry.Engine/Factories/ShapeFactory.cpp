@@ -207,6 +207,7 @@ namespace Xbim
 				TopoDS_Shape result = OccHandle().Union(topoBody, topoAddition, _modelService->MinimumGap);
 				return GetXbimShape(result);
 			}
+			
 
 			IXShape^ ShapeFactory::Cut(IXShape^ body, IXShape^ substraction)
 			{

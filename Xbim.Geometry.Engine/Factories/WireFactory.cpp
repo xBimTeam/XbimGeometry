@@ -71,8 +71,8 @@ namespace Xbim
 					return BuildWire(static_cast<IIfcLine^>(ifcCurve), true);
 				case XCurveType::IfcOffsetCurve2D:
 					return BuildWire(static_cast<IIfcOffsetCurve2D^>(ifcCurve), asSingleEdge);
-
-					//return BuildWire(static_cast<IIfcOffsetCurve3D^>(ifcCurve), asSingleEdge);
+				case XCurveType::IfcOffsetCurve3D:
+					return BuildWire(static_cast<IIfcOffsetCurve3D^>(ifcCurve), asSingleEdge);
 					/*case XCurveType::IfcPcurve:
 						return BuildCurve2d(static_cast<IIfcPcurve^>(curve));*/
 				case XCurveType::IfcPolyline:
@@ -83,7 +83,7 @@ namespace Xbim
 						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
 					return BuildWire(static_cast<IIfcTrimmedCurve^>(ifcCurve), asSingleEdge);
-				case XCurveType::IfcOffsetCurve3D:
+				
 				default:
 					throw RaiseGeometryFactoryException("Unsupported curve type", ifcCurve);
 				}

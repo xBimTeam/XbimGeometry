@@ -5,6 +5,7 @@
 #include "../BRep/XEdge.h"
 #include "../BRep/XCurve.h"
 #include "../BRep/XCurve2d.h"
+#include <GCE2d_MakeCircle.hxx>
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
 {
@@ -131,7 +132,16 @@ namespace Xbim
 
 			}
 
-			
+			TopoDS_Edge EdgeFactory::BuildCircle(double radius, gp_Ax22d axis)
+			{
+				gp_Circ2d outer(axis, radius);
+				Handle(Geom2d_Circle) hOuter = GCE2d_MakeCircle(outer);
+				TopoDS_Edge  edge = EXEC_NATIVE->BuildEdge(hOuter);
+				if (edge.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create circle edge");
+				else
+					return edge;
+			}
 
 #pragma endregion
 		}

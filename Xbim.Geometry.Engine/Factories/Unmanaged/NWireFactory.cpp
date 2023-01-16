@@ -232,21 +232,21 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 		double d = originalStart.Distance(originalEnd);
 		bool closed = d <= tolerance; //check if the polyline is specified as closed (end repeats the start point)
 
-		for (int i = 1; i < points.Length(); i++)
+		for (int i = 2; i <= points.Length(); i++)
 		{
 			const gp_Pnt& start = points.Value(i - 1);
 			const gp_Pnt& end = points.Value(i);
 			int vCount = vertices.Length();
 
-		//	gp_Pnt startPoint = vCount == 0 ? startKP : BRep_Tool::Pnt(TopoDS::Vertex(vertices.Last()));
+			//	gp_Pnt startPoint = vCount == 0 ? startKP : BRep_Tool::Pnt(TopoDS::Vertex(vertices.Last()));
 			double pointTolerance = tolerance + (vCount == 0 ? Precision::Confusion() : BRep_Tool::Tolerance(TopoDS::Vertex(vertices.Last())));
-			
+
 			gp_Vec edgeVec(start, end);
 			double segLength = edgeVec.Magnitude();
 			if (segLength < pointTolerance)
 			{
 				char message[128];
-				sprintf_s(message, 128, "Polyline point ignored: #(%x,%y,%z) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
+				sprintf_s(message, 128, "Polyline point ignored: (%f,%f,%f) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
 				pLoggingService->LogInformation(message);
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two
@@ -800,11 +800,26 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 		int nbSegments = segments.Length();
 		int currentSegment = 0;
 		bool isClosed = false;
+		bool lastSegmentIsPeriodic = false;
+		bool currentSegmentIsPeriodic = false;
+		Handle(Geom_Curve) lastBasisCurve;
+		Handle(Geom_Curve) lastSegment;
 		for (auto&& segIt : segments)
 		{
 			bool tolerancesAdjusted = false;
 			Handle(Geom_Curve) segment = segIt;
 
+			Handle(Geom_TrimmedCurve)trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(segment);
+			Handle(Geom_Curve) basisCurve;
+			while (!trimmedCurve.IsNull())
+			{
+				basisCurve = trimmedCurve->BasisCurve();
+				trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(basisCurve);
+			}
+			if (!basisCurve.IsNull())
+				currentSegmentIsPeriodic = basisCurve->IsPeriodic();
+			else
+				currentSegmentIsPeriodic = segment->IsPeriodic();
 			if (edges.Length() == 0) //just add the first one
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(segment);
@@ -812,23 +827,63 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 				theFirstVertex = TopExp::FirstVertex(anEdge);
 				theFirstPoint = BRep_Tool::Pnt(theFirstVertex);
 				currentSegment++;
-
+				lastSegmentIsPeriodic = segment->IsPeriodic();
+				lastSegment = segment;
+				lastBasisCurve = basisCurve;
 			}
 			else //we need to add this segment to the start of end of the edges
 			{
 
-				const TopoDS_Edge& lastEdge = TopoDS::Edge(edges.Last());
-				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(lastEdge)); //the last point
+				
+
+				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(TopoDS::Edge(edges.Last()))); //the last point
 
 				gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
 				gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
 
 				double gap = segStartPoint.Distance(lastEdgeEndPoint);
-
+				double gapend = segEndPoint.Distance(lastEdgeEndPoint);
 				if (gap > gapSize)
 					Standard_Failure::Raise("Segments are not contiguous");
 				currentSegment++;
-				tolerancesAdjusted = AdjustVertexTolerance(TopExp::LastVertex(lastEdge), lastEdgeEndPoint, segStartPoint, gap);
+				if (currentSegmentIsPeriodic && !lastSegmentIsPeriodic) //change the coordinates of the last segments end point to be the same as the periodic curve, so that curves always fit
+				{
+					Handle(Geom_Line) line = Handle(Geom_Line)::DownCast(lastBasisCurve);
+					if (!line.IsNull())
+					{
+						gp_Pnt lastSegStarPoint = BRep_Tool::Pnt(TopExp::FirstVertex(TopoDS::Edge(edges.Last())));
+						gp_Vec dir(lastSegStarPoint, segStartPoint);
+						gp_Lin line(lastSegStarPoint, dir);
+						Handle(Geom_Line) hLine = new Geom_Line(line);
+						Handle(Geom_TrimmedCurve) newSegment = new Geom_TrimmedCurve(hLine, 0, dir.Magnitude());
+						BRep_Builder b;
+						b.UpdateVertex(TopExp::LastVertex(TopoDS::Edge(edges.Last())), segStartPoint, tolerance);
+						BRepBuilderAPI_MakeEdge edgeMaker(newSegment, TopExp::FirstVertex(TopoDS::Edge(edges.Last())), TopExp::LastVertex(TopoDS::Edge(edges.Last())));
+						auto newEdge = edgeMaker.Edge();
+						edges.Remove(edges.Size());
+						edges.Append(newEdge);
+						lastEdgeEndPoint = segStartPoint;
+						gap = 0;
+					}
+
+				}
+				if (lastSegmentIsPeriodic && !currentSegmentIsPeriodic) //change the coordinates of the last segments end point to be the same as the periodic curve, so that curves always fit
+				{
+
+					//if it's a line rebuild the geometry
+					Handle(Geom_Line) line = Handle(Geom_Line)::DownCast(basisCurve);
+					if (!line.IsNull())
+					{
+						segStartPoint = lastEdgeEndPoint;
+						gp_Vec dir(segStartPoint, segEndPoint);
+						gp_Lin line(segStartPoint, dir);
+						Handle(Geom_Line) hLine = new Geom_Line(line);
+						segment = new Geom_TrimmedCurve(hLine, 0, dir.Magnitude());
+
+						gap = 0;
+					}
+				}
+				tolerancesAdjusted = AdjustVertexTolerance(TopExp::LastVertex(TopoDS::Edge(edges.Last())), lastEdgeEndPoint, segStartPoint, gap);
 				TopoDS_Vertex segEndVertex;
 				if (currentSegment == nbSegments && theFirstPoint.Distance(segEndPoint) < gapSize) //its the last one
 				{
@@ -839,7 +894,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 				else
 					builder.MakeVertex(segEndVertex, segEndPoint, tolerance);
 
-				BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(lastEdge), isClosed ? TopExp::FirstVertex(TopoDS::Edge(edges.First())) : segEndVertex);
+				BRepBuilderAPI_MakeEdge edgeMaker(segment, TopExp::LastVertex(TopoDS::Edge(edges.Last())), isClosed ? TopExp::FirstVertex(TopoDS::Edge(edges.First())) : segEndVertex);
 				if (!edgeMaker.IsDone())
 				{
 					Standard_Real cf = segment->FirstParameter();
@@ -852,26 +907,20 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 					Standard_Failure::Raise(msg);
 				}
 				anEdge = edgeMaker.Edge();
-				if (tolerancesAdjusted) //fix up any edge issues arising
-				{
-					if (isClosed)
-						toleranceFixer.FixVertexTolerance(theFirstEdge);
-					else
-						toleranceFixer.FixVertexTolerance(lastEdge);
-					toleranceFixer.FixVertexTolerance(anEdge);
-				}
+				lastBasisCurve = basisCurve;
+				lastSegmentIsPeriodic = currentSegmentIsPeriodic;
+				lastSegment = segment;
 			}
-
 			edges.Append(anEdge);
-
 		}
 		if (edges.Length() > 0)
 		{
 			//add the edges to the wire
 			builder.MakeWire(wire);
-			for (auto& it = edges.cbegin(); it != edges.cend(); ++it)
+			for (auto&& edge : edges)
 			{
-				builder.Add(wire, *it);
+				toleranceFixer.FixVertexTolerance(TopoDS::Edge(edge));
+				builder.Add(wire, edge);
 			}
 			if (isClosed) wire.Closed(true);
 
@@ -901,7 +950,7 @@ bool NWireFactory::AdjustVertexTolerance(TopoDS_Vertex& vertexToJoinTo, gp_Pnt p
 		b.UpdateVertex(vertexToJoinTo, PC, maxtol);
 		return true;
 	}
-	else //just set the tolerance to the larger of the distance or the exisiting tolerance
+	else //just set the tolerance to the larger of the distance or the existing tolerance
 	{
 		if (gap > tolE)
 		{

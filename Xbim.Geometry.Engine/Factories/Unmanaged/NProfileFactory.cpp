@@ -121,11 +121,18 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopoDS_Edge& edge)
 		return TopoDS_Wire();
 	}
 }
+TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner)
+{
+	TopTools_SequenceOfShape inners;
+	inners.Append(inner);
+	return MakeFace(outer,inners);
+}
 
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops)
 {
 	try
 	{
+
 		BRepBuilderAPI_MakeFace faceMaker(_xyPlane, wire, true);
 		for (auto&& inner : innerLoops)
 		{

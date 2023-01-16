@@ -13,11 +13,10 @@ namespace Xbim
 			public ref class ProfileFactory : public FactoryBase<NProfileFactory>, IXProfileFactory
 			{	
 			private:
-				GeometryFactory^ _geometryFactory;
+				
 			public:
 				ProfileFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProfileFactory()) 
-				{
-					_geometryFactory = gcnew GeometryFactory(modelService);
+				{				
 				};
 
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
@@ -34,6 +33,7 @@ namespace Xbim
 				TopoDS_Face BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcParameterizedProfileDef^ ifcParameterizedProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef);
+				TopoDS_Face BuildProfileFace(IIfcCircleHollowProfileDef^ ifcCircleHollowProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcLShapeProfileDef^ ifcLShapeProfileDef);

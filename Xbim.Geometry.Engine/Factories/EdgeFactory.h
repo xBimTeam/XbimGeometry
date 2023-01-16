@@ -4,7 +4,7 @@
 #include "FactoryBase.h"
 
 #include <TopTools_DataMapOfIntegerShape.hxx>
-
+#include <gp_Ax22d.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -39,6 +39,7 @@ namespace Xbim
 				TopoDS_Edge BuildEdge(Handle(Geom_Curve) hCurve3d);
 
 				TopoDS_Edge BuildEdgeCurve(IIfcEdgeCurve^ ifcEdgeCurve, TopTools_DataMapOfIntegerShape& verticesContext);
+				TopoDS_Edge BuildCircle(double radius, gp_Ax22d axis);
 #pragma endregion
 
 #pragma region Constructors and private and protected data

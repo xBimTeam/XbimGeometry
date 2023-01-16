@@ -423,6 +423,25 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildPolyline2d(const TColgp_Array1Of
 	}
 }
 
+int NCurveFactory::Get3dLinearSegments(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& segments)
+{
+	int pointCount = points.Length();
+	int lastPointIdx = 1;
+	for (Standard_Integer i = 1; i < pointCount; i++)
+	{
+		const gp_Pnt& start = points.Value(lastPointIdx);
+		const gp_Pnt& end = points.Value(i + 1);
+		if (!start.IsEqual(end, tolerance)) //ignore very small segments
+		{
+			Handle(Geom_TrimmedCurve) lineSeg = BuildTrimmedLine3d(start, end);
+			//move the lastIndex on
+			lastPointIdx++;
+			segments.Append(lineSeg);
+		} //else if we skip a segment because it is small lastPointIdx remains the same
+	}
+	return lastPointIdx - 1;
+}
+
 
 Handle(Geom_BSplineCurve) NCurveFactory::BuildPolyline3d(const TColgp_Array1OfPnt& points, double tolerance)
 {
@@ -596,23 +615,24 @@ Handle(Geom_Curve) NCurveFactory::TrimDirectrix(const Handle(Geom_Curve)& basisC
 
 
 }
-
+Handle(Geom_Curve) NCurveFactory::GetBasisCurve(const Handle(Geom_Curve)& geomCurve)
+{
+	// kill trimmed curves
+	Handle(Geom_Curve) basisCurve = geomCurve;
+	Handle(Geom_TrimmedCurve) trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(basisCurve);
+	while (!trimmedCurve.IsNull()) 
+	{
+		basisCurve = trimmedCurve->BasisCurve();
+		trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(basisCurve);
+	}
+	return basisCurve;
+}
 bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance)
 {
 	Standard_Real Eps2 = maxTolerance * maxTolerance;
-
-	// kill trimmed curves
-	Handle(Geom_Curve) C = geomCurve;
-	Handle(Geom_TrimmedCurve) CT = Handle(Geom_TrimmedCurve)::DownCast(C);
-	while (!CT.IsNull()) {
-		C = CT->BasisCurve();
-		CT = Handle(Geom_TrimmedCurve)::DownCast(C);
-	}
-
+	Handle(Geom_Curve) basisCurve = GetBasisCurve(geomCurve);
 	gp_Pnt P = BRep_Tool::Pnt(V);
-	GeomAdaptor_Curve GAC(C);
-
-
+	GeomAdaptor_Curve GAC(basisCurve);
 	Standard_Real D1, D2;
 	gp_Pnt P1, P2;
 	P1 = GAC.Value(GAC.FirstParameter());
@@ -660,7 +680,7 @@ bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, con
 bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter,  gp_Pnt2d& pnt2d, gp_Vec2d& tangent)
 {
 	try
-	{
+	{ 
 		curve->D1(parameter, pnt2d, tangent);
 		return true;
 	}

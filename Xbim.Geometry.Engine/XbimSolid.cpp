@@ -94,6 +94,7 @@
 #include "XbimGeometryCreator.h"
 #include "XbimConvert.h"
 #include "XbimOccWriter.h"
+#include "Factories/Unmanaged/NCurveFactory.h"
 
 using namespace System::Linq;
 using namespace Xbim::Common;
@@ -565,7 +566,7 @@ namespace Xbim
 				Handle(Geom_Curve) curve = BRep_Tool::Curve(edge, loc, f, l);
 				gp_Pnt p1;
 				gp_Vec tangent;
-				
+
 				curve->D1(f, p1, tangent);
 				tangent.Normalize();
 				//tangent.Reverse();
@@ -1259,7 +1260,7 @@ namespace Xbim
 				}
 				else
 					face = gcnew XbimFace(overrideProfileDef, logger);
-				if (face!=nullptr && !face->BoundingBox.IsEmpty)
+				if (face != nullptr && !face->BoundingBox.IsEmpty)
 				{
 					TopoDS_Face occFace = face;
 					BRepPrimAPI_MakePrism prism(occFace, vec);
@@ -1271,7 +1272,7 @@ namespace Xbim
 
 						if (repItem->Position != nullptr) //In Ifc4 this is now optional
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-						
+
 						return;
 					}
 				}
@@ -1337,7 +1338,7 @@ namespace Xbim
 				Init((IIfcBoxedHalfSpace^)hs, logger);
 			else //it is a simple Half space
 			{
-	
+
 				//Handle(Geom_Surface) geomSurface = ActiveModelGeometryService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
 				////XbimFace^ face = gcnew XbimFace(surface, logger);
 				//Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
@@ -1353,7 +1354,7 @@ namespace Xbim
 				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, c, normalDir);
 				if (hs->AgreementFlag)
 					normalDir.Reverse();
-				
+
 
 
 				gp_Pnt pointInMaterial = c.Translated(normalDir * 10);
@@ -1529,7 +1530,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcPolyline^>(repItem->Directrix)) //need right corner mode
 				transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 
-			System::String^ err = BuildSweptDiskSolid(sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., transitionMode);
+			System::String^ err = BuildSweptDiskSolid(repItem,sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., logger);
 			if (err != nullptr)
 			{
 				if (pSolid == nullptr || pSolid->IsNull()) //nothing done at all
@@ -1541,7 +1542,7 @@ namespace Xbim
 		}
 
 		//if inner radius is not required it has a value of -1
-		System::String^ XbimSolid::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire, double radius, double innerRadius, BRepBuilderAPI_TransitionMode transitionMode)
+		System::String^ XbimSolid::BuildSweptDiskSolid(IIfcSweptDiskSolid^ repItem, const TopoDS_Wire& directrixWire, double radius, double innerRadius, ILogger^ logger)
 		{
 			//the standard say
 
@@ -1550,14 +1551,52 @@ namespace Xbim
 			//composite urves will be tangent continuous
 			try
 			{
-				//form the shape to sweep, the centre of the circles must be at the start of the directrix
-				BRepBuilderAPI_MakeEdge edgeMaker;
-				BRep_Builder builder;
+				bool haveFirstEdge = false;
 				//get the normal at the start point
 				gp_Vec dirAtStart;
 				gp_Pnt startPoint;
-				BRepAdaptor_CompCurve directrix(directrixWire, Standard_True);
-				directrix.D1(0, startPoint, dirAtStart);
+				int numPeriodics = 0;
+				int numEdges = 0;
+				bool hasConsecutiveNonPeriodics = false;
+				bool previousEdgeIsPerodic = false;;
+				for (BRepTools_WireExplorer wireExplorer(directrixWire); wireExplorer.More(); wireExplorer.Next())
+				{
+					numEdges++;
+					double start, end;
+					auto edge = wireExplorer.Current();
+					auto curve = BRep_Tool::Curve(edge, start, end);
+					auto basisCurve = NCurveFactory::GetBasisCurve(curve);
+					if (basisCurve->IsPeriodic())
+					{
+						numPeriodics++;
+						previousEdgeIsPerodic = true;
+					}
+					else if (haveFirstEdge && !previousEdgeIsPerodic)
+					{
+						hasConsecutiveNonPeriodics = true;
+					}
+					else
+						previousEdgeIsPerodic = false;
+					if (!haveFirstEdge)
+					{
+						haveFirstEdge = true;
+						curve->D1(0, startPoint, dirAtStart);
+					}
+					
+				}
+
+				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //lines sweep better with right corner sweeping
+				if (numPeriodics > 0)
+				{
+					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed; //curves only sweep if we use a transform
+					if(hasConsecutiveNonPeriodics) //this cannot be correctly swept as a pipe with contant radius
+						XbimGeometryCreator::LogWarning(logger, repItem, "Detected incorrect definition of directrix for IfcSweptDiskSolid. The swept disk will be an incorrect shape");
+				}
+
+				//form the shape to sweep, the centre of the circles must be at the start of the directrix
+				BRepBuilderAPI_MakeEdge edgeMaker;
+				BRep_Builder builder;
+
 				gp_Ax2 axis(startPoint, dirAtStart);
 				dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
 				Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
@@ -1568,6 +1607,7 @@ namespace Xbim
 
 				BRepOffsetAPI_MakePipeShell oSweepMaker(directrixWire);
 				oSweepMaker.SetTransitionMode(transitionMode);
+
 				oSweepMaker.Add(outerWire);
 
 				oSweepMaker.Build();

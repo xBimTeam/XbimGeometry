@@ -165,6 +165,7 @@ namespace Xbim
 
 			bool GeometryFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d, gp_Ax22d& ax22)
 			{
+				if (axis2d == nullptr) return false;
 				gp_Pnt2d loc;
 				if (!BuildPoint2d(axis2d->Location, loc))
 					return false;

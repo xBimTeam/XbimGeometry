@@ -23,6 +23,7 @@ public:
 	TopoDS_Edge MakeEdge(const Handle(Geom_Curve)& hCurve);
 	TopoDS_Edge MakeEdge2d(const Handle(Geom2d_Curve)& hCurve2d);
 	TopoDS_Wire MakeWire(const TopoDS_Edge& edge);
+	TopoDS_Face MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner);
 	//Build a face and an outer bound and inner wire loops, as profile defs are 2d the xy plane is assumed for the surface
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops);
 	TopoDS_Wire BuildRectangle(double dimX, double dimY, const TopLoc_Location& location);

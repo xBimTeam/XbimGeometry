@@ -349,8 +349,8 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const Handle(Geom_Curve) directr
 		BRepBuilderAPI_MakeWire wireMaker(wireEdgeMaker.Edge());
 		BRepOffsetAPI_MakePipeShell oSweepMaker(wireMaker.Wire());
 		oSweepMaker.SetTransitionMode(transitionMode);
-		oSweepMaker.SetMode(true);
-		oSweepMaker.Add(outerWire);
+		//oSweepMaker.SetMode(false);
+		oSweepMaker.Add(outerWire,true,true);
 
 		oSweepMaker.Build();
 		if (oSweepMaker.IsDone())
@@ -358,14 +358,14 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const Handle(Geom_Curve) directr
 			//do we need an inner shell
 			if (innerRadius > 0)
 			{
-
 				Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
 				edgeMaker.Init(inner);
 				BRepBuilderAPI_MakeWire iWireMaker(edgeMaker.Edge());
 				BRepOffsetAPI_MakePipeShell iSweepMaker(wireMaker.Wire());
 				iSweepMaker.SetTransitionMode(transitionMode);
+				//iSweepMaker.SetMode();
 				TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
-				iSweepMaker.Add(holeWire);
+				iSweepMaker.Add(holeWire,true,true);
 				iSweepMaker.Build();
 				if (iSweepMaker.IsDone())
 				{

@@ -3,6 +3,7 @@
 #include "ProfileFactory.h"
 #include "ShellFactory.h"
 #include "GeometryFactory.h"
+#include "EdgeFactory.h"
 #include <gp_Ax2.hxx>
 #include <BRepCheck_Shell.hxx>
 #include <ShapeFix_Shell.hxx>
@@ -120,14 +121,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Radius must be greater than 0", ifcSolid);
 				if (ifcSolid->InnerRadius.HasValue && ifcSolid->InnerRadius.Value >= ifcSolid->Radius)
 					throw RaiseGeometryFactoryException("Inner radius is greater than outer radius", ifcSolid);
-				/*XCurveType directrixCurveType;
-				Handle(Geom_Curve) directrix = _curveFactory->BuildDirectrix(ifcSolid->Directrix,
-					ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : -1,
-					ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : -1,
-					directrixCurveType);*/
-				//double startParam = ifcSolid->StartParam.HasValue ? (double)ifcSolid->StartParam.Value : double::NaN;
-			//	double endParam = ifcSolid->EndParam.HasValue ? (double)ifcSolid->EndParam.Value : double::NaN;
-			//	TopoDS_Wire directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSolid->Directrix, startParam, endParam);
+
 				Handle(Geom_Curve) directrix = CURVE_FACTORY->BuildDirectrixCurve(ifcSolid->Directrix, ifcSolid->StartParam, ifcSolid->EndParam);
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSolid);
@@ -136,7 +130,7 @@ namespace Xbim
 				//With Polyline the consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
 				if (dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix))
 					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
-
+				
 				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
 				return solid;
 

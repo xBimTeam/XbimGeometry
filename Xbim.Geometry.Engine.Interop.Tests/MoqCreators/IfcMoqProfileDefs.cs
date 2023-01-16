@@ -24,13 +24,24 @@ namespace Xbim.Geometry.NetCore.Tests
 
         public static IIfcCircleProfileDef IfcCircleProfileDefMock(double radius = 100, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
         {
-            var rectangleProfileDefMoq = MakeMoq<IIfcCircleProfileDef>();
-            var rectangleProfileDef = rectangleProfileDefMoq.Object;
-            rectangleProfileDefMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircleProfileDef)));
-            rectangleProfileDef.ProfileType = profileType;
-            rectangleProfileDef.Radius = radius;           
-            rectangleProfileDef.Position = position ?? IfcMoq.IfcAxis2Placement2DMock();
-            return rectangleProfileDef;
+            var circleProfileDefMoq = MakeMoq<IIfcCircleProfileDef>();
+            var circleProfileDef = circleProfileDefMoq.Object;
+            circleProfileDefMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircleProfileDef)));
+            circleProfileDef.ProfileType = profileType;
+            circleProfileDef.Radius = radius;           
+            circleProfileDef.Position = position ?? IfcMoq.IfcAxis2Placement2DMock();
+            return circleProfileDef;
+        }
+        public static IIfcCircleHollowProfileDef IfcCircleHollowProfileDefMock(double radius = 100, double wallThickness = 10, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
+        {
+            var circleHollowProfileDefMoq = MakeMoq<IIfcCircleHollowProfileDef>();
+            var circleHollowProfileDef = circleHollowProfileDefMoq.Object;
+            circleHollowProfileDefMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircleHollowProfileDef)));
+            circleHollowProfileDef.ProfileType = profileType;
+            circleHollowProfileDef.Radius = radius;
+            circleHollowProfileDef.WallThickness=wallThickness;
+            circleHollowProfileDef.Position = position ?? IfcMoq.IfcAxis2Placement2DMock();
+            return circleHollowProfileDef;
         }
     }
 }

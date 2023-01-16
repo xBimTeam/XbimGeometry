@@ -75,18 +75,20 @@ namespace Xbim
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
 				return wire;
 			}
-			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile)
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ circleProfileDef)
 			{
-				auto edge = BuildProfileEdge(arbitraryClosedProfile); //throws an exception
+				auto edge = BuildProfileEdge(circleProfileDef); //throws an exception
 				auto wire = EXEC_NATIVE->MakeWire(edge);
 				if (wire.IsNull())
-					throw RaiseGeometryFactoryException("Profile wire cound not be built", arbitraryClosedProfile);
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", circleProfileDef);
 				else
 					return wire;
 			}
 
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile)
 			{
+				if (rectangleProfile->XDim <= 0 || rectangleProfile->YDim <= 0)
+					throw RaiseGeometryFactoryException("Invalid rectangle profile with at least one zero or less dimension", rectangleProfile);
 				TopLoc_Location location;
 				if (rectangleProfile != nullptr)
 					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(rectangleProfile->Position);
@@ -140,10 +142,10 @@ namespace Xbim
 					return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcCShapeProfileDef:
 					return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));
-				case XProfileDefType::IfcCircleProfileDef:
-					return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
 				case XProfileDefType::IfcCircleHollowProfileDef:
 					return BuildProfileFace(static_cast<IIfcCircleHollowProfileDef^>(profileDef));
+				case XProfileDefType::IfcCircleProfileDef:
+					return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
 				case XProfileDefType::IfcEllipseProfileDef:
 					return BuildProfileFace(static_cast<IIfcEllipseProfileDef^>(profileDef));
 				case XProfileDefType::IfcIShapeProfileDef:
@@ -174,10 +176,15 @@ namespace Xbim
 
 				TopoDS_Wire outerProfile = BuildProfileWire(static_cast<IIfcArbitraryClosedProfileDef^>(arbitraryClosedProfileWithVoids));
 				TopTools_SequenceOfShape innerLoops;
-				for each (auto innerWire in arbitraryClosedProfileWithVoids->InnerCurves)
+				HashSet<int>^ innerLoopIds = gcnew HashSet<int>();
+
+				for each (IIfcCurve^ innerWire in arbitraryClosedProfileWithVoids->InnerCurves)
 				{
-					TopoDS_Wire wire = WIRE_FACTORY->BuildWire(innerWire, false); //throws exception
-					innerLoops.Append(wire);
+					if (innerLoopIds->Add(innerWire->EntityLabel)) //only add a loop once
+					{
+						TopoDS_Wire wire = WIRE_FACTORY->BuildWire(innerWire, false); //throws exception
+						innerLoops.Append(wire);
+					}
 				}
 				TopoDS_Face face = EXEC_NATIVE->MakeFace(outerProfile, innerLoops);
 				if (face.IsNull())
@@ -217,6 +224,39 @@ namespace Xbim
 				else
 					return face;
 			}
+
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleHollowProfileDef^ ifcCircleHollowProfileDef)
+			{
+				if (ifcCircleHollowProfileDef->Radius <= 0)
+					throw RaiseGeometryFactoryException("Outer radius  is not a positive value", ifcCircleHollowProfileDef);
+
+				gp_Ax22d gpax2;
+				if (ifcCircleHollowProfileDef->Position != nullptr)
+					GEOMETRY_FACTORY->BuildAxis2Placement2d(ifcCircleHollowProfileDef->Position, gpax2); //returns false if it fails, gpax2 statys as default for a null value of position
+				//make the outer edge
+				auto outerEdge = EDGE_FACTORY->BuildCircle(ifcCircleHollowProfileDef->Radius, gpax2); //throws an exception
+				auto outerWire = EXEC_NATIVE->MakeWire(outerEdge);
+				if (outerWire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire could not be built", ifcCircleHollowProfileDef);
+				TopoDS_Face face;
+				if (ifcCircleHollowProfileDef->WallThickness <= 0)
+				{
+					LogInformation(ifcCircleHollowProfileDef, "Circle hollow profile has a wall thickness of less than zero");
+					face = EXEC_NATIVE->MakeFace(outerWire);
+				}
+				else
+				{
+					auto innerEdge = EDGE_FACTORY->BuildCircle(ifcCircleHollowProfileDef->Radius - ifcCircleHollowProfileDef->WallThickness, gpax2); //throws an exception
+					auto innerWire = EXEC_NATIVE->MakeWire(innerEdge);
+					innerWire.Reverse();
+					face = EXEC_NATIVE->MakeFace(outerWire, innerWire);
+				}
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcCircleHollowProfileDef);
+				else
+					return face;
+			}
+
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
 				auto wire = BuildProfileWire(ifcRectangleProfileDef);
@@ -352,23 +392,11 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("IfcCircleProfileDef cannot be built with radius that is not a positive value", ifcCircleProfileDef);
 
 				gp_Ax22d gpax2;
-				IIfcAxis2Placement2D^ ax2 = dynamic_cast<IIfcAxis2Placement2D^>(ifcCircleProfileDef->Position);
-				if (ax2 != nullptr)
-				{
-					gpax2.SetLocation(gp_Pnt2d(ax2->Location->X, ax2->Location->Y));
-					if (ax2->RefDirection == nullptr)
-						gpax2.SetXDirection(gp_Dir2d(1, 0));
-					else
-						gpax2.SetXDirection(gp_Dir2d(ax2->RefDirection->X, ax2->RefDirection->Y));
-				}
-				//make the outer wire
-				gp_Circ2d outer(gpax2, ifcCircleProfileDef->Radius);
-				Handle(Geom2d_Circle) hOuter = GCE2d_MakeCircle(outer);
-				TopoDS_Edge  edge = EXEC_NATIVE->MakeEdge2d(hOuter);
-				if (edge.IsNull())
-					throw RaiseGeometryFactoryException("Failed to create IfcCircleProfileDef, invalid edge", ifcCircleProfileDef);
-				else
-					return edge;
+				if (ifcCircleProfileDef->Position != nullptr)
+					GEOMETRY_FACTORY->BuildAxis2Placement2d(ifcCircleProfileDef->Position, gpax2); //returns false if it fails
+				//make the outer edge
+				auto edge = EDGE_FACTORY->BuildCircle(ifcCircleProfileDef->Radius, gpax2); //throws an exception
+				return edge;
 			}
 
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
