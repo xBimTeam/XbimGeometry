@@ -28,7 +28,7 @@ namespace Xbim.Geometry.NetCore.Tests
             var p2 = tc.GetSecondDerivative(1, out var direction2,out var normal2);
             double.IsNaN(normal2.X).Should().BeTrue();
             double.IsNaN(normal2.Y).Should().BeTrue();
-            double.IsNaN(normal2.Z).Should().BeTrue();
+            normal2.IsNull.Should().BeTrue();
         }
     }
 }

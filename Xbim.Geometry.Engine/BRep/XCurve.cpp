@@ -73,7 +73,7 @@ namespace Xbim
 					normal = norm;
 					//normal can be null			
 				}
-				catch (const Standard_ConstructionError&) //catch if we break the OCC rule that a direction cannot have all coords as 0
+				catch (const Standard_Failure&) //catch if we break the OCC rule that a direction cannot have all coords as 0
 				{
 					auto norm = gcnew XDirection();
 					normal = norm;

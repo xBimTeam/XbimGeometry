@@ -126,12 +126,9 @@ namespace Xbim
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSolid);
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
-				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed;
-				//With Polyline the consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
-				if (dynamic_cast<IIfcPolyline^>(ifcSolid->Directrix))
-					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 				
-				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius, transitionMode);
+				
+				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius);
 				return solid;
 
 			}
