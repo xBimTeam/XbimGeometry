@@ -1,14 +1,19 @@
 #pragma once
-#include <vector>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <NCollection_CellFilter.hxx>
-#include <BRepBuilderAPI_VertexInspector.hxx>
+#include <TopoDS_Shape.hxx>
+#include <TopTools_ListOfShape.hxx>
+
 class NShapeService
 {
+private:
+	double _timeout;
 public:
-	//static bool AnalyseShape(const TopTools_IndexedMapOfShape& faceMap, bool& isPolyhedron, std::vector<bool>& seams);
-
-	//static int TriangulateNonPolygonalFace(const TopoDS_Shape& shape, double oneMeter, double tolerance, double linearDeflection, double angularDeflection);
+	NShapeService(double timeout, double minGap) : _timeout(timeout) {};
+	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double precision);
+	TopoDS_Shape Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double precision);
+	TopoDS_Shape Intersect(const TopoDS_Shape& body, const TopoDS_Shape& other, double precision);
+	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double precision);
+	TopoDS_Shape Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double precision);
+	TopoDS_Shape Intersect(const TopoDS_Shape& body, const TopTools_ListOfShape& others, double precision);
 
 };
 
