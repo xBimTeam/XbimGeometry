@@ -16,7 +16,7 @@ namespace Xbim
 			{
               
             public:
-                ShapeService() : XbimHandle(new NShapeService(5, 1))
+                ShapeService() : XbimHandle(new NShapeService(5))
                 {
                 };
                 virtual IXShape^ Convert(System::String^ brepString);

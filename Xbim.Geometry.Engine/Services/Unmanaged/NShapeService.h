@@ -7,7 +7,7 @@ class NShapeService
 private:
 	double _timeout;
 public:
-	NShapeService(double timeout, double minGap) : _timeout(timeout) {};
+	NShapeService(double timeout) : _timeout(timeout) {};
 	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double precision);
 	TopoDS_Shape Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double precision);
 	TopoDS_Shape Intersect(const TopoDS_Shape& body, const TopoDS_Shape& other, double precision);
