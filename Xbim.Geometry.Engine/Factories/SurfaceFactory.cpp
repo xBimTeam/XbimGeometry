@@ -1,6 +1,7 @@
 #include "SurfaceFactory.h"
 #include "GeometryFactory.h"
 #include "CurveFactory.h"
+#include "WireFactory.h"
 #include "ProfileFactory.h"
 #include "BIMAuthoringToolWorkArounds.h"
 #include "EdgeFactory.h"
@@ -14,6 +15,7 @@
 #include <TopoDS_Edge.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <TopoDS.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
 
 using namespace Xbim::Geometry::BRep;
 
@@ -42,15 +44,15 @@ namespace Xbim
 				Handle(Geom_Surface) surface = BuildSurface(ifcSurface, surfaceType);
 				if (surface.IsNull())
 					throw RaiseGeometryFactoryException("Error building surface", ifcSurface);
-				
+
 				return XSurface::GeomToXSurface(surface);
-					
+
 			}
 
 #pragma endregion
 
 #pragma region OCC
-			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType )
+			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType)
 			{
 				if (!Enum::TryParse<XSurfaceType>(ifcSurface->ExpressType->ExpressName, surfaceType))
 					throw RaiseGeometryFactoryException("Unsupported surface type", ifcSurface);
@@ -60,7 +62,7 @@ namespace Xbim
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcBSplineSurfaceWithKnots:
 					return BuildBSplineSurfaceWithKnots((IIfcBSplineSurfaceWithKnots^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRationalBSplineSurfaceWithKnots:
-					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface); 
+					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:
 					return BuildCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedSurface:
@@ -82,7 +84,7 @@ namespace Xbim
 				default:
 					throw RaiseGeometryFactoryException("Surface of type is not implemented", ifcSurface);
 				}
-				
+
 			}
 
 
@@ -150,14 +152,34 @@ namespace Xbim
 				BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
 
 				Handle(Geom_SurfaceOfLinearExtrusion) surface = OccHandle().BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
-				if(surface.IsNull())
-					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);			
+				if (surface.IsNull())
+					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);
 				return surface;
 			}
 
-			Handle(Geom_Plane) SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
+			TopoDS_Face SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
 			{
-				throw gcnew NotImplementedException();
+				Handle(Geom_Plane) basisPlane = BuildPlane(ifcCurveBoundedPlane->BasisSurface); //throws an exception with any failure
+				TopoDS_Wire outerBoundary = WIRE_FACTORY->BuildWire(ifcCurveBoundedPlane->OuterBoundary, false);//throws an exception with any failure
+				BRepBuilderAPI_MakeFace  faceMaker(basisPlane, outerBoundary);
+
+				for each (IIfcCurve ^ innerCurve in ifcCurveBoundedPlane->InnerBoundaries)
+				{
+					TopoDS_Wire innerBound = WIRE_FACTORY->BuildWire(innerCurve, false);//throws an exception with any failure
+					faceMaker.Add(innerBound);
+				}
+
+				if (faceMaker.IsDone())
+				{
+					gp_Trsf trsf;
+					trsf.SetTransformation(ifcCurveBoundedPlane.Position(), gp::XOY());
+					TopoDS_Face face = faceMaker.Face();
+					face.Move(trsf);
+					return face;
+				}
+				else
+					throw RaiseGeometryFactoryException("Invalid curve bounded plane", ifcCurveBoundedPlane);
+
 			}
 			Handle(Geom_Surface) SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
 			{

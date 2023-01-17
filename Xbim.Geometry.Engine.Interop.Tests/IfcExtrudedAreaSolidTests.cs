@@ -77,7 +77,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
         }
 
         [Theory]
-        [InlineData("SweptDiskSolidPolygonal_1", 84336.694898618269/*, DisplayName = "IFC SweptDiskSolidPolygonal reference test"*/)]
+        [InlineData("SweptDiskSolidPolygonal_1", 83575.33307798137/*, DisplayName = "IFC SweptDiskSolidPolygonal reference test"*/)]
         public void SweptDiskSolidPolygonalTest(string fileName, double requiredVolume)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))

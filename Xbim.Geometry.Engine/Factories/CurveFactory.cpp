@@ -58,14 +58,14 @@ namespace Xbim
 
 			IXCurve^ CurveFactory::Build(IIfcCurve^ curve)
 			{
-				
+
 				int dim = (int)curve->Dim;
 
 				XCurveType curveType;
 
 				if (dim == 2)
 				{
-					
+
 					Handle(Geom2d_Curve) hCurve2d = BuildCurve2d(curve, curveType); //this will throw an exception if it fails		
 					return BuildXCurve(hCurve2d, curveType);
 				}
@@ -121,12 +121,12 @@ namespace Xbim
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
-				
+
 				if (dynamic_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots)) return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcBSplineCurveWithKnots));
 				//all control points shall have the same dimensionality of 2
 				int numPoles = ifcBSplineCurveWithKnots->ControlPointsList->Count;
 				int numKnots = ifcBSplineCurveWithKnots->Knots->Count;
-				
+
 				int numKnotMultiplicities = ifcBSplineCurveWithKnots->KnotMultiplicities->Count;
 
 				if (numKnots != numKnotMultiplicities)
@@ -446,13 +446,10 @@ namespace Xbim
 					if (!IsBoundedCurve(segment->ParentCurve))
 						throw RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
 					Handle(Geom2d_Curve) hSegment = BuildCompositeCurveSegment2d(segment->ParentCurve, segment->SameSense);
-					if (hSegment.IsNull())
-						throw RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
+					if (hSegment.IsNull()) continue; //this will throw an exception if badly defined, a zero length segment (IsNull) is tolerated
 					Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(hSegment);
 					if (boundedCurve.IsNull())
 						throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
-					/*if (!segment->SameSense)
-						boundedCurve->Reverse();*/
 					segments.Append(boundedCurve);
 				}
 			}
@@ -500,6 +497,7 @@ namespace Xbim
 			{
 				XCurveType curveType;
 				Handle(Geom2d_Curve) curve = BuildCurve2d(ifcCurve, curveType);
+				if (curve.IsNull()) return curve;
 				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
 				if (tc != nullptr) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
 				{
@@ -658,6 +656,7 @@ namespace Xbim
 			{
 				XCurveType curveType;
 				Handle(Geom_Curve) curve = BuildCurve3d(ifcCurve, curveType);
+				if (curve.IsNull()) return curve;
 				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
 				if (tc != nullptr) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
 				{
@@ -1032,8 +1031,7 @@ namespace Xbim
 					else
 					{
 						Handle(Geom_Curve) hSegment = BuildCompositeCurveSegment3d(segment->ParentCurve, segment->SameSense);
-						if (hSegment.IsNull())
-							throw RaiseGeometryFactoryException("Composite curve segment is incorrectly defined", segment);
+						if (hSegment.IsNull()) continue;//this will throw an excpetion if badly defined, a zero length segment (IsNull) is tolerated
 						Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
 						if (boundedCurve.IsNull())
 							throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
@@ -1048,164 +1046,158 @@ namespace Xbim
 
 			Handle(Geom_TrimmedCurve) CurveFactory::BuildCurve3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
-				try
+				//Validation
+				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
+					LogInformation(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
+				XCurveType curveType;
+				Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
+				if (!basisCurve.IsNull())
 				{
-					//Validation
-					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						LogInformation(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
-					XCurveType curveType;
-					Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
-					if (!basisCurve.IsNull())
+					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool sense = ifcTrimmedCurve->SenseAgreement;
+					//get the parametric values
+					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+
+					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+
+					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
+					IIfcCartesianPoint^ cp1 = nullptr;
+					IIfcCartesianPoint^ cp2 = nullptr;
+
+					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
 					{
-						bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool sense = ifcTrimmedCurve->SenseAgreement;
-						//get the parametric values
-						IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
+						else u1 = (double)(IfcParameterValue)trim; //its parametric	
+					}
+					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
+					{
+						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
+						else u2 = (double)(IfcParameterValue)trim; //its parametric	
+					}
 
-						bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-						double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
-						IIfcCartesianPoint^ cp1 = nullptr;
-						IIfcCartesianPoint^ cp2 = nullptr;
-
-						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
+					if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
+						(cp1 != nullptr && cp2 != nullptr &&
+							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
+					{
+						gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
+						gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
+						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
+							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
+						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
+							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
+					}
+					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
+						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
+					else //we prefer to use parameters but need to adjust
+					{
+						if (isConic)
 						{
-							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
-							else u1 = (double)(IfcParameterValue)trim; //its parametric	
-						}
-						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
-						{
-							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
-							else u2 = (double)(IfcParameterValue)trim; //its parametric	
-						}
+							u1 *= ModelGeometryService->RadianFactor; //correct to radians
+							u2 *= ModelGeometryService->RadianFactor; //correct to radians
 
-						if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
-							(cp1 != nullptr && cp2 != nullptr &&
-								(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
-						{
-							gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
-							gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
-							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
-								throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
-							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
-								throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
 						}
-						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-							throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
-						else //we prefer to use parameters but need to adjust
-						{
-							if (isConic)
-							{
-								u1 *= ModelGeometryService->RadianFactor; //correct to radians
-								u2 *= ModelGeometryService->RadianFactor; //correct to radians
+					}
 
-							}
-						}
+					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
+						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
 
-						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-							throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
-
-						if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
-						{
-							if (isConic) return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-							throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve", ifcTrimmedCurve->BasisCurve);
-						}
+					if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+					{
+						if (isConic) 
+							return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 						else
-							return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
+						{
+							LogInformation(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
+							return Handle(Geom_TrimmedCurve)();
+						}
 					}
 					else
-						throw RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve", ifcTrimmedCurve->BasisCurve);
+						return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
 				}
-				catch (Exception^ ex)
-				{
-					LogInformation(ifcTrimmedCurve, ex, "Trimmed curve failed");
+				else
+					throw RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve", ifcTrimmedCurve->BasisCurve);
 
-				}
-				return nullptr;
 			}
 
 			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildCurve2d(IIfcTrimmedCurve^ ifcTrimmedCurve)
 			{
-				try
+
+
+				//Validation
+				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
+					throw RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
+				XCurveType curveType;
+				Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcTrimmedCurve->BasisCurve, curveType);
+				if (!basisCurve.IsNull())
 				{
+					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					bool sense = ifcTrimmedCurve->SenseAgreement;
+					//get the parametric values
+					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
-					//Validation
-					if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-						throw RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
-					XCurveType curveType;
-					Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcTrimmedCurve->BasisCurve, curveType);
-					if (!basisCurve.IsNull())
+					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+
+					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
+					IIfcCartesianPoint^ cp1 = nullptr;
+					IIfcCartesianPoint^ cp2 = nullptr;
+
+					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
 					{
-						bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-						bool sense = ifcTrimmedCurve->SenseAgreement;
-						//get the parametric values
-						IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
+						else u1 = (double)(IfcParameterValue)trim; //its parametric	
+					}
+					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
+					{
+						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
+						else u2 = (double)(IfcParameterValue)trim; //its parametric	
+					}
 
-						bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-						double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
-						IIfcCartesianPoint^ cp1 = nullptr;
-						IIfcCartesianPoint^ cp2 = nullptr;
-
-						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
+					if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
+						(cp1 != nullptr && cp2 != nullptr &&
+							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
+					{
+						gp_Pnt2d p1;
+						gp_Pnt2d p2;
+						if (!GEOMETRY_FACTORY->BuildPoint2d(cp1, p1))
+							throw RaiseGeometryFactoryException("Trim Point1 is not a 2d point", cp1);
+						if (!GEOMETRY_FACTORY->BuildPoint2d(cp2, p2))
+							throw RaiseGeometryFactoryException("Trim Point2 is not a 2d point", cp1);
+						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
+							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
+						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
+							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
+					}
+					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
+						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
+					else //we prefer to use parameters but need to adjust
+					{
+						if (isConic)
 						{
-							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
-							else u1 = (double)(IfcParameterValue)trim; //its parametric	
+							u1 *= ModelGeometryService->RadianFactor; //correct to radians
+							u2 *= ModelGeometryService->RadianFactor; //correct to radians
 						}
-						for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
-						{
-							if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
-							else u2 = (double)(IfcParameterValue)trim; //its parametric	
-						}
-
-						if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
-							(cp1 != nullptr && cp2 != nullptr &&
-								(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
-						{
-							gp_Pnt2d p1;
-							gp_Pnt2d p2;
-							if (!GEOMETRY_FACTORY->BuildPoint2d(cp1, p1))
-								throw RaiseGeometryFactoryException("Trim Point1 is not a 2d point", cp1);
-							if (!GEOMETRY_FACTORY->BuildPoint2d(cp2, p2))
-								throw RaiseGeometryFactoryException("Trim Point2 is not a 2d point", cp1);
-							if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
-								throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
-							if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
-								throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
-						}
-						else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-							throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
-						else //we prefer to use parameters but need to adjust
-						{
-							if (isConic)
-							{
-								u1 *= ModelGeometryService->RadianFactor; //correct to radians
-								u2 *= ModelGeometryService->RadianFactor; //correct to radians
-							}
-						}
-						if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-							throw RaiseGeometryFactoryException("Error converting Ifc Trim Points");
-						if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
-						{
-							if (isConic) return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-							throw RaiseGeometryFactoryException("Parametric Trim Points are equal and will result in an empty curve");
-						}
+					}
+					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
+						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points");
+					if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+					{
+						if (isConic) 
+							return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 						else
-							return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, sense);
+						{
+							LogInformation(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
+							return Handle(Geom2d_TrimmedCurve)();
+						}
 					}
 					else
-						throw RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve");
+						return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, sense);
 				}
-				catch (Exception^ ex)
-				{
-					LogInformation(ifcTrimmedCurve, ex, "Trimmed Curve failed");
-
-				}
-				return nullptr;
+				else
+					throw RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve");
 			}
 
 			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcPolyline^ ifcPolyline)
