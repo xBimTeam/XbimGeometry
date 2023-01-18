@@ -1,6 +1,7 @@
 #include "ShapeService.h"
 #include "Unmanaged/NWexBimMesh.h"
 #include "Unmanaged/NShapeProximityUtils.h"
+#include "Unmanaged/NShapeService.h"
 #include "ModelGeometryService.h"
 #include "BRepBuilderAPI_Transform.hxx"
 #include "../BRep//XShape.h"
@@ -42,16 +43,30 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
-			IXShape^ ShapeService::Cut(IXShape^ body, IXShape^ subtraction)
+			IXShape^ ShapeService::Cut(IXShape^ body, IXShape^ subtraction, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+				TopoDS_Shape subtractionShape = TOPO_SHAPE(subtraction);
+				TopoDS_Shape result = Ptr()->Cut(topoBody, subtractionShape, precision);
+
+				return XShape::GetXbimShape(result);
 			}
 
-			IXShape^ ShapeService::Cut(IXShape^ body, IEnumerable<IXShape^>^ subtractions)
+			IXShape^ ShapeService::Cut(IXShape^ body, IEnumerable<IXShape^>^ subtractions, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+
+				TopTools_ListOfShape subtractionShapes;
+				for each (IXShape ^ sub in subtractions)
+				{
+					TopoDS_Shape topoSubShape = TOPO_SHAPE(sub);
+					subtractionShapes.Append(topoSubShape);
+				}
+
+				TopoDS_Shape result = Ptr()->Cut(topoBody, subtractionShapes, precision);
+				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Transform(IXShape^ shape, XbimMatrix3D transformMatrix)
@@ -83,16 +98,31 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
-			IXShape^ ShapeService::Union(IXShape^ body, IXShape^ addition)
+			IXShape^ ShapeService::Union(IXShape^ body, IXShape^ addition, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+				TopoDS_Shape additionShape = TOPO_SHAPE(addition);
+				TopoDS_Shape result = Ptr()->Union(topoBody, additionShape, precision);
+
+				return XShape::GetXbimShape(result);
 			}
 
-			IXShape^ ShapeService::Union(IXShape^ body, IEnumerable<IXShape^>^ additions)
+			IXShape^ ShapeService::Union(IXShape^ body, IEnumerable<IXShape^>^ additions, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+
+				TopTools_ListOfShape additionShapes;
+				for each (IXShape ^ add in additions)
+				{
+					TopoDS_Shape addShape = TOPO_SHAPE(add);
+					additionShapes.Append(addShape);
+				}
+
+				TopoDS_Shape result = Ptr()->Union(topoBody, additionShapes, precision);
+
+				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Moved(IXShape^ shape, IIfcObjectPlacement^ placement, bool invertPlacement)
@@ -107,16 +137,31 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
-			IXShape^ ShapeService::Intersect(IXShape^ shape, IXShape^ intersect)
+			IXShape^ ShapeService::Intersect(IXShape^ body, IXShape^ intersect, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+				TopoDS_Shape intersectShape = TOPO_SHAPE(intersect);
+				TopoDS_Shape result = Ptr()->Intersect(topoBody, intersectShape, precision);
+
+				return XShape::GetXbimShape(result);
 			}
 
-			IXShape^ ShapeService::Intersect(IXShape^ shape, IEnumerable<IXShape^>^ intersect)
+			IXShape^ ShapeService::Intersect(IXShape^ body, IEnumerable<IXShape^>^ intersects, double precision)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				TopoDS_Shape topoBody;
+				TopoDS_Shape topoShape = TOPO_SHAPE(body);
+
+				TopTools_ListOfShape intersectShapes;
+				for each (IXShape ^ intersect in intersects)
+				{
+					TopoDS_Shape intersectShape = TOPO_SHAPE(intersect);
+					intersectShapes.Append(intersectShape);
+				}
+
+				TopoDS_Shape result = Ptr()->Intersect(topoBody, intersectShapes, precision);
+
+				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Moved(IXShape^ shape, IXLocation^ location)
