@@ -5,7 +5,7 @@
 #include "ProfileFactory.h"
 #include "BIMAuthoringToolWorkArounds.h"
 #include "EdgeFactory.h"
-
+#include "../BRep//XFace.h"
 #include "../BRep/XPlane.h"
 #include "../BRep/XCylindricalSurface.h"
 #include "../BRep/XConicalSurface.h"
@@ -41,12 +41,26 @@ namespace Xbim
 			IXSurface^ SurfaceFactory::Build(IIfcSurface^ ifcSurface)
 			{
 				XSurfaceType surfaceType;
-				Handle(Geom_Surface) surface = BuildSurface(ifcSurface, surfaceType);
-				if (surface.IsNull())
-					throw RaiseGeometryFactoryException("Error building surface", ifcSurface);
-
-				return XSurface::GeomToXSurface(surface);
-
+				Handle(Geom_Surface) surface;
+				auto curveBoundedPlane = dynamic_cast<IIfcCurveBoundedPlane^>(ifcSurface);
+				auto curveBoundedSurface = dynamic_cast<IIfcCurveBoundedSurface^>(ifcSurface);
+				if (curveBoundedPlane != nullptr)
+				{
+					TopoDS_Face face = BuildCurveBoundedPlane(curveBoundedPlane);
+					if (!face.IsNull()) return gcnew XFace(face); else throw RaiseGeometryFactoryException("Failed to build surface", ifcSurface);
+				}
+				else if (curveBoundedSurface != nullptr)
+				{
+					TopoDS_Face face = BuildCurveBoundedSurface(curveBoundedSurface);
+					if (!face.IsNull()) return gcnew XFace(face); else throw RaiseGeometryFactoryException("Failed to build surface", ifcSurface);
+				}
+				else
+				{
+					Handle(Geom_Surface) surface = BuildSurface(ifcSurface, surfaceType);
+					if (surface.IsNull())
+						throw RaiseGeometryFactoryException("Error building surface", ifcSurface);
+					return XSurface::GeomToXSurface(surface);
+				}
 			}
 
 #pragma endregion
@@ -63,10 +77,9 @@ namespace Xbim
 					return BuildBSplineSurfaceWithKnots((IIfcBSplineSurfaceWithKnots^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRationalBSplineSurfaceWithKnots:
 					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
-				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:
-					return BuildCurveBoundedPlane((IIfcCurveBoundedPlane^)ifcSurface);
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:			
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedSurface:
-					return BuildCurveBoundedSurface((IIfcCurveBoundedSurface^)ifcSurface);
+					throw RaiseGeometryFactoryException("Curve Bounded Surfaces must be built as faces", ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRectangularTrimmedSurface:
 					return BuildRectangularTrimmedSurface((IIfcRectangularTrimmedSurface^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcSurfaceOfLinearExtrusion:
@@ -160,7 +173,7 @@ namespace Xbim
 			TopoDS_Face SurfaceFactory::BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane)
 			{
 				Handle(Geom_Plane) basisPlane = BuildPlane(ifcCurveBoundedPlane->BasisSurface); //throws an exception with any failure
-				TopoDS_Wire outerBoundary = WIRE_FACTORY->BuildWire(ifcCurveBoundedPlane->OuterBoundary, false);//throws an exception with any failure
+				TopoDS_Wire outerBoundary = WIRE_FACTORY->BuildWire(ifcCurveBoundedPlane->OuterBoundary, true);//throws an exception with any failure
 				BRepBuilderAPI_MakeFace  faceMaker(basisPlane, outerBoundary);
 
 				for each (IIfcCurve ^ innerCurve in ifcCurveBoundedPlane->InnerBoundaries)
@@ -172,7 +185,7 @@ namespace Xbim
 				if (faceMaker.IsDone())
 				{
 					gp_Trsf trsf;
-					trsf.SetTransformation(ifcCurveBoundedPlane.Position(), gp::XOY());
+					trsf.SetTransformation(basisPlane->Position(), gp::XOY());
 					TopoDS_Face face = faceMaker.Face();
 					face.Move(trsf);
 					return face;
@@ -181,25 +194,143 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Invalid curve bounded plane", ifcCurveBoundedPlane);
 
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
+			TopoDS_Face SurfaceFactory::BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface)
 			{
 				throw gcnew NotImplementedException();
 			}
+
 			Handle(Geom_RectangularTrimmedSurface) SurfaceFactory::BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface)
 			{
-				throw gcnew NotImplementedException();
+				XSurfaceType surfaceType;
+				Handle(Geom_Surface) basisSurface = BuildSurface(ifcRectangularTrimmedSurface->BasisSurface, surfaceType); //throws an exception with any failure
+
+				Handle(Geom_RectangularTrimmedSurface) geomTrim = new  Geom_RectangularTrimmedSurface(basisSurface, ifcRectangularTrimmedSurface->U1, 
+					ifcRectangularTrimmedSurface->U2, ifcRectangularTrimmedSurface->V1, ifcRectangularTrimmedSurface->V2);
+				return geomTrim;
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots)
+
+			Handle(Geom_BSplineSurface) SurfaceFactory::BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots)
 			{
-				throw gcnew NotImplementedException();
+				auto ifcControlPoints = ifcBSplineSurfaceWithKnots->ControlPoints;
+				if (ifcControlPoints->Count < 2)
+					throw RaiseGeometryFactoryException("Incorrect number of poles for Bspline surface, it must be at least 2", ifcBSplineSurfaceWithKnots);
+				
+				TColgp_Array2OfPnt poles(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->UUpper + 1, 1, (Standard_Integer)ifcBSplineSurfaceWithKnots->VUpper + 1);
+				
+				for (int u = 0; u <= ifcBSplineSurfaceWithKnots->UUpper; u++)
+				{
+					auto uRow = ifcControlPoints[u];
+					for (int v = 0; v <= ifcBSplineSurfaceWithKnots->VUpper; v++)
+					{
+						poles.SetValue(u + 1, v + 1, gp_Pnt(uRow[v].X, uRow[v].Y, uRow[v].Z));
+					}
+				}
+				
+				TColStd_Array1OfReal uknots(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotUUpper);
+				TColStd_Array1OfReal vknots(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotVUpper);
+				TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotUUpper);
+				TColStd_Array1OfInteger vMultiplicities(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotVUpper);
+				int i = 1;
+				for each (double knot in ifcBSplineSurfaceWithKnots->UKnots)
+				{
+					uknots.SetValue(i, knot);
+					i++;
+				}
+				i = 1;
+				for each (double knot in ifcBSplineSurfaceWithKnots->VKnots)
+				{
+					vknots.SetValue(i, knot);
+					i++;
+				}
+
+				i = 1;
+				for each (int multiplicity in ifcBSplineSurfaceWithKnots->UMultiplicities)
+				{
+					uMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+
+				i = 1;
+				for each (int multiplicity in ifcBSplineSurfaceWithKnots->VMultiplicities)
+				{
+					vMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+
+				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)ifcBSplineSurfaceWithKnots->UDegree, (Standard_Integer)ifcBSplineSurfaceWithKnots->VDegree);
+				return hSurface;
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots)
+
+			Handle(Geom_BSplineSurface) SurfaceFactory::BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots)
 			{
-				throw gcnew NotImplementedException();
+				auto ifcControlPoints = ifcRationalBSplineSurfaceWithKnots->ControlPoints;
+				if (ifcControlPoints->Count < 2)
+					throw RaiseGeometryFactoryException("Incorrect number of poles for Bspline surface, it must be at least 2", ifcRationalBSplineSurfaceWithKnots);
+
+				TColgp_Array2OfPnt poles(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->UUpper + 1, 1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->VUpper + 1);
+
+				for (int u = 0; u <= ifcRationalBSplineSurfaceWithKnots->UUpper; u++)
+				{
+					auto uRow = ifcControlPoints[u];
+					for (int v = 0; v <= ifcRationalBSplineSurfaceWithKnots->VUpper; v++)
+					{
+						poles.SetValue(u + 1, v + 1, gp_Pnt(uRow[v].X, uRow[v].Y, uRow[v].Z));
+					}
+				}
+				auto ifcWeights = ifcRationalBSplineSurfaceWithKnots->Weights;
+				TColStd_Array2OfReal weights(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->UUpper + 1, 1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->VUpper + 1);
+				for (int u = 0; u <= ifcRationalBSplineSurfaceWithKnots->UUpper; u++)
+				{
+					List<Ifc4::MeasureResource::IfcReal>^ uRow = ifcWeights[u];
+					for (int v = 0; v <= ifcRationalBSplineSurfaceWithKnots->VUpper; v++)
+					{
+						double r = uRow[v];
+						weights.SetValue(u + 1, v + 1, r);
+					}
+				}
+
+
+				TColStd_Array1OfReal uknots(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->KnotUUpper);
+				TColStd_Array1OfReal vknots(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->KnotVUpper);
+				TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->KnotUUpper);
+				TColStd_Array1OfInteger vMultiplicities(1, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->KnotVUpper);
+				int i = 1;
+				for each (double knot in ifcRationalBSplineSurfaceWithKnots->UKnots)
+				{
+					uknots.SetValue(i, knot);
+					i++;
+				}
+				i = 1;
+				for each (double knot in ifcRationalBSplineSurfaceWithKnots->VKnots)
+				{
+					vknots.SetValue(i, knot);
+					i++;
+				}
+
+				i = 1;
+				for each (int multiplicity in ifcRationalBSplineSurfaceWithKnots->UMultiplicities)
+				{
+					uMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+
+				i = 1;
+				for each (int multiplicity in ifcRationalBSplineSurfaceWithKnots->VMultiplicities)
+				{
+					vMultiplicities.SetValue(i, multiplicity);
+					i++;
+				}
+
+				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, weights, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->UDegree, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->VDegree);
+				return hSurface;
 			}
-			Handle(Geom_Surface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
+			Handle(Geom_CylindricalSurface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
-				throw gcnew NotImplementedException();
+				gp_Ax2 ax2;
+				if(!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcCylindricalSurface->Position, ax2))
+					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcCylindricalSurface);
+				gp_Ax3 ax3(ax2);
+				return new Geom_CylindricalSurface(ax3, ifcCylindricalSurface->Radius);
 			}
 
 #pragma endregion

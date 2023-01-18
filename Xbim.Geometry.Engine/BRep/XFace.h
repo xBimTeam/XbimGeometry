@@ -2,7 +2,7 @@
 #include "XShape.h"
 #include <TopoDS_Face.hxx>
 #include <TopoDS.hxx>
-
+#include "XSurface.h"
 using namespace Xbim::Geometry::Abstractions;
 using namespace System::Collections::Generic;
 #define OccFace() TopoDS::Face(*(this->Ptr()))
@@ -13,7 +13,7 @@ namespace Xbim
 	{
 		namespace BRep
 		{
-			public ref class XFace : public XShape, IXFace
+			public ref class XFace : public XShape, IXFace, IXBoundedSurface
 			{
 			public:
 				XFace(const TopoDS_Face& hFace) :XShape(new TopoDS_Face(hFace)) { };
@@ -26,7 +26,9 @@ namespace Xbim
 				/// Area in default model units
 				/// </summary>
 				virtual property double Area {double get(); }
-
+				virtual property XSurfaceType SurfaceType {virtual XSurfaceType get() { return XSurfaceType::IfcCurveBoundedSurface; }; };
+				virtual property bool IsUPeriodic {bool get() { return Surface->IsUPeriodic; }}
+				virtual property bool IsVPeriodic {bool get() { return Surface->IsVPeriodic; }}
 				
 			};
 

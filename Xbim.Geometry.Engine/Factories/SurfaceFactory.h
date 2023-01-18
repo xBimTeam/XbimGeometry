@@ -8,6 +8,7 @@
 #include <Geom_SurfaceOfRevolution.hxx>
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_BSplineSurface.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -25,12 +26,12 @@ namespace Xbim
 				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane);
 				Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcPlane);
 				Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion);
-				Handle(Geom_Plane) BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);
-				Handle(Geom_Surface) BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface);
+				TopoDS_Face BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);
+				TopoDS_Face BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface);
 				Handle(Geom_RectangularTrimmedSurface) BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface);
-				Handle(Geom_Surface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
-				Handle(Geom_Surface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
-				Handle(Geom_Surface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
+				Handle(Geom_BSplineSurface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
+				Handle(Geom_BSplineSurface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
+				Handle(Geom_CylindricalSurface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
 				
 			protected:
 				
