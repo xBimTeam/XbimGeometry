@@ -56,6 +56,7 @@ public:
 	Handle(Geom_BSplineCurve) BuildIndexedPolyCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom_LineWithMagnitude) BuildLine3d(const gp_Pnt& pnt, const gp_Vec& dir, double magnitude);
 	Handle(Geom_OffsetCurve) BuildOffsetCurve3d(const Handle(Geom_Curve)& basisCurve, const gp_Vec& refDir, double offset);
+	int Get2dLinearSegments(const TColgp_Array1OfPnt2d& points, double tolerance, TColGeom2d_SequenceOfBoundedCurve& segments);
 	Handle(Geom_BSplineCurve) BuildPolyline3d(const TColgp_Array1OfPnt& points, double tolerance);
 	Handle(Geom_TrimmedCurve) BuildTrimmedLine3d(const gp_Pnt& start, const gp_Pnt& end);
 

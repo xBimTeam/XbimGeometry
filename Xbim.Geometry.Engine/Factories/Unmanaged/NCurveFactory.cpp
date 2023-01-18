@@ -309,11 +309,6 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 			}
 			GC_MakeArcOfCircle arcMaker(circle->Circ(), u1, u2, sense);
 			if (!arcMaker.IsDone()) Standard_Failure::Raise("Could not build arc segment from circle");
-			//if (!sense)
-			//{
-			//	arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
-			//	
-			//}
 			return arcMaker.Value();
 		}
 		Handle(Geom_EllipseWithSemiAxes) elipse = Handle(Geom_EllipseWithSemiAxes)::DownCast(basisCurve);
@@ -442,7 +437,24 @@ int NCurveFactory::Get3dLinearSegments(const TColgp_Array1OfPnt& points, double 
 	return lastPointIdx - 1;
 }
 
-
+int NCurveFactory::Get2dLinearSegments(const TColgp_Array1OfPnt2d& points, double tolerance, TColGeom2d_SequenceOfBoundedCurve& segments)
+{
+	int pointCount = points.Length();
+	int lastPointIdx = 1;
+	for (Standard_Integer i = 1; i < pointCount; i++)
+	{
+		const gp_Pnt2d& start = points.Value(lastPointIdx);
+		const gp_Pnt2d& end = points.Value(i + 1);
+		if (!start.IsEqual(end, tolerance)) //ignore very small segments
+		{
+			Handle(Geom2d_TrimmedCurve) lineSeg = BuildTrimmedLine2d(start, end);
+			//move the lastIndex on
+			lastPointIdx++;
+			segments.Append(lineSeg);
+		} //else if we skip a segment because it is small lastPointIdx remains the same
+	}
+	return lastPointIdx - 1;
+}
 Handle(Geom_BSplineCurve) NCurveFactory::BuildPolyline3d(const TColgp_Array1OfPnt& points, double tolerance)
 {
 	try
@@ -507,7 +519,6 @@ Handle(Geom2d_TrimmedCurve) NCurveFactory::BuildTrimmedCurve2d(const Handle(Geom
 			GCE2d_MakeArcOfCircle arcMaker(circle->Circ2d(), u1, u2, sense);
 			if (!arcMaker.IsDone())
 				Standard_Failure::Raise("Could not build arc segment from circle");
-			//if (!sense) arcMaker.Value()->Reverse(); //need to correct the reverse that has been done to the parameters to make OCC work correctly		
 			return arcMaker.Value();
 		}
 		Handle(Geom2d_EllipseWithSemiAxes) elipse = Handle(Geom2d_EllipseWithSemiAxes)::DownCast(basisCurve);

@@ -262,7 +262,8 @@ namespace Xbim.Geometry.NetCore.Tests
         [InlineData(180, 90, true, 2)] //Ifc Case 2
         [InlineData(180, 90, false, 3)]//Ifc Case 3
         [InlineData(90, 180, false, 4)]//Ifc Case 4
-      
+        [InlineData(12, 0, false, 5)]//custom
+
         public void Can_convert_ifc_trimmed_circle_2d(double trim1, double trim2, bool sameSense, int ifcCase)
         {
             double radius = 10;
@@ -285,24 +286,31 @@ namespace Xbim.Geometry.NetCore.Tests
             {
                 case 1:
                     (radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
-                    (tc.StartPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
-                    (tc.EndPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    tc.StartPoint.Y.Should().BeApproximately(radius, _modelSvc.Precision);
+                    tc.EndPoint.X.Should().BeApproximately(-radius, _modelSvc.Precision);
 
                     break;
                 case 2:
                     (3 * radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
-                    (tc.EndPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
-                    (tc.StartPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    tc.EndPoint.Y.Should().BeApproximately(radius, _modelSvc.Precision);
+                    tc.StartPoint.X.Should().BeApproximately(-radius, _modelSvc.Precision);
                     break;
                 case 3:
                     (radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
-                    (tc.EndPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
-                    (tc.StartPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    tc.EndPoint.Y.Should().BeApproximately(radius, _modelSvc.Precision);
+                    tc.StartPoint.X.Should().BeApproximately(-radius, _modelSvc.Precision);
                     break;
                 case 4:
                     (3 * radius * Math.PI / 2).Should().BeApproximately(tc.Length, _modelSvc.Precision);
-                    (tc.StartPoint.Y).Should().BeApproximately(radius, _modelSvc.Precision);
-                    (tc.EndPoint.X).Should().BeApproximately(-radius, _modelSvc.Precision);
+                    tc.StartPoint.Y.Should().BeApproximately(radius, _modelSvc.Precision);
+                    tc.EndPoint.X.Should().BeApproximately(-radius, _modelSvc.Precision);
+                    break;
+                case 5:
+                    tc.Length.Should().BeApproximately(radius * trim1 * Math.PI / 180, _modelSvc.Precision);
+                    tc.StartPoint.X.Should().BeApproximately(radius*Math.Cos(trim1 * Math.PI / 180), _modelSvc.Precision);
+                    tc.StartPoint.Y.Should().BeApproximately(radius * Math.Sin(trim1 * Math.PI / 180), _modelSvc.Precision);
+                    tc.EndPoint.X.Should().BeApproximately(radius, _modelSvc.Precision);
+                    tc.EndPoint.Y.Should().BeApproximately(0, _modelSvc.Precision);
                     break;
                 default:
                     break;

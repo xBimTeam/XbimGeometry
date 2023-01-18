@@ -380,7 +380,10 @@ namespace Xbim
 					gp_Pnt2d start = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[0]);
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->Precision))
+					{
 						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
+						return Handle(Geom2d_Curve)();
+					}
 					Handle(Geom2d_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine2d(start, end);
 					if (lineSeg.IsNull())
 						throw RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
@@ -445,12 +448,27 @@ namespace Xbim
 						throw RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
 					if (!IsBoundedCurve(segment->ParentCurve))
 						throw RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
-					Handle(Geom2d_Curve) hSegment = BuildCompositeCurveSegment2d(segment->ParentCurve, segment->SameSense);
-					if (hSegment.IsNull()) continue; //this will throw an exception if badly defined, a zero length segment (IsNull) is tolerated
-					Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(hSegment);
-					if (boundedCurve.IsNull())
-						throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
-					segments.Append(boundedCurve);
+					
+					//if the segment is a polyline or an indexedpolycurve we need to add in the individual edge
+					auto polylineSegment = dynamic_cast<IIfcPolyline^>(segment->ParentCurve);
+					auto indexPolyCurveSegment = dynamic_cast<IIfcIndexedPolyCurve^>(segment->ParentCurve);
+					if (polylineSegment != nullptr)
+					{
+						BuildPolylineSegments2d(polylineSegment, segments);
+					}
+					else if (indexPolyCurveSegment != nullptr)
+					{
+						BuildIndexPolyCurveSegments2d(indexPolyCurveSegment, segments);
+					}
+					else
+					{
+						Handle(Geom2d_Curve) hSegment = BuildCompositeCurveSegment2d(segment->ParentCurve, segment->SameSense);
+						if (hSegment.IsNull()) continue; //this will throw an exception if badly defined, a zero length segment (IsNull) is tolerated
+						Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(hSegment);
+						if (boundedCurve.IsNull())
+							throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
+						segments.Append(boundedCurve);
+					}
 				}
 			}
 
@@ -498,21 +516,7 @@ namespace Xbim
 				XCurveType curveType;
 				Handle(Geom2d_Curve) curve = BuildCurve2d(ifcCurve, curveType);
 				if (curve.IsNull()) return curve;
-				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
-				if (tc != nullptr) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
-				{
-
-					if (!sameSense)
-					{
-						if (tc->SenseAgreement) curve->Reverse();
-					}
-					else
-					{
-						if (!tc->SenseAgreement) curve->Reverse();
-					}
-				}
-				else
-					if (!sameSense) curve->Reverse();
+				if (!sameSense) curve->Reverse();
 				return curve;
 			}
 
@@ -657,21 +661,7 @@ namespace Xbim
 				XCurveType curveType;
 				Handle(Geom_Curve) curve = BuildCurve3d(ifcCurve, curveType);
 				if (curve.IsNull()) return curve;
-				IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
-				if (tc != nullptr) //special handle for IFC rules on trimmed segments, composite curve segment sense overrides the sense of the trim
-				{
-					IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(ifcCurve);
-					if (!sameSense)
-					{
-						if (tc->SenseAgreement) curve->Reverse();
-					}
-					else
-					{
-						if (!tc->SenseAgreement) curve->Reverse();
-					}
-				}
-				else
-					if (!sameSense) curve->Reverse();
+				if (!sameSense) curve->Reverse();
 				return curve;
 			}
 
@@ -705,7 +695,12 @@ namespace Xbim
 				GEOMETRY_FACTORY->GetPolylinePoints3d(ifcPolyline, points);
 				EXEC_NATIVE->Get3dLinearSegments(points, ModelGeometryService->MinimumGap, segments);
 			}
-
+			void CurveFactory::BuildPolylineSegments2d(IIfcPolyline^ ifcPolyline, TColGeom2d_SequenceOfBoundedCurve& segments)
+			{
+				TColgp_Array1OfPnt2d points(1, ifcPolyline->Points->Count);
+				GEOMETRY_FACTORY->GetPolylinePoints2d(ifcPolyline, points);
+				EXEC_NATIVE->Get2dLinearSegments(points, ModelGeometryService->MinimumGap, segments);
+			}
 			void CurveFactory::BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments)
 			{
 
@@ -1031,12 +1026,12 @@ namespace Xbim
 					else
 					{
 						Handle(Geom_Curve) hSegment = BuildCompositeCurveSegment3d(segment->ParentCurve, segment->SameSense);
-						if (hSegment.IsNull()) continue;//this will throw an excpetion if badly defined, a zero length segment (IsNull) is tolerated
+						if (hSegment.IsNull()) continue;//this will throw an exception if badly defined, a zero length segment (IsNull) is tolerated
 						Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
 						if (boundedCurve.IsNull())
 							throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
-						if (!segment->SameSense)
-							boundedCurve->Reverse();
+						/*if (!segment->SameSense)
+							boundedCurve->Reverse();*/
 						segments.Append(boundedCurve);
 					}
 

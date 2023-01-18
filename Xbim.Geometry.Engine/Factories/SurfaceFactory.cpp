@@ -16,6 +16,8 @@
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <TopoDS.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
+#include <ShapeFix_Edge.hxx>
+#include <TopExp_Explorer.hxx>
 
 using namespace Xbim::Geometry::BRep;
 
@@ -188,6 +190,11 @@ namespace Xbim
 					trsf.SetTransformation(basisPlane->Position(), gp::XOY());
 					TopoDS_Face face = faceMaker.Face();
 					face.Move(trsf);
+					ShapeFix_Edge sfe;
+					for (TopExp_Explorer exp(faceMaker.Face(), TopAbs_EDGE); exp.More(); exp.Next())
+					{
+						sfe.FixAddPCurve(TopoDS::Edge(exp.Current()), faceMaker.Face(), Standard_False);
+					}
 					return face;
 				}
 				else

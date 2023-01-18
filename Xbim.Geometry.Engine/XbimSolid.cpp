@@ -1263,6 +1263,10 @@ namespace Xbim
 				if (face != nullptr && !face->BoundingBox.IsEmpty)
 				{
 					TopoDS_Face occFace = face;
+					try
+					{
+
+					
 					BRepPrimAPI_MakePrism prism(occFace, vec);
 
 					if (prism.IsDone())
@@ -1274,6 +1278,11 @@ namespace Xbim
 							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
 
 						return;
+					}
+					}
+					catch (const Standard_Failure& exception)
+					{
+						auto errMsg = exception.GetMessageString();
 					}
 				}
 				// XbimGeometryCreator::LogWarning(logger, repItem, "Invalid extrusion, could not create solid");

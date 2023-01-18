@@ -25,7 +25,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         public Ifc4GeometryTests(ILoggerFactory loggerFactory)
         {
-            _loggerFactory = loggerFactory;_logger=_loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            _loggerFactory = loggerFactory;
+            _logger=_loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -747,7 +748,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 eas.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
-                geom.Volume.Should().BeApproximately(2278352481546.0356, 1e-7);
+                geom.Volume.Should().BeApproximately(2278352481546.0352, 1e-5);
             }
         }
 

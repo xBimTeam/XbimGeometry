@@ -77,6 +77,7 @@ namespace Xbim
 				Handle(Geom_Ellipse) BuildCurve3d(IIfcEllipse^ ifcEllipse);
 				Handle(Geom_BSplineCurve) BuildCurve3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve);
 				void BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments);
+				void BuildPolylineSegments2d(IIfcPolyline^ ifcPolyline, TColGeom2d_SequenceOfBoundedCurve& segments);
 				void BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments);
 
 				Handle(Geom_LineWithMagnitude) BuildCurve3d(IIfcLine^ ifcLine);
