@@ -596,7 +596,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var brepM = mFace.ToBRep;
                 var differ = new Diff();
                 var diffs = differ.DiffText(brepM, brepD);
-                mFace.Normal.Should().Equals(dFace.Normal);
+                mFace.Normal.X.Should().BeApproximately(dFace.Normal.X,1e-5);
+                mFace.Normal.Y.Should().BeApproximately(dFace.Normal.Y, 1e-5);
+                mFace.Normal.Z.Should().BeApproximately(dFace.Normal.Z, 1e-5);
                 diffs.Length.Should().Be(3);
 
             }
