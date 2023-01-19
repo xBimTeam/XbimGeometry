@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
-
+using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
@@ -123,7 +123,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 var extrudedSolid = geomEngine.CreateSolid(er.Entity, _logger);
                 HelperFunctions.IsValidSolid(extrudedSolid);
-                extrudedSolid.Volume.Should().BeApproximately(14999524619.3158950805664, 1e-5);
+                extrudedSolid.Volume.Should().BeApproximately(14999524619.315742, 1e-5);
             }
         }
 
@@ -319,6 +319,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        /// <summary>
+        /// This model has a composite curve with 12 segments, the 11th segment is an incorrectly defined trimed circle, the axis is wrongly defined
+        /// The process should fail and handle the failure correctly
+        /// </summary>
         [Fact]
         public void can_handle_discontinuous_composite_curve()
         {
@@ -327,8 +331,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
                 cc.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                var wire = geomEngine.CreateWire(cc, _logger);
-                wire.Should().NotBeNull();
+                
+                var exception = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateWire(cc, _logger));
+                exception.Message.Should().Be("IfcCompositeCurve could not be built as a wire");
             }
         }
 

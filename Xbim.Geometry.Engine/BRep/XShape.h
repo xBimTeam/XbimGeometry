@@ -9,7 +9,7 @@
 #include "../XbimHandle.h"
 #include "XAxisAlignedBox.h"
 
-#include "../Exceptions/XbimGeometryServiceException.h"
+
 #include "../BRep/XLocation.h"
 
 

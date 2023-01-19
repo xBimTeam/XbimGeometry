@@ -1,7 +1,7 @@
 #include "BRepDocumentItem.h"
 #include "../BRep/XShape.h"
 #include "../Visual/VisualMaterial.h"
-#include "../Exceptions/XbimGeometryServiceException.h"
+
 #include "../BRep/XCompound.h"
 #include "../BRep/XSolid.h"
 #include "../BRep/XShell.h"

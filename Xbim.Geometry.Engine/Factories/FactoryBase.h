@@ -1,7 +1,7 @@
 #pragma once
 #include "../XbimHandle.h"
 #include "../Services/ModelGeometryService.h"
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Geometry::Abstractions;
 

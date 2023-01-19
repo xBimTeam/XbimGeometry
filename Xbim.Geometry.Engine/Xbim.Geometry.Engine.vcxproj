@@ -111,6 +111,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>OCCT_NO_PLUGINS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -131,6 +132,7 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -152,6 +154,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -173,6 +176,7 @@
       <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
       <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -234,9 +238,6 @@
     <ClInclude Include="BRep\XVertex.h" />
     <ClInclude Include="BRep\XWire.h" />
     <ClInclude Include="Factories\CheckClosedStatus.h" />
-    <ClInclude Include="Exceptions\XbimGeometryDefinitionException.h" />
-    <ClInclude Include="Exceptions\XbimGeometryFactoryException.h" />
-    <ClInclude Include="Exceptions\XbimGeometryServiceException.h" />
     <ClInclude Include="Factories\BooleanFactory.h" />
     <ClInclude Include="Factories\CompoundFactory.h" />
     <ClInclude Include="Factories\CurveFactory.h" />

@@ -3,8 +3,8 @@
 #include "MeshFactors.h"
 #include "LoggingService.h"
 #include "../XbimGeometryCreator.h"
-#include "../Exceptions/XbimGeometryServiceException.h"
-#include "../Exceptions/XbimGeometryServiceException.h"
+
+
 using namespace Xbim::Geometry::Exceptions;
 
 #define ActiveModelGeometryService(ifcEntity) static_cast<ModelGeometryService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)

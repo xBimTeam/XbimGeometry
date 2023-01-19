@@ -4,7 +4,7 @@
 //#include <TDocStd_Document.hxx>
 //#include <chrono>
 //#include <STEPCAFControl_Reader.hxx>
-#include "../Exceptions//XbimGeometryServiceException.h"
+
 #include <BinTools.hxx>
 #include "../BRep/XShape.h"
 using namespace Xbim::Geometry::BRep;

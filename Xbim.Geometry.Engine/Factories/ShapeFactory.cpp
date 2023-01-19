@@ -21,7 +21,7 @@
 #include "../Brep/XPlane.h"
 #include "../Brep/XLocation.h"
 
-#include "../Exceptions/XbimGeometryServiceException.h"
+
 #include "../XbimConvert.h"
 #include "../XbimVertex.h"
 #include "../XbimEdge.h"

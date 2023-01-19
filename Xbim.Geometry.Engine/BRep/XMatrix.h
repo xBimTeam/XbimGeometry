@@ -4,7 +4,7 @@
 #include <gp_GTrsf.hxx>
 #include "../XbimHandle.h"
 #include <Graphic3d_Mat4d.hxx>
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {

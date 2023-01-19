@@ -1,6 +1,6 @@
 #pragma once
 #include <gp_Dir2d.hxx>
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim

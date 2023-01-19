@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\0200-WorkingTestModels\\0220-SingleModels\" /singlethread",
+      "commandLineArgs": "\"C:\\Users\\Steve\\Downloads\\SJ Architectural model ARC.ifc\" /singlethread",
       "nativeDebugging": true
     }
   }

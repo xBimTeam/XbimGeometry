@@ -17,7 +17,6 @@
 #include "BRepDocumentItem.h"
 #include "../Visual/VisualMaterial.h"
 #include "../Factories//ShapeFactory.h"
-#include "../Exceptions//XbimGeometryServiceException.h"
 
 
 #include "../BRep/XShape.h"

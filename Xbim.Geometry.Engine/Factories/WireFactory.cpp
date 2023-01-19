@@ -83,7 +83,7 @@ namespace Xbim
 						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
 					return BuildWire(static_cast<IIfcTrimmedCurve^>(ifcCurve), asSingleEdge);
-				
+
 				default:
 					throw RaiseGeometryFactoryException("Unsupported curve type", ifcCurve);
 				}
@@ -333,7 +333,24 @@ namespace Xbim
 						CURVE_FACTORY->BuildCompositeCurveSegments3d(ifcCompositeCurve, segments);
 						TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 						if (wire.IsNull())
+						{
+#ifdef _DEBUG
+							
+							System::Text::StringBuilder msg("Error building Composite curve\n");
+							gp_Pnt lastPnt;
+							for (auto&& seg : segments)
+							{							
+								auto start = seg->StartPoint();
+								auto end = seg->EndPoint();
+								msg.AppendFormat("({0},{1},{2}) -> ({3},{4},{5}) \t\tGAP {6}\n", start.X(), start.Y(), start.Z(), end.X(), end.Y(), end.Z(), Math::Round(lastPnt.Distance(start),3));
+								lastPnt = end;
+
+							}
+							LogDebug(ifcCompositeCurve,nullptr,msg.ToString());
+#endif // _DEBUG
+
 							throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+						}
 						return wire;
 					}
 				}
@@ -374,11 +391,11 @@ namespace Xbim
 
 			TopoDS_Wire WireFactory::BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam)
 			{
-				
+
 				TopoDS_Wire wire = BuildWire(ifcCurve, false); //throws exception
-			
+
 				if (double::IsNaN(startParam) && double::IsNaN(endParam)) return wire; //no trimming required
-				
+
 				TopoDS_Wire directrix = EXEC_NATIVE->BuildTrimmedWire(wire, startParam, endParam, true, ModelGeometryService->Precision);
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);

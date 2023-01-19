@@ -135,15 +135,6 @@
     <ClInclude Include="Services\LoggingService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Exceptions\XbimGeometryDefinitionException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Exceptions\XbimGeometryFactoryException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Exceptions\XbimGeometryServiceException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h">
       <Filter>Header Files</Filter>
     </ClInclude>

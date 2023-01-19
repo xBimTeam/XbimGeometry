@@ -1,7 +1,7 @@
 #pragma once
 #include <gp_Vec.hxx>
 #include <gp_Vec2d.hxx>
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim

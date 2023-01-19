@@ -8,7 +8,7 @@
 #include <Geom2d_Ellipse.hxx>
 #include "XEllipse2d.h"
 
-#include "../Exceptions/XbimGeometryFactoryException.h"
+
 using namespace Xbim::Geometry::Exceptions;
 namespace Xbim
 {

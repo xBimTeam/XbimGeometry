@@ -9,7 +9,7 @@
 #include <TopExp.hxx>
 #include <TopoDS_Vertex.hxx>
 
-#include "../Exceptions/XbimGeometryDefinitionException.h"
+
 #include <GProp_PGProps.hxx>
 #include <BRepGProp.hxx>
 using namespace System;

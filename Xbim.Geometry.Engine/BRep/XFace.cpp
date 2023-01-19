@@ -16,7 +16,7 @@
 #include <GeomAdaptor_Surface.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_SphericalSurface.hxx>
-#include "../Exceptions/XbimGeometryDefinitionException.h"
+
 #include <GProp_PGProps.hxx>
 #include <BRepGProp.hxx>
 #include <GeomLProp_SLProps.hxx>
