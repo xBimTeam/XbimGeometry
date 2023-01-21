@@ -113,7 +113,7 @@ namespace Xbim
 			throw gcnew System::Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
+		System::Collections::Generic::IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
 			if (!intersector->Is3D) intersector = ((XbimCurve2D^)intersector)->ToCurve3D();
@@ -354,7 +354,7 @@ namespace Xbim
 			int i = 1;
 			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in coordList)
 			{
-				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				System::Collections::Generic::IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
 				enumer->MoveNext();
 				gp_Pnt p;
 				p.SetX((double)enumer->Current);

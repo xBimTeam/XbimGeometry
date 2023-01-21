@@ -142,7 +142,7 @@ namespace Xbim
 			return result;
 		}
 
-		IEnumerator<IXbimFace^>^ XbimFaceSet::GetEnumerator()
+		System::Collections::Generic::IEnumerator<IXbimFace^>^ XbimFaceSet::GetEnumerator()
 		{
 			return faces->GetEnumerator();
 		}

@@ -45,7 +45,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimShellSetType; }}
-			virtual IEnumerator<IXbimShell^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimShell^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);

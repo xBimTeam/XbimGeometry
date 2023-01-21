@@ -37,7 +37,7 @@ namespace Xbim
 		{
 			int BRepDocumentManager::InSession(System::String^ filePath)
 			{
-				System::IntPtr p = Marshal::StringToHGlobalAnsi(filePath);
+				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filePath);
 				try
 				{
 					const char* pAnsiPath = static_cast<const char*>(p.ToPointer());
@@ -53,7 +53,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(p);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 				}
 			}
 
@@ -163,7 +163,7 @@ namespace Xbim
 			IXBRepDocument^ BRepDocumentManager::Open(System::String^ filePath)
 			{
 
-				System::IntPtr p = Marshal::StringToHGlobalAnsi(filePath);
+				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filePath);
 				bool lockWasTaken = false;
 				try
 				{
@@ -263,7 +263,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(p);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 					if (lockWasTaken) Monitor::Exit(_lockObject);
 				}
 				return nullptr;
@@ -357,7 +357,7 @@ namespace Xbim
 
 			bool BRepDocumentManager::SaveAs(System::String^ filePath, IXBRepDocument^ document)
 			{
-				System::IntPtr p = Marshal::StringToHGlobalAnsi(filePath);
+				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filePath);
 				bool lockWasTaken = false;
 				try
 				{
@@ -406,7 +406,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(p);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 					if (lockWasTaken) Monitor::Exit(_lockObject);
 				}
 				return false;
@@ -431,7 +431,7 @@ namespace Xbim
 						output.seekg(0);
 						output.read(buffer.get(), size);
 						cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
-						Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+						System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
 						return byteArray;
 					}
 					case PCDM_SS_DriverFailure:
@@ -506,7 +506,7 @@ namespace Xbim
 					output.seekg(0);
 					output.read(buffer.get(), size);
 					cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
-					Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+					System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
 					return byteArray;
 				}
 				catch (const Standard_Failure& sf)

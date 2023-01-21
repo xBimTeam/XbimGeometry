@@ -6,8 +6,8 @@
 
 
 using namespace Xbim::Geometry::Exceptions;
-
-#define ActiveModelGeometryService(ifcEntity) static_cast<ModelGeometryService^>(static_cast<IPersistEntity^>(ifcEntity)->Model->Tag)
+using namespace Xbim::Geometry::Abstractions;
+#define ActiveModelGeometryService(ifcEntity) ModelGeometryService::GetModelService(ifcEntity->Model)
 
 
 using namespace Xbim::Common;
@@ -45,7 +45,7 @@ namespace Xbim
 		}
 	}
 }
-
+using namespace System::Collections::Generic;
 namespace Xbim
 {
 	namespace Geometry
@@ -56,6 +56,8 @@ namespace Xbim
 
 			public ref class ModelGeometryService : IXModelGeometryService
 			{
+			public:
+				static ModelGeometryService^ GetModelService(IModel^ model);
 			protected:
 				LoggingService^ _loggingService;
 			private:

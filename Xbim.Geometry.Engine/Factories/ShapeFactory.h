@@ -8,7 +8,6 @@ using namespace Xbim::Common;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Collections::Generic;
 
 namespace Xbim
 {
@@ -43,8 +42,8 @@ namespace Xbim
 				virtual IXShape^ Transform(IXShape^ shape, XbimMatrix3D matrix);
 				virtual IXShape^ Union(IXShape^ body, IXShape^ addition);
 				virtual IXShape^ Cut(IXShape^ body, IXShape^ substraction);
-				virtual IXShape^ Union(IXShape^ body, IEnumerable<IXShape^>^ addition);
-				virtual IXShape^ Cut(IXShape^ body, IEnumerable<IXShape^>^ substraction);
+				virtual IXShape^ Union(IXShape^ body, System::Collections::Generic::IEnumerable<IXShape^>^ addition);
+				virtual IXShape^ Cut(IXShape^ body, System::Collections::Generic::IEnumerable<IXShape^>^ substraction);
 
 				virtual IXShape^ RemovePlacement(IXShape^ shape);
 				virtual IXShape^ SetPlacement(IXShape^ shape, IIfcObjectPlacement^ placement);
@@ -54,7 +53,7 @@ namespace Xbim
 				virtual IXShape^ Moved(IXShape^ shape, IXLocation^ moveTo);
 				virtual IXFace^ Add(IXFace^ toFace, array<IXWire^>^ wires);
 
-				virtual IEnumerable<IXFace^>^ FixFace(IXFace^ face);
+				virtual System::Collections::Generic::IEnumerable<IXFace^>^ FixFace(IXFace^ face);
 				
 
 				

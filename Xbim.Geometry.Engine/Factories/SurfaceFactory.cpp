@@ -5,7 +5,7 @@
 #include "ProfileFactory.h"
 #include "BIMAuthoringToolWorkArounds.h"
 #include "EdgeFactory.h"
-#include "../BRep//XFace.h"
+#include "../BRep/XFace.h"
 #include "../BRep/XPlane.h"
 #include "../BRep/XCylindricalSurface.h"
 #include "../BRep/XConicalSurface.h"

@@ -1,78 +1,92 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFrameworks>net472;net6.0</TargetFrameworks>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<Version>6.1.1.5-dev</Version>
+		<Version>5.7.2-V4Experimental</Version>
 		<SignAssembly>False</SignAssembly>
 	</PropertyGroup>
 
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.31" />
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.272" />
-	</ItemGroup>
-
 	<PropertyGroup>
-		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/$(TargetFramework)/</GeometryEnginePath>
+		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/</GeometryEnginePath>
 		<AssemblyVersion>6.1.1.0</AssemblyVersion>
 		<FileVersion>6.1.1.0</FileVersion>
+		<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	</PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <Optimize>False</Optimize>
+
+
+	<!--This creates the nuget package-->
+	<PropertyGroup>
+		<TargetsForTfmSpecificContentInPackage>GetNativeOccFiles;GetGeometryEngineFiles;GetIjwHostFiles</TargetsForTfmSpecificContentInPackage>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Include="buildTransitive\netcoreapp3.1\Xbim.Geometry.Engine.Interop.targets" PackagePath="buildTransitive/netcoreapp3.1" Pack="True" Visible="true">
-		</None>
-	</ItemGroup>
-	<Target Name="TouchFiles" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
+
+	<Target Name="GetGeometryEngineFiles" >
+		<ItemGroup>
+			<GeomEngine64 Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.pdb">
+				<WinPlatform>lib/$(TargetFramework)/win10-x64</WinPlatform>
+			</GeomEngine64>
+			<GeomEngine86 Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.pdb">
+				<WinPlatform>lib/$(TargetFramework)/win10-x86</WinPlatform>
+			</GeomEngine86>
+
+			<BuildTransitives Include="buildTransitive\$(TargetFramework)\Xbim.Geometry.Engine.Interop.targets">
+				<WinPlatform>buildTransitive/$(TargetFramework)</WinPlatform>
+			</BuildTransitives>
+
+			<GeomEnginePackageFile  Include="@(GeomEngine64);@(GeomEngine86);@(BuildTransitives)" >
+				<PackagePath>%(WinPlatform)/@(GeomEnginePackageFile->'%(Filename)%(Extension)')</PackagePath>
+			</GeomEnginePackageFile>
+			<TfmSpecificPackageFile  Include="@(GeomEnginePackageFile)"></TfmSpecificPackageFile>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="GetNativeOccFiles" Condition="'$(TargetFramework)'=='net6.0'">
+		<!--only need one version net 6.0 is random choice, they are all the same-->
+		<ItemGroup >
+			<Occ64Files  Include="$(GeometryEnginePath)net6.0\win10-x64\TK*.dll" >
+				<WinPlatform>runtimes/win10-x64/native</WinPlatform>
+			</Occ64Files>
+			<Occ86Files  Include="$(GeometryEnginePath)net6.0\win10-x86\TK*.dll">
+				<WinPlatform>runtimes/win10-x86/native</WinPlatform>
+			</Occ86Files>
+			<OccPackageFile  Include="@(Occ64Files);@(Occ86Files)" >
+				<PackagePath>%(WinPlatform)/@(OccPackageFile->'%(Filename)%(Extension)')</PackagePath>
+			</OccPackageFile>
+			<TfmSpecificPackageFile Include="@(OccPackageFile)"></TfmSpecificPackageFile>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="GetIjwHostFiles" Condition="'$(TargetFramework)'!='net472' and '$(TargetFramework)'!=''" >
+		<ItemGroup>
+			<IjwHost64Files Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Ijwhost.dll" >
+				<WinPlatform>lib/$(TargetFramework)/win10-x64</WinPlatform>
+			</IjwHost64Files>
+			<IjwHost86Files Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Ijwhost.dll" >
+				<WinPlatform>lib/$(TargetFramework)/win10-x86</WinPlatform>
+			</IjwHost86Files>
+			<IjwHostPackageFile  Include="@(IjwHost64Files);@(IjwHost86Files)">
+				<PackagePath>%(WinPlatform)/@(IjwHostPackageFile->'%(Filename)%(Extension)')</PackagePath>
+			</IjwHostPackageFile>
+			<TfmSpecificPackageFile Include="@(IjwHostPackageFile)"></TfmSpecificPackageFile>
+		</ItemGroup>
+	</Target>
+
+	<!--<Target Name="TouchFiles" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
 		<Touch Files="XbimGeometryEngine.cs">
 			<Output TaskParameter="TouchedFiles" ItemName="FilesTouched" />
 		</Touch>
-	</Target>
-	<ItemGroup>
-		<None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
-		</None>
-
-	</ItemGroup>
+	</Target>-->
 
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.273" />
+	</ItemGroup>
 
-	
+
 </Project>

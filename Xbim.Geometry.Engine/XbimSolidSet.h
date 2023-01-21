@@ -8,7 +8,6 @@
 #include "XbimGeometryObjectSet.h"
 
 using namespace Xbim::Common;
-using namespace System::Collections::Generic;
 using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
@@ -24,7 +23,7 @@ namespace Xbim
 
 		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
-		private ref class VolumeComparer : IComparer<System::Tuple<double, XbimSolid^>^>
+		private ref class VolumeComparer : System::Collections::Generic::IComparer<System::Tuple<double, XbimSolid^>^>
 		{
 		public:
 			virtual int Compare(System::Tuple<double, XbimSolid^>^ x, System::Tuple<double, XbimSolid^>^ y)
@@ -83,7 +82,7 @@ namespace Xbim
 			XbimSolidSet(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
-			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
+			XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids);
 			XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelGeometryService^ modelService, ILogger^ logger);
 			XbimSolidSet(IIfcBooleanClippingResult^ solid, IXModelGeometryService^ modelService, ILogger^ logger);
 			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
@@ -121,7 +120,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType {XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimSolidSetType; }}
-			virtual IEnumerator<IXbimSolid^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimSolid^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); };
 			virtual void Add(IXbimGeometryObject^ solid);
 			virtual void Reverse();

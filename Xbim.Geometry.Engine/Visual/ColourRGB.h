@@ -5,7 +5,7 @@
 
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 using namespace System::Collections::Generic;
 namespace Xbim
 {

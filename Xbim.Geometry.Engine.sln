@@ -4,13 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E847C989-FCE5-4DBD-AD7D-575007DF2164} = {E847C989-FCE5-4DBD-AD7D-575007DF2164}
-	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F9422C17-8390-4E20-80BA-02E8C51E614B}"
 	ProjectSection(ProjectDependencies) = postProject
-		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A} = {DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}
+		{102F1B85-48BD-4598-A556-E05E385048CC} = {102F1B85-48BD-4598-A556-E05E385048CC}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46F548AD-CB02-4C10-A607-EBC0E2439596}"
@@ -38,6 +35,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Dependencies", "Xbim.Geometry.Dependencies\Xbim.Geometry.Dependencies.csproj", "{E847C989-FCE5-4DBD-AD7D-575007DF2164}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry", "Xbim.Geometry\Xbim.Geometry.csproj", "{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine.net472", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.net472.vcxproj", "{102F1B85-48BD-4598-A556-E05E385048CC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E847C989-FCE5-4DBD-AD7D-575007DF2164} = {E847C989-FCE5-4DBD-AD7D-575007DF2164}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,18 @@ Global
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x64.Build.0 = Release|Any CPU
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x86.ActiveCfg = Release|Any CPU
 		{C2E7030F-2C3D-4C3B-9820-3AC8E2EA201D}.Release|x86.Build.0 = Release|Any CPU
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|Any CPU.Build.0 = Debug|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|x64.ActiveCfg = Debug|x64
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|x64.Build.0 = Debug|x64
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|x86.ActiveCfg = Debug|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Debug|x86.Build.0 = Debug|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|Any CPU.ActiveCfg = Release|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|Any CPU.Build.0 = Release|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|x64.ActiveCfg = Release|x64
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|x64.Build.0 = Release|x64
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|x86.ActiveCfg = Release|Win32
+		{102F1B85-48BD-4598-A556-E05E385048CC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

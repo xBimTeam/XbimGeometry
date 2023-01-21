@@ -11,7 +11,7 @@
 //#include "../storage/StorageItem.h"
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Storage;
 namespace Xbim

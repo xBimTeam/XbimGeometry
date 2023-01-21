@@ -5,7 +5,7 @@
 #include "../BRep/X2dDirection.h"
 #include <gp_Ax22d.hxx>
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 namespace Xbim
 {
 	namespace Geometry

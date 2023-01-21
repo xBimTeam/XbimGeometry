@@ -38,8 +38,8 @@ namespace Xbim
 			bool WithinTolerance(const  TopoDS_Wire& topoOuterLoop, const TopoDS_Face& topoAdvancedFace, double _sewingTolerance);
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet,  ILogger^ logger);
-			TopoDS_Shape InitFaces(IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
-			TopoDS_Shape InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
+			TopoDS_Shape InitFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
+			TopoDS_Shape InitAdvancedFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
 			void Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
@@ -107,7 +107,7 @@ namespace Xbim
 			operator const TopoDS_Compound& () { return *pCompound; }
 			virtual operator const TopoDS_Shape& () override { return *pCompound; }
 			virtual property bool IsSewn{bool get(){ return _isSewn; }}
-			virtual IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{return GetEnumerator();}
 			//Upgrades the result to the highest level and simplest object without loss of representation
 			IXbimGeometryObject^ Upgrade();

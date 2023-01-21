@@ -35,10 +35,9 @@
 #include "XbimConvert.h"
 #include "XbimPoint3DWithTolerance.h"
 #include "XbimOccWriter.h"
-using System::Runtime::InteropServices::Marshal;
 
 using namespace  System::Threading;
-using namespace  System::Linq;
+
 using namespace  System::IO;
 
 namespace Xbim
@@ -55,7 +54,7 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimGeometryCreator::ReadBrep(System::String^ filename)
 		{
-			Standard_CString fName = (const char*)(Marshal::StringToHGlobalAnsi(filename)).ToPointer();
+			Standard_CString fName = (const char*)(System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filename)).ToPointer();
 			try
 			{
 				BRep_Builder builder;
@@ -88,7 +87,7 @@ namespace Xbim
 			}
 			finally
 			{
-				Marshal::FreeHGlobal(System::IntPtr((void*)fName));
+				System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)fName));
 			}
 		}
 
@@ -104,7 +103,7 @@ namespace Xbim
 			model->Tag = _modelService;
 		}
 
-		
+
 
 		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
@@ -365,7 +364,7 @@ namespace Xbim
 
 			if (geometryObject->IsSet)
 			{
-				IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<IEnumerable<IXbimGeometryObject^>^>(geometryObject);
+				System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ set = dynamic_cast<System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^>(geometryObject);
 				if (set != nullptr)
 				{
 					MemoryStream^ memStream = gcnew MemoryStream(0x4000);
@@ -448,7 +447,7 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryCreator::CreateGeometricSet(IIfcGeometricSet^ geomSet, ILogger^)
 		{
-			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet(Enumerable::Count(geomSet->Elements));
+			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet(System::Linq::Enumerable::Count(geomSet->Elements));
 			for each (IIfcGeometricSetSelect ^ elem in geomSet->Elements)
 			{
 				if (dynamic_cast<IIfcPoint^>(elem)) result->Add(CreatePoint((IIfcPoint^)elem));
@@ -1202,7 +1201,7 @@ namespace Xbim
 			gp_Lin2d right(gp_Pnt2d(bb.X + bb.SizeX, bb.Y), gp_Dir2d(0, 1));
 
 			bool failedGridLines = false;
-			IEnumerable<System::Tuple<int, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
+			System::Collections::Generic::IEnumerable<System::Tuple<int, XbimCurve2D^>^>^ curves = Enumerable::Concat(Enumerable::Concat(UCurves, VCurves), WCurves);
 			BRep_Builder b;
 			TopoDS_Compound solidResults;
 			b.MakeCompound(solidResults);
@@ -1361,7 +1360,7 @@ namespace Xbim
 		{
 			TopoDS_Shape result;
 			BRep_Builder builder;
-			Standard_CString cStr = (const char*)(Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
+			Standard_CString cStr = (const char*)(System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
 			try
 			{
 				std::istringstream iss(cStr);
@@ -1392,7 +1391,7 @@ namespace Xbim
 			}
 			finally
 			{
-				Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
+				System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
 			}
 		}
 

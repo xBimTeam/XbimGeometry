@@ -83,7 +83,7 @@ namespace Xbim
 				virtual  bool Triangulate(IXMeshFactors^ meshFactors);
 
 				virtual property IXLocation^ Location { IXLocation^ get() { return gcnew XLocation(OccHandle().Location()); } };
-				virtual IEnumerable<IXFace^>^ AllFaces();
+				virtual System::Collections::Generic::IEnumerable<IXFace^>^ AllFaces();
 				virtual const TopoDS_Shape& GetTopoShape() { return *(this->Ptr()); };
 				virtual bool IsEqual(IXShape^ shape);
 				virtual int ShapeHashCode() { return OccHandle().HashCode(0xFFFF); }

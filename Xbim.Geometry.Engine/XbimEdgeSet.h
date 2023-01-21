@@ -27,7 +27,7 @@ namespace Xbim
 			XbimEdgeSet(const TopoDS_Shape& shape);
 			IXCompound^ ToXCompound();
 			operator  TopoDS_Shape () override;
-			XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges);
+			XbimEdgeSet(System::Collections::Generic::IEnumerable<IXbimEdge^>^ edges);
 			XbimEdgeSet(XbimWire^ wire);
 			
 #pragma endregion
@@ -47,7 +47,7 @@ namespace Xbim
 			virtual property int Count {int get() override; }
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimEdgeSetType; }}
-			virtual IEnumerator<IXbimEdge^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimEdge^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;

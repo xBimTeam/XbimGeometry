@@ -78,7 +78,7 @@ namespace Xbim
 
 			bool BRepDocument::RemoveAssembly(IXBRepDocumentItem^ assembly)
 			{
-				System::IntPtr pShape = Marshal::StringToHGlobalAnsi(assembly->Key);
+				System::IntPtr pShape = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(assembly->Key);
 				try
 				{
 					const char* pShapeAnsi = static_cast<const char*>(pShape.ToPointer());
@@ -93,7 +93,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pShape);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pShape);
 				}
 				return false;
 			}
@@ -163,7 +163,7 @@ namespace Xbim
 			{
 
 
-				System::IntPtr p = Marshal::StringToHGlobalAnsi(visMaterial->Name);
+				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(visMaterial->Name);
 				try
 				{
 					const char* pAnsi = static_cast<const char*>(p.ToPointer());
@@ -188,7 +188,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(p);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 				}
 			}
 
@@ -238,7 +238,7 @@ namespace Xbim
 			{
 				if (!item->IsNull)
 				{
-					System::IntPtr pShape = Marshal::StringToHGlobalAnsi(item->Key);
+					System::IntPtr pShape = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(item->Key);
 					try
 					{
 
@@ -258,7 +258,7 @@ namespace Xbim
 					}
 					finally
 					{
-						Marshal::FreeHGlobal(pShape);
+						System::Runtime::InteropServices::Marshal::FreeHGlobal(pShape);
 					}
 				}
 				return nullptr;

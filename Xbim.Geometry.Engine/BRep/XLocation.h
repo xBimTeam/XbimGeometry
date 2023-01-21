@@ -14,8 +14,7 @@ namespace Xbim
 		{
 
 			using namespace System::Collections::Generic;
-			using namespace System::Text::Json;
-			using namespace System::Text::Json::Serialization;
+			
 			using namespace Xbim::Geometry::Abstractions;
 
 			public ref class XLocation : XbimHandle<gp_Trsf>, IXLocation, IXMatrix

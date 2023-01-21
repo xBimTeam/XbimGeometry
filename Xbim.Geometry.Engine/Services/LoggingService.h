@@ -5,7 +5,7 @@
 
 using namespace Microsoft::Extensions::Logging;
 using namespace Microsoft::Extensions::Logging::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 using namespace System::Threading::Tasks;
 using namespace System::Threading;
 
@@ -26,7 +26,7 @@ namespace Xbim
 				ILogger^ _logger;
 				//IHostApplicationLifetime^ _appLifetime;
 				LogDelegate^ LogWriter;
-				GCHandle gchLogWriter;
+				System::Runtime::InteropServices::GCHandle gchLogWriter;
 
 			public:
 				LoggingService(ILogger<LoggingService^>^ logger) : LoggingService((ILogger^)logger)
@@ -37,9 +37,9 @@ namespace Xbim
 				{
 					_logger = logger;					
 					LogWriter = gcnew LogDelegate(this, &LoggingService::Log);
-					gchLogWriter = GCHandle::Alloc(LogWriter);
+					gchLogWriter = System::Runtime::InteropServices::GCHandle::Alloc(LogWriter);
 					//LogInformation("Native Logger handle obtained");
-					System::IntPtr ip = Marshal::GetFunctionPointerForDelegate(LogWriter);
+					System::IntPtr ip = System::Runtime::InteropServices::Marshal::GetFunctionPointerForDelegate(LogWriter);
 					this->Ptr()->SetLogger(static_cast<WriteLog>(ip.ToPointer()));
 					
 				};
@@ -61,7 +61,7 @@ namespace Xbim
 				virtual void LogInformation(System::String^ logMsg);
 				virtual void LogDebug(System::String^ logMsg);
 				virtual operator NLoggingService* ()  { return this->Ptr(); }
-				virtual property System::IntPtr LogDelegatePtr {System::IntPtr get() { return Marshal::GetFunctionPointerForDelegate(LogWriter); }};
+				virtual property System::IntPtr LogDelegatePtr {System::IntPtr get() { return System::Runtime::InteropServices::Marshal::GetFunctionPointerForDelegate(LogWriter); }};
 				
 
 				void Log(int logLevel, System::String^ msg)

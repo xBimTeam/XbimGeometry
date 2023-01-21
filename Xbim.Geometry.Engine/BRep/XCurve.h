@@ -4,7 +4,7 @@
 #include <GCPnts_AbscissaPoint.hxx>
 #include <GeomAdaptor_Curve.hxx>
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 using namespace Xbim::Common::Geometry;
 namespace Xbim
 {
@@ -37,8 +37,8 @@ namespace Xbim
 					return OccHandle()->LastParameter();
 				}};
 				virtual IXPoint^ GetPoint(double uParam) ;
-				virtual IXPoint^ GetFirstDerivative(double uParam, [Out] IXDirection^% direction) ;
-				virtual IXPoint^ GetSecondDerivative(double uParam,  [Out] IXDirection^% direction, [Out] IXDirection^% normal);
+				virtual IXPoint^ GetFirstDerivative(double uParam, [System::Runtime::InteropServices::Out] IXDirection^% direction) ;
+				virtual IXPoint^ GetSecondDerivative(double uParam,  [System::Runtime::InteropServices::Out] IXDirection^% direction, [System::Runtime::InteropServices::Out] IXDirection^% normal);
 				virtual property double Length { double get()  { return GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(OccHandle())); } }
 			};
 		}

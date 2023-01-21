@@ -6,7 +6,7 @@
 #include "XDirection.h"
 #include "XPoint.h"
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 namespace Xbim
 {
 	namespace Geometry

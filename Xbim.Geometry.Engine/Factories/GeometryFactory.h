@@ -97,7 +97,7 @@ namespace Xbim
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 				gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement);
 				TopLoc_Location ToLocation(IIfcObjectPlacement^ placement);
-				bool MakeDir3d(IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v);
+				bool MakeDir3d(System::Collections::Generic::IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v);
 
 				XMatrix^ ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D);
 

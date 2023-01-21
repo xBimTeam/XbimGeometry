@@ -82,7 +82,7 @@ namespace Xbim
 			return result;
 		}
 
-		IEnumerator<IXbimShell^>^ XbimShellSet::GetEnumerator()
+		System::Collections::Generic::IEnumerator<IXbimShell^>^ XbimShellSet::GetEnumerator()
 		{
 			return shells->GetEnumerator();
 		}
@@ -112,20 +112,20 @@ namespace Xbim
 		IXbimGeometryObjectSet^ XbimShellSet::Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 			
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 		
 		IXbimGeometryObjectSet^ XbimShellSet::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimShellSet::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 		void XbimShellSet::Union(double /*tolerance*/)
@@ -193,20 +193,20 @@ namespace Xbim
 		IXbimGeometryObjectSet^ XbimShellSet::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimShellSet::Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimShellSet::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 	}
 }

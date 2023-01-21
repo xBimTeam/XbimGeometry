@@ -80,7 +80,7 @@
 using namespace Xbim::Geometry::Factories;
 using namespace Xbim::Common;
 using namespace System::Linq;
-// using namespace System::Diagnostics;
+
 
 namespace Xbim
 {
@@ -460,7 +460,7 @@ namespace Xbim
 			int n = 1;
 			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in coordList)
 			{
-				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				System::Collections::Generic::IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
 				enumer->MoveNext();
 				gp_Pnt p;
 				p.SetX((double)enumer->Current);
@@ -970,7 +970,7 @@ namespace Xbim
 			return gcnew XbimEdgeSet(this);
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimWire::Points::get()
+		System::Collections::Generic::IEnumerable<XbimPoint3D>^ XbimWire::Points::get()
 		{
 			return IntervalPoints;
 		}

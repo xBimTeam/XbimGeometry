@@ -19,7 +19,7 @@ namespace Xbim
 
 				XPolyLoop2d(Handle(Poly_Polygon2D) hPointSeq) : XbimHandle(new Handle(Poly_Polygon2D)(hPointSeq)) {};
 
-				ref struct enumerator : IEnumerator<IXPoint^>
+				ref struct enumerator : System::Collections::Generic::IEnumerator<IXPoint^>
 				{
 					enumerator(XPolyLoop2d^ myArr)
 					{
@@ -27,7 +27,7 @@ namespace Xbim
 						currentIndex = 0;
 					}
 
-					virtual bool MoveNext() = IEnumerator<IXPoint^>::MoveNext
+					virtual bool MoveNext() = System::Collections::Generic::IEnumerator<IXPoint^>::MoveNext
 					{
 
 						if (currentIndex < colInst->Ref()->NbNodes())
@@ -40,7 +40,7 @@ namespace Xbim
 
 						property IXPoint^ Current
 					{
-						virtual IXPoint^ get() = IEnumerator<IXPoint^>::Current::get
+						virtual IXPoint^ get() = System::Collections::Generic::IEnumerator<IXPoint^>::Current::get
 						{
 							return gcnew XPoint(colInst->Ref()->Nodes().Value(currentIndex));
 						}
@@ -54,7 +54,7 @@ namespace Xbim
 						}
 					};
 
-					virtual void Reset() = IEnumerator<IXPoint^>::Reset{}
+					virtual void Reset() = System::Collections::Generic::IEnumerator<IXPoint^>::Reset{}
 						~enumerator() {}
 
 					XPolyLoop2d^ colInst;
@@ -62,7 +62,7 @@ namespace Xbim
 					int currentIndex;
 				};
 
-				virtual IEnumerator<IXPoint^>^ GetEnumerator()
+				virtual System::Collections::Generic::IEnumerator<IXPoint^>^ GetEnumerator()
 				{
 					return gcnew enumerator(this);
 				};

@@ -45,7 +45,7 @@ namespace Xbim
 		{
 			IXShape^ ShapeFactory::Convert(System::String^ brepStr)
 			{
-				const char* cStr = (const char*)(Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
+				const char* cStr = (const char*)(System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(brepStr)).ToPointer();
 				try
 				{
 					TopoDS_Shape shape = EXEC_NATIVE->Convert(cStr);
@@ -76,7 +76,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
+				System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
 				}
 				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
 			}
@@ -217,7 +217,7 @@ namespace Xbim
 				return GetXbimShape(result);
 			}
 
-			IXShape^ ShapeFactory::Union(IXShape^ body, IEnumerable<IXShape^>^ additionShapes)
+			IXShape^ ShapeFactory::Union(IXShape^ body, System::Collections::Generic::IEnumerable<IXShape^>^ additionShapes)
 			{
 				const TopoDS_Shape& topoBody = TOPO_SHAPE(body);
 
@@ -231,7 +231,7 @@ namespace Xbim
 				return GetXbimShape(result);
 			}
 
-			IXShape^ ShapeFactory::Cut(IXShape^ body, IEnumerable<IXShape^>^ substractionShapes)
+			IXShape^ ShapeFactory::Cut(IXShape^ body, System::Collections::Generic::IEnumerable<IXShape^>^ substractionShapes)
 			{
 				const TopoDS_Shape& topoBody = TOPO_SHAPE(body);
 				TopTools_ListOfShape substractions;
@@ -293,7 +293,7 @@ namespace Xbim
 				return gcnew XFace(occFace);
 			}
 
-			IEnumerable<IXFace^>^ ShapeFactory::FixFace(IXFace^ face)
+			System::Collections::Generic::IEnumerable<IXFace^>^ ShapeFactory::FixFace(IXFace^ face)
 			{
 				const TopoDS_Face& occFace = TOPO_FACE(face);
 

@@ -24,7 +24,7 @@ namespace Xbim
 			virtual operator  TopoDS_Shape () override;
 #pragma region Constructors
 			XbimVertexSet(const TopoDS_Shape& shape);
-			XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices);
+			XbimVertexSet(System::Collections::Generic::IEnumerable<IXbimVertex^>^ vertices);
 #pragma endregion
 
 #pragma region destructors
@@ -71,7 +71,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimVertexSetType; }}
-			virtual IEnumerator<IXbimVertex^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimVertex^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);

@@ -1,8 +1,9 @@
 #include "BIMAuthoringToolWorkArounds.h"
 #include "GeometryFactory.h"
 #include "ProfileFactory.h"
+
 using namespace System::Text::RegularExpressions;
-using namespace System::Runtime::InteropServices;
+using namespace System::Linq;
 bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::FixRevitIncorrectArcCentreSweptCurve(IIfcSurfaceOfLinearExtrusion^ surfaceOfLinearExtrusions, TopoDS_Edge& fixedEdge)
 {
 	if (!ShouldApplyRevitIncorrectArcCentreSweptCurve()) return false;

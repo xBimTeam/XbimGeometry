@@ -6,7 +6,7 @@
 #include <GCPnts_AbscissaPoint.hxx>
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 
 #define OccLine() Handle(Geom_Line)::DownCast(this->Ref())
 namespace Xbim

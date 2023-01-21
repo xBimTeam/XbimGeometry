@@ -334,7 +334,7 @@ namespace Xbim
 			}
 			System::String^ BRepDocumentItem::GetStringAttribute(System::String^ attributeName)
 			{
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
 				try
 				{
 					const char* pAnsiName = static_cast<const char*>(pAttributeName.ToPointer());
@@ -346,7 +346,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
 				}
 
 			}
@@ -355,8 +355,8 @@ namespace Xbim
 			{
 				if (System::String::IsNullOrWhiteSpace(attributeName) || System::String::IsNullOrWhiteSpace(attributeValue)) return;
 				Handle(TDataStd_NamedData) namedData = TDataStd_NamedData::Set(Ref());
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
-				System::IntPtr pAttributeValue = Marshal::StringToHGlobalAnsi(attributeValue);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeValue = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeValue);
 				try
 				{
 					const char* pAnsiName = static_cast<const char*>(pAttributeName.ToPointer());
@@ -365,15 +365,15 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
-					Marshal::FreeHGlobal(pAttributeValue);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeValue);
 				}
 
 			}
 
 			int BRepDocumentItem::GetIntAttribute(System::String^ attributeName)
 			{
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
 				try
 				{
 					const char* pAnsiName = static_cast<const char*>(pAttributeName.ToPointer());
@@ -381,7 +381,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
 				}
 
 			}
@@ -389,7 +389,7 @@ namespace Xbim
 			void BRepDocumentItem::SetIntAttribute(System::String^ attributeName, int attributeValue)
 			{
 				Handle(TDataStd_NamedData) namedData = TDataStd_NamedData::Set(Ref());
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
 
 				try
 				{
@@ -399,7 +399,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
 
 				}
 			}
@@ -409,7 +409,7 @@ namespace Xbim
 				Handle(TDataStd_NamedData) attributes;
 				bool hasAttributes = Ref().FindAttribute(TDataStd_NamedData::GetID(), attributes);
 				if (!hasAttributes) return 0;
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
 				try
 				{
 					const char* pAnsiName = static_cast<const char*>(pAttributeName.ToPointer());
@@ -420,7 +420,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
 				}
 			}
 
@@ -477,7 +477,7 @@ namespace Xbim
 			{
 
 				Handle(TDataStd_NamedData) namedData = TDataStd_NamedData::Set(Ref());
-				System::IntPtr pAttributeName = Marshal::StringToHGlobalAnsi(attributeName);
+				System::IntPtr pAttributeName = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(attributeName);
 				try
 				{
 					const char* pAnsiName = static_cast<const char*>(pAttributeName.ToPointer());
@@ -493,7 +493,7 @@ namespace Xbim
 				}
 				finally
 				{
-					Marshal::FreeHGlobal(pAttributeName);
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(pAttributeName);
 
 				}
 
@@ -590,7 +590,7 @@ namespace Xbim
 			{
 				if (!label.IsNull() && name != nullptr)
 				{
-					System::IntPtr p = Marshal::StringToHGlobalAnsi(name);
+					System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(name);
 					try
 					{
 						const char* pAnsi = static_cast<const char*>(p.ToPointer());
@@ -598,7 +598,7 @@ namespace Xbim
 					}
 					finally
 					{
-						Marshal::FreeHGlobal(p);
+						System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 					}
 				}
 			}
@@ -632,7 +632,7 @@ namespace Xbim
 				if (visMaterial->Label == nullptr) //need to add to the document
 				{	
 					//copy material in
-					System::IntPtr p = Marshal::StringToHGlobalAnsi(visMaterial->Name);
+					System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(visMaterial->Name);
 					try
 					{
 						const char* pAnsi = static_cast<const char*>(p.ToPointer());
@@ -653,7 +653,7 @@ namespace Xbim
 					}
 					finally
 					{
-						Marshal::FreeHGlobal(p);
+						System::Runtime::InteropServices::Marshal::FreeHGlobal(p);
 					}
 				}
 				else

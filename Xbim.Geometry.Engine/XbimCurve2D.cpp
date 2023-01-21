@@ -21,7 +21,7 @@
 #include "XbimConvert.h"
 #include "XbimFace.h"
 #include "XbimGeometryCreator.h"
-using namespace System::Linq;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -127,7 +127,7 @@ namespace Xbim
 			throw gcnew System::Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
+		System::Collections::Generic::IEnumerable<XbimPoint3D>^ XbimCurve2D::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			Geom2dAPI_InterCurveCurve extrema(*pCurve2D, *((XbimCurve2D^)intersector)->pCurve2D, tolerance);
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
@@ -205,7 +205,7 @@ namespace Xbim
 			int i = 1;
 			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in coordList)
 			{
-				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				System::Collections::Generic::IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
 				enumer->MoveNext();
 				gp_Pnt2d p;
 				p.SetX((double)enumer->Current);
@@ -215,7 +215,7 @@ namespace Xbim
 				i++;
 			}
 
-			if (Enumerable::Any(polyCurve->Segments))
+			if (System::Linq::Enumerable::Any(polyCurve->Segments))
 			{
 				Geom2dConvert_CompCurveToBSplineCurve converter;
 				for each (IIfcSegmentIndexSelect ^ segment in  polyCurve->Segments)

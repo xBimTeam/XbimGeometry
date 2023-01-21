@@ -76,7 +76,7 @@
 
 
 
-using namespace System::Linq;
+
 using namespace Xbim::Common;
 using namespace Xbim::Common::XbimExtensions;
 using namespace Xbim::Ifc4::Interfaces;
@@ -100,7 +100,7 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		IEnumerator<IXbimGeometryObject^>^ XbimCompound::GetEnumerator()
+		System::Collections::Generic::IEnumerator<IXbimGeometryObject^>^ XbimCompound::GetEnumerator()
 		{
 			//add all top level objects in to the collection, ignore nested objects
 			List<IXbimGeometryObject^>^ result = gcnew List<IXbimGeometryObject^>(1);
@@ -328,7 +328,7 @@ namespace Xbim
 		XbimCompound::XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger)
 		{
 			_sewingTolerance = XbimConvert::ModelGeometryService(faceSet)->MinimumGap;
-			IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);
+			System::Collections::Generic::IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);
 			//if the face set has more than max faces just abandon and try and mesh
 			/*if (faceList->Count > MaxFacesToSew)
 			{
@@ -700,7 +700,7 @@ namespace Xbim
 				return 0;
 		}
 		//This method copes with faces that may be advanced as well as ordinary
-		TopoDS_Shape XbimCompound::InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
+		TopoDS_Shape XbimCompound::InitAdvancedFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ faces, ILogger^ logger)
 		{
 			BRep_Builder builder;
 			ShapeFix_Edge edgeFixer;
@@ -1188,7 +1188,7 @@ namespace Xbim
 			List<XbimVertex^>^ vertices = gcnew List<XbimVertex^>(Enumerable::Count(faceSet->Coordinates->CoordList));
 			Dictionary<long long, XbimEdge^>^ edgeMap = gcnew Dictionary<long long, XbimEdge^>();
 
-			for each (IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure> ^ cp in faceSet->Coordinates->CoordList)
+			for each (System::Collections::Generic::IEnumerable<Ifc4::MeasureResource::IfcLengthMeasure> ^ cp in faceSet->Coordinates->CoordList)
 			{
 				XbimTriplet<Ifc4::MeasureResource::IfcLengthMeasure> tpl = IEnumerableExtensions::AsTriplet<Ifc4::MeasureResource::IfcLengthMeasure>(cp);
 				XbimVertex^ v = gcnew XbimVertex(tpl.A, tpl.B, tpl.C, _sewingTolerance);
@@ -1197,7 +1197,7 @@ namespace Xbim
 
 
 			//make the triangles
-			for each (IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger> ^ indices in faceSet->CoordIndex)
+			for each (System::Collections::Generic::IEnumerable<Ifc4::MeasureResource::IfcPositiveInteger> ^ indices in faceSet->CoordIndex)
 			{
 				try
 				{
@@ -1346,7 +1346,7 @@ namespace Xbim
 				builder.Add(*pCompound, shell);
 		}
 
-		TopoDS_Shape XbimCompound::InitFaces(IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
+		TopoDS_Shape XbimCompound::InitFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
 			double tolerance = XbimConvert::ModelGeometryService(theItem)->MinimumGap;
 
@@ -1387,7 +1387,7 @@ namespace Xbim
 					TopoDS_Vertex currentTail;
 					BRepBuilderAPI_MakeWire wireMaker;
 
-					for each (IIfcCartesianPoint ^ cp in Enumerable::Concat(polyloop->Polygon, Enumerable::Take(polyloop->Polygon, 1))) //add the start on to the polygon
+					for each (IIfcCartesianPoint ^ cp in System::Linq::Enumerable::Concat(polyloop->Polygon, Enumerable::Take(polyloop->Polygon, 1))) //add the start on to the polygon
 					{
 						try
 						{
@@ -2065,40 +2065,40 @@ namespace Xbim
 		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimCompound::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimCompound::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 
 		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
 		{
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, solids, tolerance, logger);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimCompound::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
 			if (Count == 0) return XbimGeometryObjectSet::Empty;
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
+			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, (System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^)this, gcnew XbimSolidSet(solid), tolerance, logger);
 		}
 #pragma endregion
 

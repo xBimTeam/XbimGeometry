@@ -157,7 +157,7 @@ namespace Xbim
 			Init(comp, solid, logger);
 		}
 
-		XbimSolidSet::XbimSolidSet(IEnumerable<IXbimSolid^>^ solids)
+		XbimSolidSet::XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids)
 		{
 			this->solids = gcnew  List<IXbimSolid^>(solids);;
 		}
@@ -433,7 +433,7 @@ namespace Xbim
 			return result;
 		}
 
-		IEnumerator<IXbimSolid^>^ XbimSolidSet::GetEnumerator()
+		System::Collections::Generic::IEnumerator<IXbimSolid^>^ XbimSolidSet::GetEnumerator()
 		{
 			if (solids == nullptr) return Empty->GetEnumerator();
 			return solids->GetEnumerator();

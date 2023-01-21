@@ -12,6 +12,7 @@
 using namespace System::Collections::Generic;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -128,9 +129,9 @@ namespace Xbim
 			XbimFace(IIfcPolyLoop ^ loop, ILogger^ logger);
 			XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel,  ILogger^ logger);
 			XbimFace(IXbimWire^ wire, XbimPoint3D pointOnface,  XbimVector3D faceNormal, ILogger^ logger);
-			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
+			XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, System::Collections::Generic::IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger);
 			static void PutEdgeOnFace(const TopoDS_Edge& Edg, const TopoDS_Face& Fac);
-			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
+			XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, System::Collections::Generic::IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger);
 			bool CheckInside();
 			XbimFace(IIfcCylindricalSurface ^ surface, ILogger^ logger);
 			XbimFace(double x, double y, double tolerance, ILogger^ logger);

@@ -76,8 +76,8 @@ namespace Xbim
 			static gp_Pnt2d GetPoint2d(IIfcCartesianPoint^ cartesian);
 			static gp_Dir GetDir3d(IIfcDirection^ dir);
 			static gp_Dir2d GetDir2d(IIfcDirection^ dir);
-			static gp_Vec2d GetDir2d(IEnumerable<IfcLengthMeasure>^ offsets);
-			static gp_Vec GetDir3d(IEnumerable<IfcLengthMeasure>^ offsets);
+			static gp_Vec2d GetDir2d(System::Collections::Generic::IEnumerable<IfcLengthMeasure>^ offsets);
+			static gp_Vec GetDir3d(System::Collections::Generic::IEnumerable<IfcLengthMeasure>^ offsets);
 			static gp_Pnt GetPoint3d(IIfcAxis2Placement^ placement);
 			static gp_Vec GetRefDir3d(IIfcAxis2Placement^ placement);
 			static gp_Vec GetAxisDir3d(IIfcAxis2Placement^ placement);

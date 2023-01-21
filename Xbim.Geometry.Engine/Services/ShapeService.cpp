@@ -257,7 +257,7 @@ namespace Xbim
 				output.seekg(0);
 				output.read(buffer.get(), size);
 				cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
-				Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
 				return byteArray;
 			}
 

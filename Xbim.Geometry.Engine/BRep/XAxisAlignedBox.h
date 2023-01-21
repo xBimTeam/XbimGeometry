@@ -4,7 +4,7 @@
 #include<Bnd_Box.hxx>
 
 using namespace Xbim::Geometry::Abstractions;
-using namespace System::Runtime::InteropServices;
+
 
 namespace Xbim
 {

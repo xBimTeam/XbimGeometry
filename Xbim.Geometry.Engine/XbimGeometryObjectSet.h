@@ -25,7 +25,7 @@ namespace Xbim
 			List<IXbimGeometryObject^>^ geometryObjects;
 			static XbimGeometryObjectSet^ empty = gcnew XbimGeometryObjectSet();
 			
-			static bool ParseGeometry(IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
+			static bool ParseGeometry(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
 				TopoDS_Shell& facesToIgnore, double tolerance);
 			
 			void InstanceCleanup()
@@ -33,14 +33,14 @@ namespace Xbim
 				geometryObjects = nullptr;
 			};
 		internal:
-			static TopoDS_Compound CreateCompound(IEnumerable<IXbimGeometryObject^>^ geomObjects);
+			static TopoDS_Compound CreateCompound(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects);
 		public:
 			static property IXbimGeometryObjectSet^ Empty{IXbimGeometryObjectSet^ get(){ return empty; }};	
-			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, IXbimGeometryObject^ geomObject, IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 
 			XbimGeometryObjectSet::XbimGeometryObjectSet();
-			XbimGeometryObjectSet(IEnumerable<IXbimGeometryObject^>^ objects);
+			XbimGeometryObjectSet(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ objects);
 			XbimGeometryObjectSet(int size){geometryObjects = gcnew List<IXbimGeometryObject^>(size);}
 
 #pragma region destructors
@@ -57,7 +57,7 @@ namespace Xbim
 			virtual property int Count {int get() override; }
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimGeometryObjectSetType; }}
-			virtual IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual property XbimRect3D BoundingBox {XbimRect3D get() ; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;

@@ -126,6 +126,16 @@ namespace Xbim
 			{
 				return _loggingService;
 			}
+
+			ModelGeometryService^ ModelGeometryService::GetModelService(IModel^ model)
+			{
+				ModelGeometryService^ service;
+				if (!Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::GetTagValue<ModelGeometryService^>(model, "ModelGeometryService", service))
+					throw gcnew Exception("Invalid use of Model.Tag property");
+				else
+					return service;
+			}
+
 			VertexFactory^ ModelGeometryService::GetVertexFactory()
 			{
 				if (_vertexFactory == nullptr) _vertexFactory = gcnew Xbim::Geometry::Factories::VertexFactory(this);

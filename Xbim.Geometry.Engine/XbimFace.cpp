@@ -64,7 +64,7 @@
 #include "./Services//ModelGeometryService.h"
 #include <ShapeBuild_ReShape.hxx>
 #include "Factories/ProfileFactory.h"
-using namespace System::Linq;
+
 using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
@@ -275,7 +275,7 @@ namespace Xbim
 			Init(x, y, tolerance, logger);
 		}
 
-		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger)
+		XbimFace::XbimFace(IIfcSurface^ surface, XbimWire^ outerBound, System::Collections::Generic::IEnumerable<XbimWire^>^ innerBounds, ILogger^ logger)
 		{
 			Init(surface, logger);
 			if (!IsValid) return;
@@ -466,7 +466,7 @@ namespace Xbim
 
 
 		//NB the wires defined in the facesurface are ignored
-		XbimFace::XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger)
+		XbimFace::XbimFace(IIfcFaceSurface^ surface, XbimWire^ outerBound, System::Collections::Generic::IEnumerable<XbimWire^>^ innerBounds, double tolerance, ILogger^ logger)
 		{
 			Init(surface->FaceSurface, logger);
 			if (!IsValid) return;
@@ -599,6 +599,7 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcPolyLoop^ polyloop, ILogger^ logger)
 		{
+			
 			List<IIfcCartesianPoint^>^ polygon = Enumerable::ToList(polyloop->Polygon);
 			int originalCount = polygon->Count;
 			double tolerance = ActiveModelGeometryService(polyloop)->MinimumGap;

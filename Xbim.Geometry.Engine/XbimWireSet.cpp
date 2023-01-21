@@ -7,6 +7,8 @@
 #include <BRep_Builder.hxx>
 #include "./BRep/XCompound.h"
 #include "XbimGeometryObjectSet.h"
+using namespace System::Linq;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -129,7 +131,7 @@ namespace Xbim
 			return result;
 		}
 
-		IEnumerator<IXbimWire^>^ XbimWireSet::GetEnumerator()
+		System::Collections::Generic::IEnumerator<IXbimWire^>^ XbimWireSet::GetEnumerator()
 		{
 			return wires->GetEnumerator();
 		}
