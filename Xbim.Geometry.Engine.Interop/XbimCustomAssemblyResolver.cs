@@ -95,7 +95,6 @@ namespace Xbim.Geometry.Engine.Interop
             Assembly loadedAssembly = null;
             if (libraryPath != null)
             {
-
                 loadedAssembly = Assembly.LoadFile(libraryPath);
             }
             XbimGeometryEngine.GeometryServicesCollectionExtensionsType = loadedAssembly.GetType(XbimArchitectureConventions.ServiceCollectionExtensionsName) as Type;

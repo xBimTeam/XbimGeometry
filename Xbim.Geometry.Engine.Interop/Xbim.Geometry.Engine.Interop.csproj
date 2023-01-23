@@ -6,7 +6,7 @@
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<Version>5.7.2-V8Experimental</Version>
+		<Version>5.7.2-V9Experimental</Version>
 		<SignAssembly>False</SignAssembly>
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
