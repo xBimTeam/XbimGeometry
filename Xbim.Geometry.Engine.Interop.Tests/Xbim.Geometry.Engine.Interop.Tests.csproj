@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+		<TargetFrameworks>net472;net6.0</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
 		<SignAssembly>False</SignAssembly>
@@ -11,14 +11,17 @@
 		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
-
-
-
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<ItemGroup>
+			<Item Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win10-x86/*.*" />
+			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win10-x64/*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
 	<ItemGroup>
 
 		<PackageReference Include="FluentAssertions" Version="6.8.0" />
-
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.31" />
 
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.31" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.0" />
@@ -35,6 +38,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
 			<Private>True</Private>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</ProjectReference>
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
 	</ItemGroup>

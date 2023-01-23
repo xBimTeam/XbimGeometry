@@ -20,7 +20,7 @@
 using namespace System::Linq;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
-
+using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -31,7 +31,9 @@ namespace Xbim
 
 		IXModelGeometryService^ XbimConvert::ModelGeometryService(IPersistEntity^ ifcEntity)
 		{
-			return static_cast<IXModelGeometryService^>(ifcEntity->Model->Tag); 
+			IXModelGeometryService^ geomService;
+			Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::GetTagValue(ifcEntity->Model,"ModelGeometryService", geomService);
+			return geomService;
 		}
 
 		// Converts an ObjectPlacement into a TopLoc_Location

@@ -8,6 +8,7 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F9422C17-8390-4E20-80BA-02E8C51E614B}"
 	ProjectSection(ProjectDependencies) = postProject
 		{102F1B85-48BD-4598-A556-E05E385048CC} = {102F1B85-48BD-4598-A556-E05E385048CC}
+		{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A} = {DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{46F548AD-CB02-4C10-A607-EBC0E2439596}"

@@ -5,38 +5,12 @@ namespace Xbim.Geometry.Engine.Interop
     /// <summary> 
     /// A class representing the conventions we use for processor specific Geometry Engine library
     /// </summary> 
-    internal class XbimArchitectureConventions
-    { 
-        public XbimArchitectureConventions()
-        {
-            if (Is64BitProcess())
-            {
-                Suffix = "64";
-                Runtime = "win10-x64";
+    public class XbimArchitectureConventions
+    {
 
+        public static string ModuleDllName => ModuleName + ".dll";
 
-            } 
-            else
-            {
-                Suffix = "32";
-                Runtime = "win10-x86";
-            }
-        }
-
-        public string AssemblyName
-        {
-            get
-            {
-                return ModuleName + Suffix; 
-            }
-        }
-            
-
-        /// <summary>
-        /// The suffix we apply to platform-specific assemblys in the current process architecture
-        /// </summary>
-        public string Suffix { get; private set; }
-        public string Runtime { get; private set; }
+        public static string Runtime => Is64BitProcess ? "win10-x64" : "win10-x86";
         ///// <summary>
         ///// The default subfolder to look for platform-specific assemblys in the current process architecture
         ///// </summary>
@@ -45,21 +19,12 @@ namespace Xbim.Geometry.Engine.Interop
         /// <summary>
         /// name of the dll that that holds the geometry functionality
         /// </summary>
-        public string ModuleName
-        {
-            get
-            {
-#if VS2015
-                return "Xbim.Geometry.Engine2015";
-#else
-                return "Xbim.Geometry.Engine";
-#endif
-            }
-        }
+        public static string ModuleName => "Xbim.Geometry.Engine";
 
-        public static bool Is64BitProcess()
-        {
-            return (IntPtr.Size == 8);
-        }
+        public static bool Is64BitProcess => IntPtr.Size == 8;
+
+        public static string ServiceCollectionExtensionsName => "Microsoft.Extensions.DependencyInjection.ServiceCollectionExtensions";
+        public static string AddGeometryEngineServicesName => "AddGeometryEngineServices";
+        public static string GeometryConverterFactoryTypeName => "Xbim.Geometry.Factories.GeometryConverterFactory";
     }
 }

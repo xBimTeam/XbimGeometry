@@ -100,7 +100,7 @@ namespace Xbim
 			scope->Add("IfcVersion", model->Header->SchemaVersion);
 			_logger->BeginScope(scope);
 			_modelService = gcnew ModelGeometryService(model, loggerFactory);
-			model->Tag = _modelService;
+			Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::AddTagValue(model, "ModelGeometryService", _modelService);
 		}
 
 

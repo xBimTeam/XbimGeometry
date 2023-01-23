@@ -55,7 +55,7 @@ namespace Xbim
 			{
 				model = iModel;
 				precisionSquared = model->ModelFactors->Precision * model->ModelFactors->Precision;
-				model->Tag = this; //support for legacy engine lookup
+				Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::AddTagValue(model,"ModelGeometryService", this); //support for legacy engine lookup
 
 				minAreaM2 = std::pow(0.002, 2) * std::pow(model->ModelFactors->OneMeter, 2)/*2 mm x 2mm*/;
 

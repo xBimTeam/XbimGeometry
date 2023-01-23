@@ -1,14 +1,18 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Abstractions.Extensions;
 using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
+
 
 
 namespace Xbim.Geometry.Engine.Interop
@@ -18,33 +22,23 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly IXbimGeometryEngine _engine;
 
         private readonly ILogger _logger;
+        static internal Type GeometryServicesCollectionExtensionsType;
+        /// <summary>
+        /// Builds different options of XbimGeoemtryEngine
+        /// </summary>
+        static public IXGeometryConverterFactory GeometryConverterFactory;
 
-
-        static private IXGeometryConverterFactory geometryConverterFactory;
-        private static IXGeometryConverterFactory GeometryConverterFactory
-        {
-            get
-            {
-                if (geometryConverterFactory == null)
-                {
-                    var conventions = new XbimArchitectureConventions();    // understands the process we run under
-                    string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
-                    var ass = Assembly.Load(assemblyName);
-                    var theType = ass.GetType("Xbim.Geometry.Factories.GeometryConverterFactory");
-                    geometryConverterFactory = Activator.CreateInstance(theType) as IXGeometryConverterFactory;
-                }
-                return geometryConverterFactory;
-            }
-        }
 
         static XbimGeometryEngine()
         {
 
             // We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
             // not located using standard probing rules (due to way we deploy processor specific binaries)
-            AppDomain.CurrentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
-
+            AppDomain currentDomain = AppDomain.CurrentDomain;
+            currentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
         }
+
+
 
         public static IXModelGeometryService CreateModelGeometryService(IModel model, ILoggerFactory loggerFactory)
         {
@@ -64,29 +58,21 @@ namespace Xbim.Geometry.Engine.Interop
             return GeometryConverterFactory.CreateGeometryEngine(version, model, loggerFactory);
         }
 
-        public XbimGeometryEngine() { }
+        protected XbimGeometryEngine() { }
 
+        static private void InitialiseEngine()
+        {
+            if (GeometryConverterFactory is null) //just do it once
+                Assembly.Load(XbimArchitectureConventions.ModuleName); //make the module load and initialise the variables
+        }
 
         public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory)
         {
-
-
-            _logger = loggerFactory.CreateLogger<XbimGeometryEngine>();
-
-            var conventions = new XbimArchitectureConventions();    // understands the process we run under
-            string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
-            _logger.LogDebug("Loading {assemblyName}", assemblyName);
             try
             {
-                var ass = Assembly.Load(assemblyName);
-#if NETFRAMEWORK
-                _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.CodeBase);
-#else
-                _logger.LogTrace("Loaded {fullName} from {codebase}", ass.GetName().FullName, ass.Location);
-#endif
-
-
-                _engine = GeometryConverterFactory.CreateGeometryEngineV5(model, loggerFactory);
+                InitialiseEngine();
+                _engine = GeometryConverterFactory.CreateGeometryEngineV6(model, loggerFactory);
+                _logger = loggerFactory.CreateLogger<XbimGeometryEngine>();
                 _logger.LogTrace("Created Instance of {fullName}", _engine.GetType().FullName);
                 if (_engine == null)
                 {
@@ -94,21 +80,17 @@ namespace Xbim.Geometry.Engine.Interop
                 }
                 if (model is IfcStore ifcStore) //special case for stores which wrap the internal model
                 {
-                    ifcStore.Model.Tag = GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
+                    ifcStore.Model.AddTagValue("ModelGeometryService", GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine));
                 }
+                else
+                    model.AddTagValue("ModelGeometryService", GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine));
 
                 _logger.LogDebug("XbimGeometryEngine constructed successfully");
             }
             catch (Exception e)
             {
                 _logger.LogError(0, e, "Failed to construct XbimGeometryEngine");
-#if NETFRAMEWORK
-                throw new FileLoadException($"Failed to load Xbim.Geometry.Engine{conventions.Suffix}.dll", e);
-#else
-                throw new FileLoadException($"Failed to load {conventions.Runtime}\\Xbim.Geometry.Engine.dll", e);
-#endif
             }
-
         }
 
         public IXModelGeometryService ModelService => GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
@@ -892,6 +874,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             // no logger is provided so no tracing is started for this function
             return _engine.ReadBrep(filename);
+        }
+
+        public static void AddGeometryServices(IServiceCollection services)
+        {
+            InitialiseEngine();
+            var svcCollExt = Activator.CreateInstance(GeometryServicesCollectionExtensionsType);
+            var method = GeometryServicesCollectionExtensionsType.GetMethod(XbimArchitectureConventions.AddGeometryEngineServicesName);
+            method.Invoke(svcCollExt, new object[] { services });
         }
     }
 

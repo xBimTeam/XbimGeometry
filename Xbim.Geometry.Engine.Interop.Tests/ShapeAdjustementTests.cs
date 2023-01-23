@@ -13,10 +13,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     
 	public class ShapeAdjustementTests
 	{
-        
-        static private ILogger logger;
+        private readonly ILoggerFactory _loggerFactory;
 
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        public ShapeAdjustementTests(ILoggerFactory loggerFactory)
+        {
+            _loggerFactory = loggerFactory;
+        }
         
 
         [Fact]
@@ -106,8 +108,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
                 var area = m.Instances.New<IfcArbitraryClosedProfileDef>();
                 area.OuterCurve = poly;
-                var geomEngine = new XbimGeometryEngine(m, loggerFactory);
-                var solid = geomEngine.CreateFace(area, logger);
+                var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
+                var logger = _loggerFactory.CreateLogger<ShapeAdjustementTests>();
+                var solid = geomEngine.CreateFace(area,  logger);
                 var pline = geomEngine.CreateCurve(poly, logger);
                 var t = solid.ToBRep;
                 Debug.WriteLine(t);

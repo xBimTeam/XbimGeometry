@@ -3,11 +3,12 @@
 		<TargetFrameworks>net472;net6.0</TargetFrameworks>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<Version>5.7.2-V4Experimental</Version>
+		<Version>5.7.2-V8Experimental</Version>
 		<SignAssembly>False</SignAssembly>
+		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -80,7 +81,41 @@
 			<Output TaskParameter="TouchedFiles" ItemName="FilesTouched" />
 		</Touch>
 	</Target>-->
+<ItemGroup>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\TK*.dll"  Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\TK*.dll" Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'" >
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll" Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll" Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.pdb" Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		</None>
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.pdb"  Visible="true">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		</None>
 
+	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>

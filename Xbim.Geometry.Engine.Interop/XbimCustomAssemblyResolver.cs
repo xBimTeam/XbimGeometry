@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Reflection;
 using Xbim.Common;
+using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop
 {
@@ -58,20 +60,12 @@ namespace Xbim.Geometry.Engine.Interop
 
             string libraryPath = null;
 
-            if (moduleName.StartsWith(GeometryModuleName))
+            if (moduleName.StartsWith(XbimArchitectureConventions.ModuleName))
             {
 
-                // Get conventions used by this process architecture
-                var conventions = new XbimArchitectureConventions();
 
-                // Append the relevant suffix
-                // var filename = String.Format("{0}{1}.dll", conventions.ModuleName, conventions.Suffix);
-                //dropping the use of a suffix
-#if NETFRAMEWORK
-                var filename = $"{conventions.ModuleName}{conventions.Suffix}.dll";
-#else
-                var filename = $"{conventions.Runtime}\\{conventions.ModuleName}.dll";
-#endif
+                var filename = @$"{XbimArchitectureConventions.Runtime}\{XbimArchitectureConventions.ModuleDllName}";
+
                 // Look in relevant Architecture subfolder off the main application deployment
                 libraryPath = Path.Combine(appDir, filename);
 
@@ -102,9 +96,11 @@ namespace Xbim.Geometry.Engine.Interop
             if (libraryPath != null)
             {
 
-                loadedAssembly = LoadAssembly(moduleName, libraryPath);
-
+                loadedAssembly = Assembly.LoadFile(libraryPath);
             }
+            XbimGeometryEngine.GeometryServicesCollectionExtensionsType = loadedAssembly.GetType(XbimArchitectureConventions.ServiceCollectionExtensionsName) as Type;
+            var geometryConverterFactoryType = loadedAssembly.GetType(XbimArchitectureConventions.GeometryConverterFactoryTypeName) as Type;
+            XbimGeometryEngine.GeometryConverterFactory = Activator.CreateInstance(geometryConverterFactoryType) as IXGeometryConverterFactory;
             return loadedAssembly;
         }
 
