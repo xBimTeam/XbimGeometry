@@ -70,9 +70,9 @@ namespace Xbim.Geometry.Engine.Interop
         {
             try
             {
-                InitialiseEngine();
-                _engine = GeometryConverterFactory.CreateGeometryEngineV6(model, loggerFactory);
                 _logger = loggerFactory.CreateLogger<XbimGeometryEngine>();
+                InitialiseEngine();
+                _engine = GeometryConverterFactory.CreateGeometryEngineV6(model, loggerFactory);          
                 _logger.LogTrace("Created Instance of {fullName}", _engine.GetType().FullName);
                 if (_engine == null)
                 {
