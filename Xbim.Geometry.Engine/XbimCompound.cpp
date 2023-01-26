@@ -581,6 +581,7 @@ namespace Xbim
 
 		void XbimCompound::Init(IIfcClosedShell^ closedShell, ILogger^ logger)
 		{
+
 			TopoDS_Shape occOuterShell = InitFaces(closedShell->CfsFaces, closedShell, logger);
 
 			if (occOuterShell.IsNull())

@@ -36,14 +36,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
-			<Private>True</Private>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</ProjectReference>
-		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Update="TestFiles\advanced_brep_1.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -465,6 +457,17 @@
 
 	<ItemGroup>
 		<Folder Include="TestFiles\Github\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
+	    <Private>True</Private>
+	    <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
+	  </ProjectReference>
+	  <ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj">
+	    <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
+	    <Private>True</Private>
+	  </ProjectReference>
 	</ItemGroup>
 
 </Project>
