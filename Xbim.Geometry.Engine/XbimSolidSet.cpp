@@ -474,7 +474,7 @@ namespace Xbim
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyFactor);
 			
-				Message_ProgressRange pi;
+				XbimProgressMonitor pi(timeout);
 				
 				TopoDS_Shape aR;
 
@@ -563,7 +563,7 @@ namespace Xbim
 							retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
 						}
 					}
-					catch (...) //if we cannot fix it return the unified shape
+					catch (const Standard_Failure&) //if we cannot fix it return the unified shape
 					{
 						result = aR;
 						retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
@@ -587,13 +587,13 @@ namespace Xbim
 					unifier.Build();
 					result =unifier.Shape();
 				}
-				catch (...) //any failure
+				catch (const Standard_Failure&) //any failure
 				{
 					//default to what we had					
 				}
 				return retVal;
 			}
-			catch (Standard_NotImplemented) //User break most likely called
+			catch (const Standard_NotImplemented&) //User break most likely called
 			{
 				return BOOLEAN_TIMEDOUT;
 			}
@@ -630,7 +630,7 @@ namespace Xbim
 				{
 					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
 				}
-				catch (...)
+				catch (const Standard_Failure& ex)
 				{
 					success = BOOLEAN_FAIL;
 				}

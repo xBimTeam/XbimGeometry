@@ -31,7 +31,7 @@ namespace Xbim
 
 				System::String^ timeOut = System::Environment::GetEnvironmentVariable("BooleanTimeOut");
 				if (!int::TryParse(timeOut, BooleanTimeOut))
-					BooleanTimeOut = 60;
+					BooleanTimeOut = 30;
 				System::String^ fuzzyString = System::Environment::GetEnvironmentVariable("FuzzyFactor");
 				if (!double::TryParse(fuzzyString, FuzzyFactor))
 					FuzzyFactor = 10;
