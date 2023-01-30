@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Xbim.Geometry.Abstractions;
+using Xbim.Ifc;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
@@ -29,6 +30,26 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 // todo: 2021: add checks so that the expected openings are correctly computed.
             }
+        }
+
+        [Fact]
+        public void CanConstructModelContext()
+        {
+
+            var selectedFilename = @"C:\Users\AndyWard\Desktop\Ruppender.ifc";
+            var model = IfcStore.Open(selectedFilename);
+
+            var loggerFactory = new LoggerFactory();
+            
+            var contextLogger = loggerFactory.CreateLogger<Xbim3DModelContext>();
+
+            var context = new Xbim3DModelContext(model, engineVersion: Xbim.Geometry.Abstractions.XGeometryEngineVersion.V6,
+                    logger: contextLogger, loggerFactory: loggerFactory); // Null Reference Exception here
+
+
+            context.CreateContext();
+
+
         }
     }
 }

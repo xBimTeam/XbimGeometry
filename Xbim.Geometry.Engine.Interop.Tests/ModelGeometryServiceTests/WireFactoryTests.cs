@@ -14,9 +14,12 @@ namespace Xbim.Geometry.NetCore.Tests
 
         static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
-        static IXModelGeometryService _modelSvc = XbimGeometryEngine.CreateModelGeometryService(_dummyModel, loggerFactory);
+        private readonly IXModelGeometryService _modelSvc;
         #endregion
 
-      
+        public WireFactoryTests(IXbimGeometryServicesFactory factory)
+        {
+            _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
+        }
     }
 }

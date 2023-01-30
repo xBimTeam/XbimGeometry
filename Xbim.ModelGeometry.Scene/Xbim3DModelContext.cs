@@ -1,5 +1,6 @@
 ﻿#region Directives
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
@@ -8,15 +9,14 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Xbim.Common;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.ModelGeometry.Scene.Extensions;
@@ -585,11 +585,15 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
+            var services = XbimGeometryInternalServices.ServiceProvider;
+            var factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
+
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
              _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());
             _model = model;
             if(loggerFactory==null) loggerFactory= XbimLogging.LoggerFactory;
-            _engine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
+            
+            _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
 
             model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();

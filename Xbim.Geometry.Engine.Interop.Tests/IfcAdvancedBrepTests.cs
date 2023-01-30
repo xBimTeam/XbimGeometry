@@ -15,11 +15,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     {
         
         
-        private ILoggerFactory _loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IXbimGeometryServicesFactory factory;
 
-        public IfcAdvancedBrepTests(ILoggerFactory loggerFactory)
+        public IfcAdvancedBrepTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
             _loggerFactory = loggerFactory;
+            this.factory = factory;
         }
         [Fact]
         public void IfcAdvancedBrepTrimmedCurveTest()
@@ -27,7 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcAdvancedBrep>(nameof(IfcAdvancedBrepTrimmedCurveTest)))
             {
                 er.Entity.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(er.Entity.Model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(er.Entity.Model, _loggerFactory);
                 var solid = geomEngine.CreateSolid(er.Entity);
                 solid.Faces.Count.Should().Be(14, "This solid should have 14 faces");
             }
@@ -41,7 +43,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 solids.Count.Should().Be(3); //this should really be one but the model is incorrect
                 solids.First().Faces.Count.Should().Be(60);
@@ -61,7 +63,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 model.AddRevitWorkArounds();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 solids.Count.Should().Be(2);
                 solids.First().Faces.Count.Should().Be(8);
@@ -87,7 +89,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 surfaceSweep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
                 sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
@@ -106,7 +108,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 var shapeGeom = geomEngine.CreateShapeGeometry(solids,
                     model.ModelFactors.Precision, model.ModelFactors.DeflectionTolerance,
@@ -155,7 +157,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //this model needs workarounds to be applied
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var solids = geomEngine.CreateSolidSet(brep);
                 solids.IsValid.Should().BeTrue();
                 solids.Should().HaveCount(solidCount);

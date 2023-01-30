@@ -21,12 +21,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
 
         static private ILoggerFactory _loggerFactory;
+        private readonly IXbimGeometryServicesFactory factory;
         static ILogger _logger;
 
-        public Ifc4GeometryTests(ILoggerFactory loggerFactory)
+        public Ifc4GeometryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
             _loggerFactory = loggerFactory;
-            _logger=_loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            this.factory = factory;
+            _logger =_loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -40,7 +42,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var advancedBrep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 if (engineVersion == XGeometryEngineVersion.V5) model.AddRevitWorkArounds();
                 advancedBrep.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var solid = geomEngine.CreateSolid(advancedBrep, _logger);
 
                 solid.Volume.Should().BeApproximately(102264692.6969, 1e-4);
@@ -58,7 +60,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 pfs.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var faceModel = geomEngine.CreateSurfaceModel(pfs, _logger).OfType<IXbimShell>().FirstOrDefault();
                 faceModel.Should().NotBeNull();
                 faceModel.Faces.Count.Should().Be(11);
@@ -75,7 +77,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var pfs = model.Instances.OfType<IIfcPolygonalFaceSet>().FirstOrDefault();
                 pfs.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var solidModel = geomEngine.Create(pfs, _logger) as IXbimSolidSet;
 
                 solidModel.Should().NotBeNull();
@@ -93,7 +95,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcCompositeCurve>(nameof(Composite_curve_with_disconnection)))
             {
                 er.Entity.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, er.Model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, er.Model, _loggerFactory);
                 var face = geomEngine.CreateFace(er.Entity, _logger);
                 face.Area.Should().BeApproximately(22084775, 1);
                
@@ -108,7 +110,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(CentreLineProfileTest)))
             {
                 er.Entity.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, er.Model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, er.Model, _loggerFactory);
                 var extrudedSolid = geomEngine.CreateSolid(er.Entity, _logger);
                 HelperFunctions.IsValidSolid(extrudedSolid);
             }
@@ -264,7 +266,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IfcFacetedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var geom = geomEngine.CreateSolidSet(shape, _logger).FirstOrDefault();
                 geom.Volume.Should().BeApproximately(geom.BoundingBox.Volume, 1e-5);
             }
@@ -312,7 +314,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(shape, _logger);
                 geom.Volume.Should().BeApproximately(0.83333333333333282, 1e-7);
 
@@ -695,7 +697,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var eas = model.Instances[3676127] as IIfcExtrudedAreaSolid;
                 eas.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
                 geom.Volume.Should().BeApproximately(11443062570.814053, 1e-5);
             }

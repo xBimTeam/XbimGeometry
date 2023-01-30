@@ -12,10 +12,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
     public class BRepBuildingTests
     {
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        
-        public BRepBuildingTests()
+        private readonly IXbimGeometryServicesFactory factory;
+
+        public BRepBuildingTests(IXbimGeometryServicesFactory factory)
         {
-           
+            this.factory = factory;
         }
 
 
@@ -23,7 +24,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         public void Can_Create_Plane()
         {
 
-            var modelService = XbimGeometryEngine.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
 
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 30),
@@ -46,7 +47,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         public void Can_Create_WireAndFace()
         {
 
-            var modelService = XbimGeometryEngine.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 30),
                             modelService.GeometryFactory.BuildDirection3d(0, 0, 1));
@@ -75,7 +76,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         [Fact]
         public void Can_Create_Wire_InnerBoundAndFace()
         {
-            var modelService = XbimGeometryEngine.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
 
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 0),
@@ -128,7 +129,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         {
 
             {
-                var modelService = XbimGeometryEngine.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+                var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
 
                 var plane = modelService.SurfaceFactory.BuildPlane(
                                 modelService.GeometryFactory.BuildPoint3d(10, 20, 0),

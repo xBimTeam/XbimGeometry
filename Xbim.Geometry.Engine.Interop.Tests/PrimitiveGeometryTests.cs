@@ -17,7 +17,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         static private ILogger logger = NullLogger<PrimitiveGeometryTests>.Instance;
         static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        private readonly IXbimGeometryServicesFactory factory;
 
+        public PrimitiveGeometryTests(IXbimGeometryServicesFactory factory)
+        {
+            this.factory = factory;
+        }
 
         //[Fact]
         //public void can_build_composite_curve()
@@ -39,7 +44,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcFacetedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
                 var geom = geomEngine.CreateSolidSet(shape, logger);
                 geom.Count.Should().Be(1);
                 geom.First().Volume.Should().BeApproximately(3232.386, 5e-3);
@@ -54,7 +59,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
                 var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
                 geom.Volume.Should().BeApproximately(-136033.82966702414, 1e-5);
             }
@@ -68,7 +73,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = XbimGeometryEngine.CreateGeometryEngine(engineVersion, model, loggerFactory);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
                 var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
                 geom.Should().NotBeNull();
             }
