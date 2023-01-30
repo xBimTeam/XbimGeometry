@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Xbim.Geometry.Engine.Interop.Internal
+namespace Xbim.Geometry.Engine.Interop
 {
     /// <summary> 
     /// A class representing the conventions we use for processor specific Geometry Engine library
@@ -22,10 +22,6 @@ namespace Xbim.Geometry.Engine.Interop.Internal
             _ => throw new NotImplementedException(RuntimeInformation.ProcessArchitecture.ToString())
         };
 
-        ///// <summary>
-        ///// The default subfolder to look for platform-specific assemblys in the current process architecture
-        ///// </summary>
-        //public string SubFolder { get; private set; }
 
         /// <summary>
         /// name of the dll that that holds the geometry functionality
@@ -34,6 +30,5 @@ namespace Xbim.Geometry.Engine.Interop.Internal
 
         public static string ServiceCollectionExtensionsName => "Xbim.Geometry.DependencyInjection.ServiceCollectionExtensions";
         public static string AddGeometryEngineServicesName => "AddGeometryEngineServices";
-        public static string GeometryConverterFactoryTypeName => "Xbim.Geometry.Factories.GeometryConverterFactory";
     }
 }

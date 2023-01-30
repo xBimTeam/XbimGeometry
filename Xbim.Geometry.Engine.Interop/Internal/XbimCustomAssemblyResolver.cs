@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using Xbim.Common;
 
-namespace Xbim.Geometry.Engine.Interop.Internal
+namespace Xbim.Geometry.Engine.Interop
 {
     [Obsolete]
     internal class XbimCustomAssemblyResolver

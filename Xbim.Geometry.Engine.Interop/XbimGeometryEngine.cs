@@ -90,9 +90,10 @@ namespace Xbim.Geometry.Engine.Interop
         /// </summary>
         /// <param name="model"></param>
         /// <param name="loggerFactory"></param>
-        public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory)
+        /// <param name="options"></param>
+        public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory, GeometryEngineOptions options = null)
         {
-            _engineOptions = new GeometryEngineOptions();
+            _engineOptions = options ?? new GeometryEngineOptions();
             IServiceProvider services = XbimGeometryInternalServices.ServiceProvider;
             this.factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
 
