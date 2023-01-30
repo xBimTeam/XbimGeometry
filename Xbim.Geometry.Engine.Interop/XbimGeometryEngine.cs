@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -8,6 +9,7 @@ using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
+using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc;
 using Xbim.Ifc4;
@@ -31,26 +33,57 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
+        private readonly GeometryEngineOptions _engineOptions;
+
 
 
         private XbimGeometryEngine() { }
+
 
 
         /// <summary>
         /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
         /// invoking any geometry functions.
         /// </summary>
-        /// <param name="logger"></param>
+        /// <param name="servicesFactory"></param>
         /// <param name="loggerFactory"></param>
-        public XbimGeometryEngine(IXbimGeometryServicesFactory factory, ILogger<XbimGeometryEngine> logger, ILoggerFactory loggerFactory)
+        public XbimGeometryEngine(IXbimGeometryServicesFactory servicesFactory, ILoggerFactory loggerFactory) :
+            this(servicesFactory, loggerFactory, new GeometryEngineOptions())
         {
-            this.factory = factory;
-            _logger = logger;
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
+        /// invoking any geometry functions.
+        /// </summary>
+        /// <param name="servicesFactory"></param>
+        /// <param name="loggerFactory"></param>
+        /// <param name="geometryOptions"></param>
+        public XbimGeometryEngine(IXbimGeometryServicesFactory servicesFactory, ILoggerFactory loggerFactory, GeometryEngineOptions geometryOptions) :
+            this(servicesFactory, loggerFactory, Options.Create(geometryOptions))
+        {
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
+        /// invoking any geometry functions.
+        /// </summary>
+        /// <param name="servicesFactory"></param>
+        /// <param name="loggerFactory"></param>
+        /// <param name="geometryOptions"></param>
+        public XbimGeometryEngine(IXbimGeometryServicesFactory servicesFactory, ILoggerFactory loggerFactory, IOptions<GeometryEngineOptions> geometryOptions = null)
+        {
+            _engineOptions = geometryOptions == null || geometryOptions.Value == null ? new GeometryEngineOptions() : geometryOptions.Value;
+
+            this.factory = servicesFactory;
             _loggerFactory = loggerFactory;
-            
+            _logger = _loggerFactory.CreateLogger<XbimGeometryEngine>();
+
             _logger.LogDebug("XbimGeometryEngine constructed successfully");
         }
 
+        
+        // This a legacy ctor for backward compatibility and use outside of a DI system
 
         /// <summary>
         /// Creates an instance of <see cref="XbimGeometryEngine"/> and registers the provided model with the Geometry Engine
@@ -59,6 +92,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// <param name="loggerFactory"></param>
         public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory)
         {
+            _engineOptions = new GeometryEngineOptions();
             IServiceProvider services = XbimGeometryInternalServices.ServiceProvider;
             this.factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
 
@@ -85,9 +119,9 @@ namespace Xbim.Geometry.Engine.Interop
         /// </summary>
         /// <param name="model">The model to register</param>
         /// <exception cref="Exception">If an engine cannot be created</exception>
-        public void RegisterModel(IModel model, XGeometryEngineVersion geometryEngineVersion = XGeometryEngineVersion.V6)
+        public void RegisterModel(IModel model)
         {
-            _engine = factory.CreateGeometryEngine(geometryEngineVersion, model, _loggerFactory);
+            _engine = factory.CreateGeometryEngine(_engineOptions.GeometryEngineVersion, model, _loggerFactory);
             _logger.LogTrace("Created Instance of {fullName}", _engine.GetType().FullName);
             if (_engine == null)
             {

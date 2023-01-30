@@ -1,7 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
+using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 
@@ -9,18 +13,27 @@ namespace Xbim.Geometry.Engine.Interop
 {
     public static class ServiceCollectionExtensions
     {
+
+        public static IServiceCollection AddGeometryServices(this IServiceCollection services)
+        {
+            return services.AddGeometryServices(delegate { });
+        }
+
         /// <summary>
         /// Adds xbim geometry to the specified <see cref="IServiceCollection"/>
         /// </summary>
         /// <param name="services"></param>
         /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
-        public static IServiceCollection AddGeometryServices(this IServiceCollection services)
+        public static IServiceCollection AddGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
         {
-            
+            services.AddOptions();
 
             services.AddScoped<IXbimGeometryEngine, XbimGeometryEngine>();
             services.AddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
             services.AddXbimGeometryServices();
+            
+            services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(Abstractions.XGeometryEngineVersion.V6)));
+            configure(new GeometryEngineBuilder(services));
             return services;
         }
 

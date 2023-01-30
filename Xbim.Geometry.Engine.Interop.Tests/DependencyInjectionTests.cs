@@ -2,16 +2,14 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
-using Xbim.Geometry.Engine.Interop.Tests.Extensions;
+using Xbim.Geometry.Engine.Interop.Extensions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 
@@ -44,7 +42,30 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         }
 
-        
+        [Fact]
+        public void CanCreateEngineWithoutDI()
+        {
+
+            var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
+            var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
+            var engine = new XbimGeometryEngine(model, loggerFactory);
+
+            Assert.NotNull(engine);
+        }
+
+        [Fact]
+        public void CanCreateEngineWithConfigWithoutDI()
+        {
+            IServiceProvider provider = BuildServices();
+
+            var factory = provider.GetRequiredService<IXbimGeometryServicesFactory>();
+
+            var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
+            var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
+            var engine = new XbimGeometryEngine(factory, loggerFactory, new Configuration.GeometryEngineOptions { GeometryEngineVersion=XGeometryEngineVersion.V6});
+
+            Assert.NotNull(engine);
+        }
 
         [Fact]
         public void CanLoad3DContextWithoutDI()
@@ -52,9 +73,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
             var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
-            var engine = new Xbim3DModelContext(model, loggerFactory, XGeometryEngineVersion.V6);
+            var context = new Xbim3DModelContext(model, loggerFactory, XGeometryEngineVersion.V6);
 
-            Assert.NotNull(engine);
+            Assert.NotNull(context);
         }
 
         [Fact]
@@ -86,7 +107,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             var services = new ServiceCollection();
 
             services.AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)));
-            services.AddXbimGeometryServices();
+            services.AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5));
 
             var provider = services.BuildServiceProvider();
             return provider;
