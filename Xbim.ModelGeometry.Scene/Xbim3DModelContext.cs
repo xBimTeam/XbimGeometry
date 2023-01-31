@@ -1094,7 +1094,12 @@ namespace Xbim.ModelGeometry.Scene
 
             if (r.ContextOfItems == null)
             {
-                LogWarning(r, "No Context found for this representation");
+                if(contexts.Count == 1) // Malformed but assume everything is in the context when there is only single
+                {
+                    LogWarning(r, "Inferring default context for this representation");
+                    return true;
+                }
+                LogWarning(r, "No Context found for this representation - skipping shape");
                 return false;
             }
             // check for entity label to take advantage of keyed collection
