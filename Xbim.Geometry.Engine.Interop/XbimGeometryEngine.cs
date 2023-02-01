@@ -184,14 +184,22 @@ namespace Xbim.Geometry.Engine.Interop
                 return factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
             }
         }
-            
-            //factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
+        
+        protected IXbimGeometryEngine Engine
+        {
+            get
+            {
+                if (_engine == null)
+                    throw new InvalidOperationException("Models must be registered before invoking the Geometry Engine");
+                return _engine;
+            }
+        }
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))
             {
-                return _engine.Create(ifcRepresentation, null, logger);
+                return Engine.Create(ifcRepresentation, null, logger);
             }
         }
 
@@ -200,7 +208,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType, logger);
+                return Engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, storageType, logger);
             }
         }
 
@@ -208,14 +216,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, XbimGeometryType.Polyhedron, logger);
+                return Engine.CreateShapeGeometry(geometryObject, precision, deflection, angle, XbimGeometryType.Polyhedron, logger);
             }
         }
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection, ILogger logger /*, angle = 0.5*/)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron, logger);
+                return Engine.CreateShapeGeometry(geometryObject, precision, deflection, 0.5, XbimGeometryType.Polyhedron, logger);
             }
         }
         /// <summary>
@@ -230,14 +238,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.CreateShapeGeometry(oneMillimetre, geometryObject, precision, logger);
+                return Engine.CreateShapeGeometry(oneMillimetre, geometryObject, precision, logger);
             }
         }
         public IXbimSolid CreateSolid(IIfcSweptAreaSolid ifcSolid, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -245,7 +253,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -253,7 +261,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -261,7 +269,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -269,7 +277,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -277,7 +285,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -285,7 +293,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -293,7 +301,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -301,7 +309,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -309,7 +317,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -317,7 +325,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -325,7 +333,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -333,7 +341,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -341,7 +349,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -349,7 +357,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -357,7 +365,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -365,7 +373,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -373,7 +381,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -381,7 +389,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -389,7 +397,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -397,7 +405,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -405,7 +413,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -413,7 +421,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -421,7 +429,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -429,7 +437,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -437,7 +445,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -445,7 +453,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -453,7 +461,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolid(ifcSolid, logger);
+                return Engine.CreateSolid(ifcSolid, logger);
             }
         }
 
@@ -461,7 +469,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateShell(shell, logger);
+                return Engine.CreateShell(shell, logger);
             }
         }
 
@@ -469,7 +477,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateShell(shell, logger);
+                return Engine.CreateShell(shell, logger);
             }
         }
 
@@ -477,7 +485,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, linExt))
             {
-                return _engine.CreateShell(linExt, logger);
+                return Engine.CreateShell(linExt, logger);
             }
         }
 
@@ -485,7 +493,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSurfaceModel(shell, logger);
+                return Engine.CreateSurfaceModel(shell, logger);
             }
         }
 
@@ -493,7 +501,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSurfaceModel(ifcSurface, logger);
+                return Engine.CreateSurfaceModel(ifcSurface, logger);
             }
         }
 
@@ -501,7 +509,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSurfaceModel(ifcSurface, logger);
+                return Engine.CreateSurfaceModel(ifcSurface, logger);
             }
         }
 
@@ -509,14 +517,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSolidSet(shell, logger);
+                return Engine.CreateSolidSet(shell, logger);
             }
         }
         public IXbimSolidSet CreateSolidSet(IIfcPolygonalFaceSet shell, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSolidSet(shell, logger);
+                return Engine.CreateSolidSet(shell, logger);
             }
         }
 
@@ -524,7 +532,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSolidSet(ifcSurface, logger);
+                return Engine.CreateSolidSet(ifcSurface, logger);
             }
         }
 
@@ -532,7 +540,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSolidSet(ifcSurface, logger);
+                return Engine.CreateSolidSet(ifcSurface, logger);
             }
         }
 
@@ -540,7 +548,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSolid(shell, logger);
+                return Engine.CreateSolid(shell, logger);
             }
         }
 
@@ -548,7 +556,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSolid(ifcSurface, logger);
+                return Engine.CreateSolid(ifcSurface, logger);
             }
         }
 
@@ -556,7 +564,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSurface))
             {
-                return _engine.CreateSolid(ifcSurface, logger);
+                return Engine.CreateSolid(ifcSurface, logger);
             }
         }
 
@@ -564,7 +572,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, profileDef))
             {
-                return _engine.CreateFace(profileDef, logger);
+                return Engine.CreateFace(profileDef, logger);
             }
         }
 
@@ -573,14 +581,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, cCurve))
             {
-                return _engine.CreateFace(cCurve, logger);
+                return Engine.CreateFace(cCurve, logger);
             }
         }
         public IXbimFace CreateFace(IIfcPolyline pline, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, pline))
             {
-                return _engine.CreateFace(pline, logger);
+                return Engine.CreateFace(pline, logger);
             }
         }
 
@@ -588,7 +596,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, loop))
             {
-                return _engine.CreateFace(loop, logger);
+                return Engine.CreateFace(loop, logger);
             }
         }
 
@@ -597,7 +605,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, surface))
             {
-                return _engine.CreateFace(surface, logger);
+                return Engine.CreateFace(surface, logger);
             }
         }
 
@@ -605,7 +613,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, plane))
             {
-                return _engine.CreateFace(plane, logger);
+                return Engine.CreateFace(plane, logger);
             }
         }
 
@@ -613,7 +621,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, wire))
             {
-                return _engine.CreateFace(wire, logger);
+                return Engine.CreateFace(wire, logger);
             }
         }
 
@@ -621,7 +629,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateWire(curve, logger);
+                return Engine.CreateWire(curve, logger);
             }
         }
 
@@ -629,7 +637,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, compCurveSeg))
             {
-                return _engine.CreateWire(compCurveSeg, logger);
+                return Engine.CreateWire(compCurveSeg, logger);
             }
         }
 
@@ -639,7 +647,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger))
             {
-                return _engine.CreatePoint(x, y, z, tolerance);
+                return Engine.CreatePoint(x, y, z, tolerance);
             }
         }
 
@@ -647,7 +655,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, p))
             {
-                return _engine.CreatePoint(p);
+                return Engine.CreatePoint(p);
             }
         }
 
@@ -655,7 +663,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, p))
             {
-                return _engine.CreatePoint(p, tolerance);
+                return Engine.CreatePoint(p, tolerance);
             }
         }
 
@@ -663,7 +671,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, pt))
             {
-                return _engine.CreatePoint(pt);
+                return Engine.CreatePoint(pt);
             }
         }
 
@@ -671,7 +679,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, p))
             {
-                return _engine.CreatePoint(p, logger);
+                return Engine.CreatePoint(p, logger);
             }
         }
 
@@ -679,7 +687,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, p))
             {
-                return _engine.CreatePoint(p, logger);
+                return Engine.CreatePoint(p, logger);
             }
         }
 
@@ -687,7 +695,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, point))
             {
-                return _engine.CreateVertexPoint(point, precision);
+                return Engine.CreateVertexPoint(point, precision);
             }
         }
 
@@ -698,7 +706,7 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 using (new Tracer(LogHelper.CurrentFunctionName(), this._logger))
                 {
-                    return _engine.CreateSolidSet();
+                    return Engine.CreateSolidSet();
                 }
             }
             catch (Exception e)
@@ -713,7 +721,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, boolOp))
             {
-                return _engine.CreateSolidSet(boolOp, logger);
+                return Engine.CreateSolidSet(boolOp, logger);
             }
         }
 
@@ -721,7 +729,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, grid))
             {
-                return _engine.CreateGrid(grid, logger);
+                return Engine.CreateGrid(grid, logger);
             }
         }
 
@@ -734,14 +742,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shape))
             {
-                _engine.WriteTriangulation(tw, shape, tolerance, deflection, angle);
+                Engine.WriteTriangulation(tw, shape, tolerance, deflection, angle);
             }
         }
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection, double angle)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shape))
             {
-                _engine.WriteTriangulation(bw, shape, tolerance, deflection, angle);
+                Engine.WriteTriangulation(bw, shape, tolerance, deflection, angle);
             }
         }
 
@@ -750,7 +758,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                _engine.Mesh(receiver, geometryObject, precision, deflection, angle);
+                Engine.Mesh(receiver, geometryObject, precision, deflection, angle);
             }
         }
 
@@ -767,7 +775,7 @@ namespace Xbim.Geometry.Engine.Interop
             {
                 using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))
                 {
-                    return _engine.Create(ifcRepresentation, objectLocation, logger);
+                    return Engine.Create(ifcRepresentation, objectLocation, logger);
                 }
             }
             catch (Exception e)
@@ -782,7 +790,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger))
             {
-                return _engine.CreateGeometryObjectSet();
+                return Engine.CreateGeometryObjectSet();
             }
         }
 
@@ -790,7 +798,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -798,7 +806,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcPolyline))
             {
-                return _engine.CreateCurve(ifcPolyline, logger);
+                return Engine.CreateCurve(ifcPolyline, logger);
             }
         }
 
@@ -806,7 +814,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -814,7 +822,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -822,7 +830,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -830,7 +838,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -838,7 +846,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -846,7 +854,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -854,14 +862,14 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
         public IXbimCurve CreateCurve(IIfcOffsetCurve2D curve, ILogger logger)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, curve))
             {
-                return _engine.CreateCurve(curve, logger);
+                return Engine.CreateCurve(curve, logger);
             }
         }
 
@@ -869,7 +877,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, objPlacement))
             {
-                return _engine.ToMatrix3D(objPlacement, logger);
+                return Engine.ToMatrix3D(objPlacement, logger);
             }
         }
 
@@ -883,7 +891,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometry))
             {
-                return _engine.Transformed(geometry, cartesianTransform);
+                return Engine.Transformed(geometry, cartesianTransform);
             }
         }
 
@@ -892,21 +900,21 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.Moved(geometryObject, placement);
+                return Engine.Moved(geometryObject, placement);
             }
         }
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcAxis2Placement2D placement)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.Moved(geometryObject, placement);
+                return Engine.Moved(geometryObject, placement);
             }
         }
         public IXbimGeometryObject Moved(IXbimGeometryObject geometryObject, IIfcPlacement placement)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.Moved(geometryObject, placement);
+                return Engine.Moved(geometryObject, placement);
             }
         }
 
@@ -914,7 +922,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.Moved(geometryObject, objectPlacement, logger);
+                return Engine.Moved(geometryObject, objectPlacement, logger);
             }
         }
 
@@ -922,7 +930,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger))
             {
-                return _engine.FromBrep(brepStr);
+                return Engine.FromBrep(brepStr);
             }
         }
 
@@ -930,7 +938,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, geometryObject))
             {
-                return _engine.ToBrep(geometryObject);
+                return Engine.ToBrep(geometryObject);
             }
         }
 
@@ -938,7 +946,7 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcSolid))
             {
-                return _engine.CreateSolidSet(ifcSolid, logger);
+                return Engine.CreateSolidSet(ifcSolid, logger);
             }
         }
 
@@ -946,27 +954,27 @@ namespace Xbim.Geometry.Engine.Interop
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSurfaceModel(shell, logger);
+                return Engine.CreateSurfaceModel(shell, logger);
             }
         }
         public IXbimGeometryObjectSet CreateSurfaceModel(IIfcPolygonalFaceSet shell, ILogger logger = null)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shell))
             {
-                return _engine.CreateSurfaceModel(shell, logger);
+                return Engine.CreateSurfaceModel(shell, logger);
             }
         }
 
         public void WriteBrep(string filename, IXbimGeometryObject geomObj)
         {
             // no logger is provided so no tracing is started for this function
-            _engine.WriteBrep(filename, geomObj);
+            Engine.WriteBrep(filename, geomObj);
         }
 
         public IXbimGeometryObject ReadBrep(string filename)
         {
             // no logger is provided so no tracing is started for this function
-            return _engine.ReadBrep(filename);
+            return Engine.ReadBrep(filename);
         }
 
     }
