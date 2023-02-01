@@ -19,12 +19,14 @@ namespace Xbim.Geometry.NetCore.Tests
         #region Setup
 
         static ILoggerFactory _loggerFactory;
-        IXModelGeometryService _modelSvc;
-        public SolidFactoryTests(ILoggerFactory loggerFactory)
+        private readonly IXbimGeometryServicesFactory factory;
+        readonly IXModelGeometryService _modelSvc;
+        public SolidFactoryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
             _loggerFactory = loggerFactory;
+            this.factory = factory;
             var dummyModel = new MemoryModel(new EntityFactoryIfc4());
-            _modelSvc = XbimGeometryEngine.CreateModelGeometryService(dummyModel, _loggerFactory);
+            _modelSvc = factory.CreateModelGeometryService(dummyModel, _loggerFactory);
         }
 
         #endregion
@@ -337,7 +339,7 @@ namespace Xbim.Geometry.NetCore.Tests
         public void Can_extrude_arbitrary_profile_def_with_voids()
         {
             using var model = MemoryModel.OpenRead("testfiles/ExtrudedAreaSolidFailsOnExtrusion.ifc");
-            var engine = XbimGeometryEngine.CreateGeometryEngineV6(model, _loggerFactory);
+            var engine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var ifcExtrudedAreaSolid = model.Instances[1] as IIfcExtrudedAreaSolid;
             var v6Solid = engine.SolidFactory.Build(ifcExtrudedAreaSolid);
             Assert.NotNull(v6Solid);

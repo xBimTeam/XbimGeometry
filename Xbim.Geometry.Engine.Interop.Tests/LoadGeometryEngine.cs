@@ -10,13 +10,20 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
     public class LoadGeometryEngine
     {
+        private readonly IXbimGeometryServicesFactory factory;
+
+        public LoadGeometryEngine(IXbimGeometryServicesFactory factory)
+        {
+            this.factory = factory;
+        }
+
         [Fact]
         public void SimpleLoad()
         {
             var mm = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
-            var geometryEngineV5 = XbimGeometryEngine.CreateGeometryEngineV5(mm, new NullLoggerFactory());
+            var geometryEngineV5 = factory.CreateGeometryEngineV5(mm, new NullLoggerFactory());
             geometryEngineV5.Should().NotBeNull();
-            var modelGeometryService = XbimGeometryEngine.CreateModelGeometryService(mm, new NullLoggerFactory());
+            var modelGeometryService = factory.CreateModelGeometryService(mm, new NullLoggerFactory());
             modelGeometryService.Should().NotBeNull();
         }
 
@@ -28,7 +35,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-                var ge = XbimGeometryEngine.CreateGeometryEngineV5(m, loggerFactory);
+                var ge = factory.CreateGeometryEngineV5(m, loggerFactory);
                 using (var txn = m.BeginTransaction("new"))
                 {
                     var pline = m.Instances.New<IfcPolyline>();

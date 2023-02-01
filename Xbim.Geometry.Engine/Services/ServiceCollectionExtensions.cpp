@@ -3,7 +3,7 @@
 #include "../storage/BRepDocumentManager.h"
 #include "../Primitives/GeometryPrimitives.h"
 #include "ShapeService.h"
-using namespace Microsoft::Extensions::DependencyInjection;
+using namespace Xbim::Geometry::DependencyInjection;
 
 IServiceCollection^ ServiceCollectionExtensions::AddGeometryEngineServices(IServiceCollection^ services)
 {

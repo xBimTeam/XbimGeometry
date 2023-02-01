@@ -13,12 +13,18 @@ namespace Xbim.Geometry.NetCore.Tests
 
         static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
-       
+        private readonly IXbimGeometryServicesFactory factory;
+
+        public CurveTests(IXbimGeometryServicesFactory factory)
+        {
+            this.factory = factory;
+        }
+
 
         [Fact]
         public void Can_Get_Derivatives()
         {
-            IXGeometryEngineV6 geomSvc = XbimGeometryEngine.CreateGeometryEngineV6(_dummyModel, loggerFactory);
+            IXGeometryEngineV6 geomSvc = factory.CreateGeometryEngineV6(_dummyModel, loggerFactory);
             var basisLine = IfcMoq.IfcLine3dMock( magnitude: 100,  origin: IfcMoq.IfcCartesianPoint3dMock(0, 0, 0), direction: IfcMoq.IfcDirection3dMock(0, 0, 1));
             var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(basisCurve: basisLine, trimParam1: 1, trimParam2: 30);
             var curveFactory = geomSvc.CurveFactory;

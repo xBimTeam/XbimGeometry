@@ -17,19 +17,21 @@ namespace Xbim.Geometry.NetCore.Tests
 
         IXModelGeometryService _modelSvc;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly IXbimGeometryServicesFactory factory;
         #endregion
 
-        public ProfileFactoryTests(ILoggerFactory loggerFactory)
+        public ProfileFactoryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
             _loggerFactory = loggerFactory;
+            this.factory = factory;
             var _dummyModel = new MemoryModel(new EntityFactoryIfc4());
-            _modelSvc = XbimGeometryEngine.CreateModelGeometryService(_dummyModel, _loggerFactory);
+            _modelSvc = factory.CreateModelGeometryService(_dummyModel, _loggerFactory);
         }
         [Fact]
         void Can_Build_IIfcArbitraryProfileDef_With_Composite_Curve_Void()
         {
             using var model = MemoryModel.OpenRead("testfiles/ArbritaryClosedProfileWithCompositeCurveVoid.ifc");
-            var engine = XbimGeometryEngine.CreateGeometryEngineV6(model, _loggerFactory);
+            var engine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var ifcArbitraryProfileDefWithVoids = model.Instances[1] as IIfcArbitraryProfileDefWithVoids;
             var v6face = engine.ProfileFactory.BuildFace(ifcArbitraryProfileDefWithVoids);
             Assert.NotNull(v6face);
@@ -45,7 +47,7 @@ namespace Xbim.Geometry.NetCore.Tests
         void Can_Build_IIfcArbitraryProfileDef_With_bad_precision_on_closing_segments()
         {
             using var model = MemoryModel.OpenRead("testfiles/ArbritaryClosedProfileWithBadPrecisionOnClosingSegments.ifc");
-            var engine = XbimGeometryEngine.CreateGeometryEngineV6(model, _loggerFactory);
+            var engine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var ifcArbitraryProfileDefWithVoids = model.Instances[1] as IIfcArbitraryProfileDefWithVoids;
             var v6face = engine.ProfileFactory.BuildFace(ifcArbitraryProfileDefWithVoids);
             Assert.NotNull(v6face);

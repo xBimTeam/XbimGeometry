@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Xbim.Geometry.Abstractions;
+using Xbim.Ifc;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
@@ -30,5 +32,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 // todo: 2021: add checks so that the expected openings are correctly computed.
             }
         }
+
+        
     }
 }

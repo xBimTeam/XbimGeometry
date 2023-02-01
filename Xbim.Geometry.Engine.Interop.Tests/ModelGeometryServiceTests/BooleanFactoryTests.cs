@@ -20,11 +20,15 @@ namespace Xbim.Geometry.NetCore.Tests
        
         static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
-        static IXModelGeometryService _modelSvc = XbimGeometryEngine.CreateModelGeometryService(_dummyModel, loggerFactory);
+        private readonly IXModelGeometryService _modelSvc;
         const double minGap = 0.2;
+        private readonly IXbimGeometryServicesFactory factory;
 
-        static BooleanFactoryTests()
+
+        public BooleanFactoryTests(IXbimGeometryServicesFactory factory)
         {
+            this.factory = factory;
+            _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
             _modelSvc.MinimumGap = minGap;
         }
 
@@ -204,7 +208,7 @@ namespace Xbim.Geometry.NetCore.Tests
         public void Can_Clip_With_HalfSpace()
         {
             using var model = MemoryModel.OpenRead("testfiles/BooleanClippingWithHalfSpace.ifc"); 
-            var geomEngine = XbimGeometryEngine.CreateGeometryEngineV6(model, loggerFactory);
+            var geomEngine = factory.CreateGeometryEngineV6(model, loggerFactory);
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Build(booleanOp);
             shape.Should().NotBeNull();

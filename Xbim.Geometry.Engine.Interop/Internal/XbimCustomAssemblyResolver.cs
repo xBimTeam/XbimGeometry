@@ -1,13 +1,12 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Reflection;
 using Xbim.Common;
-using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop
 {
+    [Obsolete]
     internal class XbimCustomAssemblyResolver
     {
 
@@ -78,28 +77,31 @@ namespace Xbim.Geometry.Engine.Interop
                     libraryPath = filename;
                 }
             }
-            else if (moduleName.StartsWith(XbimModulePrefix) && !moduleName.Contains("resources"))
-            {
-                // TODO: unclear if this has to do with Geometry Resolving. Suggest this gets moved to a dedicated handler with plugins code.
-                // If the *32.dll or *64.dll is loaded from a
-                // subdirectory (e.g. plugins folder), .net can
-                // fail to resolve its dependencies so this is
-                // to give it a helping hand
-                var splitName = moduleName.Split(',');
-                if (splitName.Length >= 1)
-                {
-                    libraryPath = Path.Combine(appDir, splitName[0] + ".dll");
-                }
-            }
+            //else if (moduleName.StartsWith(XbimModulePrefix) && !moduleName.Contains("resources"))
+            //{
+            //    // TODO: unclear if this has to do with Geometry Resolving. Suggest this gets moved to a dedicated handler with plugins code.
+            //    // If the *32.dll or *64.dll is loaded from a
+            //    // subdirectory (e.g. plugins folder), .net can
+            //    // fail to resolve its dependencies so this is
+            //    // to give it a helping hand
+            //    var splitName = moduleName.Split(',');
+            //    if (splitName.Length >= 1)
+            //    {
+            //        libraryPath = Path.Combine(appDir, splitName[0] + ".dll");
+            //    }
+            //}
 
             Assembly loadedAssembly = null;
             if (libraryPath != null)
             {
                 loadedAssembly = Assembly.LoadFile(libraryPath);
             }
-            XbimGeometryEngine.GeometryServicesCollectionExtensionsType = loadedAssembly.GetType(XbimArchitectureConventions.ServiceCollectionExtensionsName) as Type;
-            var geometryConverterFactoryType = loadedAssembly.GetType(XbimArchitectureConventions.GeometryConverterFactoryTypeName) as Type;
-            XbimGeometryEngine.GeometryConverterFactory = Activator.CreateInstance(geometryConverterFactoryType) as IXGeometryConverterFactory;
+            //if (moduleName.StartsWith(XbimArchitectureConventions.ModuleName))
+            //{
+            //    // HACK: remove this
+            //    ServiceCollectionExtensions.GeometryServicesCollectionExtensionsType = loadedAssembly.GetType(XbimArchitectureConventions.ServiceCollectionExtensionsName) as Type;
+            //}
+
             return loadedAssembly;
         }
 
