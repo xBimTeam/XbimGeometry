@@ -45,6 +45,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
         /// invoking any geometry functions.
         /// </summary>
+        /// <remarks>Alternatively use <see cref="XbimGeometryEngineFactory"/> to build the engine fully configured</remarks>
         /// <param name="servicesFactory"></param>
         /// <param name="loggerFactory"></param>
         public XbimGeometryEngine(IXbimGeometryServicesFactory servicesFactory, ILoggerFactory loggerFactory) :
@@ -56,6 +57,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
         /// invoking any geometry functions.
         /// </summary>
+        /// <remarks>Alternatively use <see cref="XbimGeometryEngineFactory"/> to build the engine fully configured</remarks>
         /// <param name="servicesFactory"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="geometryOptions"></param>
@@ -68,6 +70,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// Creates an instance of <see cref="XbimGeometryEngine"/>. Note a model must be registered using <see cref="XbimGeometryEngine.RegisterModel(IModel)"/> with the engine before 
         /// invoking any geometry functions.
         /// </summary>
+        /// <remarks>Alternatively use <see cref="XbimGeometryEngineFactory"/> to build the engine fully configured</remarks>
         /// <param name="servicesFactory"></param>
         /// <param name="loggerFactory"></param>
         /// <param name="geometryOptions"></param>
@@ -75,8 +78,8 @@ namespace Xbim.Geometry.Engine.Interop
         {
             _engineOptions = geometryOptions == null || geometryOptions.Value == null ? new GeometryEngineOptions() : geometryOptions.Value;
 
-            this.factory = servicesFactory;
-            _loggerFactory = loggerFactory;
+            this.factory = servicesFactory ?? throw new ArgumentNullException(nameof(servicesFactory));
+            _loggerFactory = loggerFactory ?? XbimGeometryInternalServices.ServiceProvider.GetRequiredService<ILoggerFactory>();
             _logger = _loggerFactory.CreateLogger<XbimGeometryEngine>();
 
             _logger.LogDebug("XbimGeometryEngine constructed successfully");
@@ -98,7 +101,7 @@ namespace Xbim.Geometry.Engine.Interop
             this.factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
 
             _logger = services.GetRequiredService<ILogger<XbimGeometryEngine>>();
-            _loggerFactory = loggerFactory;
+            _loggerFactory = loggerFactory ?? XbimGeometryInternalServices.ServiceProvider.GetRequiredService<ILoggerFactory>(); ;
 
             try
             {
