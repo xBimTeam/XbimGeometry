@@ -8,7 +8,6 @@ namespace Xbim.Geometry.Engine.Interop.Internal
     /// </summary>
     public class XbimGeometryInternalServices
     {
-
         static Lazy<IServiceProvider> lazyServiceProvider = new Lazy<IServiceProvider>(() =>
         {
             var services = new ServiceCollection();
@@ -19,6 +18,7 @@ namespace Xbim.Geometry.Engine.Interop.Internal
             return services.BuildServiceProvider();
         });
 
+        // TODO: When we integrate latest Essentials we can use a single XbimServices.ServiceProvider instance here.
         /// <summary>
         /// Gets a <see cref="IServiceProvider"/> used for resolving xbim Geometry Engine services 
         /// </summary>

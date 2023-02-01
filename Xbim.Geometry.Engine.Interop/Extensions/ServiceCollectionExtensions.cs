@@ -30,9 +30,12 @@ namespace Xbim.Geometry.Engine.Interop
             services.AddScoped<XbimGeometryEngine>();
             services.AddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
             services.AddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
-
+            services.AddFactory<IXbimManagedGeometryEngine>();
+  
             services.AddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
+            services.AddSingleton<XbimGeometryEngineFactory>();
             services.AddXbimGeometryServices();
+            
             
             services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(Abstractions.XGeometryEngineVersion.V6)));
             configure(new GeometryEngineBuilder(services));
@@ -58,6 +61,22 @@ namespace Xbim.Geometry.Engine.Interop
 
             return services;
         }
+
+
+        /// <summary>
+        /// Shorthand for adding service of <see cref="Func{}"/> where TResult is<typeparamref name="TService"/>
+        /// </summary>
+        /// <typeparam name="TService"></typeparam>
+        /// <param name="serviceCollection"></param>
+        /// <returns>The <see cref="IServiceCollection"/></returns>
+        internal static IServiceCollection AddFactory<TService>(this IServiceCollection serviceCollection)
+            where TService : class
+         
+        {
+            return serviceCollection
+                .AddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
+        }
+        
 
         private static Lazy<Assembly> lazyAssembly = new Lazy<Assembly>(() => 
         {

@@ -33,7 +33,7 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
 
-        private readonly GeometryEngineOptions _engineOptions;
+        private GeometryEngineOptions _engineOptions;
 
 
 
@@ -114,7 +114,15 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        
+        /// <summary>
+        /// Gets and sets the <see cref="GeometryEngineOptions"/>
+        /// </summary>
+        public GeometryEngineOptions EngineOptions 
+        { 
+            get { return _engineOptions; } 
+            internal set { _engineOptions = value; } 
+        } 
+
         /// <summary>
         /// Associates a new geometry Engine instance and services with the provided <see cref="IModel"/>
         /// </summary>

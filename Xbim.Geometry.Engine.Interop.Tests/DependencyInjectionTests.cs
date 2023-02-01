@@ -33,7 +33,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [InlineData(typeof(IXbimGeometryEngine))]
         [InlineData(typeof(IXbimManagedGeometryEngine))]
         [InlineData(typeof(IXbimGeometryServicesFactory))]
-        //
+        [InlineData(typeof(XbimGeometryEngineFactory))]
+        
         [Theory]
         public void CanResolveTypes(Type type)
         {
@@ -158,6 +159,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             var ex = Record.Exception(() => engine.CreatePoint(1, 2, 3, 4));
             ex.Should().BeOfType<InvalidOperationException>();
 
+        }
+
+        [Fact]
+        public void CanCreateEngineWithoutExplicitDI()
+        {
+            //Arrange
+            var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
+            var factory = new XbimGeometryEngineFactory();
+
+            // Act 
+            var options = new Configuration.GeometryEngineOptions { GeometryEngineVersion = XGeometryEngineVersion.V5 };
+            var engine = factory.CreateGeometryEngineForModel(model, options);
+
+
+            var point = engine.CreatePoint(1, 2, 3, 4);
+     
+            point.Should().NotBeNull();
         }
 
 
