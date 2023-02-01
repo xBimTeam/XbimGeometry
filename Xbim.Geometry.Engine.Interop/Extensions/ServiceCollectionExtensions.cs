@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
 using Xbim.Geometry.Engine.Interop.Configuration;
-using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
@@ -28,7 +26,11 @@ namespace Xbim.Geometry.Engine.Interop
         {
             services.AddOptions();
 
-            services.AddScoped<IXbimGeometryEngine, XbimGeometryEngine>();
+            // We want the same instance of GE regardless of interface used. This 'forwarding factory' is the only approach current M.E.DI
+            services.AddScoped<XbimGeometryEngine>();
+            services.AddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+            services.AddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+
             services.AddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
             services.AddXbimGeometryServices();
             
@@ -37,6 +39,11 @@ namespace Xbim.Geometry.Engine.Interop
             return services;
         }
 
+        /// <summary>
+        /// Adds the native dependencies to the Service Collection
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
         private static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
         {
             // We can't invoke the mixed mode/native code directly. We have to go via reflection to invoke:

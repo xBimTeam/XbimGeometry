@@ -25,7 +25,7 @@ namespace Xbim.Geometry.Engine.Interop
     /// <remarks>This mananaged class provides an interoperability layer to the underlying native / "mixed-mode"
     /// geometry engine. As of version 6 it supports switching between different implementation of the core geometry engine  
     /// </remarks>
-    public class XbimGeometryEngine : IXbimGeometryEngine, IGeometryRegistration
+    public class XbimGeometryEngine : IXbimManagedGeometryEngine
     {
         private const string ModelGeometryServiceKey = "ModelGeometryService";
         private IXbimGeometryEngine _engine;
@@ -173,7 +173,19 @@ namespace Xbim.Geometry.Engine.Interop
             return underlyingModel;
         }
 
-        public IXModelGeometryService ModelService => factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
+
+
+        public IXModelGeometryService ModelService
+        {
+            get
+            {
+                if (_engine == null || factory == null)
+                    return default;
+                return factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
+            }
+        }
+            
+            //factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
 
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
         {

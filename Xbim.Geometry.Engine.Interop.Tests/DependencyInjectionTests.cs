@@ -29,6 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //[InlineData(typeof(IXBRepDocumentManager))]   // Issues with running under another AppDomain.
         [InlineData(typeof(IXGeometryConverterFactory))]
         [InlineData(typeof(IXbimGeometryEngine))]
+        [InlineData(typeof(IXbimManagedGeometryEngine))]
         [InlineData(typeof(IXbimGeometryServicesFactory))]
         //
         [Theory]
@@ -40,6 +41,51 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             Assert.NotNull(resolved);
 
+        }
+
+        [Fact]
+        public void GeometryEngineIsScoped()
+        {
+            IServiceProvider provider = BuildServices();
+            var baseEngine = provider.GetRequiredService<IXbimGeometryEngine>();
+            using (var scope = provider.CreateScope())
+            {
+
+                var engine = scope.ServiceProvider.GetRequiredService<IXbimGeometryEngine>();
+                var engine2 = scope.ServiceProvider.GetRequiredService<IXbimGeometryEngine>();
+
+                engine.Should().BeSameAs(engine2);
+                baseEngine.Should().NotBeSameAs(engine);
+
+            }
+        }
+
+        [Fact]
+        public void ManagedGeometryEngineIsScoped()
+        {
+            IServiceProvider provider = BuildServices();
+
+            var baseEngine = provider.GetRequiredService<IXbimManagedGeometryEngine>();
+            using (var scope = provider.CreateScope())
+            {
+
+                var engine = scope.ServiceProvider.GetRequiredService<IXbimManagedGeometryEngine>();
+                var engine2 = scope.ServiceProvider.GetRequiredService<IXbimManagedGeometryEngine>();
+
+                engine.Should().BeSameAs(engine2);
+                baseEngine.Should().NotBeSameAs(engine);
+            }
+        }
+
+        [Fact]
+        public void ManagedGeometryEngineIsAssignable()
+        {
+            IServiceProvider provider = BuildServices();
+
+            var engine = provider.GetRequiredService<IXbimGeometryEngine>();
+            var engine2 = provider.GetRequiredService<IXbimManagedGeometryEngine>();
+            engine.Should().BeSameAs(engine2);
+            
         }
 
         [Fact]
@@ -82,21 +128,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public void CanRegisterAndUnregister()
         {
             IServiceProvider provider = BuildServices();
-            var engine = provider.GetRequiredService<IXbimGeometryEngine>();
+            var engine = provider.GetRequiredService<IXbimManagedGeometryEngine>();
 
-            var register = engine as IGeometryRegistration;
-
+            
+            
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
 
             model.Tag.Should().BeNull();
 
             // Act 
-            register.RegisterModel(model);
+            engine.RegisterModel(model);
             model.Tag.Should().BeOfType(typeof(Dictionary<string, object>));
             model.GetTagValue("ModelGeometryService", out IXModelGeometryService service).Should().BeTrue();
             service.Should().NotBeNull();
 
-            register.UnregisterModel(model);
+            engine.UnregisterModel(model);
             model.GetTagValue("ModelGeometryService", out service).Should().BeFalse();
             
         }
