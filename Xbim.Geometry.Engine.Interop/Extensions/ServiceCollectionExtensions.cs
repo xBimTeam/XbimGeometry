@@ -80,8 +80,14 @@ namespace Xbim.Geometry.Engine.Interop
 
         private static Lazy<Assembly> lazyAssembly = new Lazy<Assembly>(() => 
         {
-            var codeDir = AppDomain.CurrentDomain.BaseDirectory;
-            return LoadDll(codeDir);
+            
+            var assembly = Assembly.GetExecutingAssembly();
+#if NETFRAMEWORK
+            var codepath = new Uri(assembly.CodeBase);
+#else
+            var codepath = new Uri(assembly.Location);
+#endif
+            return LoadDll(codepath.LocalPath);
         });
 
         private static Assembly ManagedGeometryAssembly { get => lazyAssembly.Value; } 
