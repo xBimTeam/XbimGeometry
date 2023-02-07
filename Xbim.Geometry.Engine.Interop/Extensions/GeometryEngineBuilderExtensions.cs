@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using System;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop.Configuration;
-using Xbim.Geometry.Engine.Interop.Internal;
+
 
 namespace Xbim.Geometry.Engine.Interop.Extensions
 {
