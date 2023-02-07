@@ -130,14 +130,8 @@
 		<Reference Include="Microsoft.Extensions.Logging.Abstractions">
 			<HintPath>$(PackagesDir)Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
 		</Reference>
-		<Reference Include="Microsoft.Extensions.Logging">
-			<HintPath>$(PackagesDir)Microsoft.Extensions.Logging.dll</HintPath>
-		</Reference>
 		<Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
 			<HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Extensions.DependencyInjection">
-			<HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.dll</HintPath>
 		</Reference>
 		<Reference Include="System.Core" />
 		<Reference Include="Xbim.Ifc4">
