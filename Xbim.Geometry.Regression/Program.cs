@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Ifc;
 
 namespace XbimRegression
@@ -13,7 +15,8 @@ namespace XbimRegression
             // ContextTesting is a class that has been temporarily created to test multiple files
             // ContextTesting.Run();
             // return;
-            IfcStore.ModelProviderFactory.UseHeuristicModelProvider();
+            
+            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddHeuristicModel()));
             var arguments = new Params(args);
             if (!arguments.IsValid)
                 return;

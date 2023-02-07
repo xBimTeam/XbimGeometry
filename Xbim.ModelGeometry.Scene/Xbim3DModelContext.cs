@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
@@ -585,13 +586,14 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
-            var services = XbimGeometryInternalServices.ServiceProvider;
+            var xbimServices = XbimServices.Current;
+            var services = xbimServices.ServiceProvider;
             var factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
 
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
-             _logger = logger ?? (XbimLogging.CreateLogger<XbimGeometryEngine>());
+             _logger = logger ?? (xbimServices.CreateLogger<XbimGeometryEngine>());
             _model = model;
-            if(loggerFactory==null) loggerFactory= XbimLogging.LoggerFactory;
+            if(loggerFactory==null) loggerFactory= xbimServices.GetLoggerFactory();
             
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
 

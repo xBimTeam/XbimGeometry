@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
@@ -53,7 +54,7 @@ namespace XbimRegression
                fileLoggerOpts.MinLevel = LogLevel.Trace;
            }));
             _logger = _loggerFactory.CreateLogger<BatchProcessor>();
-            XbimLogging.LoggerFactory = _loggerFactory;
+            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddLoggerFactory(_loggerFactory)));
         }
 
         public Params Params
@@ -81,7 +82,7 @@ namespace XbimRegression
                 if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
                 Console.WriteLine($"Processing {file}");
                 ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
-                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                //XbimLogging.LoggerFactory = null; // uses a default loggerFactory
                 _currentLogFileName = "BatchProcessor.log";
 
                 _logger.LogInformation($"Processing run results from log file {runLogFileName}");
@@ -363,7 +364,7 @@ namespace XbimRegression
                     if (caching)
                         ret = IfcStore.Open(ifcFileName, null, 0, progress);
                     else
-                        ret = MemoryModel.OpenRead(ifcFileName, logger, progress);
+                        ret = MemoryModel.OpenRead(ifcFileName, progress);
                     logger.LogInformation($"Parsing ended.");
                     return ret;
                 default:

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Geometry.Engine.Interop.Configuration;
-using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
@@ -12,7 +12,7 @@ namespace Xbim.Geometry.Engine.Interop
         private readonly Func<IXbimManagedGeometryEngine> engineFn;
  
         public XbimGeometryEngineFactory() : 
-            this(XbimGeometryInternalServices.ServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>())
+            this(XbimServices.Current.ServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>())
         {
             
         }

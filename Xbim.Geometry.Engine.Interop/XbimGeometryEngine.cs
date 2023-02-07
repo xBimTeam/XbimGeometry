@@ -5,12 +5,12 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
 using Xbim.Geometry.Engine.Interop.Configuration;
-using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
@@ -79,7 +79,7 @@ namespace Xbim.Geometry.Engine.Interop
             _engineOptions = geometryOptions == null || geometryOptions.Value == null ? new GeometryEngineOptions() : geometryOptions.Value;
 
             this.factory = servicesFactory ?? throw new ArgumentNullException(nameof(servicesFactory));
-            _loggerFactory = loggerFactory ?? XbimGeometryInternalServices.ServiceProvider.GetRequiredService<ILoggerFactory>();
+            _loggerFactory = loggerFactory ?? XbimServices.Current.GetLoggerFactory();
             _logger = _loggerFactory.CreateLogger<XbimGeometryEngine>();
 
             _logger.LogDebug("XbimGeometryEngine constructed successfully");
@@ -97,11 +97,11 @@ namespace Xbim.Geometry.Engine.Interop
         public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory, GeometryEngineOptions options = null)
         {
             _engineOptions = options ?? new GeometryEngineOptions();
-            IServiceProvider services = XbimGeometryInternalServices.ServiceProvider;
+            var services = XbimServices.Current.ServiceProvider;
             this.factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
 
             _logger = services.GetRequiredService<ILogger<XbimGeometryEngine>>();
-            _loggerFactory = loggerFactory ?? XbimGeometryInternalServices.ServiceProvider.GetRequiredService<ILoggerFactory>(); ;
+            _loggerFactory = loggerFactory ?? services.GetRequiredService<ILoggerFactory>(); ;
 
             try
             {

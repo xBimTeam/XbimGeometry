@@ -568,7 +568,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [Fact]
         public void FixedReferenceSweptSolidTest()
         {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\fixed-reference-sweptarea.ifc", _logger))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\fixed-reference-sweptarea.ifc"))
             {
                 var sectionedSpine = model.Instances.OfType<IfcFixedReferenceSweptAreaSolid>().FirstOrDefault();
                 sectionedSpine.Should().NotBeNull();

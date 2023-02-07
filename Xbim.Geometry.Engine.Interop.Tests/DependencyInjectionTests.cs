@@ -3,17 +3,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.Pkcs;
+using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
-using Xbim.Geometry.Engine.Interop.Extensions;
-using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
 using Xunit.DependencyInjection;
-using Xunit.DependencyInjection.Logging;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -92,7 +89,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
-            var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
+            var loggerFactory = new LoggerFactory();
             var engine = new XbimGeometryEngine(model, loggerFactory);
 
             Assert.NotNull(engine);
@@ -106,7 +103,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             var factory = provider.GetRequiredService<IXbimGeometryServicesFactory>();
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
-            var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
+            var loggerFactory = new LoggerFactory();
             var engine = new XbimGeometryEngine(factory, loggerFactory, new Configuration.GeometryEngineOptions { GeometryEngineVersion=XGeometryEngineVersion.V6});
 
             Assert.NotNull(engine);
@@ -117,7 +114,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
-            var loggerFactory = Xbim.Common.XbimLogging.LoggerFactory;
+            var loggerFactory = new LoggerFactory();
             var context = new Xbim3DModelContext(model, loggerFactory, XGeometryEngineVersion.V6);
 
             Assert.NotNull(context);
@@ -141,18 +138,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             engine.UnregisterModel(model);
             model.GetTagValue("ModelGeometryService", out service).Should().BeFalse();
-            
+            // TODO: should the inner engine instance be freed?   
         }
 
         [Fact]
         public void UsingWithoutModelRegistrationIsHandled()
         {
-            IServiceProvider provider = BuildServices();
-            var engine = provider.GetRequiredService<IXbimManagedGeometryEngine>();
+            // Use a scope as we want to guarantee a fresh instance
+            var serviceScope = BuildServices().CreateScope();
+            var engine = serviceScope.ServiceProvider.GetRequiredService<IXbimManagedGeometryEngine>();
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
 
             // We don't register the model
+            // engine.RegisterModel(model);
+
 
             // Act 
 
@@ -181,13 +181,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         private IServiceProvider BuildServices()
         {
-            var services = new ServiceCollection();
+            // TODO: Can't create a ServiceProvider per test - need to make internal CreateService() available
 
-            services.AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)));
-            services.AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5));
+            //var services = XbimServices.Current;
+            //services.ConfigureServices(s => s
+            //    //.AddXbimToolkit()
+            //    .AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)))
+            //    .AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5))
+            //);
 
-            var provider = services.BuildServiceProvider();
-            return provider;
+            return XbimServices.Current.ServiceProvider;
         }
     }
 }
