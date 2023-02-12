@@ -28,7 +28,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             _loggerFactory = loggerFactory;
             this.factory = factory;
-            _logger =_loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            _logger = _loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -98,7 +98,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = factory.CreateGeometryEngine(engineVersion, er.Model, _loggerFactory);
                 var face = geomEngine.CreateFace(er.Entity, _logger);
                 face.Area.Should().BeApproximately(22084775, 1);
-               
+
             }
         }
 
@@ -333,7 +333,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
                 cc.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                
+
                 var exception = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateWire(cc, _logger));
                 exception.Message.Should().Be("IfcCompositeCurve could not be built as a wire");
             }
@@ -380,7 +380,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var basin = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
                 basin.BoundingBox.Volume.Should().BeApproximately(23938449.816244926, 1e-5);
-                
+
             }
         }
 
@@ -598,7 +598,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var brepM = mFace.ToBRep;
                 var differ = new Diff();
                 var diffs = differ.DiffText(brepM, brepD);
-                mFace.Normal.X.Should().BeApproximately(dFace.Normal.X,1e-5);
+                mFace.Normal.X.Should().BeApproximately(dFace.Normal.X, 1e-5);
                 mFace.Normal.Y.Should().BeApproximately(dFace.Normal.Y, 1e-5);
                 mFace.Normal.Z.Should().BeApproximately(dFace.Normal.Z, 1e-5);
                 diffs.Length.Should().Be(3);
@@ -614,15 +614,21 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\cylindrical-surface.ifc"))
             {
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
+                var solids = geomEngine.CreateSolidSet();
                 foreach (var brep in model.Instances.OfType<IIfcAdvancedBrep>())
                 {
+
                     var geom = geomEngine.CreateSolid(brep, _logger);
+
                     foreach (var face in geom.Faces)
                     {
                         face.Area.Should().BeGreaterThan(0);
+
                     }
                     geom.Volume.Should().BeGreaterThan(0);
+                    solids.Add(geom);
                 }
+                solids.Sum(s => s.Volume).Should().BeApproximately(338122748.71573657, 1e-5);
             }
         }
         [Fact]
@@ -851,7 +857,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                 var face = geomEngine.CreateFace(rev, _logger);
                 (face as IXbimFace).Should().NotBeNull();
-                ((IXbimFace)face).IsValid.Should().BeTrue( "Invalid face returned");
+                ((IXbimFace)face).IsValid.Should().BeTrue("Invalid face returned");
             }
         }
 

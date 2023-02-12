@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net48;net6.0</TargetFrameworks>
+		<TargetFrameworks>net472;net6.0</TargetFrameworks>
 		<IsPackable>false</IsPackable>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
 		<SignAssembly>False</SignAssembly>
@@ -9,16 +9,11 @@
 		<Platforms>AnyCPU</Platforms>
 		<AllowUnsafeBlocks>false</AllowUnsafeBlocks>
 		<LangVersion>9.0</LangVersion>
+		<GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/</GeometryInteropDirectory>
+		<RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
 	</PropertyGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<ItemGroup>
-			<Item Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win10-x86/*.*" />
-			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win10-x64/*.*" />
-		</ItemGroup>
-		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-	</Target>
+
 	<ItemGroup>
 
 		<PackageReference Include="FluentAssertions" Version="6.8.0" />
@@ -30,8 +25,8 @@
 		<PackageReference Include="xunit.abstractions" Version="2.0.3" />
 		<PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.1" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 	</ItemGroup>
 
@@ -64,16 +59,16 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\ArbritaryClosedProfileWithCompositeCurveVoid.ifc">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\ArbritaryClosedProfileWithBadPrecisionOnClosingSegments.ifc">
-		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\arbritary_closed_profile_with_intersecting_voids_test.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\BooleanClippingWithHalfSpace.ifc">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\boolean_cut_failure.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -97,7 +92,7 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\ExtrudedAreaSolidFailsOnExtrusion.ifc">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\Github\Github_issue_281_minimal.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -460,14 +455,31 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
-	    <Private>True</Private>
-	    <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
-	  </ProjectReference>
-	  <ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj">
-	    <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
-	    <Private>True</Private>
-	  </ProjectReference>
+
+		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
+			<Private>True</Private>
+		</ProjectReference>
+
+		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj">
+			
+			<Private>True</Private>
+		</ProjectReference>
 	</ItemGroup>
 
+	
+	<ItemGroup Condition="'$(TargetFramework)'!=''">
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x86\*.*">
+			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>false</Pack>
+			<Visible>true</Visible>
+		</Content>
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x64\*.*">
+			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>false</Pack>
+			<Visible>true</Visible>
+		</Content>
+		<!-- TODO: ARM-->
+	</ItemGroup>
 </Project>

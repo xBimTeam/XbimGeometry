@@ -630,7 +630,7 @@ namespace Xbim
 				{
 					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
 				}
-				catch (const Standard_Failure& ex)
+				catch (const Standard_Failure& )
 				{
 					success = BOOLEAN_FAIL;
 				}

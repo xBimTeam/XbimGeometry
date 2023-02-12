@@ -51,6 +51,7 @@ public:
 	Handle(Geom_BSplineCurve) BuildBSplineCurve3d(const TColgp_Array1OfPnt& poles, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree);
 	Handle(Geom_Circle) BuildCircle3d(const gp_Ax2& axis, double radius);
 	Handle(Geom_Circle) BuildCircle3d(const gp_Pnt& start, const gp_Pnt& mid, const gp_Pnt& end);
+	
 	Handle(Geom_BSplineCurve) BuildCompositeCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance);
 	Handle(Geom_EllipseWithSemiAxes) BuildEllipse3d(const gp_Ax2& axis, double major, double minor);
 	Handle(Geom_BSplineCurve) BuildIndexedPolyCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance);
@@ -64,7 +65,7 @@ public:
 	Handle(Geom_TrimmedCurve) BuildTrimmedCurve3d(const Handle(Geom_Curve)& basisCurve, const gp_Pnt& start, const gp_Pnt& end, double tolerance);
 
 
-
+	 
 	Handle(Geom_BSplineCurve) BuildRationalBSplineCurve3d(const TColgp_Array1OfPnt& poles, const TColStd_Array1OfReal& weights, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree);
 
 

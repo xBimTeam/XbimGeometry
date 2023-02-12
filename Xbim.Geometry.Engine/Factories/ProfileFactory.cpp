@@ -11,7 +11,10 @@
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <GCE2d_MakeCircle.hxx>
-
+#include <BRepBuilderAPI_MakeEdge2d.hxx>
+#include <Geom2d_TrimmedCurve.hxx>
+#include <GeomLib.hxx>
+#include "../BRep/XCurve.h"
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Ifc4::Interfaces;
@@ -55,10 +58,69 @@ namespace Xbim
 				TopoDS_Face face = BuildProfileFace(profileDef);
 				return gcnew XFace(face);
 			}
+
+#pragma region Build wires from profiles
+
 			IXWire^ ProfileFactory::BuildWire(IIfcProfileDef^ profileDef)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				XProfileDefType profileType;
+
+				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+				TopoDS_Wire wire;
+				switch (profileType)
+				{
+				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcArbitraryProfileDefWithVoids, use BuildFace", profileDef);
+				case XProfileDefType::IfcArbitraryClosedProfileDef:
+					wire = BuildProfileWire((static_cast<IIfcArbitraryClosedProfileDef^>(profileDef)));
+					break;
+				case XProfileDefType::IfcArbitraryOpenProfileDef:
+					wire = BuildProfileWire((static_cast<IIfcArbitraryOpenProfileDef^>(profileDef)));
+					break;
+				case XProfileDefType::IfcCenterLineProfileDef:
+					wire = BuildProfileWire(static_cast<IIfcCenterLineProfileDef^>(profileDef));
+					break;
+					/*case XProfileDefType::IfcCompositeProfileDef:
+						return BuildProfileFace(static_cast<IIfcCompositeProfileDef^>(profileDef));
+					case XProfileDefType::IfcDerivedProfileDef:
+						return BuildProfileFace(static_cast<IIfcDerivedProfileDef^>(profileDef));
+					case XProfileDefType::IfcMirroredProfileDef:
+						return BuildProfileFace(static_cast<IIfcMirroredProfileDef^>(profileDef));
+					case XProfileDefType::IfcAsymmetricIShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
+					case XProfileDefType::IfcCShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));*/
+					case XProfileDefType::IfcCircleHollowProfileDef:
+						throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCircleHollowProfileDef, use BuildFace", profileDef);
+				/*	case XProfileDefType::IfcCircleProfileDef:
+						return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
+					case XProfileDefType::IfcEllipseProfileDef:
+						return BuildProfileFace(static_cast<IIfcEllipseProfileDef^>(profileDef));
+					case XProfileDefType::IfcIShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcIShapeProfileDef^>(profileDef));
+					case XProfileDefType::IfcLShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcLShapeProfileDef^>(profileDef));
+					case XProfileDefType::IfcRectangleProfileDef:
+						return BuildProfileFace(static_cast<IIfcRectangleProfileDef^>(profileDef));
+					case XProfileDefType::IfcRectangleHollowProfileDef:
+						return BuildProfileFace(static_cast<IIfcRectangleHollowProfileDef^>(profileDef));
+					case XProfileDefType::IfcRoundedRectangleProfileDef:
+						return BuildProfileFace(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
+					case XProfileDefType::IfcTShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcTShapeProfileDef^>(profileDef));
+					case XProfileDefType::IfcTrapeziumProfileDef:
+						return BuildProfileFace(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
+					case XProfileDefType::IfcUShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcUShapeProfileDef^>(profileDef));
+					case XProfileDefType::IfcZShapeProfileDef:
+						return BuildProfileFace(static_cast<IIfcZShapeProfileDef^>(profileDef));*/
+				default:
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+				}
+				if(wire.IsNull())
+					throw RaiseGeometryFactoryException("ProfileDef could not be built as a wire", profileDef);
+				return gcnew XWire(wire);
 			}
 
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
@@ -75,6 +137,23 @@ namespace Xbim
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
 				return wire;
 			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile)
+			{
+				//WR12 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
+				if (2 == (int)arbitraryOpenProfile->Curve->Dim)
+					throw RaiseGeometryFactoryException("WR12 The curve used for the outer curve definition shall have the dimensionality of 2", arbitraryOpenProfile);
+
+				//WR11 The profile type is a .CURVE., an open profile can only be used to define a swept surface.
+				if (arbitraryOpenProfile->ProfileType != IfcProfileTypeEnum::CURVE)
+					throw RaiseGeometryFactoryException("WR11 The profile type must be a .CURVE., an open profile can only be used to define a swept surface.", arbitraryOpenProfile);
+			
+				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryOpenProfile->Curve, false); //throws exception
+				return wire;
+			}
+
+
+			
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ circleProfileDef)
 			{
 				auto edge = BuildProfileEdge(circleProfileDef); //throws an exception
@@ -99,27 +178,71 @@ namespace Xbim
 					return wire;
 			}
 
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
+			{
+				if (ifcCenterLineProfileDef->Thickness <= 0)
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid thickness", ifcCenterLineProfileDef);
+				Handle(Geom2d_Curve) centreLine = CURVE_FACTORY->BuildCurve2d(ifcCenterLineProfileDef->Curve); //throws exceptions
+				if (centreLine.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid curve", ifcCenterLineProfileDef);
+				gp_Pnt2d centrLineStart, centreLineEnd;
+				centreLine->D0(centreLine->FirstParameter(), centrLineStart);
+				centreLine->D0(centreLine->LastParameter(), centreLineEnd);
+				if(centrLineStart.Distance(centreLineEnd)< ModelGeometryService->Precision)
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef must have an open curve for the centre line", ifcCenterLineProfileDef);
+				auto aCurve = CURVE_FACTORY->Ref().BuildOffsetCurve2d(centreLine, ifcCenterLineProfileDef->Thickness / 2);
+				auto bCurve = CURVE_FACTORY->Ref().BuildOffsetCurve2d(centreLine, ifcCenterLineProfileDef->Thickness / -2);
+				if (aCurve.IsNull() || bCurve.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid offset curves", ifcCenterLineProfileDef);
+				
+				TopTools_ListOfShape edges;
+				gp_Pnt2d aStart, aEnd, bStart, bEnd;
+				
+				aCurve->D0(aCurve->FirstParameter(), aStart);
+				aCurve->D0(aCurve->LastParameter(), aEnd);
+				bCurve->D0(bCurve->FirstParameter(), bStart);
+				bCurve->D0(bCurve->LastParameter(), bEnd);
+
+				edges.Append(EXEC_NATIVE->MakeEdge(aCurve));
+				edges.Append(EXEC_NATIVE->MakeEdge(aStart, bStart));
+				edges.Append(EXEC_NATIVE->MakeEdge(bCurve));
+				edges.Append(EXEC_NATIVE->MakeEdge(bEnd, aEnd));
+												  
+				TopoDS_Wire wire = EXEC_NATIVE->MakeWire(edges);
+				if(wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef could not be built as a wire", ifcCenterLineProfileDef);
+				return wire;
+				
+			}
+
+#pragma endregion
+			
+			
 			IXEdge^ ProfileFactory::BuildEdge(IIfcProfileDef^ profileDef)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				XProfileDefType profileDefType;
+				auto curve = BuildCurve(profileDef, profileDefType);
+				if(curve.IsNull())
+					throw RaiseGeometryFactoryException("Profile could not be built as a Curve");
+				auto edge = EXEC_NATIVE->MakeEdge(curve);
+				if (edge.IsNull())
+					throw RaiseGeometryFactoryException("Profile could not be built as an Edge");
+				return gcnew XEdge(edge);
 			}
 
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
 			{
-				TopoDS_Face face = OccHandle().MakeFace(wire);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
 				if (face.IsNull())
-					throw RaiseGeometryFactoryException("Profile cound not be built from wire");
+					throw RaiseGeometryFactoryException("Profile could not be built as a Face");
 				return face;
 			}
 			//NB all profiles are 2d
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcProfileDef^ profileDef)
 			{
 				XProfileDefType profileType;
-				////WR1 The curve used for the outer curve definition shall have the dimensionality of 2.
-				//if (2 != (int)profileDef.->OuterCurve->Dim)
-				//	throw gcnew XbimGeometryFactoryException("WR1 The curve used for the outer curve definition shall have the dimensionality of 2");
+				
 				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
 					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
 				switch (profileType)
@@ -307,13 +430,13 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCenterLineProfileDef);
-				XCurveType curveType;
-				Handle(Geom2d_Curve) centreLine = CURVE_FACTORY->BuildCurve2d(ifcCenterLineProfileDef->Curve, curveType);
-				if (centreLine.IsNull())
-					throw RaiseGeometryFactoryException("Error building centre line Curve", ifcCenterLineProfileDef);
-
-				return TopoDS_Face();
+				auto wire = BuildProfileWire(ifcCenterLineProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Error building centre line Curve as a Wire", ifcCenterLineProfileDef);
+				auto face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Error building centre line Curve as a Face", ifcCenterLineProfileDef);
+				return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(double x, double y, double tolerance, bool centre)
 			{
@@ -334,7 +457,7 @@ namespace Xbim
 				case XProfileDefType::IfcArbitraryClosedProfileDef:
 					return BuildProfileEdge(static_cast<IIfcArbitraryClosedProfileDef^>(profileDef));
 				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
-					return BuildProfileEdge(static_cast<IIfcArbitraryProfileDefWithVoids^>(profileDef));
+					throw RaiseGeometryFactoryException("IfcArbitraryProfileDefWithVoids cannot be built as an edge, use BuildProfileFace", profileDef);
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
 					return BuildProfileEdge(static_cast<IIfcArbitraryOpenProfileDef^>(profileDef));
 				case XProfileDefType::IfcCenterLineProfileDef:
@@ -441,15 +564,149 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("An Edge built from an IfcCenterLineProfileDef is not supported, use BuildProfileWire", ifcArbitraryOpenProfileDef);
 				else
 				{
-					Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve3d(ifcArbitraryOpenProfileDef->Curve);
+					Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(ifcArbitraryOpenProfileDef->Curve);
 					return EDGE_FACTORY->BuildEdge(curve);
 				}
 			}
 
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef)
 			{
-				return TopoDS_Edge();
+				if (dynamic_cast<IIfcLine^>(ifcArbitraryClosedProfileDef->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", ifcArbitraryClosedProfileDef);
+				//WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve.
+				if (dynamic_cast<IIfcOffsetCurve2D^>(ifcArbitraryClosedProfileDef->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", ifcArbitraryClosedProfileDef);
+
+				return EDGE_FACTORY->BuildEdge(ifcArbitraryClosedProfileDef->OuterCurve); //throws exception			
 			}
+			
+#pragma region Build Curves from Profile Definition
+
+
+
+			IXCurve^ ProfileFactory::BuildCurve(IIfcProfileDef^ profileDef)
+			{
+				XProfileDefType profileType;
+				auto curve =  BuildCurve(profileDef, profileType);
+				return gcnew XCurve(curve, XCurveType::IfcCurve);
+			}
+
+			Handle(Geom_Curve) ProfileFactory::BuildCurve(IIfcProfileDef^ profileDef, XProfileDefType% profileType)
+			{
+				
+				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+				Handle(Geom_Curve) curve3d;
+				switch (profileType)
+				{
+				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
+					throw RaiseGeometryFactoryException("A single curve cannot be built from an IfcArbitraryProfileDefWithVoids", profileDef);
+				case XProfileDefType::IfcArbitraryClosedProfileDef:
+					return BuildCurve((static_cast<IIfcArbitraryClosedProfileDef^>(profileDef)));
+				case XProfileDefType::IfcArbitraryOpenProfileDef:
+					return BuildCurve((static_cast<IIfcArbitraryOpenProfileDef^>(profileDef)));
+				case XProfileDefType::IfcCenterLineProfileDef:
+					return BuildCurve(static_cast<IIfcCenterLineProfileDef^>(profileDef));
+				/*case XProfileDefType::IfcCompositeProfileDef:
+					return BuildProfileFace(static_cast<IIfcCompositeProfileDef^>(profileDef));
+				case XProfileDefType::IfcDerivedProfileDef:
+					return BuildProfileFace(static_cast<IIfcDerivedProfileDef^>(profileDef));
+				case XProfileDefType::IfcMirroredProfileDef:
+					return BuildProfileFace(static_cast<IIfcMirroredProfileDef^>(profileDef));
+				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcCShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcCircleHollowProfileDef:
+					return BuildProfileFace(static_cast<IIfcCircleHollowProfileDef^>(profileDef));
+				case XProfileDefType::IfcCircleProfileDef:
+					return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
+				case XProfileDefType::IfcEllipseProfileDef:
+					return BuildProfileFace(static_cast<IIfcEllipseProfileDef^>(profileDef));
+				case XProfileDefType::IfcIShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcIShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcLShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcLShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcRectangleProfileDef:
+					return BuildProfileFace(static_cast<IIfcRectangleProfileDef^>(profileDef));
+				case XProfileDefType::IfcRectangleHollowProfileDef:
+					return BuildProfileFace(static_cast<IIfcRectangleHollowProfileDef^>(profileDef));
+				case XProfileDefType::IfcRoundedRectangleProfileDef:
+					return BuildProfileFace(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
+				case XProfileDefType::IfcTShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcTShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcTrapeziumProfileDef:
+					return BuildProfileFace(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
+				case XProfileDefType::IfcUShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcUShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcZShapeProfileDef:
+					return BuildProfileFace(static_cast<IIfcZShapeProfileDef^>(profileDef));*/
+				default:
+					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
+				}
+
+				return Handle(Geom_Curve)();
+			}
+
+			Handle(Geom_Curve) ProfileFactory::BuildCurve(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef)
+			{			
+				//WR1 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
+				if(2 == (int)ifcArbitraryClosedProfileDef->OuterCurve->Dim)
+					throw RaiseGeometryFactoryException("WR1 The curve used for the outer curve definition shall have the dimensionality of 2", ifcArbitraryClosedProfileDef);
+				//WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve.
+				if (dynamic_cast<IIfcLine^>(ifcArbitraryClosedProfileDef->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR2 The outer curve shall not be of type IfcLine as IfcLine is not a closed curve", ifcArbitraryClosedProfileDef);
+				//WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve.
+				if (dynamic_cast<IIfcOffsetCurve2D^>(ifcArbitraryClosedProfileDef->OuterCurve) != nullptr)
+					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", ifcArbitraryClosedProfileDef);
+				return CURVE_FACTORY->BuildCurve(ifcArbitraryClosedProfileDef->OuterCurve);
+
+			}
+			Handle(Geom_Curve) ProfileFactory::BuildCurve(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
+			{
+				//WR12 The curve used for the outer curve definition shall have the dimensionality of 2. All profiles are 2D checked in BuildProfile
+				if (2 == (int)ifcArbitraryOpenProfileDef->Curve->Dim)
+					throw RaiseGeometryFactoryException("WR12 The curve used for the outer curve definition shall have the dimensionality of 2", ifcArbitraryOpenProfileDef);
+
+				//WR11 The profile type is a .CURVE., an open profile can only be used to define a swept surface.
+				if (ifcArbitraryOpenProfileDef->ProfileType != IfcProfileTypeEnum::CURVE)
+					throw RaiseGeometryFactoryException("WR11 The profile type must be a .CURVE., an open profile can only be used to define a swept surface.", ifcArbitraryOpenProfileDef);
+				return CURVE_FACTORY->BuildCurve(ifcArbitraryOpenProfileDef->Curve);
+
+			}
+
+			Handle(Geom_Curve) ProfileFactory::BuildCurve(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
+			{
+				if(ifcCenterLineProfileDef->Thickness<=0)
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid thickness", ifcCenterLineProfileDef);
+				Handle(Geom2d_Curve) centreLine = CURVE_FACTORY->BuildCurve2d(ifcCenterLineProfileDef->Curve); //throws exceptions
+				if (centreLine.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid curve", ifcCenterLineProfileDef);
+				auto aCurve = CURVE_FACTORY->Ref().BuildOffsetCurve2d(centreLine, ifcCenterLineProfileDef->Thickness / 2);
+				auto bCurve = CURVE_FACTORY->Ref().BuildOffsetCurve2d(centreLine, ifcCenterLineProfileDef->Thickness / -2);
+				if (aCurve.IsNull() || bCurve.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef has invalid offset curves", ifcCenterLineProfileDef);
+
+				TColGeom2d_SequenceOfBoundedCurve segments;
+				gp_Pnt2d aStart, aEnd, bStart, bEnd;
+
+				aCurve->D0(aCurve->FirstParameter(), aStart);
+				aCurve->D0(aCurve->LastParameter(), aEnd);
+				bCurve->D0(bCurve->FirstParameter(), bStart);
+				bCurve->D0(bCurve->LastParameter(), bEnd);
+				segments.Append(new Geom2d_TrimmedCurve(aCurve, aCurve->FirstParameter(), aCurve->LastParameter()));
+				segments.Append(CURVE_FACTORY->BuildLinearSegment(aStart, bStart));
+				segments.Append(new Geom2d_TrimmedCurve(bCurve, bCurve->FirstParameter(), bCurve->LastParameter()));
+				segments.Append(CURVE_FACTORY->BuildLinearSegment(bEnd, aEnd));
+
+				Handle(Geom2d_BSplineCurve) bSpline = CURVE_FACTORY->Ref().BuildCompositeCurve2d(segments, ModelGeometryService->Precision); 
+				if(bSpline.IsNull())
+					throw RaiseGeometryFactoryException("IfcCenterLineProfileDef could not be built as a Curve", ifcCenterLineProfileDef);
+				return GeomLib::To3d(gp_Ax2(), bSpline);
+			}
+
+#pragma endregion
+
 		}
 	}
 }

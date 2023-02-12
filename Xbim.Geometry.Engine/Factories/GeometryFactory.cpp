@@ -144,6 +144,28 @@ namespace Xbim
 					return false;
 			}
 
+			//builds a 2d or 3d placement as a gp_Ax2
+			gp_Ax2 GeometryFactory::BuildAxis2Placement(IIfcAxis2Placement^ axis2)
+			{
+				auto axis3d = dynamic_cast<IIfcAxis2Placement3D^>(axis2);
+				if (axis3d != nullptr)
+				{
+					gp_Ax2 ax2;
+					if (!BuildAxis2Placement3d(axis3d, ax2))
+						throw RaiseGeometryFactoryException("Error building axis", axis2);
+					return ax2;
+				}
+				auto axis2d = dynamic_cast<IIfcAxis2Placement2D^>(axis2);
+				if (axis2d != nullptr)
+				{
+					gp_Ax22d ax2d;
+					if (!BuildAxis2Placement2d(axis2d, ax2d))
+						throw RaiseGeometryFactoryException("Error building axis", axis2);
+					return  gp_Ax2(gp_Pnt(ax2d.Location().X(), ax2d.Location().Y(), 0), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0));
+				}
+				throw RaiseGeometryFactoryException("Unsupported axis placement type", axis2);
+			}
+
 			bool GeometryFactory::BuildAxis2Placement3d(IIfcAxis2Placement3D^ axis2, gp_Ax2& ax2)
 			{
 				if (axis2->Axis == nullptr || axis2->RefDirection == nullptr) //both have to be given if one is null use the defaults

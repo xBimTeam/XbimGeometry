@@ -79,7 +79,7 @@ namespace Xbim
 					return BuildBSplineSurfaceWithKnots((IIfcBSplineSurfaceWithKnots^)ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRationalBSplineSurfaceWithKnots:
 					return BuildRationalBSplineSurfaceWithKnots((IIfcRationalBSplineSurfaceWithKnots^)ifcSurface);
-				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:			
+				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedPlane:
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcCurveBoundedSurface:
 					throw RaiseGeometryFactoryException("Curve Bounded Surfaces must be built as faces", ifcSurface);
 				case Xbim::Geometry::Abstractions::XSurfaceType::IfcRectangularTrimmedSurface:
@@ -117,36 +117,27 @@ namespace Xbim
 
 			Handle(Geom_SurfaceOfRevolution) SurfaceFactory::BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution)
 			{
-				throw RaiseGeometryFactoryException("BuildSurfaceOfRevolution is not implemented");
-				//if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
-				//	throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of revolution.", ifcSurfaceOfRevolution->SweptCurve);
+				if (ifcSurfaceOfRevolution->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
+					throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of revolution.", ifcSurfaceOfRevolution->SweptCurve);
+				XProfileDefType profileDefType;
+				Handle(Geom_Curve) sweptEdge = PROFILE_FACTORY->BuildCurve(ifcSurfaceOfRevolution->SweptCurve, profileDefType); //throws exception
+				if (sweptEdge.IsNull())
+					throw RaiseGeometryFactoryException("IfcSurfaceOfRevolution swept edge is incorrectly defined", ifcSurfaceOfRevolution->SweptCurve);
 
-				//
-				//TopoDS_Edge sweptEdge = EDGE_FACTORY->BuildEdge(ifcSurfaceOfRevolution->SweptCurve); //throws exception
+				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcSurfaceOfRevolution->AxisPosition->Location);
+				gp_Vec axisDir(0, 0, 1);
+				if (ifcSurfaceOfRevolution->AxisPosition->Axis != nullptr)
+				{
+					if (!GEOMETRY_FACTORY->BuildDirection3d(ifcSurfaceOfRevolution->AxisPosition->Axis, axisDir))
+						throw RaiseGeometryFactoryException("IfcSurfaceOfRevolution axis is incorrectly defined", ifcSurfaceOfRevolution->AxisPosition->Axis);
+				}
+				gp_Ax1 axis(origin, axisDir);
+				Handle(Geom_SurfaceOfRevolution) revolutedSurface = new Geom_SurfaceOfRevolution(sweptEdge, axis);
 
-
-				//TopoDS_Edge startEdge = sweptEdge;
-
-				//gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcSurfaceOfRevolution->AxisPosition->Location);
-				//gp_Vec axisDir(0, 0, 1);
-				//if (ifcSurfaceOfRevolution->AxisPosition->Axis != nullptr)
-				//{
-				//	if (!GEOMETRY_FACTORY->BuildDirection3d(ifcSurfaceOfRevolution->Position->Axis, axisDir))
-				//		throw RaiseGeometryFactoryException("IIfcSurfaceOfRevolution axis is incorrectly defined", ifcSurfaceOfRevolution->Position->Axis);
-				//}
-				//gp_Ax1 axis(origin, axisDir);
-
-				//BRepPrimAPI_MakeRevol revolutor(startEdge, axis, M_PI * 2);
-				//if (!revolutor.IsDone() && revolutor.Shape().ShapeType() == TopAbs_FACE)
-				//{
-				//	TopoDS_Face face = TopoDS::Face(revolutor.Shape());
-				//	return BRep_Tool::Surface(face);
-				//}
-				//else
-				//{
-				//	throw RaiseGeometryFactoryException("Invalid IfcSurfaceOfRevolution", ifcSurfaceOfRevolution);
-				//}
-				//return Handle(Geom_Surface)();
+				if (revolutedSurface.IsNull())
+					throw RaiseGeometryFactoryException("Invalid IfcSurfaceOfRevolution", ifcSurfaceOfRevolution);
+				else
+					return revolutedSurface;
 			}
 
 			Handle(Geom_SurfaceOfLinearExtrusion) SurfaceFactory::BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion)
@@ -166,7 +157,7 @@ namespace Xbim
 				BIM_WORKAROUNDS->FixRevitSweptSurfaceExtrusionInFeet(extrude);
 				BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
 
-				Handle(Geom_SurfaceOfLinearExtrusion) surface = OccHandle().BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
 				if (surface.IsNull())
 					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);
 				return surface;
@@ -211,7 +202,7 @@ namespace Xbim
 				XSurfaceType surfaceType;
 				Handle(Geom_Surface) basisSurface = BuildSurface(ifcRectangularTrimmedSurface->BasisSurface, surfaceType); //throws an exception with any failure
 
-				Handle(Geom_RectangularTrimmedSurface) geomTrim = new  Geom_RectangularTrimmedSurface(basisSurface, ifcRectangularTrimmedSurface->U1, 
+				Handle(Geom_RectangularTrimmedSurface) geomTrim = new  Geom_RectangularTrimmedSurface(basisSurface, ifcRectangularTrimmedSurface->U1,
 					ifcRectangularTrimmedSurface->U2, ifcRectangularTrimmedSurface->V1, ifcRectangularTrimmedSurface->V2);
 				return geomTrim;
 			}
@@ -221,9 +212,9 @@ namespace Xbim
 				auto ifcControlPoints = ifcBSplineSurfaceWithKnots->ControlPoints;
 				if (ifcControlPoints->Count < 2)
 					throw RaiseGeometryFactoryException("Incorrect number of poles for Bspline surface, it must be at least 2", ifcBSplineSurfaceWithKnots);
-				
+
 				TColgp_Array2OfPnt poles(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->UUpper + 1, 1, (Standard_Integer)ifcBSplineSurfaceWithKnots->VUpper + 1);
-				
+
 				for (int u = 0; u <= ifcBSplineSurfaceWithKnots->UUpper; u++)
 				{
 					auto uRow = ifcControlPoints[u];
@@ -232,7 +223,7 @@ namespace Xbim
 						poles.SetValue(u + 1, v + 1, gp_Pnt(uRow[v].X, uRow[v].Y, uRow[v].Z));
 					}
 				}
-				
+
 				TColStd_Array1OfReal uknots(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotUUpper);
 				TColStd_Array1OfReal vknots(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotVUpper);
 				TColStd_Array1OfInteger uMultiplicities(1, (Standard_Integer)ifcBSplineSurfaceWithKnots->KnotUUpper);
@@ -264,7 +255,7 @@ namespace Xbim
 					i++;
 				}
 
-				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles,uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)ifcBSplineSurfaceWithKnots->UDegree, (Standard_Integer)ifcBSplineSurfaceWithKnots->VDegree);
+				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)ifcBSplineSurfaceWithKnots->UDegree, (Standard_Integer)ifcBSplineSurfaceWithKnots->VDegree);
 				return hSurface;
 			}
 
@@ -334,7 +325,7 @@ namespace Xbim
 			Handle(Geom_CylindricalSurface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
 				gp_Ax2 ax2;
-				if(!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcCylindricalSurface->Position, ax2))
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcCylindricalSurface->Position, ax2))
 					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcCylindricalSurface);
 				gp_Ax3 ax3(ax2);
 				return new Geom_CylindricalSurface(ax3, ifcCylindricalSurface->Radius);

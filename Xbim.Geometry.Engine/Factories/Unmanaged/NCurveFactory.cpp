@@ -32,8 +32,8 @@ int NCurveFactory::Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Ge
 	try
 	{
 		Geom2dAPI_InterCurveCurve extrema(c1, c2, intersectTolerance);
-		
-		intersections.Resize(1, extrema.NbPoints(),false);
+
+		intersections.Resize(1, extrema.NbPoints(), false);
 		for (Standard_Integer i = 1; i <= extrema.NbPoints(); i++)
 		{
 			intersections.SetValue(i, extrema.Point(i));
@@ -64,7 +64,7 @@ Handle(Geom_BSplineCurve) NCurveFactory::BuildBSplineCurve3d(const TColgp_Array1
 	try
 	{
 		Handle(Geom_BSplineCurve) bspline = new Geom_BSplineCurve(poles, knots, knotMultiplicities, degree);
-		
+
 		return bspline;
 	}
 	catch (const Standard_Failure& e)
@@ -339,7 +339,7 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e, "Incorrectly defined trimmed curve");
-		
+
 	}
 	return Handle(Geom_TrimmedCurve)(); //return null handle for checking
 }
@@ -359,6 +359,9 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 		return Handle(Geom_TrimmedCurve)(); //return null handle for checking
 	}
 }
+
+
+
 
 Handle(Geom_BSplineCurve) NCurveFactory::BuildCompositeCurve3d(const TColGeom_SequenceOfBoundedCurve& segments, double tolerance)
 {
@@ -631,7 +634,7 @@ Handle(Geom_Curve) NCurveFactory::GetBasisCurve(const Handle(Geom_Curve)& geomCu
 	// kill trimmed curves
 	Handle(Geom_Curve) basisCurve = geomCurve;
 	Handle(Geom_TrimmedCurve) trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(basisCurve);
-	while (!trimmedCurve.IsNull()) 
+	while (!trimmedCurve.IsNull())
 	{
 		basisCurve = trimmedCurve->BasisCurve();
 		trimmedCurve = Handle(Geom_TrimmedCurve)::DownCast(basisCurve);
@@ -650,13 +653,13 @@ bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, con
 	P2 = GAC.Value(GAC.LastParameter());
 	D1 = P1.SquareDistance(P);
 	D2 = P2.SquareDistance(P);
-	if ((D1 < D2) && (D1 <= Eps2)) 
+	if ((D1 < D2) && (D1 <= Eps2))
 	{
 		parameter = GAC.FirstParameter();
 		actualDistance = sqrt(D1);
 		return Standard_True;
 	}
-	else if ((D2 < D1) && (D2 <= Eps2)) 
+	else if ((D2 < D1) && (D2 <= Eps2))
 	{
 		parameter = GAC.LastParameter();
 		actualDistance = sqrt(D2);
@@ -664,7 +667,7 @@ bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, con
 	}
 
 	Extrema_ExtPC extrema(P, GAC);
-	if (extrema.IsDone()) 
+	if (extrema.IsDone())
 	{
 		Standard_Integer i, index = 0, n = extrema.NbExt();
 		Standard_Real Dist2 = RealLast(), dist2min;
@@ -688,10 +691,10 @@ bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, con
 	return Standard_False;
 }
 
-bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter,  gp_Pnt2d& pnt2d, gp_Vec2d& tangent)
+bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent)
 {
 	try
-	{ 
+	{
 		curve->D1(parameter, pnt2d, tangent);
 		return true;
 	}
@@ -700,9 +703,9 @@ bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parame
 		LogStandardFailure(e, "Invalid tangent at point on curve");
 		return false;
 	}
-	
-	
-	
+
+
+
 }
 
 
