@@ -43,5 +43,16 @@ namespace Xbim.Geometry.NetCore.Tests
             circleHollowProfileDef.Position = position ?? IfcMoq.IfcAxis2Placement2DMock();
             return circleHollowProfileDef;
         }
+
+        public static IIfcCenterLineProfileDef IfcCenterLineProfileDefMock(IIfcBoundedCurve centreLine, double thickness = 10)
+        {
+            var centeLineProfileDefMoq = MakeMoq<IIfcCenterLineProfileDef>();
+            var centeLineProfileDef = centeLineProfileDefMoq.Object;
+            centeLineProfileDefMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCenterLineProfileDef)));
+            centeLineProfileDef.ProfileType = IfcProfileTypeEnum.AREA;
+            centeLineProfileDef.Thickness = thickness;
+            centeLineProfileDef.Curve = centreLine;
+            return centeLineProfileDef;
+        }
     }
 }

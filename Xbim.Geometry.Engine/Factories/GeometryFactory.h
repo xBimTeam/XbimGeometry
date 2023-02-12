@@ -58,6 +58,8 @@ namespace Xbim
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
 				bool BuildVector2d(IIfcVector^ ifcVec, gp_Vec2d& vec);
 
+				gp_Ax2 BuildAxis2Placement(IIfcAxis2Placement^ axis2);
+
 				bool BuildAxis2Placement3d(IIfcAxis2Placement3D^ axis2, gp_Ax2& ax2);
 				bool BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis, gp_Ax22d& ax22d);
 

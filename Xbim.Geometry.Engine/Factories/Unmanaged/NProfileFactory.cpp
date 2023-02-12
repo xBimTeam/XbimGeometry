@@ -63,6 +63,43 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 	return TopoDS_Face();
 }
 
+TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt& start, const gp_Pnt& end)
+{
+	try
+	{
+		BRepLib_MakeEdge edgeMaker(start, end);
+		if (!edgeMaker.IsDone())
+			Standard_Failure::Raise(NEdgeFactory::GetError(edgeMaker.Error()));
+		else
+			return edgeMaker.Edge();
+
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Edge();
+}
+
+TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt2d& start, const gp_Pnt2d& end)
+{
+	try
+	{
+		BRepLib_MakeEdge edgeMaker(gp_Pnt(start.X(), start.Y(), 0), gp_Pnt(end.X(), end.Y(), 0));
+		if (!edgeMaker.IsDone())
+			Standard_Failure::Raise(NEdgeFactory::GetError(edgeMaker.Error()));
+		else
+			return edgeMaker.Edge();
+
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Edge();
+}
+
+
 TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom_Curve)& hCurve)
 {
 	try
@@ -82,7 +119,7 @@ TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom_Curve)& hCurve)
 	return TopoDS_Edge();
 }
 
-TopoDS_Edge NProfileFactory::MakeEdge2d(const Handle(Geom2d_Curve)& hCurve2d)
+TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom2d_Curve)& hCurve2d)
 {
 	try
 	{
@@ -121,6 +158,25 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopoDS_Edge& edge)
 		return TopoDS_Wire();
 	}
 }
+
+TopoDS_Wire NProfileFactory::MakeWire(const TopTools_ListOfShape& edges)
+{
+	try
+	{
+		BRepBuilderAPI_MakeWire wireMaker;
+		wireMaker.Add(edges);
+		if (wireMaker.IsDone())
+			return wireMaker.Wire();
+		else
+			Standard_Failure::Raise("Failed to build profile as a wire");
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+		return TopoDS_Wire();
+	}
+}
+
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner)
 {
 	TopTools_SequenceOfShape inners;

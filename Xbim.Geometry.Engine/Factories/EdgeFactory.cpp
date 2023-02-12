@@ -59,7 +59,7 @@ namespace Xbim
 				}
 				else
 				{
-					Handle(Geom_Curve) hCurve3d = CURVE_FACTORY->BuildCurve3d(curve, curveType); //throws an exception if failure					
+					Handle(Geom_Curve) hCurve3d = CURVE_FACTORY->BuildCurve(curve, curveType); //throws an exception if failure					
 					return BuildEdge(hCurve3d);
 				}
 			}
@@ -80,7 +80,7 @@ namespace Xbim
 			}
 
 			/// <summary>
-			/// Pass an empty vertices collection if not using in the context of building an advanced brep
+			/// Pass an empty vertices collection if  using in the context of building an advanced brep
 			/// </summary>
 			/// <param name="ifcEdgeCurve"></param>
 			/// <param name="vertices"></param>
@@ -113,7 +113,7 @@ namespace Xbim
 					endVertex = TopoDS::Vertex(verticesContext.Find(ifcEdgeCurve->EdgeEnd->EntityLabel));
 
 
-				Handle(Geom_Curve) edgeCurve = CURVE_FACTORY->BuildCurve3d(ifcEdgeCurve->EdgeGeometry);
+				Handle(Geom_Curve) edgeCurve = CURVE_FACTORY->BuildCurve(ifcEdgeCurve->EdgeGeometry);
 
 
 				if (!ifcEdgeCurve->SameSense)

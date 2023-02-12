@@ -22,8 +22,10 @@ namespace Xbim
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
 				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile);
 				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
+				TopoDS_Wire BuildProfileWire(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
 				virtual IXCurve^ BuildCurve(IIfcProfileDef^ profileDef);
 			internal:
@@ -65,9 +67,23 @@ namespace Xbim
 				TopoDS_Edge BuildProfileEdge(IIfcTShapeProfileDef^ ifcTShapeProfileDef);
 				TopoDS_Edge BuildProfileEdge(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef);
 				TopoDS_Edge BuildProfileEdge(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef);
+
+#pragma region Build Curves from Profile Definition
+			public:
+				virtual IXCurve^ BuildCurve(IIfcProfileDef^ profileDef);
+			internal:
+				Handle(Geom_Curve) BuildCurve(IIfcProfileDef^ profileDef, XProfileDefType% curveType);
+				Handle(Geom_Curve) BuildCurve(IIfcArbitraryClosedProfileDef^ ifcArbitraryClosedProfileDef);
+
+				Handle(Geom_Curve) BuildCurve(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef);
+
+				Handle(Geom_Curve) BuildCurve(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
+
+#pragma endregion
 			protected:
 				
 			};
+			
 		}
 	}
 }
