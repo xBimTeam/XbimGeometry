@@ -105,6 +105,11 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
+			IXCurve^ ProfileFactory::BuildCurve(IIfcProfileDef^ profileDef)
+			{
+				throw gcnew System::NotImplementedException();
+				// TODO: insert return statement here
+			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
 			{

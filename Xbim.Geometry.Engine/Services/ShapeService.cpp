@@ -223,13 +223,13 @@ namespace Xbim
 				}return compound;
 			}
 
-			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors)
+			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors, bool includeTangents)
 			{
 				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
 				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
 
 				return NShapeProximityUtils::IsOverlapping
-							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
+							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection, includeTangents);
 			}
 
 			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)

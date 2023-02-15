@@ -34,7 +34,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             meshFactors.Setup(s => s.Tolerance).Returns(0.001);
             meshFactors.Setup(s => s.AngularDeflection).Returns(0.26179938);
             meshFactors.Setup(s => s.LinearDefection).Returns(0.012);
-            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object);
+            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object, true);
 
             result.Should().Be(true);
         }
@@ -55,7 +55,29 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             meshFactors.Setup(s => s.Tolerance).Returns(0.001);
             meshFactors.Setup(s => s.AngularDeflection).Returns(0.26179938);
             meshFactors.Setup(s => s.LinearDefection).Returns(0.012);
-            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object);
+            var result = _shapeService.IsOverlapping(block, cylinder, meshFactors.Object, true);
+
+            result.Should().Be(false);
+
+        }
+
+
+        [Fact]
+        public void GivenTwoTangentShapes_IsOverlapping_ShouldReturnFalse()
+        {
+            var block1Moq = IfcMoq.IfcBlockMoq();
+            var block2Moq = IfcMoq.IfcBlockMoq(IfcMoq.IfcAxis2Placement3DMock(null, null, IfcMoq.IfcCartesianPoint3dMock(10, 0, 0)));
+
+
+            var block1 = _modelGeomService.SolidFactory.Build(block1Moq);
+            var block2 = _modelGeomService.SolidFactory.Build(block2Moq);
+            var meshFactors = new Mock<IXMeshFactors>();
+            meshFactors.Setup(s => s.OneMeter).Returns(1);
+            meshFactors.Setup(s => s.Tolerance).Returns(0.001);
+            meshFactors.Setup(s => s.AngularDeflection).Returns(0.26179938);
+            meshFactors.Setup(s => s.LinearDefection).Returns(0.012);
+
+            var result = _shapeService.IsOverlapping(block1, block2, meshFactors.Object, false);
 
             result.Should().Be(false);
 

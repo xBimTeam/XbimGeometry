@@ -25,6 +25,7 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
+				virtual IXCurve^ BuildCurve(IIfcProfileDef^ profileDef);
 			internal:
 				
 				TopoDS_Face BuildProfileFace(const TopoDS_Wire& wire);
