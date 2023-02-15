@@ -69,7 +69,7 @@ namespace Xbim
 
                 virtual IXShape^ Combine(IEnumerable<IXShape^>^ shapes);
 
-                virtual bool IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors, bool includeTangents);
+                virtual bool IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors);
 
                 virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds,  bool% hasCurves);
                
