@@ -27,10 +27,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddLogging(configure => configure.SetMinimumLevel(DefaultLogLevel))
-                .AddXbimToolkit() // Required if we need IfcStore ModelProvider functionality
-                .AddLogging(opt => opt.AddConsole())
-                .AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5));
+
+            services
+                .AddLogging(configure => configure
+                    .SetMinimumLevel(DefaultLogLevel)
+                    .AddConsole())
+                .AddXbimToolkit(configure => configure
+                    .AddMemoryModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V5))
+                    )
+                ;
 
 
             // Re-use this Service Collection in the internal xbim DI

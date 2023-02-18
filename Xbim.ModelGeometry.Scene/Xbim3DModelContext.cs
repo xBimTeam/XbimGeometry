@@ -587,8 +587,12 @@ namespace Xbim.ModelGeometry.Scene
         {
             var xbimServices = XbimServices.Current;
             var services = xbimServices.ServiceProvider;
-            var factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
-
+            var factory = services.GetService<IXbimGeometryServicesFactory>();
+            if(factory == null)
+            {
+                throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found\n\nEnsure you have registered the GeometryEngine with services.AddXbimGeometryEngine()");
+            }
+            
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
              _logger = logger ?? (xbimServices.CreateLogger<XbimGeometryEngine>());
             _model = model;

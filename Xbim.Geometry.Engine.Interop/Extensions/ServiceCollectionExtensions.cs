@@ -7,34 +7,40 @@ using System.Reflection;
 using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Ifc4.Interfaces;
 
-namespace Xbim.Geometry.Engine.Interop
+namespace Xbim.Geometry.Engine.Interop.Extensions
 {
     public static class ServiceCollectionExtensions
     {
 
-        public static IServiceCollection AddGeometryServices(this IServiceCollection services)
+        /// <summary>
+        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
         {
-            return services.AddGeometryServices(delegate { });
+            return services.AddXbimGeometryServices(delegate { });
         }
 
         /// <summary>
-        /// Adds xbim geometry to the specified <see cref="IServiceCollection"/>
+        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
         /// </summary>
         /// <param name="services"></param>
+        /// <param name="configure"></param>
         /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
-        public static IServiceCollection AddGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
+        public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
         {
             services.AddOptions();
 
             // We want the same instance of GE regardless of interface used. This 'forwarding factory' is the only approach current M.E.DI
-            services.AddScoped<XbimGeometryEngine>();
-            services.AddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
-            services.AddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+            services.TryAddScoped<XbimGeometryEngine>();
+            services.TryAddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+            services.TryAddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
             services.AddFactory<IXbimManagedGeometryEngine>();
   
-            services.AddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
-            services.AddSingleton<XbimGeometryEngineFactory>();
-            services.AddXbimGeometryServices();
+            services.TryAddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
+            services.TryAddSingleton<XbimGeometryEngineFactory>();
+            services.AddNativeGeometryServices();
             
             
             services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(Abstractions.XGeometryEngineVersion.V6)));
@@ -47,7 +53,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        private static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
+        private static IServiceCollection AddNativeGeometryServices(this IServiceCollection services)
         {
             // We can't invoke the mixed mode/native code directly. We have to go via reflection to invoke:
             // Xbim.Geometry.DependencyInjection.ServiceCollectionExtensions.AddXbimGeometryEngine(services);
@@ -73,8 +79,9 @@ namespace Xbim.Geometry.Engine.Interop
             where TService : class
          
         {
-            return serviceCollection
-                .AddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
+            serviceCollection
+                .TryAddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
+            return serviceCollection;
         }
         
 

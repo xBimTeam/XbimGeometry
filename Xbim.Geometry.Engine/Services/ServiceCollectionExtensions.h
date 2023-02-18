@@ -2,6 +2,7 @@
 #include "../Factories//GeometryConverterFactory.h"
 
 using namespace Microsoft::Extensions::DependencyInjection;
+using namespace Microsoft::Extensions::DependencyInjection::Extensions;
 using namespace Xbim::Geometry::Factories;
  
 using namespace Xbim::Geometry::Abstractions;

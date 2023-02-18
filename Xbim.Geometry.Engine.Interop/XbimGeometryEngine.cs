@@ -37,6 +37,15 @@ namespace Xbim.Geometry.Engine.Interop
 
 
 
+        static XbimGeometryEngine()
+        {
+            // Initialise services with defaults. This honours any registratios made earlier.
+            if (XbimServices.Current.IsBuilt == false)
+            {
+                XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => conf.AddGeometryServices()));
+            }
+        }
+
         private XbimGeometryEngine() { }
 
 
