@@ -70,7 +70,7 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
 
 
         /// <summary>
-        /// Shorthand for adding service of <see cref="Func{}"/> where TResult is<typeparamref name="TService"/>
+        /// Shorthand for adding service of <see cref="Func{T, TResult}"/> where TResult is<typeparamref name="TService"/>
         /// </summary>
         /// <typeparam name="TService"></typeparam>
         /// <param name="serviceCollection"></param>

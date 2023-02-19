@@ -24,6 +24,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// Adds xbim Geometry services to the current configuration with the supplied configuration
         /// </summary>
         /// <param name="builder"></param>
+        /// <param name="configure">Delegate configuring the xbim Geometry service</param>
         /// <returns></returns>
         public static IXbimConfigurationBuilder AddGeometryServices(this IXbimConfigurationBuilder builder, Action<IGeometryEngineBuilder> configure)
         {
