@@ -13,6 +13,7 @@
 		<FileVersion>5.1.0.1</FileVersion>
 		<SignAssembly>False</SignAssembly>
 		<LangVersion>9.0</LangVersion>
+    <NoWarn>CS1591</NoWarn>
 	</PropertyGroup>
 
 	

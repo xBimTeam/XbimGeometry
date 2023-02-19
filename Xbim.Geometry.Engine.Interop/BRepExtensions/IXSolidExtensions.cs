@@ -4,8 +4,17 @@ using System.Linq;
 
 namespace Xbim.Geometry.Engine.Interop.BRepExtensions
 {
+
+    /// <summary>
+    /// Extension methods for <see cref="IXSolid"/>s
+    /// </summary>
     public static class IXSolidExtensions
     {
+        /// <summary>
+        /// Gets the set of Unique faces from a <see cref="IXSolid"/>
+        /// </summary>
+        /// <param name="solid"></param>
+        /// <returns></returns>
         public static ISet<IXFace> UniqueFaces(this IXSolid solid)
         {
             var vertices = new HashSet<IXFace>(new ShapeEqualityComparer());
@@ -18,6 +27,12 @@ namespace Xbim.Geometry.Engine.Interop.BRepExtensions
 
             return vertices;
         }
+
+        /// <summary>
+        /// Gets the set of Unique Vertices from a <see cref="IXSolid"/>
+        /// </summary>
+        /// <param name="solid"></param>
+        /// <returns></returns>
         public static ISet<IXVertex> UniqueVertices(this IXSolid solid)
         {
             var vertices = new HashSet<IXVertex>(new ShapeEqualityComparer());

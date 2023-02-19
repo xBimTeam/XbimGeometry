@@ -5,6 +5,9 @@ using Xbim.Geometry.Engine.Interop.Extensions;
 
 namespace Xbim.Geometry.Engine.Interop
 {
+    /// <summary>
+    /// Extension methods for <see cref="IXbimConfigurationBuilder"/>
+    /// </summary>
     public static class XbimConfigurationBuilderExtensions
     {
         /// <summary>

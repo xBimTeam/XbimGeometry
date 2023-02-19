@@ -9,12 +9,16 @@ using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop.Extensions
 {
+    /// <summary>
+    /// ServiceCollection Extensions for xbim Geometry
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
 
         /// <summary>
         /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
         /// </summary>
+        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
@@ -25,6 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
         /// <summary>
         /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
         /// </summary>
+        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
