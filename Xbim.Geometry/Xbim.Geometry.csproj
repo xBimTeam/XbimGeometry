@@ -8,7 +8,6 @@ Use this package to update your XBim IModels to contain geometry that can be vis
 Currently this library supports IFC2x2, IFC2x3, IFC4 Addendum 2 and IFC Alignment (IFC4x1) schema.
     </Description>
     <TargetFrameworks>net472;net6.0</TargetFrameworks>
-    <Version>6.1.0.2-dev</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>Xbim.Geometry</PackageId>
     <IncludeBuildOutput>false</IncludeBuildOutput>

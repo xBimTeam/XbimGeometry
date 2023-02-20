@@ -11,12 +11,14 @@ using Xunit;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
+    
 
     public class StorageServiceTests
     {
         #region Setup
+        //const string SkipOrNot = null; // Run all tests
+        const string SkipOrNot = "BrepDocumentManager cannot be run in the unit test domain"; // Skip all tests
 
-       
         private readonly IXBRepDocumentManager _brepDocumentManager;
         private readonly IXbimGeometryServicesFactory factory;
         static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -33,7 +35,7 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
 
        
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Create_Coloured_Shapes_Document()
         {
           
@@ -60,7 +62,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
 
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Add_Shapes_To_Document()
         {
            
@@ -112,7 +114,7 @@ namespace Xbim.Geometry.NetCore.Tests
             _brepDocumentManager.SaveAs($"{nameof(Can_Add_Shapes_To_Document)}.flex", storageDoc).Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Add_SubShapes_To_Document()
         {
            
@@ -152,7 +154,7 @@ namespace Xbim.Geometry.NetCore.Tests
             _brepDocumentManager.SaveAs($"{nameof(Can_Add_SubShapes_To_Document)}.flex", storageDoc).Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Add_MultiShape_Assembly_To_Document()
         {
             
@@ -177,7 +179,7 @@ namespace Xbim.Geometry.NetCore.Tests
             assembly.AddComponent("parts", 10, doorParts);
             _brepDocumentManager.SaveAs($"{nameof(Can_Add_MultiShape_Assembly_To_Document)}.xbf", storageDoc).Should().BeTrue();
         }
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Create_And_Retrieve_Materials_By_Label()
         {
            
@@ -198,7 +200,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
         }
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Set_Physical_Based_Render()
         {
            
@@ -219,7 +221,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
             _brepDocumentManager.SaveAs($"{nameof(Can_Set_Physical_Based_Render)}.xbf", storageDoc).Should().BeTrue();
         }
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Remove_Shape()
         {
             using var storageDoc = _brepDocumentManager.NewDocument();
@@ -230,7 +232,7 @@ namespace Xbim.Geometry.NetCore.Tests
         }
 
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Create_And_Retrieve_Materials_By_Shape()
         {
             
@@ -255,7 +257,7 @@ namespace Xbim.Geometry.NetCore.Tests
             _brepDocumentManager.SaveAs($"{nameof(Can_Create_And_Retrieve_Materials_By_Shape)}.xbf", storageDoc).Should().BeTrue();
         }
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Retrieve_Shape_Material()
         {
             
@@ -276,7 +278,7 @@ namespace Xbim.Geometry.NetCore.Tests
 
 
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public void Can_Store_Volume_On_Assembly()
         {
             
@@ -295,7 +297,7 @@ namespace Xbim.Geometry.NetCore.Tests
        
        
 
-        [Fact]
+        [Fact(Skip = SkipOrNot)]
         public async Task Can_Create_Multiple_Assemblies_ConcurrentlyAsync()
         {
            

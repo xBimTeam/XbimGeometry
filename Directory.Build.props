@@ -24,7 +24,8 @@
     <RepositoryUrl>https://github.com/xBimTeam/XbimGeometry/tree/master</RepositoryUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <SignAssembly>false</SignAssembly>   
+    <SignAssembly>false</SignAssembly>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
 </Project>
