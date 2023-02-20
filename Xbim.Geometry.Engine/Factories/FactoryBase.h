@@ -17,6 +17,7 @@ using namespace Xbim::Geometry::Abstractions;
 #define PROFILE_FACTORY _modelService->GetProfileFactory()
 #define SHAPE_FACTORY _modelService->GetShapeFactory()
 #define SOLID_FACTORY _modelService->GetSolidFactory()
+#define BOOLEAN_FACTORY _modelService->GetBooleanFactory()
 #define BIM_WORKAROUNDS _modelService->GetBimAuthoringToolWorkArounds()
 namespace Xbim
 {

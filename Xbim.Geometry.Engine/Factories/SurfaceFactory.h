@@ -9,6 +9,8 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -32,7 +34,8 @@ namespace Xbim
 				Handle(Geom_BSplineSurface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
 				Handle(Geom_BSplineSurface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
 				Handle(Geom_CylindricalSurface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
-				
+				Handle(Geom_SphericalSurface) BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface);
+				Handle(Geom_ToroidalSurface) BuildToroidalSurface(IIfcToroidalSurface^ ifcToroidalSurface);
 			protected:
 				
 			};

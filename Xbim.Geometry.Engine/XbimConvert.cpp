@@ -29,11 +29,11 @@ namespace Xbim
 		{
 		}
 
-		IXModelGeometryService^ XbimConvert::ModelGeometryService(IPersistEntity^ ifcEntity)
+		ModelGeometryService^ XbimConvert::ModelGeometryService(IPersistEntity^ ifcEntity)
 		{
 			IXModelGeometryService^ geomService;
 			Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::GetTagValue(ifcEntity->Model,"ModelGeometryService", geomService);
-			return geomService;
+			return static_cast<Xbim::Geometry::Services::ModelGeometryService^>(geomService);
 		}
 
 		// Converts an ObjectPlacement into a TopLoc_Location

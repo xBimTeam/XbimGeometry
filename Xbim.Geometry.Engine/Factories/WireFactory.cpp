@@ -168,9 +168,12 @@ namespace Xbim
 						{
 							points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint2d(cp));
 						}
-						TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->Precision);
+						bool hasInfo;
+						TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline2d(points, ModelGeometryService->MinimumGap, hasInfo);
 						if (wire.IsNull())
 							throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
+						if (hasInfo)
+							LogInformation(ifcPolyline, "Polyline has been corrected. See logs");
 						return wire;
 					}
 					else
@@ -182,7 +185,10 @@ namespace Xbim
 						{
 							points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint3d(cp));
 						}
-						TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, ModelGeometryService->Precision);
+						bool hasInfo;
+						TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, ModelGeometryService->MinimumGap, hasInfo);
+						if (hasInfo)
+							LogInformation(ifcPolyline, "Polyline has been corrected. See logs");
 						if (wire.IsNull())
 							throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 						return wire;
@@ -277,10 +283,12 @@ namespace Xbim
 				{
 					points.SetValue(++id, GEOMETRY_FACTORY->BuildPoint3d(cp));
 				}
-				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points,/* -1, -1,*/ ModelGeometryService->Precision);
+				bool hasInfo;
+				TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points,/* -1, -1,*/ ModelGeometryService->MinimumGap, hasInfo);
 				if (wire.IsNull() || wire.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Resulting wire is empty");
-
+				if (hasInfo)
+					LogInformation("Points array has been corrected. See logs");
 				if (OccHandle().IsClosed(wire, ModelGeometryService->Precision))
 					wire.Closed(true);
 				return gcnew XWire(wire);

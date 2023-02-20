@@ -13,10 +13,11 @@ Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, d
 	}
 }
 
-Handle(Geom_Plane) NSurfaceFactory::BuildPlane(gp_Pnt origin, gp_Dir normal)
+Handle(Geom_Plane) NSurfaceFactory::BuildPlane(const gp_Pnt& origin, const gp_Dir& normal)
 {
 	try
 	{
+
 		//this will throw an exception if the direction is 0
 		return new Geom_Plane(origin, normal);
 	}
@@ -27,7 +28,7 @@ Handle(Geom_Plane) NSurfaceFactory::BuildPlane(gp_Pnt origin, gp_Dir normal)
 	}
 }
 
-Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(Handle(Geom_Curve) sweptCurve, gp_Vec sweepDirection)
+Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(Handle(Geom_Curve) sweptCurve, const gp_Vec& sweepDirection)
 {
 
 	try
@@ -47,7 +48,7 @@ Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtru
 /// <param name="sweptEdge"></param>
 /// <param name="sweepDirection"></param>
 /// <returns></returns>
-Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(const TopoDS_Edge& sweptEdge, gp_Vec sweepDirection)
+Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(const TopoDS_Edge& sweptEdge, const gp_Vec& sweepDirection)
 {
 	try
 	{

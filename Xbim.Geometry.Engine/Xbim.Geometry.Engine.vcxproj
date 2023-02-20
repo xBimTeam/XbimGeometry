@@ -371,6 +371,10 @@
     <ClCompile Include="Factories\FaceFactory.cpp" />
     <ClCompile Include="Factories\GeometryFactory.cpp" />
     <ClCompile Include="Factories\ProfileFactory.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.CurveBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.EdgeBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.FaceBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.WireBuilder.cpp" />
     <ClCompile Include="Factories\ShapeFactory.cpp" />
     <ClCompile Include="Factories\ShellFactory.cpp" />
     <ClCompile Include="Factories\SolidFactory.cpp" />

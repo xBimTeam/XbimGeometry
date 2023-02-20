@@ -77,6 +77,8 @@
 #include "BRep/OccExtensions/KeyedPnt2d.h"
 #include "Factories/WireFactory.h"
 #include "Factories/FaceFactory.h"
+#include "Factories/ProfileFactory.h"
+
 using namespace Xbim::Geometry::Factories;
 using namespace Xbim::Common;
 using namespace System::Linq;
@@ -211,43 +213,8 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
 		{
-
-			if (profile->OuterCurve == nullptr)
-			{
-				XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Wire discarded");
-				return;
-			}
-			if (2 != (int)profile->OuterCurve->Dim)
-			{
-				XbimGeometryCreator::LogWarning(logger, profile, "The curve used for the outer curve definition shall have the dimensionality of 2. Error in IFC file");
-				return;
-			}
-			if (dynamic_cast<IIfcArbitraryProfileDefWithVoids^>(profile))
-			{
-				throw gcnew System::Exception("IfcArbitraryProfileDefWithVoids cannot be created as a wire, call the XbimFace method");
-			}
-			else
-			{
-
-				XbimWire^ loop = gcnew XbimWire(profile->OuterCurve, logger);
-
-				if (!loop->IsValid)
-				{
-					XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound. Wire discarded");
-					return;
-				}
-				bool isValidNormal;
-				gp_Dir noraml = XbimWire::NormalDir(loop, isValidNormal);
-				if (!isValidNormal)
-				{
-					XbimGeometryCreator::LogWarning(logger, profile, "Invalid outer bound, has no normal. Wire discarded");
-					return;
-				}
-
-				pWire = new TopoDS_Wire();
-				*pWire = loop;
-
-			}
+			auto wire = XbimConvert::ModelGeometryService(profile)->GetProfileFactory()->BuildProfileWire(profile); //throws an exception on failure
+			pWire = new TopoDS_Wire(wire);
 		}
 
 		void XbimWire::Init(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger)

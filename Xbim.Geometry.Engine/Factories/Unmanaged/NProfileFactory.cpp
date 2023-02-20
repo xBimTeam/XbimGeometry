@@ -12,6 +12,11 @@
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 
+#include <BRepFilletAPI_MakeFillet2d.hxx>
+#include <gp_Pln.hxx>
+#include <BRepTools_WireExplorer.hxx>
+#include <TopExp_Explorer.hxx>
+
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
 	TopoDS_Compound compound;
@@ -173,15 +178,16 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopTools_ListOfShape& edges)
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
-		return TopoDS_Wire();
+
 	}
+	return TopoDS_Wire();
 }
 
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner)
 {
 	TopTools_SequenceOfShape inners;
 	inners.Append(inner);
-	return MakeFace(outer,inners);
+	return MakeFace(outer, inners);
 }
 
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops)
@@ -259,4 +265,106 @@ TopoDS_Wire NProfileFactory::BuildRectangle(double dimX, double dimY, const TopL
 		LogStandardFailure(sf);
 	}
 	return TopoDS_Wire();
+}
+
+TopoDS_Face NProfileFactory::BuildRectangleHollowProfileDef(const TopLoc_Location& location, double xDim, double yDim, double wallThickness, double outerFilletRadius, double innerFilletRadius, double precision)
+{
+	try
+	{
+		double xOff = xDim / 2;
+		double yOff = yDim / 2;
+		gp_Pnt bl(-xOff, -yOff, 0);
+		gp_Pnt br(xOff, -yOff, 0);
+		gp_Pnt tr(xOff, yOff, 0);
+		gp_Pnt tl(-xOff, yOff, 0);
+		//make the vertices
+		BRep_Builder builder;
+		TopoDS_Vertex vbl, vbr, vtr, vtl;
+		builder.MakeVertex(vbl, bl, precision);
+		builder.MakeVertex(vbr, br, precision);
+		builder.MakeVertex(vtr, tr, precision);
+		builder.MakeVertex(vtl, tl, precision);
+		//make the edges
+		TopoDS_Wire wire;
+		builder.MakeWire(wire);
+		builder.Add(wire, BRepBuilderAPI_MakeEdge(vbl, vbr));
+		builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
+		builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
+		builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
+		wire.Closed(Standard_True);
+
+		if (outerFilletRadius > 0) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace outerFaceMaker(gp_Pln(), wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(outerFaceMaker.Face());
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				filleter.AddFillet(exp.CurrentVertex(), outerFilletRadius);
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		//make the face
+		BRepBuilderAPI_MakeFace faceMaker(gp_Pln(), wire, true);
+		TopoDS_Wire innerWire;
+		builder.MakeWire(innerWire);
+		double t = wallThickness;
+		gp_Pnt ibl(-xOff + t, -yOff + t, 0);
+		gp_Pnt ibr(xOff - t, -yOff + t, 0);
+		gp_Pnt itr(xOff - t, yOff - t, 0);
+		gp_Pnt itl(-xOff + t, yOff - t, 0);
+		TopoDS_Vertex vibl, vibr, vitr, vitl;
+		builder.MakeVertex(vibl, ibl, precision);
+		builder.MakeVertex(vibr, ibr, precision);
+		builder.MakeVertex(vitr, itr, precision);
+		builder.MakeVertex(vitl, itl, precision);
+		builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibl, vibr));
+		builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vibr, vitr));
+		builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitr, vitl));
+		builder.Add(innerWire, BRepBuilderAPI_MakeEdge(vitl, vibl));
+
+
+		if (innerFilletRadius > 0) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace innerFaceMaker(gp_Pln(), innerWire, true);
+			BRepFilletAPI_MakeFillet2d filleter(innerFaceMaker.Face());
+			for (BRepTools_WireExplorer exp(innerWire); exp.More(); exp.Next())
+			{
+				filleter.AddFillet(exp.CurrentVertex(), innerFilletRadius);
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More();) //just take the first wire
+				{
+					innerWire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		innerWire.Reverse();
+		innerWire.Closed(Standard_True);
+		faceMaker.Add(innerWire);
+		if(!faceMaker.IsDone())
+			Standard_Failure::Raise("Failed to build profile as a face");
+		auto face = faceMaker.Face();
+		//apply the position transformation
+		if(!location.IsIdentity()) 
+			face.Move(location);
+		return face;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Face();
 }

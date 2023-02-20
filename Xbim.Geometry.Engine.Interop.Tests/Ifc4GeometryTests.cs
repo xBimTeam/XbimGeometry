@@ -709,18 +709,25 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
+        /// <summary>
+        /// A Polygonally bounded half space that has a boundary that is not a closed area, the composite curve segments do not join
+        /// this is an incorrectly defined half space and therefore it cannot build a valid result.
+        /// The solid build should fail elegantly
+        /// </summary>
         [Fact]
         public void CompositeCurveSegmentsDoNotCloseTest()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\composite-curve5.ifc"))
             {
 
-                //try building the polygonally bounded half space that has the faulty curve, which is now a seam
                 var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                var solid = geomEngine.CreateSolidSet(pbhs, _logger).FirstOrDefault();
-                solid.Volume.Should().BeGreaterThan(0);
-
+                //test the faulty entity on its own
+                var ex = Assert.Throws<XbimGeometryFactoryException>(()=>geomEngine.ModelService.WireFactory.Build(model.Instances[3942179] as IIfcCompositeCurve));
+                ex.Message.Should().Be("IfcCompositeCurve could not be built as a wire");
+                //see failure exception comes through the stack
+                var exSolid = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateSolidSet(pbhs, _logger).FirstOrDefault());
+                exSolid.Message.Should().Be("IfcCompositeCurve could not be built as a wire");
             }
         }
 

@@ -120,7 +120,7 @@ namespace Xbim.Geometry.NetCore.Tests
         [InlineData(10)]
         [InlineData(-10, false, true)]
         [InlineData(0, false, true)]
-        [InlineData(10, true, true)]
+        [InlineData(10, true)]
         public void Can_convert_ifc_circle_3d(double radius, bool location2d = false, bool checkException = false)
         {
            

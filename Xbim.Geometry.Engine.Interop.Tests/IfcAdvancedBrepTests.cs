@@ -9,12 +9,12 @@ using Xbim.IO.Memory;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-    
+
     // [DeploymentItem("TestFiles")]
     public class IfcAdvancedBrepTests
     {
-        
-        
+
+
         private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
 
@@ -125,7 +125,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\advanced_brep_with_sewing_issues.ifc"))
             {
                 //this model needs workarounds to be applied
-               // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
+                // model.AddWorkAroundSurfaceofLinearExtrusionForRevit();
                 var brep = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();
                 brep.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
@@ -168,7 +168,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [InlineData("advanced_brep_6", 1/*, DisplayName = "The trimming points either result in a zero length curve or do not intersect the curve"*/)]
         [InlineData("advanced_brep_7", 2/*, DisplayName = "Long running construction"*/)]
         [InlineData("advanced_brep_8", 2/*, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve"*/)]
-        public void Advanced_brep_tests(string brepFileName,  int solidCount = 1, bool fails = false)
+        public void Advanced_brep_tests(string brepFileName, int solidCount = 1, bool fails = false)
         {
 
             using (var model = MemoryModel.OpenRead($@"TestFiles\{brepFileName}.ifc"))

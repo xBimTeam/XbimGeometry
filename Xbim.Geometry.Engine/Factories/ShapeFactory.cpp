@@ -1,5 +1,6 @@
 #include "ShapeFactory.h"
 #include "GeometryFactory.h"
+#include "ShellFactory.h"
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
 #include <HLRBRep_PolyAlgo.hxx>
@@ -35,6 +36,8 @@
 
 #include "../BRep/XPolyLoop2d.h"
 #include "../XbimGeometryObject.h"
+#include <ShapeFix_Solid.hxx>
+
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -314,6 +317,18 @@ namespace Xbim
 			}
 
 		
+			TopoDS_Shape ShapeFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
+			{
+				CheckClosedStatus isCheckedClosed;
+				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(closedShell, isCheckedClosed); //throws exeptions
+				//ensure shells are discrete 
+				Handle(ShapeFix_Solid) sfs = new ShapeFix_Solid(sfs->SolidFromShell(shell));
+				sfs->FixShellMode() = true;
+				sfs->FixShellOrientationMode() = true;
+				sfs->Perform();
+				return sfs->Shape();
+
+			}
 			
 
 		}
