@@ -29,7 +29,7 @@ namespace Xbim
 
 			}
 
-			double XWire::Area::get()
+			double XWire::ContourArea::get()
 			{
 				return ShapeAnalysis::ContourArea(OccWire());
 			}

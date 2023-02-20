@@ -632,6 +632,8 @@ namespace Xbim
 				}
 				catch (const Standard_Failure& ex)
 				{
+					System::String^ err = gcnew System::String(ex.GetMessageString());
+					XbimGeometryCreator::LogWarning(logger, solids[i], "Failed to cut Boolean: {err}", err);
 					success = BOOLEAN_FAIL;
 				}
 

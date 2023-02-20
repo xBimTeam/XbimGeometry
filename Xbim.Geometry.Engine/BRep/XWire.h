@@ -22,7 +22,7 @@ namespace Xbim
 				virtual property XShapeType ShapeType { XShapeType get() override { return XShapeType::Wire; } };
 				virtual property array<IXEdge^>^ EdgeLoop {array<IXEdge^>^ get(); };
 				virtual property double Length {double get(); };
-				virtual property double Area {double get(); };
+				virtual property double ContourArea {double get(); };
 
 				
 			};

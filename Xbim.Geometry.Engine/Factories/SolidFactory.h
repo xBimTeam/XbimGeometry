@@ -39,6 +39,7 @@ namespace Xbim
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
+				virtual IXSolid^ Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
 
 
 

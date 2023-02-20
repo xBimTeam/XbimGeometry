@@ -62,7 +62,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             };
             var wire = modelService.WireFactory.BuildWire(outerBound);
             wire.IsClosed.Should().BeTrue();
-            wire.Area.Should().Be(200);
+            wire.ContourArea.Should().Be(200);
             wire.Length.Should().Be(60);
             var face = modelService.FaceFactory.BuildFace(plane, new[] { wire });
             face.IsClosed.Should().BeTrue();
@@ -99,12 +99,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
             };
             var outerWire = modelService.WireFactory.BuildWire(outerBound.Reverse().ToArray());//reverse the inner bound points to clockwise order, causes bad shape
             outerWire.IsClosed.Should().BeTrue();
-            outerWire.Area.Should().Be(200);
+            outerWire.ContourArea.Should().Be(200);
             outerWire.Length.Should().Be(60);
 
             var innerWire = modelService.WireFactory.BuildWire(innerBound); //reverse the inner bound points to anti-clockwise order, causes bad shape
             innerWire.IsClosed.Should().BeTrue();
-            innerWire.Area.Should().Be(25);
+            innerWire.ContourArea.Should().Be(25);
             innerWire.Length.Should().Be(20);
 
             var face = modelService.FaceFactory.BuildFace(plane, new[] { outerWire, innerWire });

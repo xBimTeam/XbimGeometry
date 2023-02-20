@@ -55,7 +55,7 @@ namespace Xbim
 				IXWire^ outerWire;
 				for each (IXWire ^ wire in wires)
 				{
-					double absArea = std::abs(wire->Area);
+					double absArea = std::abs(wire->ContourArea);
 					if (absArea > maxArea)
 					{
 						maxArea = absArea;
