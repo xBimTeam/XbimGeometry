@@ -246,7 +246,7 @@ namespace Xbim
 				TopoDS_Face face;
 				if (ifcCircleHollowProfileDef->WallThickness <= 0)
 				{
-					LogInformation(ifcCircleHollowProfileDef, "Circle hollow profile has a wall thickness of less than zero");
+					LogDebug(ifcCircleHollowProfileDef, "Circle hollow profile has a wall thickness of less than zero");
 					face = EXEC_NATIVE->MakeFace(outerWire);
 				}
 				else

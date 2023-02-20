@@ -36,7 +36,7 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 			switch (error)
 			{
 			case BRepBuilderAPI_FaceDone: //should never happen
-				pLoggingService->LogInformation("BRepBuilderAPI_FaceDone: ignore");
+				pLoggingService->LogWarning("BRepBuilderAPI_FaceDone: ignore");
 				break;
 			case BRepBuilderAPI_NoFace:
 				pLoggingService->LogWarning("BRepBuilderAPI_NoFace");
@@ -146,7 +146,7 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_Se
 			switch (error)
 			{
 			case BRepBuilderAPI_FaceDone: //should never happen
-				pLoggingService->LogInformation("BRepBuilderAPI_FaceDone: ignore");
+				pLoggingService->LogWarning("BRepBuilderAPI_FaceDone: ignore");
 				break;
 			case BRepBuilderAPI_NoFace:
 				pLoggingService->LogWarning("BRepBuilderAPI_NoFace");

@@ -291,7 +291,7 @@ namespace Xbim
 							}
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
 							{
-								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								LogDebug(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
 								Handle(Geom2d_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine2d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
@@ -381,7 +381,7 @@ namespace Xbim
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->Precision))
 					{
-						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
+						LogDebug(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 						return Handle(Geom2d_Curve)();
 					}
 					Handle(Geom2d_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine2d(start, end);
@@ -751,7 +751,7 @@ namespace Xbim
 							}
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
 							{
-								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								LogDebug(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
 								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
@@ -819,7 +819,7 @@ namespace Xbim
 					{
 						//the parameters must be in radians
 						if (startParam > 2 * Math::PI || endParam > Math::PI * 2)
-							LogInformation(curve, "Directix trims parameters of periodice curves should be in radians");
+							LogDebug(curve, "Directix trims parameters of periodice curves should be in radians");
 						Handle(Geom_Curve)  geomCurveTrimmed = new Geom_TrimmedCurve(geomCurve, startParam, endParam);
 						if (geomCurve.IsNull())
 							throw RaiseGeometryFactoryException("Directrix could not be trimmed");
@@ -1043,7 +1043,7 @@ namespace Xbim
 			{
 				//Validation
 				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-					LogInformation(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
+					LogDebug(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
 				XCurveType curveType;
 				Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
 				if (!basisCurve.IsNull())
@@ -1104,7 +1104,7 @@ namespace Xbim
 							return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 						else
 						{
-							LogInformation(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
+							LogDebug(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
 							return Handle(Geom_TrimmedCurve)();
 						}
 					}
@@ -1184,7 +1184,7 @@ namespace Xbim
 							return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
 						else
 						{
-							LogInformation(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
+							LogDebug(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
 							return Handle(Geom2d_TrimmedCurve)();
 						}
 					}
@@ -1206,7 +1206,7 @@ namespace Xbim
 					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[0]);
 					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->Precision))
-						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
+						LogDebug(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 					Handle(Geom_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine3d(start, end);
 					if (lineSeg.IsNull())
 						throw RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
