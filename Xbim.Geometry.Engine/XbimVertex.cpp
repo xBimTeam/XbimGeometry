@@ -22,7 +22,7 @@ namespace Xbim
 
 #pragma region Constructors
 		/*Constructs an topological vertex with no geometry*/
-		XbimVertex::XbimVertex()
+		XbimVertex::XbimVertex() : XbimOccShape(nullptr) //vertices will be obsolete and do not need to track in a model context
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -34,7 +34,7 @@ namespace Xbim
 			Tag = tag;
 		}
 
-		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex)
+		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -42,14 +42,14 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, vertex->Model->ModelFactors->Precision);
 		}
 
-		XbimVertex::XbimVertex(double x, double y, double z, double precision)
+		XbimVertex::XbimVertex(double x, double y, double z, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
 			gp_Pnt pnt(x, y, z);
 			b.MakeVertex(*pVertex, pnt, precision);
 		}
-		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D)
+		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -57,7 +57,7 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, point3D->Tolerance);
 		}
 
-		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)
+		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -65,13 +65,13 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, precision);
 		}
 
-		XbimVertex::XbimVertex(const TopoDS_Vertex& occVertex)
+		XbimVertex::XbimVertex(const TopoDS_Vertex& occVertex) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			*pVertex = occVertex;
 		}
 
-		XbimVertex::XbimVertex(IXbimVertex^ vertex, double precision)
+		XbimVertex::XbimVertex(IXbimVertex^ vertex, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -134,7 +134,7 @@ namespace Xbim
 		{
 			if (!IsValid) return this;			
 			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger, nullptr);
 			copy->Move(loc);
 			return copy;
 		}

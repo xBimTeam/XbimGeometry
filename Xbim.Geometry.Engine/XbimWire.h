@@ -87,44 +87,44 @@ namespace Xbim
 
 #pragma region constructors
 
-			XbimWire() {}; //an empty invalid wire
-			XbimWire(XbimEdge^ edge); 
+			XbimWire(ModelGeometryService^ modelService) :XbimOccShape(modelService) {}; //an empty invalid wire
+			XbimWire(XbimEdge^ edge, ModelGeometryService^ modelService);
 
-			XbimWire(double x, double y, double tolerance, bool centre);
-			XbimWire(double precision);
-			XbimWire(const std::vector<gp_Pnt>& points, double tolerance);
-			XbimWire(const TopoDS_Wire& wire);
-			XbimWire(const TopoDS_Wire& wire, Object^ tag);
-			XbimWire(IIfcCurve^ loop, ILogger^ logger);
+			XbimWire(double x, double y, double tolerance, bool centre, ModelGeometryService^ modelService);
+			XbimWire(double precision, ModelGeometryService^ modelService);
+			XbimWire(const std::vector<gp_Pnt>& points, double tolerance, ModelGeometryService^ modelService);
+			XbimWire(const TopoDS_Wire& wire, ModelGeometryService^ modelService);
+			XbimWire(const TopoDS_Wire& wire, Object^ tag, ModelGeometryService^ modelService);
+			XbimWire(IIfcCurve^ loop, ILogger^ logger, ModelGeometryService^ modelService);
 			
 			//special case for building a composite curve as a wire and not a single edge
-			XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger);
+			XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger, ModelGeometryService^ modelService);
 			//srl need to revisit this, the sense is wrong for trimmed curves, really it should not be supported at all as the segment is not a curve
-			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger);
+			XbimWire(IIfcCompositeCurveSegment^ compCurveSeg, ILogger^ logger, ModelGeometryService^ modelService);
 
 			//Creates a wire of individual edges for each IfcPolyline segment, use XbimCurve for a single bspline edge
-			XbimWire(IIfcPolyline^ profile, ILogger^ logger);
+			XbimWire(IIfcPolyline^ profile, ILogger^ logger, ModelGeometryService^ modelService);
 			//Creates a wire of individual edges for each IfcIndexedPolyCurve segment, use XbimCurve for a single bspline edge
-			XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger);
+			XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger, ModelGeometryService^ modelService);
 
-			XbimWire(IIfcPolyLoop^ loop, ILogger^ logger);
-			XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcPolyLoop^ loop, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
 			//parametrised profiles
-			XbimWire(IIfcProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcCircleProfileDef^ circProfile, ILogger^ logger);
-			XbimWire(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger);
-			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ logger);
-			XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger);
-			XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger);
+			XbimWire(IIfcProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcCircleProfileDef^ circProfile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcRectangleProfileDef^ rectProfile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcRoundedRectangleProfileDef^ rectProfile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService);
 
 
 #pragma endregion
@@ -142,7 +142,7 @@ namespace Xbim
 			virtual property bool IsValid {bool get() override { return pWire != nullptr && !pWire->IsNull(); }; }
 			virtual property IXbimEdgeSet^ Edges {IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices {IXbimVertexSet^ get(); }
-			virtual property IEnumerable<XbimPoint3D>^ Points {IEnumerable<XbimPoint3D>^ get(); }
+			virtual property System::Collections::Generic::IEnumerable<XbimPoint3D>^ Points {System::Collections::Generic::IEnumerable<XbimPoint3D>^ get(); }
 			//returns the normal of the loop using the Newell's normal algorithm
 			virtual property XbimVector3D Normal {XbimVector3D get(); }
 			virtual property bool IsClosed {bool get() { return IsValid && pWire->Closed() == Standard_True; }; }
@@ -217,7 +217,7 @@ namespace Xbim
 			
 		};
 
-		public ref class IfcPolylineComparer :IEqualityComparer<IIfcPolyline^>
+		public ref class IfcPolylineComparer :System::Collections::Generic::IEqualityComparer<IIfcPolyline^>
 		{
 		public:
 			// Inherited via IEqualityComparer

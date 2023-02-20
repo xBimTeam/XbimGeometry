@@ -79,7 +79,7 @@ namespace Xbim
 				}
 				finally
 				{
-				System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
 				}
 				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
 			}
@@ -210,7 +210,7 @@ namespace Xbim
 				TopoDS_Shape result = OccHandle().Union(topoBody, topoAddition, _modelService->MinimumGap);
 				return GetXbimShape(result);
 			}
-			
+
 
 			IXShape^ ShapeFactory::Cut(IXShape^ body, IXShape^ substraction)
 			{
@@ -260,7 +260,7 @@ namespace Xbim
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 
 				if (s.IsNull()) return nullptr;
-				s.Location(XbimConvert::ToLocation(placement, Logger()));
+				s.Location(XbimConvert::ToLocation(placement, Logger(), _modelService));
 				return  GetXbimShape(s);
 			}
 
@@ -269,9 +269,9 @@ namespace Xbim
 			{
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 				if (invertPlacement)
-					s.Move(XbimConvert::ToLocation(placement, Logger()).Inverted());
+					s.Move(XbimConvert::ToLocation(placement, Logger(), _modelService).Inverted());
 				else
-					s.Move(XbimConvert::ToLocation(placement, Logger()));
+					s.Move(XbimConvert::ToLocation(placement, Logger(), _modelService));
 				return  GetXbimShape(s);
 			}
 
@@ -316,7 +316,7 @@ namespace Xbim
 				return gTran.Shape();
 			}
 
-		
+
 			TopoDS_Shape ShapeFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
 			{
 				CheckClosedStatus isCheckedClosed;
@@ -329,7 +329,7 @@ namespace Xbim
 				return sfs->Shape();
 
 			}
-			
+
 
 		}
 	}

@@ -38,9 +38,9 @@ namespace Xbim
 		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
 		private:
-			IXModelGeometryService^ _modelService;
+			
 			List<IXbimSolid^>^ solids;
-			static XbimSolidSet^ empty = gcnew XbimSolidSet((IXModelGeometryService^)nullptr);
+			
 			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
@@ -74,33 +74,33 @@ namespace Xbim
 
 #pragma endregion
 
-			static property XbimSolidSet^ Empty {XbimSolidSet^ get() { return empty; }};
-			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
-			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger);
-			XbimSolidSet(IXModelGeometryService^ modelService);
+			
+			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger, ModelGeometryService^ modelService);
+			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(ModelGeometryService^ modelService);
 			IXCompound^ ToXCompound();
-			XbimSolidSet(const TopoDS_Shape& shape);
+			XbimSolidSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
 			void InitSolidsFromShape(const TopoDS_Shape& shape);
-			XbimSolidSet(XbimCompound^ shape);
-			XbimSolidSet(IXbimSolid^ solid);
-			XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IIfcBooleanResult^ boolOp, IXModelGeometryService^ modelService, ILogger^ logger);
-			XbimSolidSet(IIfcBooleanClippingResult^ solid, IXModelGeometryService^ modelService, ILogger^ logger);
-			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
-			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
-			void SetModelGeometryService(IXModelGeometryService^ modelService) { _modelService = modelService; };
+			XbimSolidSet(XbimCompound^ shape, ModelGeometryService^ modelService);
+			XbimSolidSet(IXbimSolid^ solid, ModelGeometryService^ modelService);
+			XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanClippingResult^ solid,  ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			
 			virtual property bool IsValid
 			{
 				bool get()

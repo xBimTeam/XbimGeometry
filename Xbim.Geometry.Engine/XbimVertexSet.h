@@ -12,19 +12,20 @@ namespace Xbim
 		{
 		private:			
 			List<IXbimVertex^>^ vertices;
-			static XbimVertexSet^ empty = gcnew XbimVertexSet();
-			XbimVertexSet::XbimVertexSet(){ vertices = gcnew List<IXbimVertex^>(1); }
+			
+			
 			void InstanceCleanup()
 			{
 				vertices = nullptr;
 			};
 		public:
-			static property XbimVertexSet^ Empty{XbimVertexSet^ get(){ return empty; }};
+			
 			IXCompound^ ToXCompound();
 			virtual operator  TopoDS_Shape () override;
 #pragma region Constructors
-			XbimVertexSet(const TopoDS_Shape& shape);
-			XbimVertexSet(System::Collections::Generic::IEnumerable<IXbimVertex^>^ vertices);
+			XbimVertexSet(ModelGeometryService^ modelService) : XbimSetObject(modelService) { vertices = gcnew List<IXbimVertex^>(1); }
+			XbimVertexSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			XbimVertexSet(System::Collections::Generic::IEnumerable<IXbimVertex^>^ vertices, ModelGeometryService^ modelService);
 #pragma endregion
 
 #pragma region destructors

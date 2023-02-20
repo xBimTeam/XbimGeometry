@@ -71,9 +71,15 @@ namespace Xbim
 
 		ref class XbimSetObject abstract
 		{
+		protected:
+			Xbim::Geometry::Services::ModelGeometryService^ _modelServices;
 		private:
 			Object^ tag;
 		public:
+			XbimSetObject(Xbim::Geometry::Services::ModelGeometryService^ modelService)
+			{
+				_modelServices = modelService;
+			}
 			virtual operator TopoDS_Shape () abstract;
 			virtual IXbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator^ transformation) abstract;
 			virtual IXbimGeometryObject^ Moved(IIfcPlacement^ placement) abstract;

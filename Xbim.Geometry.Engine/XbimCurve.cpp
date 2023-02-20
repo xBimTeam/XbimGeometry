@@ -41,7 +41,7 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		
+
 
 		XbimRect3D XbimCurve::BoundingBox::get()
 		{
@@ -745,7 +745,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
-			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger, _modelServices);
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;

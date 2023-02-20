@@ -31,12 +31,12 @@ namespace Xbim
 			void Init(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
 		public:
 			//Constructors
-			XbimShell();
-			XbimShell(const TopoDS_Shell& shell);
-			XbimShell(const TopoDS_Shell& shell, Object^ tag);
-			XbimShell(IIfcOpenShell^ openShell, ILogger^ logger);
-			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger);
-			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger);
+			XbimShell(ModelGeometryService^ modelService) :XbimOccShape(modelService) {};
+			XbimShell(const TopoDS_Shell& shell, ModelGeometryService^ modelService);
+			XbimShell(const TopoDS_Shell& shell, Object^ tag, ModelGeometryService^ modelService);
+			XbimShell(IIfcOpenShell^ openShell, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimShell(IIfcConnectedFaceSet^ faceset, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimShell(IIfcSurfaceOfLinearExtrusion^ linExt, ILogger^ logger, ModelGeometryService^ modelService);
 			//destructors
 			~XbimShell() { InstanceCleanup(); }
 			!XbimShell() { InstanceCleanup(); }
