@@ -86,12 +86,14 @@ namespace Xbim
 
 		ref class XbimGeometryObject abstract : IXbimGeometryObject
 		{
+		protected:
+			Xbim::Geometry::Services::ModelGeometryService^ _modelServices;
 		private:
 			Object^ tag;
-			Xbim::Geometry::Services::ModelGeometryService^ _engine;
+			
 		public:
 			static IXShape^ ToXShape(IXbimGeometryObject^ geomObj);
-			XbimGeometryObject() {};
+			XbimGeometryObject(Xbim::Geometry::Services::ModelGeometryService^ modelServices) { _modelServices = modelServices;};
 #pragma region destructors
 
 			virtual ~XbimGeometryObject() {};

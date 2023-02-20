@@ -8,6 +8,8 @@
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 using namespace Microsoft::Extensions::Logging;
+using namespace Xbim::Geometry::Services;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -52,17 +54,21 @@ namespace Xbim
 			~XbimCurve() { InstanceCleanup(); }
 			!XbimCurve() { InstanceCleanup(); }
 			//constructors
-			XbimCurve(const Handle(Geom_Curve)& curve);
-			XbimCurve(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve(const Handle(Geom_Curve)& curve, ModelGeometryService^ modelService) :XbimGeometryObject(modelService)
+			{
+				this->pCurve = new Handle(Geom_Curve);
+				*pCurve = curve;
+			};
+			XbimCurve(IIfcCurve^ curve, ILogger^ logger, ModelGeometryService^ modelService):XbimGeometryObject(modelService){ Init(curve, logger); }
 
-			XbimCurve(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger) { Init(trimmedCurve, logger); }
-			XbimCurve(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve(IIfcPcurve^ curve, ILogger^ logger) { Init(curve, logger); }
+			XbimCurve(IIfcCircle^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcEllipse^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcLine^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcTrimmedCurve^ trimmedCurve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(trimmedCurve, logger); }
+			XbimCurve(IIfcBSplineCurve^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcOffsetCurve3D^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve(IIfcPcurve^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
 
 #pragma region operators
 			operator const Handle(Geom_Curve)& () { return *pCurve; }
@@ -89,7 +95,7 @@ namespace Xbim
 #pragma region Methods
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ logger);
+			virtual System::Collections::Generic::IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ logger);
 			virtual XbimPoint3D GetPoint(double parameter);
 			void Reverse();
 			gp_Pnt StartPoint();
