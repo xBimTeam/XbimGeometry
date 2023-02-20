@@ -104,24 +104,24 @@ namespace Xbim
 #pragma region Constructors
 
 
-		XbimWire::XbimWire(XbimEdge^ edge)
+		XbimWire::XbimWire(XbimEdge^ edge, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			pWire = new TopoDS_Wire();
 			BRepBuilderAPI_MakeWire wireMaker(edge);
 			*pWire = wireMaker.Wire();
 		}
-		XbimWire::XbimWire(const TopoDS_Wire& wire)
+		XbimWire::XbimWire(const TopoDS_Wire& wire, ModelGeometryService^ modelService) : XbimOccShape(modelService)
 		{
 			pWire = new TopoDS_Wire();
 			*pWire = wire;
 		}
 
-		XbimWire::XbimWire(const TopoDS_Wire& wire, Object^ tag) :XbimWire(wire)
+		XbimWire::XbimWire(const TopoDS_Wire& wire, Object^ tag, ModelGeometryService^ modelService) : XbimWire(wire, modelService)
 		{
 			Tag = tag;
 		}
 
-		XbimWire::XbimWire(const std::vector<gp_Pnt>& points, double tolerance)
+		XbimWire::XbimWire(const std::vector<gp_Pnt>& points, double tolerance, ModelGeometryService^ modelService) : XbimOccShape(modelService)
 		{
 			BRepBuilderAPI_MakePolygon polyMaker;
 			for (size_t i = 0; i < points.size(); i++)
@@ -134,34 +134,34 @@ namespace Xbim
 			ShapeFix_ShapeTolerance fixer;
 			fixer.LimitTolerance(*pWire, tolerance);
 		}
-		XbimWire::XbimWire(double precision) { Init(precision); }
-		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(double precision, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(precision); }
+		XbimWire::XbimWire(IIfcCurve^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger) { Init(compCurve, logger); }
-		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger) { Init(profile, logger); };
-		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCompositeCurve^ compCurve, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(compCurve, logger); }
+		XbimWire::XbimWire(IIfcCompositeCurveSegment^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); };
+		XbimWire::XbimWire(IIfcPolyline^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcIndexedPolyCurve^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
 
-		XbimWire::XbimWire(IIfcPolyLoop^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcPolyLoop^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcArbitraryOpenProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCenterLineProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
 		//parametrised profiles
-		XbimWire::XbimWire(IIfcProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcCircleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger) { Init(profile, logger); }
-		XbimWire::XbimWire(double x, double y, double tolerance, bool centre) { Init(x, y, tolerance, centre); }
+		XbimWire::XbimWire(IIfcProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcDerivedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcParameterizedProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCircleProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcRectangleProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcRoundedRectangleProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcLShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcUShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcEllipseProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcIShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcZShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcCShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(IIfcTShapeProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(profile, logger); }
+		XbimWire::XbimWire(double x, double y, double tolerance, bool centre, ModelGeometryService^ modelService) : XbimOccShape(modelService) { Init(x, y, tolerance, centre); }
 #pragma endregion
 
 
@@ -226,7 +226,7 @@ namespace Xbim
 			else
 			{
 
-				XbimWire^ loop = gcnew XbimWire(profile->Curve, logger);
+				XbimWire^ loop = gcnew XbimWire(profile->Curve, logger, _modelServices);
 				if (!loop->IsValid)
 				{
 					XbimGeometryCreator::LogWarning(logger, profile, "Invalid curve. Wire discarded");
@@ -241,10 +241,10 @@ namespace Xbim
 		{
 
 			double precision = profile->Model->ModelFactors->Precision;
-			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger);
+			XbimWire^ centreWire = gcnew XbimWire(profile->Curve, logger, _modelServices);
 			TopoDS_Wire spine = centreWire;
 			//nb the curve must be 2d so place it on the Z plane so that the offseter can get the correct normal
-			XbimFace^ xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger);
+			XbimFace^ xFace = gcnew XbimFace(XbimVector3D(0, 0, 1), logger, _modelServices);
 			xFace->Add(centreWire);
 			TopoDS_Face spineFace = xFace;
 			if (!centreWire->IsValid)
@@ -326,7 +326,7 @@ namespace Xbim
 		{
 
 			IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve);
-			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger);
+			XbimWire^ segWire = gcnew XbimWire(seg->ParentCurve, logger, _modelServices);
 			if (segWire->IsValid)
 			{
 				if (tc != nullptr)
@@ -707,7 +707,7 @@ namespace Xbim
 				Init(polyCurve, logger);
 			else
 			{
-				XbimEdge^ edge = gcnew XbimEdge(curve, logger);
+				XbimEdge^ edge = gcnew XbimEdge(curve, logger, _modelServices);
 				if (!edge->IsValid) return; //errors handled below in curve
 				BRepLib_MakeWire wireMaker(edge);
 				if (wireMaker.IsDone())
@@ -909,14 +909,14 @@ namespace Xbim
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Wire temp = TopoDS::Wire(gTran.Shape());
-			return gcnew XbimWire(temp);
+			return gcnew XbimWire(temp, _modelServices);
 		}
 
 		IXbimGeometryObject^ XbimWire::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Wire wire = TopoDS::Wire(pWire->Moved(XbimConvert::ToTransform(matrix3D)));
 			System::GC::KeepAlive(this);
-			return gcnew XbimWire(wire);
+			return gcnew XbimWire(wire, _modelServices);
 		}
 
 		XbimRect3D XbimWire::BoundingBox::get()
@@ -933,8 +933,8 @@ namespace Xbim
 
 		IXbimEdgeSet^ XbimWire::Edges::get()
 		{
-			if (!IsValid) return XbimEdgeSet::Empty;
-			return gcnew XbimEdgeSet(this);
+			if (!IsValid) return gcnew XbimEdgeSet(_modelServices);
+			return gcnew XbimEdgeSet(this, _modelServices);
 		}
 
 		System::Collections::Generic::IEnumerable<XbimPoint3D>^ XbimWire::Points::get()
@@ -944,8 +944,8 @@ namespace Xbim
 
 		IXbimVertexSet^ XbimWire::Vertices::get()
 		{
-			if (!IsValid) return XbimVertexSet::Empty;
-			return gcnew XbimVertexSet(*pWire);
+			if (!IsValid) return gcnew  XbimVertexSet(_modelServices);
+			return gcnew XbimVertexSet(*pWire, _modelServices);
 		}
 
 		XbimVector3D XbimWire::Normal::get()
@@ -2246,10 +2246,10 @@ namespace Xbim
 					wm.Add(BRepBuilderAPI_MakeEdge(trimmed));
 					TopoDS_Wire trimmedWire = wm.Wire();
 					fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
-					return gcnew XbimWire(trimmedWire);
+					return gcnew XbimWire(trimmedWire, _modelServices);
 				}
 				else
-					return gcnew XbimWire(); //empty wire
+					return gcnew XbimWire( _modelServices); //empty wire
 			}
 			else
 			{
@@ -2338,7 +2338,7 @@ namespace Xbim
 				TopoDS_Wire trimmedWire = wm.Wire();
 
 				fTol.LimitTolerance(trimmedWire, this->MaxTolerance);
-				return gcnew XbimWire(trimmedWire);
+				return gcnew XbimWire(trimmedWire, _modelServices);
 			}
 		}
 
@@ -2370,7 +2370,7 @@ namespace Xbim
 
 		XbimWire^ XbimWire::Reversed()
 		{
-			XbimWire^ copy = gcnew XbimWire(this);
+			XbimWire^ copy = gcnew XbimWire(this, _modelServices);
 			copy->Reverse();
 			return copy;
 			//if (!IsValid) return this;
@@ -2443,12 +2443,12 @@ namespace Xbim
 							B.Add(aCurrWire, TopoDS::Edge(aValue));
 						}
 						// make edge from the wire
-						XbimEdge^ xanEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger);
+						XbimEdge^ xanEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger, _modelServices);
 						if (!xanEdge->IsValid) //probably could not get C1 continuity just add all edges
 						{
 							for (itEdges.Initialize(currChain); itEdges.More(); itEdges.Next()) {
 								TopoDS_Shape aValue = itEdges.Value();
-								finalList.Append(gcnew XbimEdge(TopoDS::Edge(aValue)));
+								finalList.Append(gcnew XbimEdge(TopoDS::Edge(aValue), _modelServices));
 							}
 						}
 						else
@@ -2479,13 +2479,13 @@ namespace Xbim
 				}
 
 				// make edge from the wire
-				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger);
+				XbimEdge^ anEdge = gcnew XbimEdge(aCurrWire, tolerance, angleTolerance, logger, _modelServices);
 				if (!anEdge->IsValid) //probably could not get C1 continuity just add all edges
 				{
 					itEdges.Initialize(currChain);
 					for (; itEdges.More(); itEdges.Next()) {
 						TopoDS_Shape aValue = itEdges.Value();
-						anEdge = gcnew XbimEdge(TopoDS::Edge(aValue));
+						anEdge = gcnew XbimEdge(TopoDS::Edge(aValue), _modelServices);
 						finalList.Append(anEdge);
 					}
 				}
@@ -2666,20 +2666,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
+				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag, _modelServices);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag);
+				return gcnew XbimWire(TopoDS::Wire(tr.Shape()), Tag, _modelServices);
 			}
 		}
 
 		XbimGeometryObject^ XbimWire::Moved(IIfcPlacement^ placement)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
+			XbimWire^ copy = gcnew XbimWire(this, Tag, _modelServices); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -2688,8 +2688,8 @@ namespace Xbim
 		XbimGeometryObject^ XbimWire::Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimWire^ copy = gcnew XbimWire(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
+			XbimWire^ copy = gcnew XbimWire(this, Tag, _modelServices); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger, _modelServices);
 			copy->Move(loc);
 			return copy;
 		}

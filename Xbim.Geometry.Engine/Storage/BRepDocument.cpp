@@ -40,7 +40,7 @@ namespace Xbim
 				
 				TDF_Label assemblyLabel = XCAFDoc_ShapeTool()->NewShape();
 				BRepDocumentItem::SetName(assemblyLabel, name);
-				return gcnew BRepDocumentItem(assemblyLabel);
+				return gcnew BRepDocumentItem(assemblyLabel,_modelServices);
 
 			}
 
@@ -50,7 +50,7 @@ namespace Xbim
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
 				TDF_Label assemblyLabel = XCAFDoc_ShapeTool()->AddShape(topoShape);
 				BRepDocumentItem::SetName(assemblyLabel, name);
-				return gcnew BRepDocumentItem(assemblyLabel);
+				return gcnew BRepDocumentItem(assemblyLabel, _modelServices);
 			}
 
 
@@ -61,7 +61,7 @@ namespace Xbim
 				const TopoDS_Shape& s = static_cast<XShape^>(shape)->GetTopoShape();
 				TDF_Label label = XCAFDoc_ShapeTool()->AddShape(s, false, false);
 				BRepDocumentItem::SetName(label, System::Convert::ToString(id));
-				return gcnew BRepDocumentItem(label);
+				return gcnew BRepDocumentItem(label, _modelServices);
 			}
 
 			IXShape^ BRepDocument::GetShape(int id)
@@ -132,7 +132,7 @@ namespace Xbim
 			IXBRepDocumentItem^ BRepDocument::RootItem::get()
 			{
 				Handle(XCAFDoc_ShapeTool) myAssembly = XCAFDoc_DocumentTool::ShapeTool(Ref()->Main());
-				return gcnew BRepDocumentItem(myAssembly->BaseLabel());
+				return gcnew BRepDocumentItem(myAssembly->BaseLabel(), _modelServices);
 			}
 
 			IEnumerable<IXBRepDocumentItem^>^ BRepDocument::FreeShapes::get()
@@ -143,7 +143,7 @@ namespace Xbim
 				if (labels.IsEmpty()) return Enumerable::Empty<IXBRepDocumentItem^>();
 				List<IXBRepDocumentItem^>^ freeShapes = gcnew List<IXBRepDocumentItem^>(labels.Size());
 				for (auto& it = labels.cbegin(); it != labels.cend(); ++it)
-					freeShapes->Add(gcnew BRepDocumentItem(*it));
+					freeShapes->Add(gcnew BRepDocumentItem(*it, _modelServices));
 				return freeShapes;
 			}
 			IEnumerable<IXBRepDocumentItem^>^ BRepDocument::Shapes::get()
@@ -154,7 +154,7 @@ namespace Xbim
 				if (labels.IsEmpty()) return Enumerable::Empty<IXBRepDocumentItem^>();
 				List<IXBRepDocumentItem^>^ shapes = gcnew List<IXBRepDocumentItem^>(labels.Size());
 				for (auto& it = labels.cbegin(); it != labels.cend(); ++it)
-					shapes->Add(gcnew BRepDocumentItem(*it));
+					shapes->Add(gcnew BRepDocumentItem(*it, _modelServices));
 				return shapes;
 			}	
 
@@ -184,7 +184,7 @@ namespace Xbim
 					aMat->SetCommonMaterial(aMatCom);
 					XCAFDoc_VisMaterialPBR pbr = aMat->ConvertToPbrMaterial();
 					aMat->SetPbrMaterial(pbr);
-					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel, _modelServices));
 				}
 				finally
 				{
@@ -217,7 +217,7 @@ namespace Xbim
 				for (auto& it = materialLabels.cbegin(); it != materialLabels.cend(); ++it)
 				{
 					Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(*it);
-					materials->Add(gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(*it)));
+					materials->Add(gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(*it, _modelServices)));
 				}
 				return materials;
 			}
@@ -229,7 +229,7 @@ namespace Xbim
 				List<IXBRepDocumentItem^>^ materials = gcnew List<IXBRepDocumentItem^>(materialLabels.Size());
 				for (auto& it = materialLabels.cbegin(); it != materialLabels.cend(); ++it)
 				{
-					materials->Add(gcnew BRepDocumentItem(*it));
+					materials->Add(gcnew BRepDocumentItem(*it, _modelServices));
 				}
 				return materials;
 			}
@@ -252,7 +252,7 @@ namespace Xbim
 							if (aMatTool->GetShapeMaterial(aShapeLabel, materialLabel))
 							{
 								Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
-								return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+								return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel, _modelServices));
 							}
 						}
 					}
@@ -273,7 +273,7 @@ namespace Xbim
 				if (aMatTool->GetShapeMaterial(topoShape, materialLabel))
 				{
 					Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
-					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+					return gcnew VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel, _modelServices));
 				}
 
 				return nullptr;

@@ -121,45 +121,45 @@ namespace Xbim
 #pragma endregion
 
 #pragma region constructors
-			XbimSolid() {};
-			XbimSolid(const TopoDS_Solid& solid);
-			XbimSolid(const TopoDS_Solid& solid, Object^ tag);
-			XbimSolid(IIfcSolidModel^ solid, ILogger^ logger);
-			XbimSolid(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimSolid(IIfcSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
-			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
+			XbimSolid (ModelGeometryService^ modelService):XbimOccShape(modelService) {};
+			XbimSolid(const TopoDS_Solid& solid, ModelGeometryService^ modelService);
+			XbimSolid(const TopoDS_Solid& solid, Object^ tag, ModelGeometryService^ modelService);
+			XbimSolid(IIfcSolidModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcSweptAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
 
-			XbimSolid(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
+			XbimSolid(IIfcHalfSpaceSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			
-			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger);
-			XbimSolid(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcRevolvedAreaSolidTapered^ solid, ILogger^ logger);
-			XbimSolid(IIfcRevolvedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcSweptDiskSolid^ solid, ILogger^ logger);
+			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcRevolvedAreaSolidTapered^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcRevolvedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcRevolvedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcRevolvedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcSweptDiskSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			// XbimSolid(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
-			XbimSolid(IIfcSectionedSpine^ solid, ILogger^ logger);
-			XbimSolid(IIfcBoundingBox^ solid, ILogger^ logger);
+			XbimSolid(IIfcSectionedSpine^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcBoundingBox^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 
 
-			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
-			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger);
+			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcFixedReferenceSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			XbimSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
 
-			XbimSolid(IIfcSphere^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcBlock^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger);
-			XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger);
-			XbimSolid(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolid(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
-			XbimSolid(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
+			XbimSolid(IIfcSphere^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcBlock^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcRightCircularCylinder^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcRightCircularCone^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcRectangularPyramid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolid(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 #pragma endregion
 
 

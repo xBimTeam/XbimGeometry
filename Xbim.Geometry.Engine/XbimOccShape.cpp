@@ -34,17 +34,14 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		XbimOccShape::XbimOccShape()
-		{
-		}
-
+		
 
 
 		void XbimOccShape::WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle)
 		{
 
 			if (!IsValid) return;
-			XbimFaceSet^ faces = gcnew XbimFaceSet(this);
+			XbimFaceSet^ faces = gcnew XbimFaceSet(this,_modelServices);
 
 			if (faces->Count == 0) return;
 

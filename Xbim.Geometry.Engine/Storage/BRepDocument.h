@@ -6,13 +6,13 @@
 #include <XCAFDoc_ShapeTool.hxx>
 #include <TDocStd_Application.hxx>
 
-
+#include "../Services/ModelGeometryService.h"
 #include "Unmanaged/FlexApp_Application.h"
 //#include "Unmanaged/FlexDrivers.h"
 
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Geometry::Abstractions;
-
+using namespace Xbim::Geometry::Services;
 
 
 using namespace System::Collections::Generic;
@@ -34,12 +34,12 @@ namespace Xbim
 			
 
 			private:
-
+				ModelGeometryService^ _modelServices;
 			public:
 
-				BRepDocument(Handle(TDocStd_Document) hDoc) : XbimHandle(new Handle(TDocStd_Document)(hDoc))
+				BRepDocument(Handle(TDocStd_Document) hDoc, ModelGeometryService^ modelServices) : XbimHandle(new Handle(TDocStd_Document)(hDoc))
 				{
-
+					_modelServices = modelServices;
 				};
 				///Tidy up the document make sure it is closed aand removed from the in session documents on dispose
 				~BRepDocument()

@@ -68,12 +68,12 @@ namespace Xbim
 
 
 #pragma region IXbimEdge Interface
-		XbimEdge::XbimEdge(const TopoDS_Edge& edge)
+		XbimEdge::XbimEdge(const TopoDS_Edge& edge, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			pEdge = new TopoDS_Edge();
 			*pEdge = edge;
 		}
-		XbimEdge::XbimEdge(const TopoDS_Edge& edge, Object^ tag) : XbimEdge(edge) { Tag = tag; }
+		XbimEdge::XbimEdge(const TopoDS_Edge& edge, Object^ tag, ModelGeometryService^ modelService) : XbimEdge(edge, modelService) { Tag = tag; }
 
 		IXbimCurve^ XbimEdge::EdgeGeometry::get()
 		{
@@ -81,7 +81,7 @@ namespace Xbim
 			Standard_Real p1, p2;
 			Handle(Geom_Curve) curve = BRep_Tool::Curve(*pEdge, p1, p2);
 			System::GC::KeepAlive(this);
-			return gcnew XbimCurve(curve);
+			return gcnew XbimCurve(curve, _modelServices);
 		}
 
 		double XbimEdge::Length::get()
@@ -97,7 +97,7 @@ namespace Xbim
 			else
 				return 0;
 		}
-		XbimEdge::XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd)
+		XbimEdge::XbimEdge(IXbimVertex^ edgeStart, IXbimVertex^ edgeEnd, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 
 			if (!dynamic_cast<XbimVertex^>(edgeStart))
@@ -122,18 +122,18 @@ namespace Xbim
 #pragma region Constructors
 
 
-		XbimEdge::XbimEdge(IIfcCurve^ edge, ILogger^ logger)
+		XbimEdge::XbimEdge(IIfcCurve^ edge, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(edge, logger);
 		}
 
-		XbimEdge::XbimEdge(IIfcProfileDef^ profile, ILogger^ logger)
+		XbimEdge::XbimEdge(IIfcProfileDef^ profile, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(profile, logger);
 		}
 
 
-		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end)
+		XbimEdge::XbimEdge(XbimVertex^ start, XbimVertex^ midPoint, XbimVertex^ end, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 
 			gp_Pnt p1 = BRep_Tool::Pnt(start);
@@ -175,7 +175,7 @@ namespace Xbim
 			}
 
 		}
-		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double /*maxTolerance*/)
+		XbimEdge::XbimEdge(XbimEdge^ edgeCurve, XbimVertex^ start, XbimVertex^ end, double /*maxTolerance*/, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			double tolerance = System::Math::Max(start->Tolerance, end->Tolerance);
 			double edgeTol = BRep_Tool::Tolerance(edgeCurve);
@@ -236,7 +236,7 @@ namespace Xbim
 			FTol.LimitTolerance(*pEdge, tolerance);
 		}
 
-		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger)
+		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(edgeCurve, logger);
 			double tolerance = XbimConvert::ModelGeometryService(edgeCurve)->MinimumGap;
@@ -280,7 +280,7 @@ namespace Xbim
 
 #pragma warning( push )
 #pragma warning( disable : 4701)
-		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance, ILogger^ logger)
+		XbimEdge::XbimEdge(const TopoDS_Wire& aWire, double tolerance, double angleTolerance, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 
 			TopoDS_Edge ResEdge;
@@ -829,7 +829,7 @@ namespace Xbim
 
 		XbimEdge^ XbimEdge::Reversed()
 		{
-			XbimEdge^ revEdge = gcnew XbimEdge(this);
+			XbimEdge^ revEdge = gcnew XbimEdge(this, _modelServices);
 			revEdge->Reverse();
 			return revEdge;
 		}
@@ -841,20 +841,20 @@ namespace Xbim
 			{
 				gp_GTrsf trans = XbimConvert::ToTransform(nonUniform);
 				BRepBuilderAPI_GTransform tr(this, trans, Standard_True); //make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag, _modelServices);
 			}
 			else
 			{
 				gp_Trsf trans = XbimConvert::ToTransform(transformation);
 				BRepBuilderAPI_Transform tr(this, trans, Standard_False); //do not make a copy of underlying shape
-				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag);
+				return gcnew XbimEdge(TopoDS::Edge(tr.Shape()), Tag, _modelServices);
 			}
 		}
 
 		XbimGeometryObject ^ XbimEdge::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
+			XbimEdge^ copy = gcnew XbimEdge(this, Tag, _modelServices); //take a copy of the shape
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			copy->Move(loc);
 			return copy;
@@ -863,8 +863,8 @@ namespace Xbim
 		XbimGeometryObject ^ XbimEdge::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimEdge^ copy = gcnew XbimEdge(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
+			XbimEdge^ copy = gcnew XbimEdge(this, Tag, _modelServices); //take a copy of the shape
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger, _modelServices);
 			copy->Move(loc);
 			return copy;
 		}
@@ -935,14 +935,14 @@ namespace Xbim
 			BRepBuilderAPI_Copy copier(this);
 			BRepBuilderAPI_Transform gTran(copier.Shape(), XbimConvert::ToTransform(matrix3D));
 			TopoDS_Edge temp = TopoDS::Edge(gTran.Shape());
-			return gcnew XbimEdge(temp);
+			return gcnew XbimEdge(temp, _modelServices);
 		}
 
 		IXbimGeometryObject^ XbimEdge::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Edge edge = TopoDS::Edge(pEdge->Moved(XbimConvert::ToTransform(matrix3D)));
 			System::GC::KeepAlive(this);
-			return gcnew XbimEdge(edge);
+			return gcnew XbimEdge(edge, _modelServices);
 		}
 
 		XbimRect3D XbimEdge::BoundingBox::get()
@@ -985,7 +985,7 @@ namespace Xbim
 
 		void XbimEdge::Init(IIfcCurve^ curve, ILogger^ logger)
 		{
-			XbimCurve^ xbimCurve = gcnew XbimCurve(curve, logger); //if this fails it will record the error
+			XbimCurve^ xbimCurve = gcnew XbimCurve(curve, logger,_modelServices); //if this fails it will record the error
 			if (xbimCurve->IsValid)
 			{
 				BRepBuilderAPI_MakeEdge edgeMaker(xbimCurve);
@@ -1078,7 +1078,7 @@ namespace Xbim
 
 
 #pragma endregion
-		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ /*logger*/)
+		XbimEdge::XbimEdge(XbimCurve2D^ curve2D, ILogger^ /*logger*/, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			XbimCurve^ curve = (XbimCurve^)curve2D->ToCurve3D();
 			BRepBuilderAPI_MakeEdge edgeMaker(curve);
@@ -1086,7 +1086,7 @@ namespace Xbim
 			*pEdge = edgeMaker.Edge();
 		}
 
-		XbimEdge::XbimEdge(XbimCurve^ curve3D)
+		XbimEdge::XbimEdge(XbimCurve^ curve3D, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 
 			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);
@@ -1094,7 +1094,7 @@ namespace Xbim
 			*pEdge = edgeMaker.Edge();
 
 		}
-		XbimEdge::XbimEdge(Handle(Geom_Curve) curve3D)
+		XbimEdge::XbimEdge(Handle(Geom_Curve) curve3D, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 
 			BRepBuilderAPI_MakeEdge edgeMaker(curve3D);

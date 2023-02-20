@@ -202,23 +202,23 @@ namespace Xbim
 					return BuildExtrudedAreaSolid(static_cast<IIfcExtrudedAreaSolid^>(ifcSolid));
 					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation
 				case XSolidModelType::IfcSweptDiskSolidPolygonal:
-					return gcnew XbimSolid(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid), Logger(),_modelService);
 				case XSolidModelType::IfcAdvancedBrep:
-					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcAdvancedBrepWithVoids:
-					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcFacetedBrepWithVoids:
-					return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcExtrudedAreaSolidTapered:
-					return gcnew XbimSolid(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcRevolvedAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolid^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolid^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcRevolvedAreaSolidTapered:
-					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolidTapered^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid), Logger());
+					return gcnew XbimSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
 				default:
 					break;
 				}

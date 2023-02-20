@@ -4,9 +4,10 @@
 #include "../XbimHandle.h"
 #include "Unmanaged//FlexApp_Application.h"
 #include "../Services//LoggingService.h"
-
+#include "../Services/ModelGeometryService.h"
 using namespace Xbim::Geometry::Abstractions;
 using namespace Xbim::Geometry::Services;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -16,14 +17,16 @@ namespace Xbim
 			public ref class BRepDocumentManager : XbimHandle<Handle(FlexApp_Application)>, IXBRepDocumentManager
 			{
 			private:
-				LoggingService^ _loggingService;
+				IXLoggingService^ _loggingService;
+				ModelGeometryService^ _modelService;
 				Object^ _lockObject = gcnew Object();
 			public:
-				BRepDocumentManager(ILogger<BRepDocumentManager^>^ logger) :
+				BRepDocumentManager(ModelGeometryService^ modelService) :
 					XbimHandle(new Handle(FlexApp_Application)(FlexApp_Application::GetApplication())) //ensure only one application per session
 
 				{
-					_loggingService = gcnew LoggingService(logger);
+					_modelService = modelService;
+					_loggingService = modelService->LoggingService;
 					FlexDrivers::DefineFormat(Ref()); //initialise the application drivers
 				};
 				/// <summary>

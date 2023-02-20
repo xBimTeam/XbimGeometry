@@ -61,7 +61,7 @@ namespace Xbim
 			{
 				Handle(TDocStd_Document) aDoc;
 				Ref()->GetDocument(docIndex, aDoc);
-				return gcnew BRepDocument(aDoc);
+				return gcnew BRepDocument(aDoc, _modelService);
 			}
 			IXBRepDocument^ BRepDocumentManager::Open(array<System::Byte>^ bytes)
 			{
@@ -76,7 +76,7 @@ namespace Xbim
 					switch (status)
 					{
 					case PCDM_RS_OK:
-						return gcnew BRepDocument(aDoc);
+						return gcnew BRepDocument(aDoc, _modelService);
 					case PCDM_RS_NoDriver:
 						_loggingService->LogError("Open Document Failed: PCDM_RS_NoDriver");
 						break;
@@ -181,7 +181,7 @@ namespace Xbim
 					switch (status)
 					{
 					case PCDM_RS_OK:
-						return gcnew BRepDocument(aDoc);
+						return gcnew BRepDocument(aDoc, _modelService);
 					case PCDM_RS_NoDriver:
 						_loggingService->LogError("Open Document Failed: PCDM_RS_NoDriver");
 						break;
@@ -276,7 +276,7 @@ namespace Xbim
 				{
 					Handle(TDocStd_Document) aDoc;
 					Ref()->NewDocument("BinXCAF", aDoc);
-					return gcnew BRepDocument(aDoc);
+					return gcnew BRepDocument(aDoc, _modelService);
 				}
 				catch (const Standard_Failure& sf)
 				{

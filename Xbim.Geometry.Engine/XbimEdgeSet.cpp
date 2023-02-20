@@ -26,22 +26,22 @@ namespace Xbim
 			}
 			return bodyCompound;
 		}
-		XbimEdgeSet::XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges)
+		XbimEdgeSet::XbimEdgeSet(IEnumerable<IXbimEdge^>^ edges, ModelGeometryService^ modelService):XbimSetObject(modelService)
 		{
 			this->edges = gcnew List<IXbimEdge^>(edges);
 		}
 
-		XbimEdgeSet::XbimEdgeSet(XbimWire^ wire)
+		XbimEdgeSet::XbimEdgeSet(XbimWire^ wire, ModelGeometryService^ modelService) :XbimSetObject(modelService)
 		{
 			edges = gcnew  List<IXbimEdge^>();
 			for (BRepTools_WireExplorer wireEx((const TopoDS_Wire&)wire); wireEx.More(); wireEx.Next())
 			{
-				edges->Add(gcnew XbimEdge(wireEx.Current()));
+				edges->Add(gcnew XbimEdge(wireEx.Current(),_modelServices));
 			}
 			System::GC::KeepAlive(wire);
 		}
 
-		XbimEdgeSet::XbimEdgeSet(const TopoDS_Shape& shape)
+		XbimEdgeSet::XbimEdgeSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService) :XbimSetObject(modelService)
 		{
 			if (shape.ShapeType() == TopAbs_WIRE) //consider the ordering of the edges in the wire 
 			{
@@ -52,7 +52,7 @@ namespace Xbim
 					//if (reversed)
 					//	edges->Add(gcnew XbimEdge(TopoDS::Edge(wireEx.Current().Reversed())));
 					//else
-						edges->Add(gcnew XbimEdge(wireEx.Current()));
+						edges->Add(gcnew XbimEdge(wireEx.Current(), _modelServices));
 				}
 			}
 			else
@@ -61,7 +61,7 @@ namespace Xbim
 				TopExp::MapShapes(shape, TopAbs_EDGE, map);
 				edges = gcnew  List<IXbimEdge^>(map.Extent());
 				for (int i = 1; i <= map.Extent(); i++)
-					edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i))));
+					edges->Add(gcnew XbimEdge(TopoDS::Edge(map(i)), _modelServices));
 			}
 
 		}
@@ -97,7 +97,7 @@ namespace Xbim
 			{
 				result->Add((IXbimEdge^)edge->Transform(matrix3D));
 			}
-			return gcnew XbimEdgeSet(result);
+			return gcnew XbimEdgeSet(result, _modelServices);
 		}
 
 		IXbimGeometryObject^ XbimEdgeSet::TransformShallow(XbimMatrix3D matrix3D)
@@ -107,13 +107,13 @@ namespace Xbim
 			{
 				result->Add((IXbimEdge^)((XbimEdge^)edge)->TransformShallow(matrix3D));
 			}
-			return gcnew XbimEdgeSet(result);
+			return gcnew XbimEdgeSet(result, _modelServices);
 		}
 
 		IXbimGeometryObject ^ XbimEdgeSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
 			if (!IsValid) return this;
-			XbimEdgeSet^ result = gcnew XbimEdgeSet();
+			XbimEdgeSet^ result = gcnew XbimEdgeSet(_modelServices);
 			
 			for each (XbimEdge^ edge in edges)
 				result->Add((XbimEdge^)edge->Transformed(transformation));
@@ -123,11 +123,11 @@ namespace Xbim
 		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimEdgeSet^ result = gcnew XbimEdgeSet();
+			XbimEdgeSet^ result = gcnew XbimEdgeSet(_modelServices);
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag, _modelServices);
 				copy->Move(loc);
 				result->Add(copy);
 			}
@@ -137,11 +137,11 @@ namespace Xbim
 		IXbimGeometryObject ^ XbimEdgeSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger)
 		{
 			if (!IsValid) return this;
-			XbimEdgeSet^ result = gcnew XbimEdgeSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
+			XbimEdgeSet^ result = gcnew XbimEdgeSet(_modelServices);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger, _modelServices);
 			for each (IXbimEdge^ edge in edges)
 			{
-				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag);
+				XbimEdge^ copy = gcnew XbimEdge((XbimEdge^)edge, Tag, _modelServices);
 				copy->Move(loc);
 				result->Add(copy);
 			}
