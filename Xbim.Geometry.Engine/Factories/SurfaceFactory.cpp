@@ -106,10 +106,11 @@ namespace Xbim
 			Handle(Geom_Plane) SurfaceFactory::BuildPlane(IIfcPlane^ ifcPlane)
 			{
 				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcPlane->Position->Location);
-				gp_Vec normal;
-				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
-					throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
-				Handle(Geom_Plane) plane = OccHandle().BuildPlane(origin, normal);
+				gp_Vec normal = gp::DZ(); //default to (0,0,1)
+				if (ifcPlane->Position->Axis != nullptr)
+					if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
+						throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
+				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal);
 				if (plane.IsNull())
 					throw RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
 				return plane;
@@ -324,11 +325,37 @@ namespace Xbim
 			}
 			Handle(Geom_CylindricalSurface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
+				if (ifcCylindricalSurface->Radius <= 0)
+					throw RaiseGeometryFactoryException("Radius for surface must be > 0", ifcCylindricalSurface);
 				gp_Ax2 ax2;
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcCylindricalSurface->Position, ax2))
 					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcCylindricalSurface);
 				gp_Ax3 ax3(ax2);
 				return new Geom_CylindricalSurface(ax3, ifcCylindricalSurface->Radius);
+			}
+
+			Handle(Geom_SphericalSurface) SurfaceFactory::BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface)
+			{
+				if (ifcSphericalSurface->Radius <= 0)
+					throw RaiseGeometryFactoryException("Radius for surface must be > 0", ifcSphericalSurface);
+				gp_Ax2 ax2;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcSphericalSurface->Position, ax2))
+					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcSphericalSurface);
+				gp_Ax3 ax3(ax2);
+				return new Geom_SphericalSurface(ax3, ifcSphericalSurface->Radius);
+			}
+
+			Handle(Geom_ToroidalSurface) SurfaceFactory::BuildToroidalSurface(IIfcToroidalSurface^ ifcToroidalSurface)
+			{
+				if (ifcToroidalSurface->MajorRadius < 0 || ifcToroidalSurface->MinorRadius < 0)
+					throw RaiseGeometryFactoryException("Radius for surface must be >= 0", ifcToroidalSurface);
+				if (ifcToroidalSurface->MinorRadius.Equals(0))
+					throw RaiseGeometryFactoryException("Circle Radius for surface must be > 0", ifcToroidalSurface);
+				gp_Ax2 ax2;
+				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcToroidalSurface->Position, ax2))
+					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcToroidalSurface);
+				gp_Ax3 ax3(ax2);
+				return new Geom_ToroidalSurface(ax3, ifcToroidalSurface->MajorRadius, ifcToroidalSurface->MinorRadius);
 			}
 
 #pragma endregion

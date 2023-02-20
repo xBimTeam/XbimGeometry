@@ -77,7 +77,7 @@ namespace Xbim
 
 			bool GeometryFactory::BuildDirection3d(double x, double y, double z, gp_Vec& vec)
 			{
-				return OccHandle().BuildDirection3d(x, y, z, vec);
+				return EXEC_NATIVE->BuildDirection3d(x, y, z, vec);
 			};
 
 			gp_Pnt GeometryFactory::BuildPoint3d(IIfcCartesianPoint^ ifcPoint)
@@ -109,15 +109,15 @@ namespace Xbim
 			bool GeometryFactory::BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir2d)
 			{
 				if ((int)ifcDir->Dim != 2) return false;
-				return OccHandle().BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], dir2d);
+				return EXEC_NATIVE->BuildDirection2d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], dir2d);
 			}
-
 
 
 
 			bool GeometryFactory::BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& dir)
 			{
-				return OccHandle().BuildDirection3d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], ifcDir->DirectionRatios[2], dir);
+
+				return EXEC_NATIVE->BuildDirection3d(ifcDir->DirectionRatios[0], ifcDir->DirectionRatios[1], ifcDir->DirectionRatios[2], dir);
 			}
 
 			bool GeometryFactory::BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec)
@@ -170,7 +170,7 @@ namespace Xbim
 			{
 				if (axis2->Axis == nullptr || axis2->RefDirection == nullptr) //both have to be given if one is null use the defaults
 				{
-					if (OccHandle().BuildAxis2Placement3d(BuildPoint3d(axis2->Location), gp::DZ(), gp::DX(), ax2))
+					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), gp::DZ(), gp::DX(), ax2))
 						return true;
 				}
 				else
@@ -179,7 +179,7 @@ namespace Xbim
 					gp_Vec refDir;
 					if (!BuildDirection3d(axis2->Axis, axis)) return false;
 					if (!BuildDirection3d(axis2->RefDirection, refDir)) return false;
-					if (OccHandle().BuildAxis2Placement3d(BuildPoint3d(axis2->Location), axis, refDir, ax2))
+					if (EXEC_NATIVE->BuildAxis2Placement3d(BuildPoint3d(axis2->Location), axis, refDir, ax2))
 						return true;
 				}
 				return false;
@@ -193,13 +193,13 @@ namespace Xbim
 					return false;
 				if (axis2d->RefDirection == nullptr) //both have to be given if one is null use the defaults
 				{
-					return OccHandle().BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
+					return EXEC_NATIVE->BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
 				}
 				else
 				{
 					gp_Vec2d refDir;
 					if (!BuildDirection2d(axis2d->RefDirection, refDir)) return false;
-					return OccHandle().BuildAxis2Placement2d(loc, refDir, ax22);
+					return EXEC_NATIVE->BuildAxis2Placement2d(loc, refDir, ax22);
 				}
 			}
 
@@ -278,7 +278,7 @@ namespace Xbim
 				gp_XY xDir(1, 0);
 				if (axis2D->RefDirection != nullptr)
 					xDir = gp_XY(axis2D->RefDirection->DirectionRatios[0], axis2D->RefDirection->DirectionRatios[1]);
-				return OccHandle().ToLocation(pnt2d, xDir, location);
+				return EXEC_NATIVE->ToLocation(pnt2d, xDir, location);
 			}
 
 			bool GeometryFactory::ToLocation(IIfcAxis2Placement3D^ axis3D, TopLoc_Location& location)
@@ -316,6 +316,15 @@ namespace Xbim
 					m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ);
 				return trsf;
 			}
+			gp_Trsf GeometryFactory::BuildTransform(IIfcAxis2Placement^ axis2Placement)
+			{
+				gp_Ax2 ax2 = BuildAxis2Placement(axis2Placement);
+				gp_Trsf trsf;
+				trsf.SetTransformation(gp_Ax3(ax2)), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
+				return trsf;
+			}
+
+
 			bool GeometryFactory::IsFacingAwayFrom(IXFace^ face, IXDirection^ direction)
 			{
 				if (direction->IsNull) return false;
@@ -410,12 +419,12 @@ namespace Xbim
 
 				if (axis3d != nullptr)
 				{
-					gp_Ax2 ax3d;
-					if (!BuildAxis2Placement3d(axis3d, ax3d))
+					gp_Ax2 ax2;
+					if (!BuildAxis2Placement3d(axis3d, ax2))
 						throw RaiseGeometryFactoryException("Error building axis", axis2);
 					gp_Trsf transform;
-					gp_Ax3 ax(ax3d);
-					transform.SetTransformation(ax);
+					gp_Ax3 ax3(ax2);
+					transform.SetTransformation(ax3, gp_Ax3());
 					return transform;
 				}
 				auto axis2d = dynamic_cast<IIfcAxis2Placement2D^>(axis2);
@@ -426,9 +435,8 @@ namespace Xbim
 						throw RaiseGeometryFactoryException("Error building axis", axis2);
 					gp_Trsf transform;
 					gp_Pnt2d p2d = ax2d.Location();
-					//gp_Dir2d d2d= ax2d.
-					gp_Ax3 ax(gp_Pnt(p2d.X(), p2d.Y(), 0.), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0.));
-					transform.SetTransformation(ax);
+					gp_Ax3 ax3(gp_Pnt(p2d.X(), p2d.Y(), 0.), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0.));
+					transform.SetTransformation(ax3, gp_Ax3());
 					return transform;
 				}
 				throw RaiseGeometryFactoryException("Unsupported axis placement type", axis2);

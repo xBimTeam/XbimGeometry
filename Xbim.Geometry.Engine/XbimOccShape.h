@@ -4,6 +4,7 @@
 #include <BRepBuilderAPI_Copy.hxx>
 #include <OSD_Timer.hxx>
 #include "XbimGeometryObject.h"
+
 using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;

@@ -2,8 +2,10 @@
 #include "WireFactory.h"
 #include "ProfileFactory.h"
 #include "ShellFactory.h"
+#include "SurfaceFactory.h"
 #include "GeometryFactory.h"
 #include "EdgeFactory.h"
+#include "BooleanFactory.h"
 #include <gp_Ax2.hxx>
 #include <BRepCheck_Shell.hxx>
 #include <ShapeFix_Shell.hxx>
@@ -19,6 +21,11 @@
 #include "../BRep/XFace.h"
 #include "CheckClosedStatus.h"
 #include "../XbimSolid.h"
+#include <GeomLib.hxx>
+#include <BRepPrimAPI_MakeHalfSpace.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+#include <BRepPrimAPI_MakePrism.hxx>
+#include <BRepAlgoAPI_Common.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 
@@ -30,14 +37,14 @@ namespace Xbim
 		{
 			bool SolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 			{
-				return OccHandle().TryUpgrade(solid, shape);
+				return EXEC_NATIVE->TryUpgrade(solid, shape);
 			}
 
 			IXShape^ SolidFactory::Convert(System::String^ brepStr)
 			{
 				return SHAPE_FACTORY->Convert(brepStr);
 			}
-			
+
 
 			IXShape^ SolidFactory::Build(IIfcFacetedBrep^ ifcBrep)
 			{
@@ -58,6 +65,109 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Failure building IfcCsgPrimitive3D", ifcCsgPrimitive);
 				return gcnew XSolid(topoSolid);
 			}
+
+			IXSolid^ SolidFactory::Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid)
+			{
+				throw gcnew System::NotImplementedException();
+				// TODO: insert return statement here
+			}
+
+			TopoDS_Solid SolidFactory::BuildHalfSpace(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid)
+			{
+				//if (dynamic_cast<IIfcBoxedHalfSpace^>(ifcHalfSpaceSolid)) SRL treat as normal half space solid, the boxed bit is only for computational efficiency		
+
+				auto elementarySurface = dynamic_cast<IIfcElementarySurface^>(ifcHalfSpaceSolid->BaseSurface);
+				if (elementarySurface == nullptr)
+					throw RaiseGeometryFactoryException("Informal proposition. Only IfcElementarySurfaces are supported for IfcHalfSpaceSolids", ifcHalfSpaceSolid);
+				XSurfaceType surfaceType;
+				Handle(Geom_Surface) baseSurface = SURFACE_FACTORY->BuildSurface(ifcHalfSpaceSolid->BaseSurface, surfaceType);
+
+				auto planarSurface = dynamic_cast<IIfcPlane^>(elementarySurface);
+				auto cylindricalSurface = dynamic_cast<IIfcCylindricalSurface^>(elementarySurface);
+				auto sphericalSurface = dynamic_cast<IIfcSphericalSurface^>(elementarySurface);
+				auto toroidalSurface = dynamic_cast<IIfcToroidalSurface^>(elementarySurface);
+				auto polygonalBoundedHalfSpace = dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(ifcHalfSpaceSolid);
+
+				TopoDS_Face face;
+				gp_Pnt pointInMaterial;
+				if (planarSurface != nullptr)
+				{
+					Handle(Geom_Plane) plane = SURFACE_FACTORY->BuildPlane(planarSurface);
+					gp_Vec normalDir = plane->Axis().Direction();
+					if (ifcHalfSpaceSolid->AgreementFlag) normalDir.Reverse();
+					pointInMaterial = plane->Location().Translated(normalDir * _modelService->OneMeter);
+					face = BRepBuilderAPI_MakeFace(plane, _modelService->Precision);
+				}
+				else if (cylindricalSurface != nullptr)
+				{
+					auto surface = SURFACE_FACTORY->BuildCylindricalSurface(cylindricalSurface);
+					gp_Dir normalDir = surface->Axis().Direction(); //oriented towards the outside of the cylinder
+					pointInMaterial = surface->Location(); //location of cylinder is always in the material
+					if (ifcHalfSpaceSolid->AgreementFlag) //the material is outside the cylinder
+					{
+						normalDir.Reverse();
+						gp_Vec displace = normalDir;
+						displace *= cylindricalSurface->Radius * 2;
+						pointInMaterial = surface->Location().Translated(displace);
+					}
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
+
+				}
+				else if (sphericalSurface != nullptr)
+				{
+					auto surface = SURFACE_FACTORY->BuildSphericalSurface(sphericalSurface);
+					gp_Dir normalDir = surface->Axis().Direction(); //oriented away from the centre
+					pointInMaterial = surface->Location(); //location of sphere is always in the material
+					if (ifcHalfSpaceSolid->AgreementFlag)
+					{
+						normalDir.Reverse();
+						gp_Vec displace = normalDir;
+						displace *= sphericalSurface->Radius * 2;
+						pointInMaterial = surface->Location().Translated(displace);
+					}
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
+				}
+				else if (toroidalSurface != nullptr)
+				{
+					//SRL further work is needed here but no evidence of toroidal surfaces has been found in ifc files yet, so prioritising other actions
+					throw RaiseGeometryFactoryException("IfcToroidalSurface for HalfSpace is not currently supported", ifcHalfSpaceSolid);
+				}
+				BRepPrimAPI_MakeHalfSpace hasMaker(face, pointInMaterial);
+				if (!hasMaker.IsDone())
+					throw RaiseGeometryFactoryException("Failure building IfcHalfSpaceSolid", ifcHalfSpaceSolid);
+				auto halfSpace = hasMaker.Solid();
+				if (polygonalBoundedHalfSpace != nullptr)
+				{
+					if (2 != (int)polygonalBoundedHalfSpace->PolygonalBoundary->Dim)
+						throw RaiseGeometryFactoryException("IfcPolygonalBoundedHalfSpace must have a 2D polygonal boundary", ifcHalfSpaceSolid);
+					if (planarSurface == nullptr)
+						throw RaiseGeometryFactoryException("IfcPolygonalBoundedHalfSpace must have a planar surface", ifcHalfSpaceSolid);
+					auto wire = WIRE_FACTORY->BuildWire(polygonalBoundedHalfSpace->PolygonalBoundary, false); //it will have a 2d bound
+					if(wire.IsNull())
+						throw RaiseGeometryFactoryException("IfcPolygonalBoundedHalfSpace polygonal boundary could not be built", ifcHalfSpaceSolid);
+					auto face = FACE_FACTORY->EXEC_NATIVE->BuildProfileDef(gp_Pln(), wire);
+					TopLoc_Location location;
+					if (polygonalBoundedHalfSpace->Position != nullptr)
+						location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(polygonalBoundedHalfSpace->Position);
+					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(face, gp_Vec(0, 0, 1e1));
+					gp_Trsf shift;
+					shift.SetTranslation(gp_Vec(0, 0, -1e1 / 2));
+					substractionBody.Move(shift);
+					substractionBody.Move(location);
+					bool hasWarnings;
+					TopoDS_Shape shape = BOOLEAN_FACTORY->EXEC_NATIVE->Intersect( halfSpace,substractionBody, ModelGeometryService->MinimumGap,hasWarnings);
+					if (hasWarnings)
+						LogWarning(polygonalBoundedHalfSpace, "Warnings generated building half space solid. See logs");
+					halfSpace = EXEC_NATIVE->CastToSolid(shape);
+					if (halfSpace.IsNull())
+						throw RaiseGeometryFactoryException("Failure building IfcPolygonBoundedHalfSpaceSolid", polygonalBoundedHalfSpace);
+					else
+						return halfSpace;
+				}
+				return halfSpace;
+			}
+
+
 
 			IXShape^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
 			{
@@ -126,8 +236,8 @@ namespace Xbim
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSolid);
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
-				
-				
+
+
 				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSolid->Radius, innerRadius);
 				return solid;
 
@@ -144,20 +254,24 @@ namespace Xbim
 				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(extrudedSolid->SweptArea); //if this fails it will throw an exception
 				if (sweptArea.IsNull())
 					throw RaiseGeometryFactoryException("Extruded Solid Swept area could not be built", extrudedSolid->SweptArea);
-				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth);
+				TopLoc_Location location;
+				if (extrudedSolid->Position != nullptr)
+					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(extrudedSolid->Position);
+				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth, location);
 				if (solid.IsNull() || solid.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Extruded Solid could not be built", extrudedSolid);
+				
 				return solid;
 			}
 
 			TopoDS_Solid SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
 			{
 				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell =  SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isCheckedClosed); //throws exeptions
-				return OccHandle().MakeSolid(shell);
+				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isCheckedClosed); //throws exeptions
+				return EXEC_NATIVE->MakeSolid(shell);
 			}
 
-			
+
 			/// <summary>
 			/// FC4 CHANGE  The entity has been deprecated and shall not be used. The entity IfcFacetedBrep shall be used instead. Implemented for backward compatibility
 			/// </summary>
@@ -178,7 +292,7 @@ namespace Xbim
 					switch (isCheckedClosed)
 					{
 					case CheckAndClosed:
-						builder.Add(compound, OccHandle().MakeSolid(shell));
+						builder.Add(compound, EXEC_NATIVE->MakeSolid(shell));
 						break;
 					case CheckedNotClosed:		//Nb 	IfcFaceBasedSurfaceModel do not require to be made of solids or add up to a solid		
 					case NotChecked:
@@ -235,15 +349,15 @@ namespace Xbim
 			{
 				CheckClosedStatus isCheckedClosed;
 				TopoDS_Shell shell = SHELL_FACTORY->BuildPolygonalFaceSet(ifcPolygonalFaceSet, isCheckedClosed);
-				return OccHandle().MakeSolid(shell);
+				return EXEC_NATIVE->MakeSolid(shell);
 			}
 			;
 
 			TopoDS_Solid SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
 			{
 				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell =   SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isCheckedClosed);
-				return OccHandle().MakeSolid(shell);
+				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isCheckedClosed);
+				return EXEC_NATIVE->MakeSolid(shell);
 			}
 
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
@@ -284,7 +398,7 @@ namespace Xbim
 					break;
 				}
 				throw RaiseGeometryFactoryException("Not implemented. CsgPrimitive3D type", ifcCsgPrimitive3D);
-				
+
 			}
 
 			TopoDS_Solid SolidFactory::BuildBlock(IIfcBlock^ ifcBlock)
@@ -294,7 +408,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg block has invalid axis placement", ifcBlock->Position);
 				if (ifcBlock->XLength <= 0 || ifcBlock->YLength <= 0 || ifcBlock->ZLength <= 0)
 					throw RaiseGeometryFactoryException("Csg block is a solid with zero volume", ifcBlock);
-				return OccHandle().BuildBlock(ax2, ifcBlock->XLength, ifcBlock->YLength, ifcBlock->ZLength);
+				return EXEC_NATIVE->BuildBlock(ax2, ifcBlock->XLength, ifcBlock->YLength, ifcBlock->ZLength);
 
 			}
 
@@ -305,7 +419,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg rectangle pyramid has invalid axis placement", ifcRectangularPyramid->Position);
 				if (ifcRectangularPyramid->XLength <= 0 || ifcRectangularPyramid->YLength <= 0 || ifcRectangularPyramid->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg Rectangular Pyramid is a solid with zero volume", ifcRectangularPyramid);
-				return OccHandle().BuildRectangularPyramid(ax2, ifcRectangularPyramid->XLength, ifcRectangularPyramid->YLength, ifcRectangularPyramid->Height);
+				return EXEC_NATIVE->BuildRectangularPyramid(ax2, ifcRectangularPyramid->XLength, ifcRectangularPyramid->YLength, ifcRectangularPyramid->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildRightCircularCone(IIfcRightCircularCone^ ifcRightCircularCone)
@@ -315,7 +429,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg circular cone has invalid axis placement", ifcRightCircularCone->Position);
 				if (ifcRightCircularCone->BottomRadius <= 0 || ifcRightCircularCone->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg RightCircularCone is a solid with zero volume");
-				return OccHandle().BuildRightCircularCone(ax2, ifcRightCircularCone->BottomRadius, ifcRightCircularCone->Height);
+				return EXEC_NATIVE->BuildRightCircularCone(ax2, ifcRightCircularCone->BottomRadius, ifcRightCircularCone->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder))
@@ -325,7 +439,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg circular cylinder has invalid axis placement", ifcRightCircularCylinder->Position);
 				if (ifcRightCircularCylinder->Radius <= 0 || ifcRightCircularCylinder->Height <= 0)
 					throw RaiseGeometryFactoryException("Csg RightCircularCylinder is a solid with zero volume");
-				return OccHandle().BuildRightCylinder(ax2, ifcRightCircularCylinder->Radius, ifcRightCircularCylinder->Height);
+				return EXEC_NATIVE->BuildRightCylinder(ax2, ifcRightCircularCylinder->Radius, ifcRightCircularCylinder->Height);
 			}
 
 			TopoDS_Solid SolidFactory::BuildSphere(IIfcSphere^ ifcSphere)
@@ -335,7 +449,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg sphere has invalid axis placement", ifcSphere->Position);
 				if (ifcSphere->Radius <= 0)
 					throw RaiseGeometryFactoryException("Csg Sphere is a solid with zero volume", ifcSphere);
-				return OccHandle().BuildSphere(ax2, ifcSphere->Radius);
+				return EXEC_NATIVE->BuildSphere(ax2, ifcSphere->Radius);
 			}
 
 		}

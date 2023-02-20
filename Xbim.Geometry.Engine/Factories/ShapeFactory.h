@@ -19,13 +19,15 @@ namespace Xbim
 			{
 			private:				
 				TopoDS_Shape Transform(TopoDS_Shape& shape, XbimMatrix3D matrix);
+
+				
 				
 			public:
 				ShapeFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NShapeFactory(modelService->Timeout)) {}
 
 				
 				TopoDS_Shape NUnifyDomain(const TopoDS_Shape& toFix);
-				
+				TopoDS_Shape BuildClosedShell(IIfcClosedShell^ closedShell);
 
 				static IXShape^ GetXbimShape(const TopoDS_Shape& shape);
 

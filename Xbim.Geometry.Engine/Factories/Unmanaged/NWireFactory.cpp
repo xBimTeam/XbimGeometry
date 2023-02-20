@@ -101,13 +101,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TopTools_SequenceOfShape& edgeList)
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance)
+TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance, bool& hasInfo)
 {
 	//we need to ensure that no points are technically duplicate, i.e. < tolerance of the model apart
 	//the method of removing duplicates that are tolerance away from each other is flawed when the polyline is used
 	//in a shared vertex context such as a brep definition, using cell filters and controlling precision is better
 	try
 	{
+		hasInfo = false;
 		int id = 0;
 		NCollection_Vector<KeyedPnt2d> pointSeq;
 		for (auto&& point : points)
@@ -130,10 +131,10 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 
 		TopTools_SequenceOfShape vertices;
 		int pCount = pointSeq.Size();
-		for (auto& it = pointSeq.cbegin(); it != pointSeq.cend(); ++it)
+		for (auto&& keyedPnt : pointSeq)
 		{
 			pCount--;
-			gp_XY pnt = it->myPnt2d;
+			gp_XY pnt = keyedPnt.myPnt2d;
 			gp_XY pMin = gp_XY(pnt.X() - tolerance, pnt.Y() - tolerance);
 			gp_XY pMax = gp_XY(pnt.X() + tolerance, pnt.Y() + tolerance);
 			anInspector.SetPoint(pnt);
@@ -142,16 +143,16 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 
 			if (aResID <= 0) //its not in the vertex content we need to create it
 			{
-				BRepMesh_Vertex keyedVertex(pnt, it->myID, BRepMesh_DegreeOfFreedom::BRepMesh_OnCurve);
+				BRepMesh_Vertex keyedVertex(pnt, keyedPnt.myID, BRepMesh_DegreeOfFreedom::BRepMesh_OnCurve);
 				myLastId = anInspector.Add(keyedVertex);
 				theCells.Add(myLastId, pMin, pMax);
-				vertices.Append(it->CreateTopoVertex());
+				vertices.Append(keyedPnt.CreateTopoVertex());
 			}
 			else //we have a coincidental vertex from the context
 			{
 				//adjust its tolerance and position so that the shared vertex is a surrogate for both regardless 
-				const BRepMesh_Vertex& keyedPnt = anInspector.GetVertex(aResID);
-				gp_XY foundPoint = keyedPnt.Coord();
+				const BRepMesh_Vertex& meshVert = anInspector.GetVertex(aResID);
+				gp_XY foundPoint = meshVert.Coord();
 				gp_Vec2d vecBetween(foundPoint, pnt); //vector between the found point and the inspected point
 				gp_Vec2d displacement = vecBetween.Divided(2);//get the vector to move to a point half way between the two
 				foundPoint.Add(displacement.XY());
@@ -163,8 +164,9 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 				if (myLastId == aResID) //its the same as the previous point, just ignore and carry on
 				{
 					char message[128];
-					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", it->myID, keyedPnt.Location3d());
+					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", keyedPnt.myID, meshVert.Location3d());
 					pLoggingService->LogInformation(message);
+					hasInfo = true;
 					continue;
 				}
 				else if (pCount != 0) //we are adding a point we already have connnected and we are not on the last point
@@ -172,6 +174,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 					if (!warnedOfSelfIntersection)
 					{
 						pLoggingService->LogInformation("Self intersecting polyline");
+						hasInfo = true;
 						warnedOfSelfIntersection = true; //just do it once
 					}
 
@@ -185,10 +188,14 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 		int desiredPointCount = pointSeq.Length();
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
+		{
 			pLoggingService->LogInformation("Duplicate points removed from polyline");
+			hasInfo = true;
+		}
 		if (actualPointCount < 2)
 		{
 			pLoggingService->LogInformation("Polyline must have at least 2 vertices");
+			hasInfo = true;
 			return TopoDS_Wire();
 		}
 
@@ -218,9 +225,9 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 //creates polyline removes  segments if they are >= tolerance in length, nb this method does not check for intersecting or notched lines
 TopoDS_Wire NWireFactory::BuildPolyline3d(
 	const TColgp_Array1OfPnt& points,
-	double tolerance)
+	double tolerance, bool& hasInfo)
 {
-
+	hasInfo = false;
 	try
 	{
 		BRep_Builder builder;
@@ -248,6 +255,7 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 				char message[128];
 				sprintf_s(message, 128, "Polyline point ignored: (%f,%f,%f) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
 				pLoggingService->LogInformation(message);
+				hasInfo = true;
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two
 				gp_Pnt startTranslated = start.Translated(displacement);

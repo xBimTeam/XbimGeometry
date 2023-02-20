@@ -39,7 +39,7 @@ namespace Xbim
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
-
+				virtual IXSolid^ Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
 
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
@@ -55,6 +55,8 @@ namespace Xbim
 				TopoDS_Solid BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder));
 				TopoDS_Solid BuildSphere(IIfcSphere^ ifcSphere);
 
+				TopoDS_Solid BuildHalfSpace(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
+				
 #pragma endregion
 
 #pragma region Swept solids

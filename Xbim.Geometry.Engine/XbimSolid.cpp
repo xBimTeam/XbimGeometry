@@ -96,6 +96,8 @@
 #include "XbimOccWriter.h"
 #include "Factories/Unmanaged/NCurveFactory.h"
 
+#include "./Factories/SolidFactory.h"
+#include "Factories/Unmanaged/NBooleanFactory.h"
 using namespace System::Linq;
 using namespace Xbim::Common;
 using namespace Xbim::Geometry::Services;
@@ -228,15 +230,6 @@ namespace Xbim
 			Init(repItem, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcPolygonalBoundedHalfSpace^ repItem, ILogger^ logger)
-		{
-			Init(repItem, logger);
-		}
-
-		XbimSolid::XbimSolid(IIfcBoxedHalfSpace^ repItem, ILogger^ logger)
-		{
-			Init(repItem, logger);
-		}
 
 		XbimSolid::XbimSolid(XbimRect3D rect3D, double tolerance, ILogger^ logger)
 		{
@@ -1266,19 +1259,19 @@ namespace Xbim
 					try
 					{
 
-					
-					BRepPrimAPI_MakePrism prism(occFace, vec);
 
-					if (prism.IsDone())
-					{
-						pSolid = new TopoDS_Solid();
-						*pSolid = TopoDS::Solid(prism.Shape());
+						BRepPrimAPI_MakePrism prism(occFace, vec);
 
-						if (repItem->Position != nullptr) //In Ifc4 this is now optional
-							pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+						if (prism.IsDone())
+						{
+							pSolid = new TopoDS_Solid();
+							*pSolid = TopoDS::Solid(prism.Shape());
 
-						return;
-					}
+							if (repItem->Position != nullptr) //In Ifc4 this is now optional
+								pSolid->Move(XbimConvert::ToLocation(repItem->Position));
+
+							return;
+						}
 					}
 					catch (const Standard_Failure& exception)
 					{
@@ -1341,39 +1334,9 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, ILogger^ logger)
 		{
-			if (dynamic_cast<IIfcPolygonalBoundedHalfSpace^>(hs))
-				Init((IIfcPolygonalBoundedHalfSpace^)hs, logger);
-			else if (dynamic_cast<IIfcBoxedHalfSpace^>(hs))
-				Init((IIfcBoxedHalfSpace^)hs, logger);
-			else //it is a simple Half space
-			{
-
-				//Handle(Geom_Surface) geomSurface = ActiveModelGeometryService(hs)->GetSurfaceFactory()->BuildOccSurface(hs->BaseSurface);
-				////XbimFace^ face = gcnew XbimFace(surface, logger);
-				//Handle(Geom_RectangularTrimmedSurface) geomTrim(new  Geom_RectangularTrimmedSurface(geomSurface, def->U1, def->U2, def->V1, def->V2));
-
-				IIfcSurface^ surface = (IIfcSurface^)hs->BaseSurface;
-				XbimFace^ face = gcnew XbimFace(surface, logger);
-
-				BRepGProp_Face prop(face);
-				gp_Pnt c;
-				gp_Vec normalDir;
-				double u1, u2, v1, v2;
-				prop.Bounds(u1, u2, v1, v2);
-				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, c, normalDir);
-				if (hs->AgreementFlag)
-					normalDir.Reverse();
-
-
-
-				gp_Pnt pointInMaterial = c.Translated(normalDir * 10);
-				BRepPrimAPI_MakeHalfSpace hsMaker(face, pointInMaterial);
-				pSolid = new TopoDS_Solid();
-				*pSolid = hsMaker.Solid();
-				//half space solids are only used in booleans, set the face tolerance the millimeter precision we require for a minimum gap
-				/*ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(hs)->MinimumGap);*/
-			}
+			auto solid = XbimConvert::ModelGeometryService(hs)->GetSolidFactory()->BuildHalfSpace(hs); //throws an exception on failure
+			pSolid = new TopoDS_Solid();
+			*pSolid = solid;
 		}
 
 		void XbimSolid::Init(XbimRect3D rect3D, double tolerance, ILogger^ /*logger*/)
@@ -1387,80 +1350,6 @@ namespace Xbim
 			tolFixer.LimitTolerance(*pSolid, tolerance);
 		}
 
-		void XbimSolid::Init(IIfcBoxedHalfSpace^ bhs, ILogger^ logger)
-		{
-			IIfcSurface^ surface = (IIfcSurface^)bhs->BaseSurface;
-			if (!dynamic_cast<IIfcPlane^>(surface))
-			{
-				XbimGeometryCreator::LogWarning(logger, bhs, "Non-Planar half spaces are not supported. It has been ignored");
-				return;
-			}
-			IIfcPlane^ ifcPlane = (IIfcPlane^)surface;
-
-			Init(bhs->Enclosure, logger);
-			if (bhs->AgreementFlag)
-				Translate(XbimVector3D(0, 0, -bhs->Enclosure->ZDim));
-			Move(ifcPlane->Position);
-			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(bhs)->MinimumGap);
-		}
-
-		void XbimSolid::Init(IIfcPolygonalBoundedHalfSpace^ pbhs, ILogger^ logger)
-		{
-
-			//build the half space
-			IIfcPlane^ surface = dynamic_cast<IIfcPlane^>(pbhs->BaseSurface);
-			if (surface == nullptr)
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal bounded of half space must have a planar surface. It has been ignored");
-				return;
-			}
-			//get the surface of the half space
-			gp_Ax3 ax3 = XbimConvert::ToAx3(surface->Position);
-			gp_Pln pln(ax3);
-
-			//build the substraction body
-			gp_Dir dir(pbhs->Position->P[2].X, pbhs->Position->P[2].Y, pbhs->Position->P[2].Z);
-			XbimWire^ polyBoundary = gcnew XbimWire(pbhs->PolygonalBoundary, logger);
-
-			if (!polyBoundary->IsValid)
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is invalid or empty. It has been ignored");
-				return;
-			}
-
-			//just simple check to see if the wire is sensible
-			XbimVector3D normal = polyBoundary->Normal;
-			if (normal.IsInvalid()) //check we have a valid wire
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "Polygonal boundary of half space is not an area. It has been ignored");
-				return;
-			}
-			ShapeFix_ShapeTolerance tolFixer;
-			tolFixer.LimitTolerance(polyBoundary, XbimConvert::ModelGeometryService(pbhs)->MinimumGap);
-			// we have to use 1e8 as the max extrusion as the common boolean op times out on values greater than this, probably an extrema issue in booleans
-			TopoDS_Shape substractionBody = BRepPrimAPI_MakePrism(BRepBuilderAPI_MakeFace(polyBoundary), gp_Vec(0, 0, 1e8));
-			//find point inside the material
-			gp_Pnt pnt = pln.Location().Translated(pbhs->AgreementFlag ? -pln.Axis().Direction() : pln.Axis().Direction());
-
-			TopoDS_Shape halfspace = BRepPrimAPI_MakeHalfSpace(BRepBuilderAPI_MakeFace(pln), pnt).Solid();
-			gp_Trsf location = XbimConvert::ToTransform(pbhs->Position);
-			gp_Trsf shift;
-			shift.SetTranslation(gp_Vec(0, 0, -1e8 / 2));
-			substractionBody.Move(location * shift);
-			TopoDS_Shape bounded_halfspace = BRepAlgoAPI_Common(substractionBody, halfspace);
-
-			TopTools_IndexedMapOfShape map;
-			TopExp::MapShapes(bounded_halfspace, TopAbs_SOLID, map);
-			if (map.Extent() != 1)
-			{
-				XbimGeometryCreator::LogWarning(logger, pbhs, "A single solid should be created for a Polygonal boundary of half space. It has been ignored");
-				return;
-			}
-			pSolid = new TopoDS_Solid();
-			*pSolid = TopoDS::Solid(map(1));
-			tolFixer.LimitTolerance(*pSolid, XbimConvert::ModelGeometryService(pbhs)->MinimumGap);
-		}
 
 		// params depend on segment type
 		double XbimSolid::SegLength(IIfcCompositeCurveSegment^ segment, ILogger^ logger)
@@ -1539,7 +1428,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcPolyline^>(repItem->Directrix)) //need right corner mode
 				transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
 
-			System::String^ err = BuildSweptDiskSolid(repItem,sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., logger);
+			System::String^ err = BuildSweptDiskSolid(repItem, sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., logger);
 			if (err != nullptr)
 			{
 				if (pSolid == nullptr || pSolid->IsNull()) //nothing done at all
@@ -1591,14 +1480,14 @@ namespace Xbim
 						haveFirstEdge = true;
 						curve->D1(0, startPoint, dirAtStart);
 					}
-					
+
 				}
 
 				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //lines sweep better with right corner sweeping
 				if (numPeriodics > 0)
 				{
 					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed; //curves only sweep if we use a transform
-					if(hasConsecutiveNonPeriodics) //this cannot be correctly swept as a pipe with contant radius
+					if (hasConsecutiveNonPeriodics) //this cannot be correctly swept as a pipe with contant radius
 						XbimGeometryCreator::LogWarning(logger, repItem, "Detected incorrect definition of directrix for IfcSweptDiskSolid. The swept disk will be an incorrect shape");
 				}
 
@@ -2207,8 +2096,19 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^ logger)
 		{
-			XbimSolidSet^ thisSolidSet = gcnew XbimSolidSet(this);
-			return thisSolidSet->Cut(gcnew XbimSolidSet(toCut), tolerance, logger);
+			//there is no access to modelservice here as we have no ifc entities
+			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
+			NBooleanFactory booleanFactory;
+			LoggingService^ loggingService = gcnew LoggingService(logger);
+			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+			TopoDS_Solid right = static_cast<XbimSolid^>(toCut);
+			TopoDS_Solid left = *pSolid;
+			bool hasWarnings;
+			TopoDS_Shape resultShape = booleanFactory.Cut(left, right, tolerance, hasWarnings);
+			if (hasWarnings)
+				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity cut operation has generated warnings. See logs");
+			return gcnew XbimSolidSet(resultShape);
+
 		}
 
 		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolidSet^ toIntersect, double tolerance, ILogger^ logger)
@@ -2219,31 +2119,20 @@ namespace Xbim
 			return thisSolidSet->Intersection(toIntersect, tolerance, logger);
 		}
 
-		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double /*tolerance*/, ILogger^ logger)
+		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double tolerance, ILogger^ logger)
 		{
-			if (!IsValid || !toIntersect->IsValid) return XbimSolidSet::Empty;
-			XbimSolid^ solidIntersect = dynamic_cast<XbimSolid^>(toIntersect);
-			if (solidIntersect == nullptr)
-			{
-				XbimGeometryCreator::LogWarning(logger, toIntersect, "Invalid operation. Only solid shapes can be intersected with another solid");
-				return gcnew XbimSolidSet(this); // the result would be no change so return this			
-			}
-			/*ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(solidIntersect, tolerance);
-			fixTol.SetTolerance(this, tolerance);*/
-			System::String^ err = "";
-			try
-			{
-				BRepAlgoAPI_Common boolOp(this, solidIntersect);
-				if (boolOp.HasErrors() == Standard_False)
-					return gcnew XbimSolidSet(boolOp.Shape());
-			}
-			catch (const std::exception& exc)
-			{
-				err = gcnew System::String(exc.what());
-			}
-			XbimGeometryCreator::LogWarning(logger, toIntersect, "Intersect operation failed,{0}", err);
-			return XbimSolidSet::Empty;
+			//there is no access to modelservice here as we have no ifc entities
+			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
+			NBooleanFactory booleanFactory;
+			LoggingService^ loggingService = gcnew LoggingService(logger);
+			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+			TopoDS_Solid right = static_cast<XbimSolid^>(toIntersect);
+			TopoDS_Solid left = *pSolid;
+			bool hasWarnings;
+			TopoDS_Shape resultShape = booleanFactory.Intersect(left, right, tolerance, hasWarnings);
+			if (hasWarnings)
+				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity intersect operation has generated warnings. See logs");
+			return gcnew XbimSolidSet(resultShape);
 		}
 
 		IXbimSolidSet^ XbimSolid::Union(IXbimSolidSet^ toUnion, double tolerance, ILogger^ logger)
@@ -2254,35 +2143,20 @@ namespace Xbim
 			return thisSolidSet->Union(toUnion, tolerance, logger);
 		}
 
-		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double /*tolerance*/, ILogger^ logger)
+		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double tolerance, ILogger^ logger)
 		{
-			if (!IsValid || !toUnion->IsValid) return XbimSolidSet::Empty;
-			XbimSolid^ solidUnion = dynamic_cast<XbimSolid^>(toUnion);
-			if (solidUnion == nullptr)
-			{
-
-
-				XbimGeometryCreator::LogWarning(logger, toUnion, "Invalid operation. Only solid shapes can be unioned with another solid");
-				return gcnew XbimSolidSet(this); // the result would be no change so return this
-			}
-
-
-			/*ShapeFix_ShapeTolerance fixTol;
-			fixTol.SetTolerance(solidUnion, tolerance);
-			fixTol.SetTolerance(this, tolerance);*/
-			System::String^ err = "";
-			try
-			{
-				BRepAlgoAPI_Fuse boolOp(this, solidUnion);
-				if (boolOp.HasErrors() == Standard_False)
-					return gcnew XbimSolidSet(boolOp.Shape());
-			}
-			catch (const std::exception& exc)
-			{
-				err = gcnew System::String(exc.what());
-			}
-			XbimGeometryCreator::LogWarning(logger, toUnion, "Boolean Union operation failed, {0}", err);
-			return XbimSolidSet::Empty;
+			//there is no access to modelservice here as we have no ifc entities
+			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
+			NBooleanFactory booleanFactory;
+			LoggingService^ loggingService = gcnew LoggingService(logger);
+			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+			TopoDS_Solid right = static_cast<XbimSolid^>(toUnion);
+			TopoDS_Solid left = *pSolid;
+			bool hasWarnings;
+			TopoDS_Shape resultShape = booleanFactory.Union(left, right, tolerance, hasWarnings);
+			if (hasWarnings)
+				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity union operation has generated warnings. See logs");
+			return gcnew XbimSolidSet(resultShape);
 		}
 
 

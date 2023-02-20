@@ -1,4 +1,5 @@
 #pragma once
+
 #include <TopoDS_Solid.hxx>
 
 #include "XbimOccShape.h"
@@ -11,6 +12,9 @@ using namespace System::IO;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
+
+
+
 namespace Xbim
 {
 	namespace Geometry
@@ -55,10 +59,7 @@ namespace Xbim
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
 			void Init(IIfcBoundingBox^ solid, ILogger^ logger);
 			void Init(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
-			void Init(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
-			void Init(IIfcPolygonalBoundedHalfSpace^ solid, ILogger^ logger);
-
-
+			
 
 			void Init(XbimRect3D rect3D, double tolerance, ILogger^ logger);
 
@@ -131,8 +132,7 @@ namespace Xbim
 			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
 
 			XbimSolid(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
-			XbimSolid(IIfcBoxedHalfSpace^ solid, ILogger^ logger);
-			XbimSolid(IIfcPolygonalBoundedHalfSpace^ solid, ILogger^ logger);
+			
 			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
 			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger); //support for composite profiles
 			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger);

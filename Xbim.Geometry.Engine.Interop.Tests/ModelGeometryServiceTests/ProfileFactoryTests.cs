@@ -80,20 +80,20 @@ namespace Xbim.Geometry.NetCore.Tests
             else
                 innerRadius = 0;
             face.Area.Should().BeApproximately((Math.PI * Math.Pow(outerRadius, 2) - (Math.PI * Math.Pow(innerRadius, 2))), 1e-9);
-
-            var wire = profileFactory.BuildWire(circleHollowProfileDef);
-            var edge = profileFactory.BuildEdge(circleHollowProfileDef);
-            var curve = profileFactory.BuildCurve(circleHollowProfileDef);
+            //wires, edges and curves cannot be built out of multiple wires
+            Assert.Throws<XbimGeometryFactoryException>(() => profileFactory.BuildWire(circleHollowProfileDef));
+            Assert.Throws<XbimGeometryFactoryException>(() => profileFactory.BuildEdge(circleHollowProfileDef));
+            Assert.Throws<XbimGeometryFactoryException>(() => profileFactory.BuildCurve(circleHollowProfileDef));
         }
 
         [Theory]
-        [InlineData(500, 20,90, 15707.96327)]
+        [InlineData(500, 20, 90, 15707.96327)]
         [InlineData(500, 20, 180, 31415.92654)]
         [InlineData(500, 20, 359, 62657.32015)]
         [InlineData(500, 20, 360, 62831.85307)]
         public void Can_build_centre_line_profile_def(double radius, double thickness, double paramEnd, double area)
         {
-            var centreLine =IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcCircle2dMock(radius: radius),0, paramEnd);
+            var centreLine = IfcMoq.IfcTrimmedCurve2dMock(IfcMoq.IfcCircle2dMock(radius: radius), 0, paramEnd);
             var profile = IfcMoq.IfcCenterLineProfileDefMock(centreLine, thickness);
             var profileFactory = _modelSvc.ProfileFactory;
             if (paramEnd == 360) //expect an exception to be thrown, the centre line must not be closed
@@ -108,7 +108,7 @@ namespace Xbim.Geometry.NetCore.Tests
                 var edge = profileFactory.BuildEdge(profile);
                 var curve = profileFactory.BuildCurve(profile);
             }
-            
+
 
         }
 

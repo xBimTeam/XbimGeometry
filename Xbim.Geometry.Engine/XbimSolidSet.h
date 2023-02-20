@@ -80,6 +80,7 @@ namespace Xbim
 			XbimSolidSet(IXModelGeometryService^ modelService);
 			IXCompound^ ToXCompound();
 			XbimSolidSet(const TopoDS_Shape& shape);
+			void InitSolidsFromShape(const TopoDS_Shape& shape);
 			XbimSolidSet(XbimCompound^ shape);
 			XbimSolidSet(IXbimSolid^ solid);
 			XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids);

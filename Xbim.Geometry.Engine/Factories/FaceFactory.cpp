@@ -55,7 +55,7 @@ namespace Xbim
 				IXWire^ outerWire;
 				for each (IXWire ^ wire in wires)
 				{
-					double absArea = std::abs(wire->Area);
+					double absArea = std::abs(wire->ContourArea);
 					if (absArea > maxArea)
 					{
 						maxArea = absArea;
@@ -80,8 +80,7 @@ namespace Xbim
 				return gcnew XFace(result);
 			}
 
-
-
+			
 
 			TopoDS_Face FaceFactory::BuildFaceSurface(IIfcFaceSurface^ faceSurface, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices)
 			{
@@ -89,13 +88,16 @@ namespace Xbim
 				//workaround for badly defined linear extrusions in old Revit files
 				IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(faceSurface->FaceSurface);
 				bool buildRuledSurface = (solExtrusion != nullptr);
-
+				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(faceSurface->FaceSurface)!=nullptr;
 				TopoDS_Wire outerLoop;
 				TopTools_SequenceOfShape  innerLoops;
 				XSurfaceType surfaceType;
 				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(faceSurface->FaceSurface, surfaceType); //throws exception
-				if (!faceSurface->SameSense)
-					surface->UReverse();
+				
+				if (!faceSurface->SameSense && !isBspline)
+				{
+					surface->UReverse();					
+				}
 				for each (IIfcFaceBound ^ ifcBound in faceSurface->Bounds) //build all the loops
 				{
 					TopTools_SequenceOfShape loopEdges;
@@ -166,8 +168,8 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Face has no outer bound", faceSurface);//no bounded face
 				TopoDS_Face face = BuildFace(surface, outerLoop, innerLoops); //throws exception
 				//System::String^ brep = _modelService->GetBrep(face);
-				//if (!faceSurface->SameSense)
-				//	face.Reverse();
+				if (!faceSurface->SameSense && isBspline)
+					face.Reverse();
 				//brep = _modelService->GetBrep(face);
 		
  				

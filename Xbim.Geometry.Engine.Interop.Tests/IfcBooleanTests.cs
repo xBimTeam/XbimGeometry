@@ -120,7 +120,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
         [Fact]
-        //[Ignore("The test was formally passing, but returning the wrong geometry in the previous release, it needs to be investigated, but it's not a regression.")]
+        
         public void Batched_boolean_cuts_return_the_same_result_as_multiple_cuts_faster()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(memory_hungry_boolean3)))
@@ -173,18 +173,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     var left = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(82), _logger);
                     var right = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(91), _logger);
-                    var boolRes81 = left.Cut(right, geomEngine.ModelService.MinimumGap);
+                    var boolRes81 = left.Cut(right, geomEngine.ModelService.MinimumGap, _logger);
                     var hs100 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(100), _logger);
-                    var boolRes80 = boolRes81.Cut(hs100, geomEngine.ModelService.MinimumGap);
+                    var boolRes80 = boolRes81.Cut(hs100, geomEngine.ModelService.MinimumGap, _logger);
                     var hs104 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(104), _logger);
-                    var boolRes79 = boolRes80.Cut(hs104, geomEngine.ModelService.MinimumGap);
+                    var boolRes79 = boolRes80.Cut(hs104, geomEngine.ModelService.MinimumGap, _logger);
                     var solid11 = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(11), _logger);
-                    var boolRes10 = solid11.Union(boolRes79, geomEngine.ModelService.MinimumGap);
+                    var boolRes10 = solid11.Union(boolRes79, geomEngine.ModelService.MinimumGap, _logger);
                     var solid110 = geomEngine.CreateSolid(er.Instance<IIfcExtrudedAreaSolid>(110), _logger);
-                    var boolRes9 = boolRes10.Cut(solid110, geomEngine.ModelService.MinimumGap);
+                    var boolRes9 = boolRes10.Cut(solid110, geomEngine.ModelService.MinimumGap, _logger);
 
                     var hs116 = geomEngine.CreateSolid(er.Instance<IIfcHalfSpaceSolid>(116), _logger);
-                    var boolRes8 = boolRes9.Cut(hs116, geomEngine.ModelService.MinimumGap);
+                    var boolRes8 = boolRes9.Cut(hs116, geomEngine.ModelService.MinimumGap, _logger);
 
 
                     return boolRes8;
@@ -202,7 +202,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var batchedCutTime = sw.Elapsed;
 
                 batchedCutTime.Should().BeLessThan(singleCutsTime);
-                singleCutsResult.FirstOrDefault().Volume.Should().Be(batchedCutResult.FirstOrDefault().Volume);
+                singleCutsResult.FirstOrDefault().Volume.Should().BeApproximately(batchedCutResult.FirstOrDefault().Volume, 1e-5);
             }
         }
         [Fact]
@@ -541,9 +541,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 er.Entity.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
+                //var shape = geomEngine.ModelService.BooleanFactory.Build(er.Entity);
                 var solids = geomEngine.CreateSolidSet(er.Entity, _logger);
                 solids.Count.Should().Be(1);
-                solids.First().Volume.Should().BeApproximately(105040748.40623935, 1e-5);
+                solids.First().Volume.Should().BeApproximately(105040743.60717809, 1e-5);
                 HelperFunctions.IsValidSolid(solids.FirstOrDefault());
 
             }
@@ -787,7 +788,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test)))
             {
                 er.Entity.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);                
                 var solids = geomEngine.CreateSolidSet(er.Entity, _logger);
                 solids.Count.Should().Be(1);
             }
@@ -1022,6 +1023,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solidResult.Faces.Count.Should().Be(8, "This solid should have 8 faces");
             }
         }
+
+        /// <summary>
+        /// Test has a box completely on the non-material side of a half space, this will return a valid but empty shape from the boolean
+        /// </summary>
         [Fact]
         public void EmptyBooleanClippingResultTest()
         {

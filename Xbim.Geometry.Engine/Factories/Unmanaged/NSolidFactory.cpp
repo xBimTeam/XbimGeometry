@@ -474,14 +474,18 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 	return TopoDS_Solid();
 }
 
-TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth)
+TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth, const TopLoc_Location& location)
 {
 	try
 	{
 		gp_Vec extrusionVec(extrudeDirection);
 		extrusionVec.Multiply(depth);
 		BRepPrimAPI_MakePrism prismMaker(face, extrusionVec);
-		return TopoDS::Solid(prismMaker.Shape());
+		if (!prismMaker.IsDone()) Standard_Failure::Raise("Error extruding prism");
+		TopoDS_Solid extrusion = TopoDS::Solid(prismMaker.Shape());
+		if (!location.IsIdentity())
+			extrusion.Move(location);
+		return extrusion;
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -505,4 +509,33 @@ TopoDS_Solid NSolidFactory::MakeSolid(const TopoDS_Shell& shell)
 	//resultSolid.Checked(true);
 	resultSolid.Closed(true);
 	return resultSolid;
+}
+
+TopoDS_Solid NSolidFactory::CastToSolid(const TopoDS_Shape& shape)
+{
+	try 
+	{
+		return TopoDS::Solid(shape);
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	pLoggingService->LogError("Could not cast to Solid");
+	return TopoDS_Solid();
+}
+
+TopoDS_Solid NSolidFactory::MakeSweptSolid(const TopoDS_Face& face, const gp_Vec& direction)
+{
+	try
+	{
+		BRepPrimAPI_MakePrism prismMaker(face, direction);
+		return TopoDS::Solid(prismMaker.Shape()); //this will throw exceptions if it fails which will be caught and reported
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	pLoggingService->LogError("Could not build ExtrudedAreaSolid");
+	return TopoDS_Solid();
 }

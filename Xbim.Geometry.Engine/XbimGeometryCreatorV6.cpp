@@ -1,4 +1,5 @@
 #include "XbimGeometryCreatorV6.h"
+#include "./Factories//ShapeFactory.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
 #include "XbimSolid.h"
@@ -11,6 +12,7 @@
 #include "./Factories/SolidFactory.h"
 #include "./Factories/FaceFactory.h"
 #include "./Factories/WireFactory.h"
+#include "./Factories/BooleanFactory.h"
 #include <BRep_Builder.hxx>
 #include <Geom_Plane.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
@@ -641,9 +643,10 @@ namespace Xbim
 			return gcnew XbimSolidSet(ifcSurface, Logger());
 		}
 
-		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanResult^ boolOp, ILogger^)
+		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanResult^ boolRes, ILogger^)
 		{
-			return gcnew XbimSolidSet(boolOp, Logger());
+			const TopoDS_Shape& shape = GetBooleanFactory()->BuildBooleanResult(boolRes);
+			return gcnew XbimSolidSet(shape);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanOperand^ IIfcSolid, ILogger^)
@@ -676,7 +679,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrep^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetSolidFactory()->BuildFacetedBrep(IIfcSolid));
+			return gcnew XbimSolidSet(GetShapeFactory()->BuildClosedShell(IIfcSolid->Outer));
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrepWithVoids^ IIfcSolid, ILogger^)
