@@ -41,11 +41,7 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve)
-		{
-			this->pCurve = new Handle(Geom_Curve);
-			*pCurve = curve;
-		}
+		
 
 		XbimRect3D XbimCurve::BoundingBox::get()
 		{
@@ -242,7 +238,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
-				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
+				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger, _modelServices);
 				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
 				{
 					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
@@ -739,7 +735,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
 		{
-			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger);
+			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger, _modelServices);
 			if (c2d->IsValid)
 			{
 				pCurve = new Handle(Geom_Curve)();
@@ -754,7 +750,7 @@ namespace Xbim
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
 				projector.Init(face->GetSurface(), XbimConvert::ModelGeometryService(curve)->MinimumGap);
-				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger, _modelServices);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;
