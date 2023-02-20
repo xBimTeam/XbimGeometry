@@ -11,13 +11,13 @@ using Xunit;
 
 namespace Xbim.Geometry.NetCore.Tests
 {
-    
 
+    [Trait("Category", "ExcludeFromCI")]
     public class StorageServiceTests
     {
         #region Setup
-        //const string SkipOrNot = null; // Run all tests
-        const string SkipOrNot = "BrepDocumentManager cannot be run in the unit test domain"; // Skip all tests
+        const string SkipOrNot = null; // Run all tests
+        //const string SkipOrNot = "BrepDocumentManager cannot be run in the unit test domain"; // Skip all tests
 
         private readonly IXBRepDocumentManager _brepDocumentManager;
         private readonly IXbimGeometryServicesFactory factory;
@@ -34,7 +34,8 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #endregion
 
-       
+
+        
         [Fact(Skip = SkipOrNot)]
         public void Can_Create_Coloured_Shapes_Document()
         {
