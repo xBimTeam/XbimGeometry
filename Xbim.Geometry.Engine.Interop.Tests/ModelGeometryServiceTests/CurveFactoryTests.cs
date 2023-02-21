@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
@@ -16,13 +17,14 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #region Setup
 
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        readonly ILoggerFactory loggerFactory;
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
         private readonly IXbimGeometryServicesFactory factory;
 
-        public CurveFactoryTests(IXbimGeometryServicesFactory factory)
+        public CurveFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
+            this.loggerFactory = loggerFactory;
             this.factory = factory;
             _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
         }
@@ -142,11 +144,10 @@ namespace Xbim.Geometry.NetCore.Tests
         [InlineData(10, true, true)]
         public void Can_convert_ifc_circle_2d(double radius, bool location3d = false, bool checkException = false)
         {
-           
             var ifcCircle = IfcMoq.IfcCircle2dMock(radius: radius, location: location3d ? IfcMoq.IfcAxis2Placement3DMock() : null);
             var curveFactory = _modelSvc.CurveFactory;
             if (checkException)
-                ifcCircle.Invoking(c => curveFactory.Build(c)).Should().Throw<Exception>();
+                ifcCircle.Invoking(c => curveFactory.Build(c)).Should().Throw<XbimGeometryFactoryException>();
             else
             {
                 var circle = curveFactory.Build(ifcCircle);
