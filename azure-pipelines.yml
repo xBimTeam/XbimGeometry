@@ -144,13 +144,13 @@ jobs:
     inputs:
       testSelector: 'testAssemblies'
       testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
-      testFiltercriteria: Category!=ExcludeFromCI
       searchFolder: '$(System.DefaultWorkingDirectory)'
-      # runSettingsFile: 'test.runsettings'
+      testFiltercriteria: 'Category!=ExcludeFromCI'
       vsTestVersion: 'toolsInstaller'
       codeCoverageEnabled: false
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
+      rerunFailedTests: true
   
   - task: PublishSymbols@1
     displayName: 'Publish symbols path: '
