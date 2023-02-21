@@ -161,11 +161,22 @@ namespace Xbim
 					{
 						geomExcept->Data->Add("IfcEntityId", entity->EntityLabel);
 						geomExcept->Data->Add("IfcEntityType", entity->GetType()->Name);
-						System::String^ formattedMessage = "#{EntityId}={EntityType}: " + message;
-						LoggerExtensions::LogWarning(LoggingService->Logger, geomExcept, formattedMessage, entity->EntityLabel, entity->GetType()->Name);
+						/* We're using the XbimGeometryFactoryException.Data Dictionary as a convenient contained of the State for a Logger scope, so
+						we can log the inner exception rather than the generic wrapper exception. Provides the same context and more detail on the original fault. */
+						System::IDisposable^ scope = nullptr;
+						try
+						{
+							scope = LoggingService->Logger->BeginScope(geomExcept->Data);
+							LoggerExtensions::LogWarning(LoggingService->Logger, innerException, message);
+						}
+						finally
+						{
+							if (scope != nullptr)
+								delete scope;
+						}
 					}
 					else
-						LoggerExtensions::LogWarning(LoggingService->Logger, geomExcept, message);
+						LoggerExtensions::LogWarning(LoggingService->Logger, innerException, message);
 					return geomExcept;
 				}
 				virtual void LogError(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Error, nullptr, nullptr, format, args); };
