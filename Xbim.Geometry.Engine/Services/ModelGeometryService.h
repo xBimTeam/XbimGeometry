@@ -201,6 +201,9 @@ namespace Xbim
 
 				void Log(LogLevel logLevel, System::Exception^ exception, IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args)
 				{
+					if (!LoggingService->Logger->IsEnabled(logLevel))
+						return;
+
 					System::String^ message = System::String::Format(format, args);
 
 					if (ifcEntity != nullptr)

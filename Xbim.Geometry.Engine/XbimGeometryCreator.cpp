@@ -94,11 +94,13 @@ namespace Xbim
 		XbimGeometryCreator::XbimGeometryCreator(IModel^ model, ILoggerFactory^ loggerFactory)
 		{
 			_logger = LoggerFactoryExtensions::CreateLogger<XbimGeometryCreator^>(loggerFactory);
+			
 			Dictionary<System::String^, System::Object^>^ scope = gcnew Dictionary<System::String^, System::Object^>();
 			scope->Add("OriginatingSystem", model->Header->FileName->OriginatingSystem);
 			scope->Add("CreatedBy", model->Header->CreatingApplication);
 			scope->Add("IfcVersion", model->Header->SchemaVersion);
-			_logger->BeginScope(scope);
+			_loggerScope = _logger->BeginScope(scope);
+			
 			_modelService = gcnew ModelGeometryService(model, loggerFactory);
 			Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::AddTagValue(model, "ModelGeometryService", _modelService);
 		}
@@ -107,63 +109,61 @@ namespace Xbim
 
 		void XbimGeometryCreator::LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			System::String^ msg = System::String::Format(format, arg);
-			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
-
-
-			if (ifcEntity != nullptr)
-				LoggerExtensions::LogInformation(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
-			else
-				if (entity == nullptr)
-					LoggerExtensions::LogInformation(logger, "GeomEngine: [{0}]", msg);
-				else
-					LoggerExtensions::LogInformation(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
-
+			Log(logger, LogLevel::Information, entity, format, arg);
 		}
 
 		void XbimGeometryCreator::LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			System::String^ msg = System::String::Format(format, arg);
-			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
-
-			if (ifcEntity != nullptr)
-				LoggerExtensions::LogWarning(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
-			else
-				if (entity == nullptr)
-					LoggerExtensions::LogWarning(logger, "GeomEngine: [{0}]", msg);
-				else
-					LoggerExtensions::LogWarning(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+			Log(logger, LogLevel::Warning, entity, format, arg);
 
 		}
 
 		void XbimGeometryCreator::LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			System::String^ msg = System::String::Format(format, arg);
-			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
-
-			if (ifcEntity != nullptr)
-				LoggerExtensions::LogDebug(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
-			else
-				if (entity == nullptr)
-					LoggerExtensions::LogDebug(logger, "GeomEngine: [{0}]", msg);
-				else
-					LoggerExtensions::LogDebug(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+			Log(logger, LogLevel::Debug, entity, format, arg);
 		}
 
 		void XbimGeometryCreator::LogError(ILogger^ logger, Object^ entity, System::String^ format, ...array<Object^>^ arg)
 		{
-			System::String^ msg = System::String::Format(format, arg);
-			IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
-
-			if (ifcEntity != nullptr)
-				LoggerExtensions::LogError(logger, "GeomEngine: #{0}={1} [{2}]", ifcEntity->EntityLabel, ifcEntity->GetType()->Name, msg);
-			else
-				if (entity == nullptr)
-					LoggerExtensions::LogError(logger, "GeomEngine: [{0}]", msg);
-				else
-					LoggerExtensions::LogError(logger, "GeomEngine: {0} [{1}]", entity->GetType()->Name, msg);
+			Log(logger, LogLevel::Error, entity, format, arg);
 
 		}
+
+		void XbimGeometryCreator::Log(ILogger^ logger, LogLevel logLevel, Object^ entity, System::String^ format, ...array<Object^>^ args)
+		{
+			if (!logger->IsEnabled(logLevel))
+				return;
+
+			
+			if (entity == nullptr)
+			{
+				LoggerExtensions::Log(logger, logLevel, "GeomEngine: - " + format, args);
+			}
+			else
+			{
+				IPersistEntity^ ifcEntity = dynamic_cast<IPersistEntity^>(entity);
+
+				Dictionary<System::String^, System::Object^>^ scope = gcnew Dictionary<System::String^, System::Object^>();
+
+				if (ifcEntity != nullptr)
+				{
+					scope->Add("ifcEntityLabel", ifcEntity->EntityLabel);
+				}
+				scope->Add("ifcType", entity->GetType()->Name);
+
+				System::IDisposable^ logScope = logger->BeginScope(scope);
+				try
+				{
+					LoggerExtensions::Log(logger, logLevel, "GeomEngine: - " + format, args);
+				}
+				finally
+				{
+					if (logScope != nullptr)
+						delete logScope;
+				}
+			}
+		}
+
 #pragma warning( pop)
 
 #pragma region  Creation
@@ -339,15 +339,15 @@ namespace Xbim
 			catch (const Standard_Failure& exc)
 			{
 				System::String^ err = gcnew System::String(exc.GetMessageString());
-				LogError(_logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
+				LogError(_logger, geomRep, "Error creating geometry #{ifcEntityLabel} representation of type {ifcType}, {occError}", geomRep->GetType()->Name, err, geomRep->EntityLabel);
 				return XbimGeometryObjectSet::Empty;
 			}
 			//catch ()
 			catch (...)
 			{
-				throw gcnew System::Exception(System::String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
+				throw gcnew System::Exception(System::String::Format("General Error Creating {ifcType}, #{ifcEntityLabel}", geomRep->GetType()->Name, geomRep->EntityLabel));
 			}
-			LogError(_logger, geomRep, "Geometry Representation of Type {0} is not implemented", geomRep->GetType()->Name);
+			LogError(_logger, geomRep, "Geometry Representation of Type {ifcType} is not implemented", geomRep->GetType()->Name);
 			return XbimGeometryObjectSet::Empty;
 		}
 
@@ -1307,12 +1307,12 @@ namespace Xbim
 					System::String^ err = gcnew System::String(sf.GetMessageString());
 
 					failedGridLines = true;
-					LogWarning(_logger, grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
+					LogWarning(_logger, grid, "Grid axis #{ifcEntityLabel} caused exception. Status={geomStatus}, {occError}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
 					failedGridLines = true;
 				}
 				catch (...)
 				{
-					LogWarning(_logger, grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
+					LogWarning(_logger, grid, "Grid axis #{ifcEntityLabel} caused internal exception. Status={geomStatus}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
 					failedGridLines = true;
 				}
 

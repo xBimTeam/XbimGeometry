@@ -847,7 +847,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-                (logger ?? _logger).LogError("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
+                (logger ?? _logger).LogError("EE001: Failed to create geometry #{ifcEntityLabel} of type {ifcType}, {error}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
 

@@ -492,7 +492,7 @@ namespace Xbim
 			//	{
 			//		startPar = startParam.Value;
 			//		endPar = cc.LastParameter();
-			//		XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {0}", directrix->Model->Header->FileName->OriginatingSystem);
+			//		XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {originatingSystem}", directrix->Model->Header->FileName->OriginatingSystem);
 			//	}
 			//	else
 			//	{

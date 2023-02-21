@@ -532,7 +532,7 @@ namespace Xbim
 				theSolid = gcnew XbimSolid(solidmaker.Solid());
 			}
 			else
-				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as outer shell is not a solid #{0} is not a solid.", brepWithVoids->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as outer shell is not a solid #{ifcEntityLabel} is not a solid.", brepWithVoids->EntityLabel);
 
 			BRepBuilderAPI_MakeSolid builder(theSolid);
 			for each (IIfcClosedShell ^ IIfcVoidShell in brepWithVoids->Voids)
@@ -540,7 +540,7 @@ namespace Xbim
 				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell, logger);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as the void #{ifcEntityLabel} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -558,14 +558,14 @@ namespace Xbim
 			XbimCompound^ shapes = gcnew XbimCompound(brepWithVoids->Outer, logger);
 			XbimShell^ outerShell = (XbimShell^)shapes->MakeShell();
 			if (!outerShell->IsClosed) //we have a shell that is not able to be made in to a solid
-				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Can cut voids properly as the bounding shell #{0} is not a solid.", brepWithVoids->Outer->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as the bounding shell #{ifcEntityLabel} is not a solid.", brepWithVoids->Outer->EntityLabel);
 			BRepBuilderAPI_MakeSolid builder(outerShell);
 			for each (IIfcClosedShell ^ IIfcVoidShell in brepWithVoids->Voids)
 			{
 				XbimCompound^ voidShapes = gcnew XbimCompound(IIfcVoidShell, logger);
 				XbimShell^ voidShell = (XbimShell^)voidShapes->MakeShell();
 				if (!voidShell->IsClosed) //we have a shell that is not able to be made in to a solid
-					XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Can cut voids properly as the void #{0} is not a solid.", IIfcVoidShell->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as the void #{ifcEntityLabel} is not a solid.", IIfcVoidShell->EntityLabel);
 				builder.Add(voidShell);
 			}
 			if (builder.IsDone())
@@ -723,7 +723,7 @@ namespace Xbim
 				TopTools_DataMapOfIntegerShape edgeCurves;
 				TopTools_DataMapOfIntegerShape vertexGeometries;
 
-				//XbimGeometryCreator::LogTrace(logger, aFace, "Enumerating {0} faces for IfcAdvancedBrep", Enumerable::Count(faces));
+				//XbimGeometryCreator::LogTrace(logger, aFace, "Enumerating {facecount} faces for IfcAdvancedBrep", Enumerable::Count(faces));
 
 				for each (IIfcFace ^ unloadedFace in  faces)
 				{
@@ -741,7 +741,7 @@ namespace Xbim
 					XbimFace^ xAdvancedFace = gcnew XbimFace(advancedFace->FaceSurface, logger);
 					if (!xAdvancedFace->IsValid)
 					{
-						XbimGeometryCreator::LogWarning(logger, advancedFace->FaceSurface, "Failed to create face surface #{0}", advancedFace->FaceSurface->EntityLabel);
+						XbimGeometryCreator::LogWarning(logger, advancedFace->FaceSurface, "Failed to create face surface #{ifcEntityLabel}", advancedFace->FaceSurface->EntityLabel);
 						continue;
 					}
 					topoAdvancedFace = xAdvancedFace;
@@ -793,7 +793,7 @@ namespace Xbim
 									XbimCurve^ curve = gcnew XbimCurve(edgeCurve->EdgeGeometry, logger);
 									if (!curve->IsValid)
 									{
-										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0} with zero length. It has been ignored", edgeCurve->EntityLabel);
+										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel} with zero length. It has been ignored", edgeCurve->EntityLabel);
 										continue;
 									}
 									Handle(Geom_Curve) sharedEdgeGeom = curve;
@@ -814,13 +814,13 @@ namespace Xbim
 
 										if (!foundP1) //assume before the start of the curve
 										{
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
+											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{ifcEntityLabel}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
 											trimParam1 = sharedEdgeGeom->FirstParameter();
 											trim1Tolerance = _sewingTolerance;
 										}
 										if (!foundP2) //assume before the start of the curve
 										{
-											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{0}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
+											XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to project vertex to edge geometry: #{ifcEntityLabel}, start point assumed", edgeCurve->EdgeGeometry->EntityLabel);
 											trimParam2 = sharedEdgeGeom->LastParameter();
 											trim2Tolerance = _sewingTolerance;
 										}
@@ -840,25 +840,25 @@ namespace Xbim
 											{
 
 											case BRepBuilderAPI_PointProjectionFailed:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointProjectionFailed", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_PointProjectionFailed", edgeCurve->EntityLabel);
 												break;
 											case BRepBuilderAPI_ParameterOutOfRange:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_ParameterOutOfRange", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_ParameterOutOfRange", edgeCurve->EntityLabel);
 												break;
 											case BRepBuilderAPI_DifferentPointsOnClosedCurve:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentPointsOnClosedCurve", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_DifferentPointsOnClosedCurve", edgeCurve->EntityLabel);
 												break;
 											case BRepBuilderAPI_PointWithInfiniteParameter:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_PointWithInfiniteParameter", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_PointWithInfiniteParameter", edgeCurve->EntityLabel);
 												break;
 											case BRepBuilderAPI_DifferentsPointAndParameter:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_DifferentsPointAndParameter", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_DifferentsPointAndParameter", edgeCurve->EntityLabel);
 												break;
 											case BRepBuilderAPI_LineThroughIdenticPoints:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: BRepBuilderAPI_LineThroughIdenticPoints", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: BRepBuilderAPI_LineThroughIdenticPoints", edgeCurve->EntityLabel);
 												break;
 											default:
-												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{0}: Unknown error", edgeCurve->EntityLabel);
+												XbimGeometryCreator::LogDebug(logger, edgeCurve, "Failed to create edge #{ifcEntityLabel}: Unknown error", edgeCurve->EntityLabel);
 												break;
 											}
 											continue; //carry on and try and ignore, no sensible fall back at this point
@@ -1070,7 +1070,7 @@ namespace Xbim
 								TopoDS_Wire innerWire = TopoDS::Wire(*it);
 								faceMaker.Add(innerWire);
 								if (!faceMaker.IsDone())
-									XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply inner bound to face #{0}, it has been ignored", advancedFace->EntityLabel);
+									XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply inner bound to face #{ifcEntityLabel}, it has been ignored", advancedFace->EntityLabel);
 							}
 
 							ShapeFix_Face fixFaceWire(faceMaker.Face());
@@ -1080,7 +1080,7 @@ namespace Xbim
 						catch (const Standard_Failure& sf)
 						{
 							System::String^ err = gcnew System::String(sf.GetMessageString());
-							XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply  bound to face #{0}: {1}, it has been ignored", advancedFace->EntityLabel, err);
+							XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not apply  bound to face #{ifcEntityLabel}: {occError}, it has been ignored", advancedFace->EntityLabel, err);
 						}
 					}
 

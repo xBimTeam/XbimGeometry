@@ -56,7 +56,7 @@ namespace Xbim.Geometry.Engine.Interop
                             if (lpPrec)
                             {
                                 // we apply the workaround and exit
-                                _logger.LogWarning("Added ArchicadPrecisionWorkaround for #{0}.", faceBound.Bound.EntityLabel);
+                                _logger.LogWarning("Added ArchicadPrecisionWorkaround for #{ifcEntityLabel}.", faceBound.Bound.EntityLabel);
                                 modelFactors.Precision /= 100;
                                 modelFactors.AddWorkAround(ArchicadPrecisionWorkaround);
                                 return;

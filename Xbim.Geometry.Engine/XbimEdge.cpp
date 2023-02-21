@@ -993,7 +993,7 @@ namespace Xbim
 				if (edgeErr != BRepBuilderAPI_EdgeDone)
 				{
 					System::String^ errMsg = GetBuildEdgeErrorMessage(edgeErr);
-					XbimGeometryCreator::LogWarning(logger, curve, "Could not build edge from curve, {0} .It has been ignored", errMsg);
+					XbimGeometryCreator::LogWarning(logger, curve, "Could not build edge from curve, {occError} .It has been ignored", errMsg);
 					return;
 				}
 				pEdge = new TopoDS_Edge();
@@ -1014,7 +1014,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile))
 				return Init((IIfcArbitraryOpenProfileDef^)profile, logger);
 			else
-				XbimGeometryCreator::LogError(logger, profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
+				XbimGeometryCreator::LogError(logger, profile, "Profile definition {ifcType} is not implemented", profile->GetType()->Name);
 		}
 
 		void XbimEdge::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
