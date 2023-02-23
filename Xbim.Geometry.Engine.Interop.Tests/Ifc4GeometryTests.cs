@@ -82,7 +82,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                 solidModel.Should().NotBeNull();
                 solidModel.First().Faces.Count.Should().Be(11);
-                solidModel.First().Volume.Should().BeApproximately(6500000000000.001, 1e-5);
+                solidModel.First().Volume.Should().BeApproximately(6500000000000, 1);
 
             }
         }

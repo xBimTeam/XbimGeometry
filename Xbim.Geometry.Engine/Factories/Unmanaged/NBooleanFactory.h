@@ -10,7 +10,7 @@ class NBooleanFactory : public NFactoryBase
 {
 	
 public:
-	double Timout = 20;
+	double Timout = 20; //seconds
 
 	//Union of two solids must return a solid
 	TopoDS_Shape Union(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance, bool& hasWarnings);
@@ -21,6 +21,6 @@ public:
 	static bool IsEmpty(const TopoDS_Shape& shape);
 	/*TopoDS_Shape Union(const TopTools_ListOfShape& shapes, double fuzzyTolerance);*/
 	TopoDS_Shape TrimTopology(const TopoDS_Shape& shape);
-	TopoDS_Shape PerformBoolean(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings);
+	TopoDS_Shape PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings);
 };
 

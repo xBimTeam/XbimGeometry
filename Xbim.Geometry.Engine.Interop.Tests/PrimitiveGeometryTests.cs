@@ -50,6 +50,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 geom.First().Volume.Should().BeApproximately(3232.386, 5e-3);
             }
         }
+
+        /// <summary>
+        /// This test has a blade shape solid which is defined to give a negative volume, but is corrected in V6 now and back ported to V5
+        /// </summary>
+        /// <param name="engineVersion"></param>
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
@@ -61,7 +66,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 shape.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
                 var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
-                geom.Volume.Should().BeApproximately(-136033.82966702414, 1e-5);
+                geom.Volume.Should().BeApproximately(136033.82966702414, 1e-5);
             }
         }
         [Theory]

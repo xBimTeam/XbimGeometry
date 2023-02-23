@@ -60,6 +60,7 @@ namespace Xbim
 			~XbimCompound(){ InstanceCleanup(); }
 			!XbimCompound(){ InstanceCleanup(); }
 			XbimCompound(double sewingTolerance, ModelGeometryService^ modelService);
+			XbimCompound(const TopoDS_Shape& shape,ModelGeometryService^ modelService); 
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, ModelGeometryService^ modelService);
 			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag, ModelGeometryService^ modelService);
 			XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService);

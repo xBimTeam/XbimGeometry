@@ -26,6 +26,7 @@
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepAlgoAPI_Common.hxx>
+#include <ShapeFix_Solid.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 
@@ -92,11 +93,13 @@ namespace Xbim
 				gp_Pnt pointInMaterial;
 				if (planarSurface != nullptr)
 				{
-					Handle(Geom_Plane) plane = SURFACE_FACTORY->BuildPlane(planarSurface);
+					Handle(Geom_Plane) plane = SURFACE_FACTORY->BuildPlane(planarSurface, true);
 					gp_Vec normalDir = plane->Axis().Direction();
 					if (ifcHalfSpaceSolid->AgreementFlag) normalDir.Reverse();
 					pointInMaterial = plane->Location().Translated(normalDir * _modelService->OneMeter);
-					face = BRepBuilderAPI_MakeFace(plane, _modelService->Precision);
+					//face = BRepBuilderAPI_MakeFace(plane, _modelService->MinimumGap);
+					BRep_Builder b;
+					b.MakeFace(face, plane, _modelService->MinimumGap);
 				}
 				else if (cylindricalSurface != nullptr)
 				{
@@ -110,8 +113,9 @@ namespace Xbim
 						displace *= cylindricalSurface->Radius * 2;
 						pointInMaterial = surface->Location().Translated(displace);
 					}
-					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
-
+					
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->MinimumGap);
+					
 				}
 				else if (sphericalSurface != nullptr)
 				{
@@ -125,7 +129,7 @@ namespace Xbim
 						displace *= sphericalSurface->Radius * 2;
 						pointInMaterial = surface->Location().Translated(displace);
 					}
-					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->MinimumGap);
 				}
 				else if (toroidalSurface != nullptr)
 				{
@@ -149,9 +153,9 @@ namespace Xbim
 					TopLoc_Location location;
 					if (polygonalBoundedHalfSpace->Position != nullptr)
 						location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(polygonalBoundedHalfSpace->Position);
-					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(face, gp_Vec(0, 0, 1e1));
+					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(face, gp_Vec(0, 0, 1e8));
 					gp_Trsf shift;
-					shift.SetTranslation(gp_Vec(0, 0, -1e1 / 2));
+					shift.SetTranslation(gp_Vec(0, 0, -1e8 / 2));
 					substractionBody.Move(shift);
 					substractionBody.Move(location);
 					bool hasWarnings;
@@ -232,7 +236,8 @@ namespace Xbim
 				if (ifcSolid->InnerRadius.HasValue && ifcSolid->InnerRadius.Value >= ifcSolid->Radius)
 					throw RaiseGeometryFactoryException("Inner radius is greater than outer radius", ifcSolid);
 
-				Handle(Geom_Curve) directrix = CURVE_FACTORY->BuildDirectrixCurve(ifcSolid->Directrix, ifcSolid->StartParam, ifcSolid->EndParam);
+				auto directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSolid->EndParam));
+				//auto w = (gcnew XWire(directrix))/*->BrepString()*/;
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSolid);
 				double innerRadius = ifcSolid->InnerRadius.HasValue ? (double)ifcSolid->InnerRadius.Value : -1;
@@ -242,6 +247,8 @@ namespace Xbim
 				return solid;
 
 			}
+
+			
 
 			TopoDS_Solid SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid)
 			{
@@ -264,11 +271,11 @@ namespace Xbim
 				return solid;
 			}
 
-			TopoDS_Solid SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
+			TopoDS_Shape SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
 			{
-				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isCheckedClosed); //throws exeptions
-				return EXEC_NATIVE->MakeSolid(shell);
+				bool isFixed;
+				return SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isFixed); //throws exeptions
+				
 			}
 
 
@@ -277,87 +284,58 @@ namespace Xbim
 			/// </summary>
 			/// <param name="faceBasedSurfaceModel"></param>
 			/// <returns></returns>
-			TopoDS_Compound SolidFactory::BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel)
+			TopoDS_Shape SolidFactory::BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel)
 			{
 				TopoDS_Compound compound;
 				BRep_Builder builder;
 				builder.MakeCompound(compound);
-				ShapeFix_Shell myFixShell;
-				myFixShell.FixFaceMode() = false; //we don't want to change any faces
-				//myFixShell.FixOrientationMode() = false;
+				
 				for each (IIfcConnectedFaceSet ^ faceSet in faceBasedSurfaceModel->FbsmFaces)
 				{
-					CheckClosedStatus isCheckedClosed;
-					TopoDS_Shell shell = SHELL_FACTORY->BuildConnectedFaceSet(faceSet, isCheckedClosed);
-					switch (isCheckedClosed)
-					{
-					case CheckAndClosed:
-						builder.Add(compound, EXEC_NATIVE->MakeSolid(shell));
-						break;
-					case CheckedNotClosed:		//Nb 	IfcFaceBasedSurfaceModel do not require to be made of solids or add up to a solid		
-					case NotChecked:
-					default:
-						builder.Add(compound, shell);
-						break;
-					}
-					//BRepCheck_Shell checker(shell);
-					//BRepCheck_Status st = checker.Closed();
-					//if (st == BRepCheck_Status::BRepCheck_NoError)
-					//{
-					//	//make it a solid
-					//	TopoDS_Solid solid;
-					//	builder.MakeSolid(solid);
-					//	builder.Add(solid, shell);
-					//	solid.Checked(true);
-					//	solid.Closed(true);
-					//	builder.Add(compound, solid);
-					//}
-					//else //try and fix the shells, often there are multiple shells in one that are solid parts
-					//{
-					//	myFixShell.Init(TopoDS::Shell(shell));
-					//	bool ok = myFixShell.Perform();
-
-					//	if (ok && myFixShell.NbShells() > 0)
-					//	{
-					//		for (TopExp_Explorer aExpSh(myFixShell.Shape(), TopAbs_SHELL); aExpSh.More(); aExpSh.Next())
-					//		{
-					//			TopoDS_Shell sh = TopoDS::Shell(aExpSh.Current());
-					//			BRepCheck_Shell checker2(sh);
-					//			BRepCheck_Status st2 = checker2.Closed();
-					//			if (st2 == BRepCheck_Status::BRepCheck_NoError)
-					//			{
-					//				//make it a solid
-					//				TopoDS_Solid solid;
-					//				builder.MakeSolid(solid);
-					//				builder.Add(solid, sh);
-					//				solid.Checked(true);
-					//				solid.Closed(true);
-					//				builder.Add(compound, solid);
-					//			}
-					//			else
-					//				builder.Add(compound, sh); //add the shell
-					//		}
-					//	}
-					//	else
-					//		builder.Add(compound, shell); //add the shell
-					//}
-
+					bool isFixed;
+					TopoDS_Shape shape = SHELL_FACTORY->BuildConnectedFaceSet(faceSet, isFixed);
+					builder.Add(compound, shape);
 				}
 				return compound;
 			}
-			TopoDS_Solid SolidFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet)
+			TopoDS_Shape SolidFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet)
 			{
-				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell = SHELL_FACTORY->BuildPolygonalFaceSet(ifcPolygonalFaceSet, isCheckedClosed);
-				return EXEC_NATIVE->MakeSolid(shell);
+				bool isFixed;
+				TopoDS_Shape shape =  SHELL_FACTORY->BuildPolygonalFaceSet(ifcPolygonalFaceSet, isFixed);
+				if (ifcPolygonalFaceSet->Closed.HasValue && ifcPolygonalFaceSet->Closed.Value)
+				{
+					ShapeFix_Solid  sfs;
+					if (shape.ShapeType() == TopAbs_COMPOUND)
+					{
+						//any shells in here will have been fixed
+						BRep_Builder b;
+						TopoDS_Compound solidCompound;
+						b.MakeCompound(solidCompound);
+
+						for (TopoDS_Iterator childIterator(shape); childIterator.More(); childIterator.Next())
+							if (childIterator.Value().ShapeType() == TopAbs_SHELL)
+								b.Add(solidCompound, sfs.SolidFromShell(TopoDS::Shell(childIterator.Value())));
+						return solidCompound;
+					}
+					else if (shape.ShapeType() == TopAbs_SHELL)//it will be a shell
+					{
+						return sfs.SolidFromShell(TopoDS::Shell(shape));
+					}
+					else
+						throw RaiseGeometryFactoryException("Failed to build closed polygonal face set", ifcPolygonalFaceSet);
+				}
+				else
+					return shape;
 			}
-			;
+			
 
 			TopoDS_Solid SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
 			{
-				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isCheckedClosed);
-				return EXEC_NATIVE->MakeSolid(shell);
+				bool isFixed;
+				TopoDS_Shape shape = SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isFixed);
+				if (shape.IsNull() || shape.ShapeType() != TopAbs_SOLID)
+					throw RaiseGeometryFactoryException("Error creating solid from advanced brep", ifcAdvancedBrep);
+				return TopoDS::Solid(shape);
 			}
 
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)

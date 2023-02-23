@@ -184,6 +184,7 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
+ 
 				auto wire = BuildProfileWire(ifcRectangleProfileDef);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcRectangleProfileDef);

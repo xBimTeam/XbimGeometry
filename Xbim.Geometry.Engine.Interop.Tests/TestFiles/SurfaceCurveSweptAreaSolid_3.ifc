@@ -24,7 +24,7 @@ DATA;
 #4= IFCORGANIZATION($,'UNKNOWN',$,$,$);
 #5= IFCORGANIZATION($,'Geometry Gym Ltd',$,$,$);
 #6= IFCAPPLICATION(#5,'0.2.4.0','ssiRhinoIFC - Geometry Gym Plug-in for Rhino3d','ssiRhinoIFC');
-#7= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#7= IFCCARTESIANPOINT((0.0,0.0));
 #8= IFCDIRECTION((1.0,0.0,0.0));
 #9= IFCDIRECTION((0.0,1.0,0.0));
 #10= IFCDIRECTION((0.0,0.0,1.0));

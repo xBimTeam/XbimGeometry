@@ -97,7 +97,8 @@
 #include "Factories/Unmanaged/NCurveFactory.h"
 
 #include "./Factories/SolidFactory.h"
-#include "Factories/Unmanaged/NBooleanFactory.h"
+#include "Factories/BooleanFactory.h"
+
 using namespace System::Linq;
 using namespace Xbim::Common;
 using namespace Xbim::Geometry::Services;
@@ -1334,7 +1335,7 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcHalfSpaceSolid^ hs, ILogger^ logger)
 		{
-			auto solid = XbimConvert::ModelGeometryService(hs)->GetSolidFactory()->BuildHalfSpace(hs); //throws an exception on failure
+			auto solid = _modelServices->GetSolidFactory()->BuildHalfSpace(hs); //throws an exception on failure
 			pSolid = new TopoDS_Solid();
 			*pSolid = solid;
 		}
@@ -1410,33 +1411,7 @@ namespace Xbim
 
 		void XbimSolid::Init(IIfcSweptDiskSolid^ repItem, ILogger^ logger)
 		{
-
-			//Build the directrix
-
-			XbimWire^ sweep = CreateDirectrix(repItem->Directrix, repItem->StartParam, repItem->EndParam, logger);
-			if (!sweep->IsValid) return;
-			BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed;
-			IIfcSweptDiskSolidPolygonal^ polygonal = dynamic_cast<IIfcSweptDiskSolidPolygonal^>(repItem);
-			if (polygonal != nullptr && polygonal->FilletRadius.HasValue) //transition model stays as transformed
-			{
-				if (!sweep->FilletAll((double)polygonal->FilletRadius.Value))
-				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Sweep could not be corectly filleted");
-					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //revert to non continuous mode
-				}
-			}
-			else if (dynamic_cast<IIfcPolyline^>(repItem->Directrix)) //need right corner mode
-				transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner;
-
-			System::String^ err = BuildSweptDiskSolid(repItem, sweep, repItem->Radius, repItem->InnerRadius.HasValue ? (double)repItem->InnerRadius.Value : -1., logger);
-			if (err != nullptr)
-			{
-				if (pSolid == nullptr || pSolid->IsNull()) //nothing done at all
-					XbimGeometryCreator::LogError(logger, repItem, "Could not construct IfcSweptDiskSolid: " + err);
-				else //partial build, most likely failed to build inner hole
-					XbimGeometryCreator::LogWarning(logger, repItem, "Could not fully construct IfcSweptDiskSolid: " + err);
-			}
-
+			pSolid = new TopoDS_Solid(_modelServices->GetSolidFactory()->BuildSweptDiskSolid(repItem));
 		}
 
 		//if inner radius is not required it has a value of -1
@@ -2096,15 +2071,11 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^ logger)
 		{
-			//there is no access to modelservice here as we have no ifc entities
-			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
-			NBooleanFactory booleanFactory;
-			LoggingService^ loggingService = gcnew LoggingService(logger);
-			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+			
 			TopoDS_Solid right = static_cast<XbimSolid^>(toCut);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;
-			TopoDS_Shape resultShape = booleanFactory.Cut(left, right, tolerance, hasWarnings);
+			TopoDS_Shape resultShape = _modelServices->GetBooleanFactory()->EXEC_NATIVE->Cut(left, right, tolerance, hasWarnings);
 			if (hasWarnings)
 				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity cut operation has generated warnings. See logs");
 			return gcnew XbimSolidSet(resultShape, _modelServices);
@@ -2121,15 +2092,11 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Intersection(IXbimSolid^ toIntersect, double tolerance, ILogger^ logger)
 		{
-			//there is no access to modelservice here as we have no ifc entities
-			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
-			NBooleanFactory booleanFactory;
-			LoggingService^ loggingService = gcnew LoggingService(logger);
-			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+
 			TopoDS_Solid right = static_cast<XbimSolid^>(toIntersect);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;
-			TopoDS_Shape resultShape = booleanFactory.Intersect(left, right, tolerance, hasWarnings);
+			TopoDS_Shape resultShape = _modelServices->GetBooleanFactory()->EXEC_NATIVE->Intersect(left, right, tolerance, hasWarnings); 
 			if (hasWarnings)
 				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity intersect operation has generated warnings. See logs");
 			return gcnew XbimSolidSet(resultShape, _modelServices);
@@ -2144,16 +2111,11 @@ namespace Xbim
 		}
 
 		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double tolerance, ILogger^ logger)
-		{
-			//there is no access to modelservice here as we have no ifc entities
-			//to avoid changing the interface for XbimSolid the native code is accessed directly as we have all the arguments required present
-			NBooleanFactory booleanFactory;
-			LoggingService^ loggingService = gcnew LoggingService(logger);
-			booleanFactory.SetLogger(static_cast<WriteLog>(loggingService->LogDelegatePtr.ToPointer()));
+		{	
 			TopoDS_Solid right = static_cast<XbimSolid^>(toUnion);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;
-			TopoDS_Shape resultShape = booleanFactory.Union(left, right, tolerance, hasWarnings);
+			TopoDS_Shape resultShape = _modelServices->GetBooleanFactory()->EXEC_NATIVE->Union(left, right, tolerance, hasWarnings);
 			if (hasWarnings)
 				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity union operation has generated warnings. See logs");
 			return gcnew XbimSolidSet(resultShape, _modelServices);

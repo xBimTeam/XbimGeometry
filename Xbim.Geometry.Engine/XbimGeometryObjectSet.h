@@ -25,6 +25,8 @@ namespace Xbim
 			List<IXbimGeometryObject^>^ geometryObjects;
 			
 			
+			void GetShapeList(TopTools_ListOfShape& shapes);
+
 			static bool ParseGeometry(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
 				TopoDS_Shell& facesToIgnore, double tolerance);
 			
@@ -36,9 +38,7 @@ namespace Xbim
 			static TopoDS_Compound CreateCompound(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects);
 		public:
 			
-			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance, ILogger^ logger, ModelGeometryService^ modelServices);
-			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, IXbimGeometryObject^ geomObject, IXbimSolidSet^ solids, double tolerance, ILogger^ logger, ModelGeometryService^ modelServices);
-
+			XbimGeometryObjectSet::XbimGeometryObjectSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
 			XbimGeometryObjectSet::XbimGeometryObjectSet(ModelGeometryService^ modelService);
 			XbimGeometryObjectSet(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ objects, ModelGeometryService^ modelService);
 			XbimGeometryObjectSet(int size, ModelGeometryService^ modelService) : XbimSetObject(modelService) {geometryObjects = gcnew List<IXbimGeometryObject^>(size);}

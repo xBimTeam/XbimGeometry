@@ -26,6 +26,7 @@
 #include <Geom2d_Line.hxx>
 #include "BRep/XShape.h"
 #include "BRep/XCompound.h"
+#include "XbimShellSet.h"
 
 using namespace Xbim::Geometry::Services;
 namespace Xbim
@@ -152,8 +153,8 @@ namespace Xbim
 					}
 					else
 					{
-						CheckClosedStatus checkClosed;
-						XbimShell^ comp = gcnew XbimShell(GetShellFactory()->BuildPolygonalFaceSet(polySet, checkClosed), this);
+						bool isFixed;
+						XbimShellSet^ comp = gcnew XbimShellSet(GetShellFactory()->BuildPolygonalFaceSet(polySet, isFixed), this);
 						if (objectLocation != nullptr) comp->Move(objectLocation);
 						return comp;
 					}
@@ -225,7 +226,7 @@ namespace Xbim
 			}
 			catch (System::Exception^ e)
 			{
-				throw RaiseGeometryServiceException("Geometry Service Error", geomRep, e);
+				throw RaiseGeometryServiceException("Error building geometry shape", geomRep, e);
 			}
 
 		}
@@ -461,12 +462,14 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 			//return gcnew XbimSolid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid));
 		};
+
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)
 		{
-			if (shell->Closed.HasValue && shell->Closed.Value)
+
+			/*if (shell->Closed.HasValue && shell->Closed.Value)
 				return gcnew XbimSolid(GetSolidFactory()->BuildPolygonalFaceSet(shell), this);
-			else
-				throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");
+			else*/
+			throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not support to create a single solid, use CreateSurfaceModel() method");
 		}
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^)
@@ -631,7 +634,7 @@ namespace Xbim
 			if (shell->Closed.HasValue && shell->Closed.Value)
 				return gcnew XbimSolidSet(shell, Logger(), this);
 			else
-					throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");
+				throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");
 		}
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcShellBasedSurfaceModel^ ifcSurface, ILogger^)
@@ -689,13 +692,12 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcClosedShell^ IIfcSolid, ILogger^)
 		{
-			CheckClosedStatus isCheckedClosed;
-			TopoDS_Shell shell = GetShellFactory()->BuildClosedShell(IIfcSolid, isCheckedClosed);
+			bool isFixed;
+			TopoDS_Shape shape = GetShellFactory()->BuildClosedShell(IIfcSolid, isFixed);
 			//for backward compatibility, a shell is just made into a solid and a warning is issued, fixed in V6
-			if (isCheckedClosed == CheckedNotClosed)
+			if (shape.IsNull() || shape.ShapeType() != TopAbs_SOLID)
 				this->LogWarning("IfcClosedShell definition has not defined a shell that is closed", IIfcSolid);
-			TopoDS_Solid solid = GetSolidFactory()->EXEC_NATIVE->MakeSolid(shell);
-			return gcnew XbimSolidSet(solid, this);
+			return gcnew XbimSolidSet(shape, this);
 		};
 
 

@@ -101,15 +101,34 @@ namespace Xbim
 				}
 
 			}
-
-
 			Handle(Geom_Plane) SurfaceFactory::BuildPlane(IIfcPlane^ ifcPlane)
+			{
+				return BuildPlane(ifcPlane, false);
+			}
+
+			Handle(Geom_Plane) SurfaceFactory::BuildPlane(IIfcPlane^ ifcPlane, bool snap)
 			{
 				gp_Pnt origin = GEOMETRY_FACTORY->BuildPoint3d(ifcPlane->Position->Location);
 				gp_Vec normal = gp::DZ(); //default to (0,0,1)
 				if (ifcPlane->Position->Axis != nullptr)
 					if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
 						throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
+				if (snap)
+				{
+					gp_Dir n = normal;
+					if (n.IsEqual(gp::DZ(), 1e-4))
+						normal = gp::DZ();
+					else if (n.IsEqual(gp::DX(), 1e-4))
+						normal = gp::DX();
+					else if (n.IsEqual(gp::DY(), 1e-4))
+						normal = gp::DY();
+					else if (n.IsEqual(-gp::DZ(), 1e-4))
+						normal = -gp::DZ();
+					else if (n.IsEqual(-gp::DX(), 1e-4))
+						normal = -gp::DX();
+					else if (n.IsEqual(-gp::DY(), 1e-4))
+						normal = -gp::DY();
+				}
 				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal);
 				if (plane.IsNull())
 					throw RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);

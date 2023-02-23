@@ -5,6 +5,7 @@
 #include "../XbimGeometryCreator.h"
 
 
+
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
 #define ActiveModelGeometryService(ifcEntity) ModelGeometryService::GetModelService(ifcEntity->Model)
@@ -42,6 +43,10 @@ namespace Xbim
 			ref class BIMAuthoringToolWorkArounds;
 			ref class MaterialFactory;
 			ref class ProjectionFactory;
+		}
+		namespace Storage
+		{
+			ref class BRepDocumentManager;
 		}
 	}
 }
@@ -85,6 +90,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ _bimAuthoringToolWorkArounds;
 				Xbim::Geometry::Factories::MaterialFactory^ _materialFactory;
 				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
+				Xbim::Geometry::Storage::BRepDocumentManager^ _bRepDocumentManager;
 			internal:
 				//Factories
 				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
@@ -103,6 +109,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ GetBimAuthoringToolWorkArounds();
 				Xbim::Geometry::Factories::MaterialFactory^ GetMaterialFactory();
 				Xbim::Geometry::Factories::ProjectionFactory^ GetProjectionFactory();
+				Xbim::Geometry::Storage::BRepDocumentManager^ GetBRepDocumentManager();
 			public:
 
 				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
@@ -148,7 +155,7 @@ namespace Xbim
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
 				virtual property IXMaterialFactory^ MaterialFactory {IXMaterialFactory^ get(); }
 				virtual property IXProjectionFactory^ ProjectionFactory {IXProjectionFactory^ get(); }
-
+				virtual property IXBRepDocumentManager^ BRepDocumentManager {IXBRepDocumentManager^ get(); }
 
 #pragma region Logging and Exceptions
 				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message) { return RaiseGeometryServiceException(message, nullptr, nullptr); };

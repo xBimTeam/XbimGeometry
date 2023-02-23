@@ -26,6 +26,7 @@ namespace Xbim
 			internal:
 				Handle(Geom_Surface) BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType);
 				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane);
+				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane, bool snap );
 				Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution);
 				Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion);
 				TopoDS_Face BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);

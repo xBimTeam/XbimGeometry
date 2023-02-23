@@ -27,6 +27,11 @@
 #include <gce_MakeLin.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <unordered_map>
+#include <BRepBuilderAPI_FindPlane.hxx>
+#include <ShapeFix_Face.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <BRepCheck_Face.hxx>
+#include <BRepCheck_Analyzer.hxx>
 struct EdgeId
 {
 public:
@@ -65,14 +70,14 @@ struct EdgeIdEqual {
 /// </summary>
 /// <param name="loops"></param>
 /// <returns></returns>
-TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, double tolerance, double oneMillimeter)
+TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, double tolerance, double minGap, bool& needsFixing)
 {
 	static int counter = 0;
-
+	needsFixing = false;
 	//coursen the tolerance as often these shapes are outputs of previous boolean operations in the BIM tool. The boolean operations in Revit are often inaccurate to up to 1 mm 
-	double tol = oneMillimeter > tolerance ? oneMillimeter : tolerance;
+	double tol = minGap > tolerance ? minGap : tolerance;
 	BRepBuilderAPI_VertexInspector inspector(tol);
-	NCollection_CellFilter<BRepBuilderAPI_VertexInspector> vertexCellFilter(2, oneMillimeter);
+	NCollection_CellFilter<BRepBuilderAPI_VertexInspector> vertexCellFilter(2, tol);
 
 	TopoDS_Shell shell;
 	BRep_Builder builder;
@@ -128,7 +133,7 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 		std::unordered_map<EdgeId, int, EdgeIdHash, EdgeIdEqual> uniqueEdges;
 		TopTools_SequenceOfShape edges;
 
-		
+
 		int faceCount = 0;
 		for (const std::vector<std::vector<int>>& face : faces)
 		{
@@ -197,16 +202,29 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 			gp_Vec wireNormal;
 			if (WireFactory.GetNormal(outerBound, wireNormal)) //no normal then unlikely to be a face, most likely co-linear edges
 			{
-				gp_Pnt baryCentre;
-				BRepFeat::Barycenter(outerBound, baryCentre);
-				Handle(Geom_Plane) plane = new Geom_Plane(baryCentre, wireNormal);
-				TopoDS_Face theFace;// = faceMaker.Face();
-				builder.MakeFace(theFace, plane, Precision::Confusion());
+				BRepBuilderAPI_FindPlane planeFinder(outerBound, tol);
+				Handle(Geom_Plane) plane;
+				TopoDS_Face theFace;
+				if (planeFinder.Found()) //the wire is planar
+				{
+					plane = planeFinder.Plane();
+					builder.MakeFace(theFace, plane, tol);
+				}
+				else //the wire is not planar and will most likely result in more than one face, this happens in some faceted models
+				{
+					gp_Pnt baryCentre;
+					BRepFeat::Barycenter(outerBound, baryCentre);
+					plane = new Geom_Plane(baryCentre, wireNormal);
+					builder.MakeFace(theFace, plane, tol);
+					needsFixing = true;
+				}
+				
 				builder.Add(theFace, outerBound);
 				gp_Vec faceNormal = FaceFactory.Normal(theFace);
 				bool isOpposite = faceNormal.IsOpposite(wireNormal, 0.1);//srl. some models are quite out of tolerance, we don't need a very precise definition of opposite ~5 degrees is fine
 				if (isOpposite)
 					theFace.Reverse(); //this should never happen
+
 				//add any inner loops
 				if (topoWires.size() > 1) //if we have any inner bounds
 				{

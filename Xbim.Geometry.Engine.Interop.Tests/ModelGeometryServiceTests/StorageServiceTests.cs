@@ -24,12 +24,13 @@ namespace Xbim.Geometry.NetCore.Tests
         static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
-        public StorageServiceTests(IXBRepDocumentManager brepDocumentManager, IXbimGeometryServicesFactory factory)
+        public StorageServiceTests(IXbimGeometryServicesFactory factory)
         {
            
-           _brepDocumentManager = brepDocumentManager;
+           
             this.factory = factory;
             _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
+            _brepDocumentManager = _modelSvc.BRepDocumentManager;
         }
 
         #endregion

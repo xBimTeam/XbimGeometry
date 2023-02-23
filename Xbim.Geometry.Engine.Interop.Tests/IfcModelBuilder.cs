@@ -217,8 +217,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public static IfcAxis2Placement2D MakeAxis2Placement2D(MemoryModel m)
         {
             var p = m.Instances.New<IfcAxis2Placement2D>();
-            p.RefDirection = m.Instances.New<IfcDirection>(d => d.SetXYZ(1, 0, 0));
-            p.Location = m.Instances.New<IfcCartesianPoint>(c => c.SetXYZ(0, 0, 0));
+            p.RefDirection = m.Instances.New<IfcDirection>(d => d.SetXY(1, 0));
+            p.Location = m.Instances.New<IfcCartesianPoint>(c => c.SetXY(0, 0));
             return p;
         }
 

@@ -140,13 +140,13 @@ namespace Xbim.Geometry.NetCore.Tests
 
             var shape = booleanFactory.Build(booleanResult);
 
-            Assert.True(shape.ShapeType == XShapeType.Compound);
-            var compound = shape as IXCompound;
+            Assert.True(shape.ShapeType == XShapeType.Solid);
+            var solid = shape as IXSolid;
 #if DEBUG
-            var def = compound.BrepString();
+            var def = solid.BrepString();
 #endif
-            Assert.True(compound.IsSolidsOnly && compound.Solids.Count() == 1); //will only be one
-            var solid = compound.Solids.First();
+            
+            
             var box = solid.Bounds();
             if (intersects)
             {
@@ -181,13 +181,12 @@ namespace Xbim.Geometry.NetCore.Tests
             else
             {
                 var shape = booleanFactory.Build(booleanResult);
-                Assert.True(shape.ShapeType == XShapeType.Compound);
-                var compound = shape as IXCompound;
+                Assert.True(shape.ShapeType == XShapeType.Solid);
+                var solid = shape as IXSolid;
 #if DEBUG
-                var def = compound.BrepString();
+                var def = solid.BrepString();
 #endif
-                Assert.True(compound.IsSolidsOnly && compound.Solids.Count() == 1); //will only be one
-                var solid = compound.Solids.First();
+                
                 var box = solid.Bounds();
                 box.LenX.Should().BeApproximately(lenX - Math.Abs(dispX), 1e-5);
             }
