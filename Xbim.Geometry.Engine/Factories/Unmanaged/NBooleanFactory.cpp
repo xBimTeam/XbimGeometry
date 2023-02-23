@@ -16,19 +16,26 @@ TopoDS_Shape NBooleanFactory::Union(const TopoDS_Shape& left, const TopoDS_Shape
 	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Union two empty solids. Result is an empty solid");
+		hasWarnings = true;
 		return TopoDS_Shape();
 	}
 	if (IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Union two solids, the right one is empty. Result is the left solid");
+		hasWarnings = true;
 		return left;
 	}
 	if (IsEmpty(left))
 	{
 		pLoggingService->LogWarning("Attempt to Union two solids, the left one is empty. Result is the right solid");
+		hasWarnings = true;
 		return right;
 	}
-	return PerformBoolean(left, right, fuzzyTolerance, BOPAlgo_FUSE, hasWarnings);
+	TopoDS_ListOfShape arguments;
+	TopoDS_ListOfShape tools;
+	arguments.Append(left);
+	tools.Append(right);
+	return PerformBoolean(arguments, tools, fuzzyTolerance, BOPAlgo_FUSE, hasWarnings);
 }
 
 
@@ -39,19 +46,26 @@ TopoDS_Shape NBooleanFactory::Cut(const TopoDS_Shape& left, const TopoDS_Shape& 
 	if (IsEmpty(left) && IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two empty solids. Result is an empty solid");
+		hasWarnings = true;
 		return TopoDS_Shape();
 	}
 	if (IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two solids, the right one is empty. Result is the left solid");
+		hasWarnings = true;
 		return left;
 	}
 	if (IsEmpty(left))
 	{
 		pLoggingService->LogWarning("Attempt to Cut two solids, the left one is empty. Result is an empty solid");
+		hasWarnings = true;
 		return TopoDS_Shape();
 	}
-	return PerformBoolean(left, right, fuzzyTolerance, BOPAlgo_CUT, hasWarnings);
+	TopoDS_ListOfShape arguments;
+	TopoDS_ListOfShape tools;
+	arguments.Append(left);
+	tools.Append(right);
+	return PerformBoolean(arguments, tools, fuzzyTolerance, BOPAlgo_CUT, hasWarnings);
 }
 
 
@@ -62,31 +76,32 @@ TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_S
 	if (IsEmpty(left) || IsEmpty(right))
 	{
 		pLoggingService->LogWarning("Attempt to Intersect one or more empty solids. Result is an empty solid");
+		hasWarnings = true;
 		return TopoDS_Shape();
 	}
-	return PerformBoolean(left, right, fuzzyTolerance, BOPAlgo_COMMON, hasWarnings);
+	TopoDS_ListOfShape arguments;
+	TopoDS_ListOfShape tools;
+	arguments.Append(left);
+	tools.Append(right);
+	return PerformBoolean(arguments, tools, fuzzyTolerance, BOPAlgo_COMMON, hasWarnings);
 }
 
-TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings)
+TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings)
 {
 	//try and operate
 	try
 	{
 		hasWarnings = false;
-		BRepAlgoAPI_BooleanOperation bop;
-		TopTools_ListOfShape arguments;
-		TopTools_ListOfShape tools;
-		arguments.Append(left);
-		tools.Append(right);
+		BRepAlgoAPI_BooleanOperation bop;	
 		bop.SetArguments(arguments);
 		bop.SetTools(tools);
 		bop.SetOperation(operation);
 		bop.SetRunParallel(false);
 		//aBOP.SetCheckInverted(true);
 		bop.SetNonDestructive(true);
-//		bop.SetFuzzyValue(fuzzyTolerance);
-		//bop.SetGlue(BOPAlgo_GlueFull);
-		bop.SimplifyResult();
+		bop.SetFuzzyValue(fuzzyTolerance);
+		//bop.SetGlue(BOPAlgo_GlueShift);
+		
 		XbimProgressMonitor pi(Timout);
 		bop.Build(pi);
 		if (bop.HasWarnings())
@@ -109,6 +124,8 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_Shape& left, const Top
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
+			
+			bop.SimplifyResult(true,true, Precision::Angular());
 			return TrimTopology(bop.Shape());
 		}
 

@@ -47,8 +47,8 @@ namespace Xbim
 			{
 				TopoDS_Shape firstSolid = BuildOperand(boolResult->FirstOperand);
 				TopoDS_Shape secondSolid = BuildOperand(boolResult->SecondOperand);
-				/*auto fstr = XShape::GetXbimShape(firstSolid)->BrepString();
-				auto sstr = XShape::GetXbimShape(secondSolid)->BrepString();*/
+				/*auto fstr = firstSolid.IsNull() ? "" : XShape::GetXbimShape(firstSolid)->BrepString();
+				auto sstr = secondSolid.IsNull() ? "" : XShape::GetXbimShape(secondSolid)->BrepString();*/
 				bool hasWarnings;
 				TopoDS_Shape result;
 				switch (boolResult->Operator)
@@ -72,7 +72,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Boolean Result returned an empty shape", boolResult);
 				else
 				{
-					/*auto resultStr = XShape::GetXbimShape(result)->BrepString();*/
+					/*auto resultStr = result.IsNull() ? "" : XShape::GetXbimShape(result)->BrepString();*/
 					return result;
 				}
 			}
@@ -95,6 +95,57 @@ namespace Xbim
 			TopoDS_Solid BooleanFactory::BuildHalfSpace(IIfcHalfSpaceSolid^ halfSpace)
 			{
 				return SOLID_FACTORY->BuildHalfSpace(halfSpace);
+			}
+
+			TopoDS_Shape BooleanFactory::Cut(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
+			{
+				return Cut(arguments, tools, ModelGeometryService->MinimumGap);
+			}
+
+			TopoDS_Shape BooleanFactory::Cut(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
+			{
+				bool hasWarnings = false;
+				TopoDS_Shape result = EXEC_NATIVE->PerformBoolean(arguments, tools, tolerance, BOPAlgo_CUT, hasWarnings);
+				if (hasWarnings)
+					LogWarning("Boolean cut operation has raised warnings. See logs");
+				if (result.IsNull())
+					throw RaiseGeometryFactoryException("Boolean intersect returned an empty result");
+				else
+					return result;
+			}
+
+			TopoDS_Shape BooleanFactory::Union(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
+			{
+				return Union(arguments, tools, ModelGeometryService->MinimumGap);
+			}
+
+			TopoDS_Shape BooleanFactory::Union(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
+			{
+				bool hasWarnings = false;
+				TopoDS_Shape result = EXEC_NATIVE->PerformBoolean(arguments, tools, tolerance, BOPAlgo_FUSE, hasWarnings);
+				if (hasWarnings)
+					LogWarning("Boolean union operation has raised warnings. See logs");
+				if (result.IsNull())
+					throw RaiseGeometryFactoryException("Boolean intersect returned an empty result");
+				else
+					return result;
+			}
+
+			TopoDS_Shape BooleanFactory::Intersect(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
+			{
+				return Intersect(arguments, tools, ModelGeometryService->MinimumGap);
+			}
+
+			TopoDS_Shape BooleanFactory::Intersect(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
+			{
+				bool hasWarnings = false;
+				TopoDS_Shape result = EXEC_NATIVE->PerformBoolean(arguments, tools, tolerance, BOPAlgo_COMMON, hasWarnings);
+				if (hasWarnings)
+					LogWarning("Boolean intersect operation has raised warnings. See logs");
+				if (result.IsNull())
+					throw RaiseGeometryFactoryException("Boolean intersect returned an empty result");
+				else
+					return result;
 			}
 
 		}

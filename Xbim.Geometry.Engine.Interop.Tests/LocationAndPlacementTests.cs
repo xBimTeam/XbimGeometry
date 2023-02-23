@@ -62,9 +62,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var tr = br.ReadShapeTriangulation();
 
                     var point = tr.Vertices.FirstOrDefault();
-                    point.X.Should().BeGreaterThan(1000);
-                    point.Y.Should().BeGreaterThan(1000);
-                    point.Z.Should().BeGreaterThan(1000);
+                    point.X.Should().BeLessThan(1000);
+                    point.Y.Should().BeLessThan(1000);
+                    point.Z.Should().BeLessThan(1000);
 
                     // when transformation is applied to the geometry it should be large
                     tr = tr.Transform(transform);

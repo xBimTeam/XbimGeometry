@@ -997,6 +997,8 @@ namespace Xbim
 					p.SetX((double)enumer->Current);
 					enumer->MoveNext();
 					p.SetY((double)enumer->Current);
+					enumer->MoveNext();
+					p.SetZ((double)enumer->Current);
 					poles.SetValue(i, p);
 					i++;
 				}

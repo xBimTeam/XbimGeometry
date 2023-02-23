@@ -1,5 +1,5 @@
 #include "BRepDocumentManager.h"
-
+#include "../Services/ModelGeometryService.h"
 #include "BRepDocument.h"
 //#include <TDocStd_Document.hxx>
 //#include <chrono>
@@ -35,6 +35,15 @@ namespace Xbim
 	{
 		namespace Storage
 		{
+			BRepDocumentManager::BRepDocumentManager(Xbim::Geometry::Services::ModelGeometryService^ modelService) :
+				XbimHandle(new Handle(FlexApp_Application)(FlexApp_Application::GetApplication())) //ensure only one application per session
+
+			{
+				_modelService = modelService;
+				_loggingService = modelService->LoggingService;
+				FlexDrivers::DefineFormat(Ref()); //initialise the application drivers
+			};
+			
 			int BRepDocumentManager::InSession(System::String^ filePath)
 			{
 				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filePath);

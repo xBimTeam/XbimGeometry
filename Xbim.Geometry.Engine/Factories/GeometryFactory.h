@@ -19,6 +19,9 @@
 #include <TopLoc_Location.hxx>
 
 #include "../BRep/XMatrix.h"
+#define NULLABLE_TO_DOUBLE(p) p.HasValue ? (double)p.Value : double::NaN
+
+
 
 using namespace Xbim::Ifc4::MeasureResource;
 using namespace Xbim::Geometry::BRep;

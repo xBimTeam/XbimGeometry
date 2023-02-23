@@ -1,4 +1,5 @@
 #include "ModelGeometryService.h"
+#include "../Storage/BRepDocumentManager.h"
 #include "../Services/LoggingService.h"
 #include <IMeshData_Status.hxx>
 #include <IMeshTools_Parameters.hxx>
@@ -20,16 +21,16 @@
 #include "../Factories/BimAuthoringToolWorkArounds.h"
 #include "../Factories/MaterialFactory.h"
 #include "../Factories/ProjectionFactory.h"
+
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Ifc4;
 
 
-using namespace System;
 using namespace Xbim::IO::Memory;
 using namespace Xbim::Geometry::Factories;
-using namespace Xbim::Geometry::Services;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -81,7 +82,7 @@ namespace Xbim
 				for each (IIfcGeometricRepresentationSubContext ^ c in Model->Instances->OfType<IIfcGeometricRepresentationSubContext^>())
 				{
 					
-					String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
+					System::String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
 
 					if (str->Contains("model") || str->Contains("body"))
 					{
@@ -93,7 +94,7 @@ namespace Xbim
 				{
 					for each (IIfcGeometricRepresentationContext ^ c in Model->Instances->OfType<IIfcGeometricRepresentationContext^>())
 					{
-						String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
+						System::String^ str = c->ContextIdentifier.ToString()->ToLower() + ":" + c->ContextType.ToString()->ToLower();
 						if (str->Contains("model") || str->Contains("body"))
 							results->Add(c);
 					}
@@ -102,14 +103,14 @@ namespace Xbim
 			}
 			IXLocation^ ModelGeometryService::Create(IIfcObjectPlacement^ placement)
 			{
-				throw gcnew NotImplementedException("Create() not available in Version 5");
+				throw gcnew System::NotImplementedException("Create() not available in Version 5");
 				/*if (placement == nullptr) return gcnew XbimLocation();
 				return gcnew XbimLocation(XbimConvert::ToTransform(placement, _logger));*/
 
 			}
 			IXLocation^ ModelGeometryService::CreateMappingTransform(IIfcMappedItem^ mappedItem)
 			{
-				throw gcnew NotImplementedException("CreateMappingTransform() not available in Version 5");
+				throw gcnew System::NotImplementedException("CreateMappingTransform() not available in Version 5");
 				/*auto targetTransform = XbimConvert::ToTransform(mappedItem->MappingTarget);
 				auto sourceTransform = XbimConvert::ToLocation(mappedItem->MappingSource->MappingOrigin);
 				auto mapLocation = sourceTransform * targetTransform;
@@ -131,7 +132,7 @@ namespace Xbim
 			{
 				ModelGeometryService^ service;
 				if (!Xbim::Geometry::Abstractions::Extensions::IXModelExtensions::GetTagValue<ModelGeometryService^>(model, "ModelGeometryService", service))
-					throw gcnew Exception("Invalid use of Model.Tag property");
+					throw gcnew System::Exception("Invalid use of Model.Tag property");
 				else
 					return service;
 			}
@@ -225,7 +226,11 @@ namespace Xbim
 				return _bimAuthoringToolWorkArounds;
 			}
 
-
+			Xbim::Geometry::Storage::BRepDocumentManager^ ModelGeometryService::GetBRepDocumentManager()
+			{
+				if (_bRepDocumentManager == nullptr) _bRepDocumentManager = gcnew Xbim::Geometry::Storage::BRepDocumentManager(this);
+				return _bRepDocumentManager;
+			}
 
 			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
 			IXVertexFactory^ ModelGeometryService::VertexFactory::get() { return GetVertexFactory(); }
@@ -242,6 +247,7 @@ namespace Xbim
 			IXProfileFactory^ ModelGeometryService::ProfileFactory::get() { return GetProfileFactory(); }
 			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
 			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
+			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return GetBRepDocumentManager(); }
 		}
 
 

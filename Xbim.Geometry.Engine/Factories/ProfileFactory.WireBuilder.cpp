@@ -133,14 +133,20 @@ namespace Xbim
 			{
 				if (rectangleProfile->XDim <= 0 || rectangleProfile->YDim <= 0)
 					throw RaiseGeometryFactoryException("Invalid rectangle profile with at least one zero or less dimension", rectangleProfile);
-				TopLoc_Location location;
-				if (rectangleProfile != nullptr)
-					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(rectangleProfile->Position);
+				TopLoc_Location location = BuildParameterizedProfilePosition(rectangleProfile->Position);
 				auto wire = EXEC_NATIVE->BuildRectangle(rectangleProfile->XDim, rectangleProfile->YDim, location);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Profile wire cound not be built", rectangleProfile);
 				else
 					return wire;
+			}
+
+			TopLoc_Location ProfileFactory::BuildParameterizedProfilePosition(IIfcAxis2Placement^ position)
+			{
+				if (position == nullptr) return TopLoc_Location();
+				auto position2d = dynamic_cast<IIfcAxis2Placement2D^>(position);
+				if (position2d == nullptr) throw RaiseGeometryFactoryException("Parameterized Profile positions must be 2D",position);
+				return GEOMETRY_FACTORY->BuildAxis2PlacementLocation(position);
 			}
 
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)

@@ -444,278 +444,90 @@ namespace Xbim
 			return true;
 		}
 
-#pragma managed(push, off)
 
-		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzyFactor, TopoDS_Shape& result, int timeout)
+
+		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
 		{
-
-			int  retVal = BOOLEAN_FAIL;
-			try
-			{
-				if (tools.Size() == 0)
-				{
-					result = body;
-					return BOOLEAN_SUCCESS;
-				}
-
-				BOPAlgo_BOP aBOP;
-
-
-				aBOP.AddArgument(body);
-				aBOP.SetTools(tools);
-				aBOP.SetOperation(op);
-				aBOP.SetRunParallel(false);
-				//aBOP.SetCheckInverted(true);
-				aBOP.SetNonDestructive(true);
-				//aBOP.SetFuzzyValue(tolerance);
-
-				XbimProgressMonitor pi(timeout);
-
-				TopoDS_Shape aR;
-
-				aBOP.Perform(pi);
-				aR = aBOP.Shape();
-
-				if (pi.UserBreak())
-				{
-					return BOOLEAN_TIMEDOUT;
-
-				}
-				bool bopErr = aBOP.HasErrors();
-#ifdef _DEBUG
-
-				if (aBOP.HasWarnings())
-				{
-					std::ofstream os;
-					OSD_OpenStream(os, "c:/tmp/warnings.txt", std::ios::out);
-					aBOP.DumpWarnings(os);
-					os.flush();
-					os.close();
-				}
-				if (aBOP.HasErrors())
-				{
-					std::ofstream os;
-					OSD_OpenStream(os, "c:/tmp/errors.txt", std::ios::out);
-					aBOP.DumpErrors(os);
-					os.flush();
-					os.close();
-				}
-#endif // DEBUG
-				//if (bopErr) // a sign of failure do them individually
-				//{
-
-				//	//check if the shape is empty
-
-				//	if (tools.Size() > 1)//do them one at a time if we are not already doing or have done that
-				//	{
-				//		TopoDS_Shape cutBody = body;
-
-				//		TopTools_ListIteratorOfListOfShape itl(tools);
-
-				//		bool noSuccess = true;
-				//		for (; itl.More(); itl.Next())
-				//		{
-				//			TopTools_ListOfShape toCut;
-				//			toCut.Append(itl.Value());
-				//			TopoDS_Shape cutResult;
-				//			int success = DoBoolean(cutBody, toCut, op, tolerance, fuzzyFactor, cutResult, timeout);
-				//			if (success > 0)
-				//			{
-				//				cutBody = cutResult;
-				//				aR = cutResult;
-				//				noSuccess = false;
-				//			}
-				//			else
-				//			{
-				//				retVal = BOOLEAN_PARTIALSUCCESSSINGLECUT;
-				//			}
-				//		}
-				//		if (noSuccess) return BOOLEAN_FAIL;
-				//		retVal = BOOLEAN_SUCCESSSINGLECUT;
-				//	}
-				//}
-
-
-				//have one go at fixing if it is not right
-				//if (BRepCheck_Analyzer(aR, Standard_True).IsValid() == Standard_False)
-				//{
-				//	//try and fix if we can
-				//	ShapeFix_Shape fixer(aR);
-				//	fixer.SetMaxTolerance(tolerance);
-				//	fixer.SetMinTolerance(tolerance);
-				//	fixer.SetPrecision(tolerance);
-				//	try
-				//	{
-				//		
-				//		if (fixer.Perform())
-				//		{
-				//			result = fixer.Shape();
-				//			retVal = BOOLEAN_SUCCESS;
-				//		}
-				//		else
-				//		{
-				//			result = aR;
-				//			retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
-				//		}
-				//	}
-				//	catch (const Standard_Failure&) //if we cannot fix it return the unified shape
-				//	{
-				//		result = aR;
-				//		retVal = BOOLEAN_PARTIALSUCCESSBADTOPOLOGY;
-				//	}
-				//}
-				//else
-				//{
-				//	result = aR;
-				//	retVal = BOOLEAN_SUCCESS;
-				//}
-				//unify the shape
-
-
-				//ShapeUpgrade_UnifySameDomain unifier(result);
-				//unifier.SetAngularTolerance(0.00174533); //1 tenth of a degree
-				//unifier.SetLinearTolerance(tolerance);
-				//
-				//try
-				//{
-				//	//sometimes unifier crashes
-				//	unifier.Build();
-				//	result =unifier.Shape();
-				//}
-				//catch (const Standard_Failure&) //any failure
-				//{
-				//	//default to what we had					
-				//}
-				//return retVal;
-				result = aR;
-				return BOOLEAN_SUCCESS;
-			}
-			catch (const Standard_NotImplemented&) //User break most likely called
-			{
-				return BOOLEAN_TIMEDOUT;
-			}
-			catch (const Standard_Failure& /*sf*/)
-			{
-				return BOOLEAN_FAIL;
-			}
-			catch (...)
-			{
-				return BOOLEAN_FAIL;
-			}
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools), _modelServices);
 		}
-
-#pragma managed(pop)
-
-		IXbimSolidSet^ XbimSolidSet::DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger)
+		
+		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
 		{
-			if (!IsValid) return this;
-
-
-			XbimSolidSet^ solidResults = gcnew XbimSolidSet(_modelServices);
-
-			for (int i = 0; i < this->Count; i++)
-			{
-				TopTools_ListOfShape tools;
-				if (!solids[i]->IsValid) continue;
-				for each (IXbimSolid ^ tool in arguments)
-				{
-					tools.Append((XbimSolid^)tool);
-				}
-				TopoDS_Shape result;
-				int success = BOOLEAN_FAIL;
-				try
-				{
-					success = Xbim::Geometry::DoBoolean((XbimSolid^)solids[i], tools, operation, tolerance, tolerance, result, XbimGeometryCreator::BooleanTimeOut);
-				}
-				catch (const Standard_Failure&)
-				{
-					success = BOOLEAN_FAIL;
-				}
-
-				if (success > 0)
-				{
-					XbimSolidSet^ resultSolids = gcnew XbimSolidSet(result, _modelServices); //extract all solids retuned					
-					solidResults->Add(resultSolids);
-				}
-
-				System::String^ msg = "";
-				switch (success)
-				{
-				case BOOLEAN_PARTIALSUCCESSBADTOPOLOGY:
-					msg = "Boolean operation has created a shape with invalid BREP Topology. The result may not be correct";
-					break;
-				case BOOLEAN_PARTIALSUCCESSSINGLECUT:
-					msg = "Boolean operation executed as one tool per operation with partial success. The result may not be correct";
-					break;
-				case BOOLEAN_TIMEDOUT:
-					msg = "Boolean operation timed out. No result whas been generated";
-					break;
-				case BOOLEAN_FAIL:
-					msg = "Boolean result could not be computed. Error undetermined";
-					break;
-				default:
-					break;
-				}
-				if (!System::String::IsNullOrWhiteSpace(msg))
-					XbimGeometryCreator::LogWarning(logger, nullptr, msg);
-				if (success <= 0)
-					throw gcnew XbimGeometryException(msg);
-
-			}
-
-			return solidResults;
-		}
-		//This will throw an XbimGeometryExcpetion if the operation is illegal
-		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolidSet^ solidsToCut, double tolerance, ILogger^ logger)
-		{
-
-			return DoBoolean(solidsToCut, BOPAlgo_CUT, tolerance, logger);
-		}
-		//This will throw an XbimGeometryExcpetion if the operation is illegal
-		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidsToUnion, double tolerance, ILogger^ logger)
-		{
-			return DoBoolean(solidsToUnion, BOPAlgo_FUSE, tolerance, logger);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Union(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Union(arguments, tools), _modelServices);
 		}
 
 
 
-		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solidSet, double tolerance, ILogger^ logger)
+		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
 		{
-			if (!IsValid) return this;
-			IXbimSolidSet^ toIntersectSolidSet = solidSet; //just to sort out carve exclusion, they must be all OCC solids if no carve
-			IXbimSolidSet^ thisSolidSet = this;
-
-			XbimCompound^ thisSolid = XbimCompound::Merge(thisSolidSet, tolerance, logger, _modelServices);
-			XbimCompound^ toIntersectSolid = XbimCompound::Merge(toIntersectSolidSet, tolerance, logger, _modelServices);
-			if (thisSolid == nullptr || toIntersectSolid == nullptr) gcnew XbimSolidSet(_modelServices);
-			XbimCompound^ result = thisSolid->Intersection(toIntersectSolid, tolerance, logger);
-			return gcnew XbimSolidSet(result, _modelServices);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools), _modelServices);
 		}
 
 
 		IXbimSolidSet^ XbimSolidSet::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-			if (Count == 0) return gcnew XbimSolidSet(_modelServices);
-			if (Count == 1) return First->Cut(solid, tolerance, logger);
-			return Cut(gcnew XbimSolidSet(solid, _modelServices), tolerance, logger);
-
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools), _modelServices);
 		}
 
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-			if (Count == 0) return gcnew XbimSolidSet(solid, _modelServices);
-			if (Count == 1) return First->Union(solid, tolerance, logger);
-			return Union(gcnew XbimSolidSet(solid, _modelServices), tolerance, logger);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Union(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Union(arguments, tools), _modelServices);
 		}
-
-
-
 
 		IXbimSolidSet^ XbimSolidSet::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-			if (Count == 0) return gcnew XbimSolidSet(_modelServices);
-			if (Count == 1) return First->Intersection(solid, tolerance, logger);
-			return Intersection(gcnew XbimSolidSet(solid, _modelServices), tolerance, logger);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			for each (auto solid in solids)
+				arguments.Append(static_cast<XbimSolid^>(solid));
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools), _modelServices);
 		}
 
 		void XbimSolidSet::Init(XbimCompound^ comp, IPersistEntity^ entity, ILogger^ logger)

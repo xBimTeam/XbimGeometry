@@ -92,6 +92,7 @@ namespace Xbim
 
 			bool GeometryFactory::BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d)
 			{
+
 				if ((int)ifcPoint->Dim == 2)
 				{
 					pnt2d.SetXY(gp_XY(ifcPoint->Coordinates[0], ifcPoint->Coordinates[1]));
@@ -188,9 +189,17 @@ namespace Xbim
 			bool GeometryFactory::BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis2d, gp_Ax22d& ax22)
 			{
 				if (axis2d == nullptr) return false;
+				if (axis2d->Location == nullptr)
+				{
+					LogError("Axis location is not optional", axis2d->Location);
+					return false;
+				}
 				gp_Pnt2d loc;
 				if (!BuildPoint2d(axis2d->Location, loc))
+				{
+					LogError("A 2D point cannot be built correctly from a 3D definition");
 					return false;
+				}
 				if (axis2d->RefDirection == nullptr) //both have to be given if one is null use the defaults
 				{
 					return EXEC_NATIVE->BuildAxis2Placement2d(loc, gp::DX2d(), ax22);
@@ -421,7 +430,7 @@ namespace Xbim
 				{
 					gp_Ax2 ax2;
 					if (!BuildAxis2Placement3d(axis3d, ax2))
-						throw RaiseGeometryFactoryException("Error building axis", axis2);
+						throw RaiseGeometryFactoryException("Error badly defined axis", axis2);
 					gp_Trsf transform;
 					gp_Ax3 ax3(ax2);
 					transform.SetTransformation(ax3, gp_Ax3());
@@ -432,7 +441,7 @@ namespace Xbim
 				{
 					gp_Ax22d ax2d;
 					if (!BuildAxis2Placement2d(axis2d, ax2d))
-						throw RaiseGeometryFactoryException("Error building axis", axis2);
+						throw RaiseGeometryFactoryException("Error badly defined axis", axis2);
 					gp_Trsf transform;
 					gp_Pnt2d p2d = ax2d.Location();
 					gp_Ax3 ax3(gp_Pnt(p2d.X(), p2d.Y(), 0.), gp::DZ(), gp_Dir(ax2d.XDirection().X(), ax2d.XDirection().Y(), 0.));

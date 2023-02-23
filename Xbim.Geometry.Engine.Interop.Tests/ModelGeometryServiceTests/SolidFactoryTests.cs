@@ -268,7 +268,7 @@ namespace Xbim.Geometry.NetCore.Tests
             Assert.False(solid.IsEmptyShape());
             Assert.True(solid.IsValidShape());
             double volume = solid.Volume;
-            volume.Should().BeApproximately(14126.588726978996, _modelSvc.Precision);
+            volume.Should().BeApproximately(14052.092819053487, _modelSvc.Precision);
         }
         [Theory]
         [InlineData(30, 20, 0, Math.PI, 100)]

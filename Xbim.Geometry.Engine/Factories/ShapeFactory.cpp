@@ -319,18 +319,10 @@ namespace Xbim
 
 			TopoDS_Shape ShapeFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
 			{
-				CheckClosedStatus isCheckedClosed;
-				TopoDS_Shell shell = SHELL_FACTORY->BuildClosedShell(closedShell, isCheckedClosed); //throws exeptions
-				//ensure shells are discrete 
-				Handle(ShapeFix_Solid) sfs = new ShapeFix_Solid(sfs->SolidFromShell(shell));
-				sfs->FixShellMode() = true;
-				sfs->FixShellOrientationMode() = true;
-				sfs->Perform();
-				return sfs->Shape();
-
+				bool isFixed;
+				return SHELL_FACTORY->BuildClosedShell(closedShell, isFixed); //throws exeptions
+				
 			}
-
-
 		}
 	}
 }

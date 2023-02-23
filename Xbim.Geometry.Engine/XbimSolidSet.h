@@ -21,7 +21,7 @@ namespace Xbim
 		const int BOOLEAN_TIMEDOUT = -1;
 
 
-		int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
+		
 
 		private ref class VolumeComparer : System::Collections::Generic::IComparer<System::Tuple<double, XbimSolid^>^>
 		{
@@ -63,7 +63,7 @@ namespace Xbim
 			{
 				solids = nullptr;
 			};
-			IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
+			//IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
 
 		public:
 

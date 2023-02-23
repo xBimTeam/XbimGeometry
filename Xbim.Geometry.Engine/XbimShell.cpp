@@ -49,6 +49,7 @@
 #include "XbimShellSet.h"
 #include "XbimConvert.h"
 #include "XbimOccWriter.h"
+#include "./Factories/BooleanFactory.h"
 
 using namespace Xbim::Common::Exceptions;
 namespace Xbim
@@ -66,7 +67,7 @@ namespace Xbim
 
 #pragma region Constructors
 
-		
+
 
 		XbimShell::XbimShell(IIfcOpenShell^ openShell, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
@@ -84,7 +85,7 @@ namespace Xbim
 			*pShell = shell;
 		}
 
-		XbimShell::XbimShell(const TopoDS_Shell& shell, Object^ tag, ModelGeometryService^ modelService) : XbimShell(shell,modelService) 
+		XbimShell::XbimShell(const TopoDS_Shell& shell, Object^ tag, ModelGeometryService^ modelService) : XbimShell(shell, modelService)
 		{
 			Tag = tag;
 		}
@@ -292,42 +293,82 @@ namespace Xbim
 			return gcnew XbimSolid(TopoDS::Solid(gTran.Shape()), _modelServices);
 		}
 
-		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
+		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
 		{
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools), _modelServices);
+		}
 
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, this, solids, tolerance, logger, _modelServices);
+		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
+		{
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Union(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Union(arguments, tools), _modelServices);
+		}
+
+
+
+		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
+		{
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			for each (auto solid in solidTools)
+				tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools), _modelServices);
 		}
 
 
 		IXbimGeometryObjectSet^ XbimShell::Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_CUT, this, gcnew XbimSolidSet(solid, _modelServices), tolerance, logger, _modelServices);
-		}
-
-		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
-		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, this, solids, tolerance, logger, _modelServices);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools), _modelServices);
 		}
 
 		IXbimGeometryObjectSet^ XbimShell::Union(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_FUSE, this, gcnew XbimSolidSet(solid, _modelServices), tolerance, logger, _modelServices);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Union(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Union(arguments, tools), _modelServices);
 		}
-
-		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger)
-		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, this, solids, tolerance, logger, _modelServices);
-		}
-
 
 		IXbimGeometryObjectSet^ XbimShell::Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger)
 		{
-
-			return XbimGeometryObjectSet::PerformBoolean(BOPAlgo_COMMON, this, gcnew XbimSolidSet(solid, _modelServices), tolerance, logger, _modelServices);
+			TopoDS_ListOfShape arguments;
+			TopoDS_ListOfShape tools;
+			arguments.Append(this);
+			tools.Append(static_cast<XbimSolid^>(solid));
+			if (tolerance > 0)
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools, tolerance), _modelServices);
+			else
+				return gcnew XbimGeometryObjectSet(_modelServices->GetBooleanFactory()->Intersect(arguments, tools), _modelServices);
 		}
 
 		IXbimFaceSet^ XbimShell::Section(IXbimFace^ toSection, double tolerance, ILogger^ logger)

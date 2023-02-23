@@ -1399,28 +1399,7 @@ namespace Xbim
 				}
 				else
 				{
-					double xOff = rectProfile->XDim / 2;
-					double yOff = rectProfile->YDim / 2;
-					double precision = rectProfile->Model->ModelFactors->Precision;
-					gp_Pnt bl(-xOff, -yOff, 0);
-					gp_Pnt br(xOff, -yOff, 0);
-					gp_Pnt tr(xOff, yOff, 0);
-					gp_Pnt tl(-xOff, yOff, 0);
-					Handle(Geom_TrimmedCurve) aSeg1 = GC_MakeSegment(bl, br);
-					Handle(Geom_TrimmedCurve) aSeg2 = GC_MakeSegment(br, tr);
-					Handle(Geom_TrimmedCurve) aSeg3 = GC_MakeSegment(tr, tl);
-					Handle(Geom_TrimmedCurve) aSeg4 = GC_MakeSegment(tl, bl);
-					TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(aSeg1);
-					TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(aSeg2);
-					TopoDS_Edge e3 = BRepBuilderAPI_MakeEdge(aSeg3);
-					TopoDS_Edge e4 = BRepBuilderAPI_MakeEdge(aSeg4);
-					TopoDS_Wire wire = BRepBuilderAPI_MakeWire(e1, e2, e3, e4);
-					ShapeFix_ShapeTolerance tol;
-					//set the correct precision
-					tol.LimitTolerance(wire, precision);
-					//apply the position transformation
-					if (rectProfile->Position != nullptr)
-						wire.Move(XbimConvert::ToLocation(rectProfile->Position));
+					auto wire = _modelServices->GetProfileFactory()->BuildProfileWire(rectProfile); //throws an excpetion if it fails
 					pWire = new TopoDS_Wire();
 					*pWire = wire;
 				}

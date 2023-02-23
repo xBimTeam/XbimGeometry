@@ -65,9 +65,9 @@ namespace Xbim
 
 #pragma endregion
 				TopoDS_Solid BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
-				TopoDS_Solid BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
-				TopoDS_Compound BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
-				TopoDS_Solid BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
+				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
+				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
+				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
 				
 
 			};

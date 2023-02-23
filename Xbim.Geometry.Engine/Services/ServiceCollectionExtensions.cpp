@@ -8,7 +8,7 @@ using namespace Xbim::Geometry::DependencyInjection;
 IServiceCollection^ Xbim::Geometry::DependencyInjection::ServiceCollectionExtensions::AddGeometryEngineServices(IServiceCollection^ services)
 {
 	ServiceCollectionServiceExtensions::AddSingleton<IXGeometryConverterFactory^, GeometryConverterFactory^>(services);
-	ServiceCollectionServiceExtensions::AddSingleton<IXBRepDocumentManager^, Xbim::Geometry::Storage::BRepDocumentManager^>(services);
+	
 	ServiceCollectionServiceExtensions::AddSingleton<IXGeometryPrimitives^, Xbim::Geometry::Primitives::GeometryPrimitives^>(services);
 	ServiceCollectionServiceExtensions::AddSingleton<IXShapeService^, Xbim::Geometry::Services::ShapeService^>(services);
 	return services;
