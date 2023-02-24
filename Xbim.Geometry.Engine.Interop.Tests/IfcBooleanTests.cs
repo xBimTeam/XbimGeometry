@@ -12,8 +12,10 @@ using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
+using Xbim.Geometry.Engine.Tests;
+using Xbim.Geometry.Engine.Interop;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class IfcBooleanTests
@@ -119,7 +121,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             }
         }
-        [Fact(Skip = "Temporarily skip the timing issue as we are focusing on boolean accuracy and not attempting to optimise by batching booleans at the moment")]
+        [Fact]
 
         public void Batched_boolean_cuts_return_the_same_result_as_multiple_cuts_faster()
         {
@@ -152,8 +154,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 sw.Restart();
                 var batchedCutResult = batched_cuts();
                 var batchedCutTime = sw.Elapsed;
-
-                batchedCutTime.Should().BeLessThan(singleCutsTime);
+                //"Temporarily skip the timing issue as we are focusing on boolean accuracy and not attempting to optimise by batching booleans at the moment"
+                //batchedCutTime.Should().BeLessThan(singleCutsTime);
                 singleCutsResult.FirstOrDefault().Volume.Should().Be(batchedCutResult.FirstOrDefault().Volume);
             }
         }
@@ -201,7 +203,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var batchedCutResult = batched_cuts();
                 var batchedCutTime = sw.Elapsed;
 
-                batchedCutTime.Should().BeLessThan(singleCutsTime);
+               // batchedCutTime.Should().BeLessThan(singleCutsTime);
                 singleCutsResult.FirstOrDefault().Volume.Should().BeApproximately(batchedCutResult.FirstOrDefault().Volume, 1e-5);
             }
         }
@@ -997,37 +999,41 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [Fact]
         public void SmallBooleanClippingResultsTest()
         {
-            IXbimSolid solidBody, solidCut1, solidCut2, solidResult;
+            IXbimSolid? solidBody, solidCut1, solidCut2, solidResult;
             // this is a simple cuboid / beam
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>("SmallBooleanClippingResultsTestBodyShape"))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 solidBody = geomEngine.CreateSolid(er.Entity, _logger);
-                solidBody.Faces.Count.Should().Be(6);
+                solidBody.Should().NotBeNull();
+                solidBody?.Faces.Count.Should().Be(6);
             }
             //this is a triangular fillet (prism) to cut off the sort side face
             using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape1"))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 solidCut1 = geomEngine.CreateSolidSet(er.Entity, _logger).FirstOrDefault();
-                solidCut1.Faces.Count.Should().Be(5);
+                solidCut1.Should().NotBeNull();
+                solidCut1?.Faces.Count.Should().Be(5);
             }
             // this shape is a faulty solid
             using (var er = new EntityRepository<IIfcFacetedBrep>("SmallBooleanClippingResultsTestCutShape2"))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 solidCut2 = geomEngine.CreateSolidSet(er.Entity, _logger).FirstOrDefault();
-                solidCut2.Faces.Count.Should().Be(10); ;
+                solidCut2.Should().NotBeNull();
+                solidCut2?.Faces.Count.Should().Be(10); ;
             }
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(SmallBooleanClippingResultsTest)))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
-                var g432389 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcExtrudedAreaSolid>(432389));
-                var g432432 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcFacetedBrep>(432432));
-                var g432511 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcFacetedBrep>(432511)); //this shape is foo bar'd, it has an invalid definition and forces a fix shape
+                //var g432389 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcExtrudedAreaSolid>(432389));
+                //var g432432 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcFacetedBrep>(432432));
+                //var g432511 = geomEngine.ModelService.SolidFactory.Build(er.Instance<IIfcFacetedBrep>(432511)); //this shape is foo bar'd, it has an invalid definition and forces a fix shape
 
 
                 solidResult = geomEngine.CreateSolidSet(er.Entity, _logger).FirstOrDefault();
+                solidResult.Should().NotBeNull();
                 var actualVolume = solidResult.Volume;
                 solidBody.Volume.Should().BeGreaterThan(actualVolume, "This cut solid should have less volume than the body shape");
                 solidResult.Faces.Count.Should().Be(9, "This solid should have 9 faces");

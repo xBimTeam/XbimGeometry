@@ -35,6 +35,7 @@ namespace Xbim
 
 				
 				TopoDS_Wire BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam);
+				bool Fillet(const TopoDS_Wire& directrix, TopoDS_Wire& filletedDirectrix, double filletRadius);
 				//void AdjustDirectrixTrimParameters(IIfcCurve^ ifcCurve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, double& start, double& end);
 			public:
 				WireFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NWireFactory()) {}				

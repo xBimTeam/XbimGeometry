@@ -3,10 +3,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Engine.Interop.Extensions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class Startup
     {
@@ -29,7 +30,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             services.AddLogging(configure => configure.SetMinimumLevel(DefaultLogLevel))
                 .AddXbimToolkit() // Required if we need IfcStore ModelProvider functionality
-                .AddLogging(opt => opt.AddConsole())
+                .AddLogging()
                 .AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5));
 
 

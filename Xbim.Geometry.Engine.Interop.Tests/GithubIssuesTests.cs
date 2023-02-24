@@ -5,15 +5,18 @@ using Xbim.Ifc;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
   
     public class GithubIssuesTests
 
     {
+        private readonly ILoggerFactory _loggerFactory;
 
-        ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-
+        public GithubIssuesTests(ILoggerFactory loggerFactory)
+        {
+            _loggerFactory = loggerFactory;
+        }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
@@ -26,7 +29,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
             {
                 m.LoadStep21("TestFiles\\Github\\Github_issue_281_minimal.ifc");
-                var c = new Xbim3DModelContext(m, loggerFactory, engineVersion);
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
                 c.CreateContext(null, false);
 
                 // todo: 2021: add checks so that the expected openings are correctly computed.

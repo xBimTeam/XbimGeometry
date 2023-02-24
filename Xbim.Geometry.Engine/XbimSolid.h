@@ -53,7 +53,7 @@ namespace Xbim
 
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
-			System::String^ BuildSweptDiskSolid(IIfcSweptDiskSolid^ repItem, const TopoDS_Wire& directrixWire, double radius, double innerRadius, ILogger^ logger);
+			
 			XbimWire^ CreateDirectrix(IIfcCurve^ directrix, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam, ILogger^ logger);
 			// this is case handled by IIfcSweptDiskSolid 
 			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);

@@ -6,20 +6,19 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class WireFactoryTests
     {
         #region Setup
-
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
+  
+        
         private readonly IXModelGeometryService _modelSvc;
         #endregion
 
-        public WireFactoryTests(IXbimGeometryServicesFactory factory)
+        public WireFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
-            _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
+            _modelSvc = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4()), loggerFactory);
         }
     }
 }

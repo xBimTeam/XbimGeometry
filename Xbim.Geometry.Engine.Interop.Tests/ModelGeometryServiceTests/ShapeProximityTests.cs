@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.NetCore.Tests;
+using Xbim.Geometry.Engine.Tests;
 using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class ShapeProximityTests
     {

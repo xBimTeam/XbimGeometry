@@ -1,7 +1,7 @@
 ﻿using Xbim.Common.Geometry;
 using Xbim.Ifc4;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     internal class MeshHelper:IXbimMeshReceiver
     {
@@ -64,7 +64,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             TriangleIndicesCount += 6;
         }
 
-        public SurfaceStyling SurfaceStyling { get; set; }
+        public SurfaceStyling? SurfaceStyling { get; set; }
 
        
       

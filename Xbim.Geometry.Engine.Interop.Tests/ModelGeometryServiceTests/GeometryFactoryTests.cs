@@ -6,17 +6,17 @@ using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class GeometryFactoryTests
     {
         #region Setup
 
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
+
+        private readonly MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
 
-        public GeometryFactoryTests(IXbimGeometryServicesFactory factory)
+        public GeometryFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
         }

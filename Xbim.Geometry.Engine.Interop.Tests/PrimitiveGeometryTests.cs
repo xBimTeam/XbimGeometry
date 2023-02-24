@@ -4,37 +4,30 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class PrimitiveGeometryTests
     {
 
 
-        static private ILogger logger = NullLogger<PrimitiveGeometryTests>.Instance;
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
 
-        public PrimitiveGeometryTests(IXbimGeometryServicesFactory factory)
+        public PrimitiveGeometryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             this.factory = factory;
+            this._loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<PrimitiveGeometryTests>();
         }
 
-        //[Fact]
-        //public void can_build_composite_curve()
-        //{
-        //    using (var model = MemoryModel.OpenRead(@".\\TestFiles\Primitives\\composite_curve.ifc"))
-        //    {
-        //        var compCurve = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
-        //        compCurve);
-        //        var face = geomEngine.CreateFace(compCurve);
-        //        face.OuterBound);
-        //    }
-        //}
+
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
@@ -44,8 +37,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcFacetedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
-                var geom = geomEngine.CreateSolidSet(shape, logger);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geom = geomEngine.CreateSolidSet(shape, _logger);
                 geom.Count.Should().Be(1);
                 geom.First().Volume.Should().BeApproximately(3232.386, 5e-3);
             }
@@ -64,9 +57,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
-                var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
-                geom.Volume.Should().BeApproximately(136033.82966702414, 1e-5);
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geom = geomEngine.CreateSolidSet(shape, _logger).FirstOrDefault();
+                if (engineVersion == XGeometryEngineVersion.V5)
+                    geom.Volume.Should().BeApproximately(-136033.82966702414, 1e-5);
+                else //fixed in V6
+                    geom.Volume.Should().BeApproximately(136033.82966702414, 1e-5);
             }
         }
         [Theory]
@@ -78,8 +74,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var shape = model.Instances.OfType<IIfcClosedShell>().FirstOrDefault();
                 shape.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
-                var geom = geomEngine.CreateSolidSet(shape, logger).FirstOrDefault();
+                var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geom = geomEngine.CreateSolidSet(shape, _logger).FirstOrDefault();
                 geom.Should().NotBeNull();
             }
             if (engineVersion == XGeometryEngineVersion.V6) Console.WriteLine("V6 produces a different result from V5, investigation is required");

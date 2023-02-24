@@ -9,7 +9,7 @@ using Xbim.Common;
 using Xbim.Common.Metadata;
 using Xbim.Ifc4;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class MoqDefaultBehaviourProvider: LookupOrFallbackDefaultValueProvider
     {

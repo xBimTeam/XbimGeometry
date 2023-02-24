@@ -3,11 +3,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
-namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
+namespace Xbim.Geometry.Engine.Tests
 {
    
     // [DeploymentItem("TestFiles")]
@@ -81,10 +82,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
                 var sweptDisk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
                 sweptDisk.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-
-
                 var solid = geomEngine.CreateSolid(sweptDisk, _logger);
-
+                var str = solid.ToBRep;
+                solid.Should().NotBeNull();
 
                 solid.Should().NotBeNull();
                 solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
@@ -98,7 +98,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                var sweptSolid = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                var sweptSolid = model.Instances.OfType<IIfcSweptDiskSolidPolygonal>().FirstOrDefault();
                 sweptSolid.Should().NotBeNull();
                 var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid, _logger);
                 sweptDiskSolid.Should().NotBeNull();

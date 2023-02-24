@@ -9,7 +9,7 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class ProfileFactoryTests
     {

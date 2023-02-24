@@ -6,11 +6,11 @@ using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.ProfileResource;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public static partial class IfcMoq
     {
-        public static IIfcRectangleProfileDef IfcRectangleProfileDefMock(double x = 100, double y = 200, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
+        public static IIfcRectangleProfileDef IfcRectangleProfileDefMock(double x = 100, double y = 200, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D? position = null)
         {
             var rectangleProfileDefMoq = MakeMoq<IIfcRectangleProfileDef>();            
             var rectangleProfileDef = rectangleProfileDefMoq.Object;
@@ -22,7 +22,7 @@ namespace Xbim.Geometry.NetCore.Tests
             return rectangleProfileDef;
         }
 
-        public static IIfcCircleProfileDef IfcCircleProfileDefMock(double radius = 100, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
+        public static IIfcCircleProfileDef IfcCircleProfileDefMock(double radius = 100, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D? position = null)
         {
             var circleProfileDefMoq = MakeMoq<IIfcCircleProfileDef>();
             var circleProfileDef = circleProfileDefMoq.Object;
@@ -32,7 +32,7 @@ namespace Xbim.Geometry.NetCore.Tests
             circleProfileDef.Position = position ?? IfcMoq.IfcAxis2Placement2DMock();
             return circleProfileDef;
         }
-        public static IIfcCircleHollowProfileDef IfcCircleHollowProfileDefMock(double radius = 100, double wallThickness = 10, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D position = null)
+        public static IIfcCircleHollowProfileDef IfcCircleHollowProfileDefMock(double radius = 100, double wallThickness = 10, IfcProfileTypeEnum profileType = IfcProfileTypeEnum.AREA, IIfcAxis2Placement2D? position = null)
         {
             var circleHollowProfileDefMoq = MakeMoq<IIfcCircleHollowProfileDef>();
             var circleHollowProfileDef = circleHollowProfileDefMoq.Object;

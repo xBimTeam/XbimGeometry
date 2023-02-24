@@ -3,20 +3,23 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class BRepBuildingTests
     {
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+       
         private readonly IXbimGeometryServicesFactory factory;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public BRepBuildingTests(IXbimGeometryServicesFactory factory)
+        public BRepBuildingTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             this.factory = factory;
+            _loggerFactory = loggerFactory;
         }
 
 
@@ -24,7 +27,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         public void Can_Create_Plane()
         {
 
-            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), _loggerFactory);
 
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 30),
@@ -47,7 +50,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         public void Can_Create_WireAndFace()
         {
 
-            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), _loggerFactory);
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 30),
                             modelService.GeometryFactory.BuildDirection3d(0, 0, 1));
@@ -76,7 +79,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         [Fact]
         public void Can_Create_Wire_InnerBoundAndFace()
         {
-            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+            var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), _loggerFactory);
 
             var plane = modelService.SurfaceFactory.BuildPlane(
                             modelService.GeometryFactory.BuildPoint3d(10, 20, 0),
@@ -129,7 +132,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests.ModelGeometryServiceTests
         {
 
             {
-                var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), loggerFactory);
+                var modelService = factory.CreateModelGeometryService(new MemoryModel(new EntityFactoryIfc4x1()), _loggerFactory);
 
                 var plane = modelService.SurfaceFactory.BuildPlane(
                                 modelService.GeometryFactory.BuildPoint3d(10, 20, 0),

@@ -1,8 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
@@ -11,8 +9,10 @@ using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
 using Xunit.DependencyInjection;
+using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Interop;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class DependencyInjectionTests
     {
@@ -104,7 +104,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
             var model = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3());
             var loggerFactory = new LoggerFactory();
-            var engine = new XbimGeometryEngine(factory, loggerFactory, new Configuration.GeometryEngineOptions { GeometryEngineVersion=XGeometryEngineVersion.V6});
+            var engine = new XbimGeometryEngine(factory, loggerFactory, new GeometryEngineOptions { GeometryEngineVersion=XGeometryEngineVersion.V6});
 
             Assert.NotNull(engine);
         }
@@ -169,7 +169,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             var factory = new XbimGeometryEngineFactory();
 
             // Act 
-            var options = new Configuration.GeometryEngineOptions { GeometryEngineVersion = XGeometryEngineVersion.V5 };
+            var options = new GeometryEngineOptions { GeometryEngineVersion = XGeometryEngineVersion.V5 };
             var engine = factory.CreateGeometryEngineForModel(model, options);
 
 

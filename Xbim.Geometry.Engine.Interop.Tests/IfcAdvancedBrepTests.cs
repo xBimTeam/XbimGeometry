@@ -6,8 +6,9 @@ using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
+using Xbim.Geometry.Engine.Interop;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     // [DeploymentItem("TestFiles")]

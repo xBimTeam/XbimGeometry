@@ -6,14 +6,14 @@ using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.NetCore.Tests;
+using Xbim.Geometry.Engine.Tests;
 using Xbim.Geometry.WexBim;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class WexBimTests
     {

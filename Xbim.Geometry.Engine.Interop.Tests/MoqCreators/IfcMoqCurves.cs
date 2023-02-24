@@ -10,7 +10,7 @@ using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.MeasureResource;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public static partial class IfcMoq
     {
@@ -41,7 +41,7 @@ namespace Xbim.Geometry.NetCore.Tests
             modelMoq.SetupGet(m => m.ModelFactors.AngleToRadiansConversionFactor).Returns(radianFactor);
             return model;
         }
-        public static IIfcVector IfcVector2dMock(IIfcDirection direction = null, double magnitude = 10)
+        public static IIfcVector IfcVector2dMock(IIfcDirection? direction = null, double magnitude = 10)
         {
             var vecMoq = MakeMoq<IIfcVector>();
             vecMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
@@ -50,7 +50,7 @@ namespace Xbim.Geometry.NetCore.Tests
             vec.Magnitude = magnitude;
             return vec;
         }
-        public static IIfcVector IfcVector3dMock(IIfcDirection direction = null, double magnitude = 10)
+        public static IIfcVector IfcVector3dMock(IIfcDirection? direction = null, double magnitude = 10)
         {
             var vecMoq = MakeMoq<IIfcVector>();
             vecMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
@@ -105,7 +105,7 @@ namespace Xbim.Geometry.NetCore.Tests
             return cp;
         }
 
-        public static IIfcAxis2Placement3D IfcAxis2Placement3DMock(IIfcDirection axis = null, IIfcDirection refDir = null, IIfcCartesianPoint loc = null)
+        public static IIfcAxis2Placement3D IfcAxis2Placement3DMock(IIfcDirection? axis = null, IIfcDirection? refDir = null, IIfcCartesianPoint? loc = null)
         {
             var axis3dMoq = MakeMoq<IIfcAxis2Placement3D>();
             var axis3d = axis3dMoq.Object;
@@ -115,7 +115,7 @@ namespace Xbim.Geometry.NetCore.Tests
             return axis3d;
         }
 
-        public static IIfcAxis2Placement2D IfcAxis2Placement2DMock(IIfcDirection refDir = null, IIfcCartesianPoint loc = null)
+        public static IIfcAxis2Placement2D IfcAxis2Placement2DMock(IIfcDirection? refDir = null, IIfcCartesianPoint? loc = null)
         {
             var axis2dMoq = MakeMoq<IIfcAxis2Placement2D>();
             var axis2d = axis2dMoq.Object;
@@ -127,7 +127,7 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
 
         #region Line Mocks
-        public static IIfcLine IfcLine2dMock(IIfcCartesianPoint origin = null, double magnitude = 1, IIfcDirection direction = null)
+        public static IIfcLine IfcLine2dMock(IIfcCartesianPoint? origin = null, double magnitude = 1, IIfcDirection? direction = null)
         {
             var lineMoq = MakeMoq<IIfcLine>();
             lineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
@@ -137,7 +137,7 @@ namespace Xbim.Geometry.NetCore.Tests
             lineMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcLine)));
             return line;
         }
-        public static IIfcLine IfcLine3dMock(IIfcCartesianPoint origin = null, double magnitude = 1, IIfcDirection direction = null)
+        public static IIfcLine IfcLine3dMock(IIfcCartesianPoint? origin = null, double magnitude = 1, IIfcDirection? direction = null)
         {
             var lineMoq = MakeMoq<IIfcLine>();
             lineMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
@@ -150,7 +150,7 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
 
         #region Circle Mocks
-        public static IIfcCircle IfcCircle3dMock(double radius = 100, IIfcAxis2Placement location = null)
+        public static IIfcCircle IfcCircle3dMock(double radius = 100, IIfcAxis2Placement? location = null)
         {
             var circleMoq = MakeMoq<IIfcCircle>();
             circleMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
@@ -160,7 +160,7 @@ namespace Xbim.Geometry.NetCore.Tests
             circleMoq.SetupGet(v => v.ExpressType).Returns(metaData.ExpressType(typeof(IfcCircle)));
             return circle;
         }
-        public static IIfcCircle IfcCircle2dMock(double radius = 100, IIfcAxis2Placement location = null)
+        public static IIfcCircle IfcCircle2dMock(double radius = 100, IIfcAxis2Placement? location = null)
         {
             var circleMoq = MakeMoq<IIfcCircle>();
             circleMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(2));
@@ -198,7 +198,7 @@ namespace Xbim.Geometry.NetCore.Tests
         #endregion
 
         #region Trimmed curve mocks
-        public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
+        public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve? basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {
 
             var trimMoq = MakeMoq<IIfcTrimmedCurve>();
@@ -214,7 +214,7 @@ namespace Xbim.Geometry.NetCore.Tests
             trimMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcTrimmedCurve)));
             return trim;
         }
-        public static IIfcTrimmedCurve IfcTrimmedCurve2dMock(IIfcCurve basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
+        public static IIfcTrimmedCurve IfcTrimmedCurve2dMock(IIfcCurve? basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {
 
             var trimMoq = MakeMoq<IIfcTrimmedCurve>();
@@ -238,7 +238,7 @@ namespace Xbim.Geometry.NetCore.Tests
         /// </summary>
         /// <param name="parent"></param>
         /// <returns></returns>
-        public static IIfcCompositeCurveSegment IfcCompositeCurveSegment3dMock(IIfcCurve parent = null, bool sameSense = true, int entityLabel = 0)
+        public static IIfcCompositeCurveSegment IfcCompositeCurveSegment3dMock(IIfcCurve? parent = null, bool sameSense = true, int entityLabel = 0)
         {
             var cCurveSegMoq = MakeMoq<IIfcCompositeCurveSegment>();
             cCurveSegMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));
@@ -250,7 +250,7 @@ namespace Xbim.Geometry.NetCore.Tests
             return cCurveSeg;
 
         }
-        public static IIfcCompositeCurve IfcCompositeCurve3dMock(IEnumerable<IIfcCompositeCurveSegment> segments = null)
+        public static IIfcCompositeCurve IfcCompositeCurve3dMock(IEnumerable<IIfcCompositeCurveSegment>? segments = null)
         {
             var cCurveMoq = MakeMoq<IIfcCompositeCurve>();
             cCurveMoq.SetupGet(v => v.Dim).Returns(new IfcDimensionCount(3));

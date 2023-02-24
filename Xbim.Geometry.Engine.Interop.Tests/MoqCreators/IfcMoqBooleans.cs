@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xbim.Ifc4.GeometricModelResource;
-using Xbim.Ifc4.GeometryResource;
+﻿using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public static partial class IfcMoq
     {

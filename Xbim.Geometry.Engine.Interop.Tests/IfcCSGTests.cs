@@ -5,25 +5,30 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Engine.Tests;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
   
     public class IfcCsgTests
     {
 
-        static private ILogger logger = NullLogger<IfcCsgTests>.Instance;
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        private readonly ILogger _logger;
+       
         private readonly IXbimGeometryServicesFactory factory;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public IfcCsgTests(IXbimGeometryServicesFactory factory)
+        public IfcCsgTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             this.factory = factory;
+            _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<IfcCsgTests>();
         }
         
         [Theory]
@@ -43,7 +48,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     pyramid.Height = 20;
                     pyramid.XLength = 10;
                     pyramid.YLength = 15;
-                    var geomEngineV5 = factory.CreateGeometryEngine(engineVersion, m, loggerFactory);
+                    var geomEngineV5 = factory.CreateGeometryEngine(engineVersion, m, _loggerFactory);
                    
                     var solid = geomEngineV5.CreateSolid(pyramid);
                     
@@ -72,8 +77,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     const double h = 2; const double r = 0.5;
                     var cylinder = IfcModelBuilder.MakeRightCircularCylinder(m, r, h);
-                    var geomEngineV5 = factory.CreateGeometryEngine(engineVersion, m, loggerFactory);
-                    var solid = geomEngineV5.CreateSolid(cylinder, logger);
+                    var geomEngineV5 = factory.CreateGeometryEngine(engineVersion, m, _loggerFactory);
+                    var solid = geomEngineV5.CreateSolid(cylinder, _logger);
 
                     solid.Faces.Count.Should().Be(3, "3 faces are required of a cylinder");
                     solid.Vertices.Count.Should().Be(2,"2 vertices are required of a cylinder");
@@ -103,8 +108,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     cylinder.Position = p;
                     cylinder.BottomRadius = 0.5;
                     cylinder.Height = 2;
-                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(cylinder, logger);
+                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(cylinder, _logger);
 
                     solid.Faces.Count.Should().Be(2, "2 faces are required of a cone");
                     solid.Vertices.Count.Should().Be(2, "2 vertices are required of a cone");
@@ -132,8 +137,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     try
                     {
 
-                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(block, logger);
+                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(block, _logger);
 
                     solid.Faces.Count.Should().Be(6, "6 faces are required of a block");
                     solid.Vertices.Count.Should().Be(8, "8 vertices are required of a block");
@@ -167,8 +172,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     const double r = 0.5;
 
                     var sphere = IfcModelBuilder.MakeSphere(m, r);
-                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(sphere, logger);
+                    var geomEngine = factory.CreateGeometryEngine(engineVersion, m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(sphere, _logger);
                     solid.Faces.Count.Should().Be(1, "1 face is required of a sphere");
                     solid.Vertices.Count.Should().Be(2, "2 vertices are required of a sphere");
                     var meshRec = new MeshHelper();

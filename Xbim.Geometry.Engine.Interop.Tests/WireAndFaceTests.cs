@@ -1,22 +1,28 @@
-﻿using FluentAssertions;
+﻿
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.Linq;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
-  
+
     // [DeploymentItem("TestFiles")]
     public class WireAndFaceTests
     {
-       
-        static private ILogger logger = NullLogger<WireAndFaceTests>.Instance;
+        private readonly ILoggerFactory loggerFactory;
+        private ILogger logger ;
 
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        
+        public WireAndFaceTests(ILoggerFactory loggerFactory)
+        {
+            this.loggerFactory = loggerFactory;
+            logger = loggerFactory.CreateLogger<WireAndFaceTests>();
+        }
+
         [Fact]
         public void Empty_Polyline()
         {

@@ -7,7 +7,7 @@ using Xbim.Common;
 using Xbim.IO.Memory;
 using Xunit;
 using FluentAssertions;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class EntityRepository<T> : IDisposable where T : IPersistEntity
     {
@@ -16,7 +16,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         public MemoryModel Model { get => model; private set => model = value; }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public EntityRepository(string name)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             var path = Path.GetFullPath($@"Testfiles\{name}.ifc");
             File.Exists(path).Should().BeTrue();
@@ -34,10 +36,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Model.ModelFactors.Initialise(Math.PI / 180, millimeter / 1000, precision);
         }
 
-        public TInstance Instance<TInstance>(int label) where TInstance : class, IPersistEntity
+        public TInstance? Instance<TInstance>(int label) where TInstance : class, IPersistEntity
         {
-            var instance = Model.Instances[label] as TInstance;
-            return instance;
+            return Model.Instances[label] as TInstance;
+           
         }
         public void Dispose()
         {

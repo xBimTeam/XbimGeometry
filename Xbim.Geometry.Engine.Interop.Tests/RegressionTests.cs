@@ -1,21 +1,24 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
-using System.Linq;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xunit;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
-    
+
     public class RegressionTests
     {
-        
-        
- 
-        static private ILogger logger = NullLogger< RegressionTests >.Instance;
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        private readonly ILoggerFactory _loggerFactory;
+        private ILogger _logger;
+
+        public RegressionTests(ILoggerFactory loggerFactory)
+        {
+            _logger= loggerFactory.CreateLogger<RegressionTests>();
+            _loggerFactory = loggerFactory;
+        }
+
         
 
         // todo: 2021: @SRL this test used to be ignored, but the reason is not clear
@@ -24,9 +27,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
             {
-                var geomEngine = new XbimGeometryEngine(m, loggerFactory);
+                var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);
-                var solid = geomEngine.CreateSolid(extSolid, logger);
+                var solid = geomEngine.CreateSolid(extSolid, _logger);
                 HelperFunctions.GeneralTest(solid);
 
                 var mlist = m.Instances.OfType<IIfcBooleanClippingResult>();
@@ -39,7 +42,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     // var eas = m.Instances.OfType<IIfcBooleanClippingResult>().FirstOrDefault(hs => hs.EntityLabel == 185249);
                     eas.SecondOperand.Should().NotBeNull();
-                    var ret = geomEngine.CreateSolidSet(eas, logger);
+                    var ret = geomEngine.CreateSolidSet(eas, _logger);
 
                     HelperFunctions.GeneralTest(solid);
 

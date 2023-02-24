@@ -9,7 +9,7 @@ using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class StorageServiceTests
@@ -19,10 +19,10 @@ namespace Xbim.Geometry.NetCore.Tests
        
         private readonly IXBRepDocumentManager _brepDocumentManager;
         private readonly IXbimGeometryServicesFactory factory;
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        
         static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
-        public StorageServiceTests(IXbimGeometryServicesFactory factory)
+        public StorageServiceTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
            
            
