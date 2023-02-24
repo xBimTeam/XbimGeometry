@@ -9,7 +9,7 @@ using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class CurveFactoryTests
@@ -54,25 +54,28 @@ namespace Xbim.Geometry.NetCore.Tests
             var line = curveFactory.Build(ifcLine) as IXLine; //initialise the factory with the line
             var trimmedLine = curveFactory.Build(ifcLineSegment) as IXTrimmedCurve;
             Assert.NotNull(line);
-            Assert.Equal(ifcLine.Pnt.X, line.Origin.X);
-            Assert.Equal(ifcLine.Pnt.Y, line.Origin.Y);
-            Assert.Equal(ifcLine.Pnt.Z, line.Origin.Z);
-            trimmedLine.LastParameter.Should().Be(Math.Abs(parametricLength * 100));
-            trimmedLine.EndPoint.Z.Should().Be(parametricLength * 100);
-            Assert.Equal(ifcLine.Dir.Orientation.X, line.Direction.X);
-            Assert.Equal(ifcLine.Dir.Orientation.Y, line.Direction.Y);
-            Assert.Equal(ifcLine.Dir.Orientation.Z, line.Direction.Z);
-            var p1 = line.GetPoint(500);
-            
-            var p2 = line.GetFirstDerivative(500, out IXDirection normal);
-            Assert.Equal(p1.X, p2.X);
-            Assert.Equal(p1.Y, p2.Y);
-            Assert.Equal(p1.Z, p2.Z);
-            Assert.Equal(line.Direction.X, normal.X);
-            Assert.Equal(line.Direction.Y, normal.Y);
-            Assert.Equal(line.Direction.Z, normal.Z);
-            Assert.True(line.Is3d);
+            Assert.NotNull(trimmedLine);
+            if (line != null && trimmedLine != null)
+            {
+                Assert.Equal(ifcLine.Pnt.X, line.Origin.X);
+                Assert.Equal(ifcLine.Pnt.Y, line.Origin.Y);
+                Assert.Equal(ifcLine.Pnt.Z, line.Origin.Z);
+                trimmedLine.LastParameter.Should().Be(Math.Abs(parametricLength * 100));
+                trimmedLine.EndPoint.Z.Should().Be(parametricLength * 100);
+                Assert.Equal(ifcLine.Dir.Orientation.X, line.Direction.X);
+                Assert.Equal(ifcLine.Dir.Orientation.Y, line.Direction.Y);
+                Assert.Equal(ifcLine.Dir.Orientation.Z, line.Direction.Z);
+                var p1 = line.GetPoint(500);
 
+                var p2 = line.GetFirstDerivative(500, out IXDirection normal);
+                Assert.Equal(p1.X, p2.X);
+                Assert.Equal(p1.Y, p2.Y);
+                Assert.Equal(p1.Z, p2.Z);
+                Assert.Equal(line.Direction.X, normal.X);
+                Assert.Equal(line.Direction.Y, normal.Y);
+                Assert.Equal(line.Direction.Z, normal.Z);
+                Assert.True(line.Is3d);
+            }
         }
 
         [Theory]

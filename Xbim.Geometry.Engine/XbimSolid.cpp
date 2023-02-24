@@ -198,11 +198,6 @@ namespace Xbim
 		}
 
 
-		//Handled by IIfcSweptDiskSolid
-		/*XbimSolid::XbimSolid(IIfcSweptDiskSolidPolygonal^ repItem, ILogger^ logger)
-		{
-			Init(repItem, logger);
-		}*/
 
 		XbimSolid::XbimSolid(IIfcSectionedSpine^ repItem, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
@@ -1414,148 +1409,6 @@ namespace Xbim
 			pSolid = new TopoDS_Solid(_modelServices->GetSolidFactory()->BuildSweptDiskSolid(repItem));
 		}
 
-		//if inner radius is not required it has a value of -1
-		System::String^ XbimSolid::BuildSweptDiskSolid(IIfcSweptDiskSolid^ repItem, const TopoDS_Wire& directrixWire, double radius, double innerRadius, ILogger^ logger)
-		{
-			//the standard say
-
-			//If the transitions between consecutive segments of the Directrix are not tangent continuous, the resulting solid is created by a miter at half angle between the two segments.
-			//this will be the case for a polyline as each segment is not tangent continuous
-			//composite urves will be tangent continuous
-			try
-			{
-				bool haveFirstEdge = false;
-				//get the normal at the start point
-				gp_Vec dirAtStart;
-				gp_Pnt startPoint;
-				int numPeriodics = 0;
-				int numEdges = 0;
-				bool hasConsecutiveNonPeriodics = false;
-				bool previousEdgeIsPerodic = false;;
-				for (BRepTools_WireExplorer wireExplorer(directrixWire); wireExplorer.More(); wireExplorer.Next())
-				{
-					numEdges++;
-					double start, end;
-					auto edge = wireExplorer.Current();
-					auto curve = BRep_Tool::Curve(edge, start, end);
-					auto basisCurve = NCurveFactory::GetBasisCurve(curve);
-					if (basisCurve->IsPeriodic())
-					{
-						numPeriodics++;
-						previousEdgeIsPerodic = true;
-					}
-					else if (haveFirstEdge && !previousEdgeIsPerodic)
-					{
-						hasConsecutiveNonPeriodics = true;
-					}
-					else
-						previousEdgeIsPerodic = false;
-					if (!haveFirstEdge)
-					{
-						haveFirstEdge = true;
-						curve->D1(0, startPoint, dirAtStart);
-					}
-
-				}
-
-				BRepBuilderAPI_TransitionMode transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_RightCorner; //lines sweep better with right corner sweeping
-				if (numPeriodics > 0)
-				{
-					transitionMode = BRepBuilderAPI_TransitionMode::BRepBuilderAPI_Transformed; //curves only sweep if we use a transform
-					if (hasConsecutiveNonPeriodics) //this cannot be correctly swept as a pipe with contant radius
-						XbimGeometryCreator::LogWarning(logger, repItem, "Detected incorrect definition of directrix for IfcSweptDiskSolid. The swept disk will be an incorrect shape");
-				}
-
-				//form the shape to sweep, the centre of the circles must be at the start of the directrix
-				BRepBuilderAPI_MakeEdge edgeMaker;
-				BRep_Builder builder;
-
-				gp_Ax2 axis(startPoint, dirAtStart);
-				dirAtStart.Reverse(); //vector points in direction of directrix, need reversing for correct face orientation
-				Handle(Geom_Circle) outer = new Geom_Circle(axis, radius);
-				edgeMaker.Init(outer);
-				TopoDS_Wire outerWire;
-				builder.MakeWire(outerWire);
-				builder.Add(outerWire, edgeMaker.Edge());
-
-				BRepOffsetAPI_MakePipeShell oSweepMaker(directrixWire);
-				oSweepMaker.SetTransitionMode(transitionMode);
-
-				oSweepMaker.Add(outerWire);
-
-				oSweepMaker.Build();
-				if (oSweepMaker.IsDone())
-				{
-					//do we need an inner shell
-					if (innerRadius > 0)
-					{
-
-						Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);
-						edgeMaker.Init(inner);
-						BRepBuilderAPI_MakeWire iWireMaker(edgeMaker.Edge());
-						BRepOffsetAPI_MakePipeShell iSweepMaker(directrixWire);
-						iSweepMaker.SetTransitionMode(transitionMode);
-						TopoDS_Shape holeWire = iWireMaker.Wire().Reversed();
-						iSweepMaker.Add(holeWire);
-						iSweepMaker.Build();
-						if (iSweepMaker.IsDone())
-						{
-
-							TopoDS_Solid solid;
-							TopoDS_Shell shell;
-							builder.MakeSolid(solid);
-							builder.MakeShell(shell);
-							TopExp_Explorer faceEx(oSweepMaker.Shape(), TopAbs_FACE);
-							for (; faceEx.More(); faceEx.Next())
-								builder.Add(shell, TopoDS::Face(faceEx.Current()));
-							faceEx.Init(iSweepMaker.Shape(), TopAbs_FACE);
-							for (; faceEx.More(); faceEx.Next())
-								builder.Add(shell, TopoDS::Face(faceEx.Current()));
-							//cap the faces
-							TopoDS_Face startFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.FirstShape().Reversed()), Standard_True);
-							builder.Add(startFace, iSweepMaker.FirstShape().Reversed());
-							TopoDS_Face endFace = BRepLib_MakeFace(TopoDS::Wire(oSweepMaker.LastShape().Reversed()), Standard_True);
-							builder.Add(endFace, iSweepMaker.LastShape().Reversed());
-							builder.Add(shell, startFace);
-							builder.Add(shell, endFace.Reversed());
-							builder.Add(solid, shell);
-							pSolid = new TopoDS_Solid();
-							*pSolid = solid;
-							return nullptr;
-						}
-						else
-						{
-							bool ok = oSweepMaker.MakeSolid();
-							if (ok)
-							{
-								pSolid = new TopoDS_Solid();
-								*pSolid = TopoDS::Solid(oSweepMaker.Shape());
-								return nullptr;
-							}
-							Standard_Failure::Raise("Could not build Inner radius of SweptDiskSolid");
-						}
-
-					}
-					else
-					{
-						bool ok = oSweepMaker.MakeSolid();
-						if (ok)
-						{
-							pSolid = new TopoDS_Solid();
-							*pSolid = TopoDS::Solid(oSweepMaker.Shape());
-							return nullptr;
-						}
-					}
-				}
-
-			}
-			catch (const Standard_Failure& e)
-			{
-				return gcnew System::String(e.GetMessageString());
-			}
-			return gcnew System::String("Could not build SweptDiskSolid");
-
-		}
 
 
 		// comments on the interpretation of the params are found here:
@@ -1994,10 +1847,18 @@ namespace Xbim
 		{
 			if (IsValid)
 			{
-				GProp_GProps gProps;
-				BRepGProp::VolumeProperties(*pSolid, gProps);
-				System::GC::KeepAlive(this);
-				return gProps.Mass();
+				try
+				{
+					GProp_GProps gProps;
+					TopoDS_Solid solid = *pSolid;
+					BRepGProp::VolumeProperties(solid, gProps);
+					return gProps.Mass();
+				}
+				catch (const Standard_Failure& sf)
+				{
+					_modelServices->LogError("Error calculating volume");
+					return 0;
+				}
 			}
 			else
 				return 0;
@@ -2071,7 +1932,7 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimSolid::Cut(IXbimSolid^ toCut, double tolerance, ILogger^ logger)
 		{
-			
+
 			TopoDS_Solid right = static_cast<XbimSolid^>(toCut);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;
@@ -2096,7 +1957,7 @@ namespace Xbim
 			TopoDS_Solid right = static_cast<XbimSolid^>(toIntersect);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;
-			TopoDS_Shape resultShape = _modelServices->GetBooleanFactory()->EXEC_NATIVE->Intersect(left, right, tolerance, hasWarnings); 
+			TopoDS_Shape resultShape = _modelServices->GetBooleanFactory()->EXEC_NATIVE->Intersect(left, right, tolerance, hasWarnings);
 			if (hasWarnings)
 				XbimGeometryCreator::LogWarning(logger, nullptr, "Solid entity intersect operation has generated warnings. See logs");
 			return gcnew XbimSolidSet(resultShape, _modelServices);
@@ -2111,7 +1972,7 @@ namespace Xbim
 		}
 
 		IXbimSolidSet^ XbimSolid::Union(IXbimSolid^ toUnion, double tolerance, ILogger^ logger)
-		{	
+		{
 			TopoDS_Solid right = static_cast<XbimSolid^>(toUnion);
 			TopoDS_Solid left = *pSolid;
 			bool hasWarnings;

@@ -1,17 +1,16 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using System;
-using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Engine.Interop.Tests;
 using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
 
@@ -20,9 +19,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
 
 
-        static private ILoggerFactory _loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
-        static ILogger _logger;
+        private readonly ILogger _logger;
 
         public Ifc4GeometryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
@@ -254,7 +253,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var geom = geomEngine.CreateSurfaceModel(shape, _logger);
                 geom.Shells.Count.Should().Be(1);
-                ((int)(geom.Shells.First.BoundingBox.Volume)).Should().Be(2000000000);
+                ((int)geom.Shells.First.BoundingBox.Volume).Should().Be(2000000000);
             }
         }
 
@@ -723,7 +722,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 //test the faulty entity on its own
-                var ex = Assert.Throws<XbimGeometryFactoryException>(()=>geomEngine.ModelService.WireFactory.Build(model.Instances[3942179] as IIfcCompositeCurve));
+                var ex = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.ModelService.WireFactory.Build(model.Instances[3942179] as IIfcCompositeCurve));
                 ex.Message.Should().Be("IfcCompositeCurve could not be built as a wire");
                 //see failure exception comes through the stack
                 var exSolid = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateSolidSet(pbhs, _logger).FirstOrDefault());
@@ -747,7 +746,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 wall.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 //create it in the right position
-                var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement, _logger) as IXbimSolid;
+                var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)ifcOpening.ObjectPlacement).RelativePlacement, _logger) as IXbimSolid;
                 geomOpening.Should().NotBeNull();
                 geomOpening.Volume.Should().BeGreaterThan(0);
                 var geomWall = geomEngine.CreateSolid(wall, _logger);
@@ -805,7 +804,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     firstOrDefault.Should().NotBeNull();
                     {
                         var opening = firstOrDefault.Items.FirstOrDefault() as IIfcGeometricRepresentationItem;
-                        var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement, _logger) as IXbimSolid;
+                        var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)ifcOpening.ObjectPlacement).RelativePlacement, _logger) as IXbimSolid;
                         geomOpening.Should().NotBeNull();
                         solids.Add(geomOpening);
                     }
@@ -822,7 +821,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         public void IfcCenterLineProfileDefTest()
         {
 
-            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction("Test"))
                 {
@@ -831,7 +830,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                     var face = geomEngine.CreateFace(cl, _logger);
                     (face as IXbimFace).Should().NotBeNull();
-                    ((IXbimFace)face).IsValid.Should().BeTrue("Invalid face returned");
+                    face.IsValid.Should().BeTrue("Invalid face returned");
                 }
             }
         }
@@ -839,7 +838,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [Fact]
         public void IfcSurfaceOfLinearExtrusionTest()
         {
-            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             using (var txn = m.BeginTransaction("Test"))
             {
                 var semiCircle = IfcModelBuilder.MakeSemiCircle(m, 20);
@@ -848,14 +847,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                 var face = geomEngine.CreateFace(cl, _logger);
                 (face as IXbimFace).Should().NotBeNull();
-                ((IXbimFace)face).IsValid.Should().BeTrue("Invalid face returned");
+                face.IsValid.Should().BeTrue("Invalid face returned");
             }
         }
 
         [Fact]
         public void IfcSurfaceOfRevolutionTest()
         {
-            using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
             using (var txn = m.BeginTransaction("Test"))
             {
                 var cc = IfcModelBuilder.MakeRationalBSplineCurveWithKnots(m);
@@ -864,7 +863,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                 var face = geomEngine.CreateFace(rev, _logger);
                 (face as IXbimFace).Should().NotBeNull();
-                ((IXbimFace)face).IsValid.Should().BeTrue("Invalid face returned");
+                face.IsValid.Should().BeTrue("Invalid face returned");
             }
         }
 

@@ -3,17 +3,23 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using Xbim.Common.Geometry;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
-   
+
     public class MemoryAndThreadingTests
     {
-        static ILogger logger = NullLogger<MemoryAndThreadingTests>.Instance;
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        
+        private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
+
+        public MemoryAndThreadingTests(ILoggerFactory loggerFactory)
+        {
+            _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<MemoryAndThreadingTests>();
+        }
         //[Fact]
         //public void simple_thread_time_out_operation_test()
         //{
@@ -52,7 +58,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //    totalTime.Restart();
         //    Parallel.For(0, runCount, ( i) =>
         //     {
-                 
+
 
         //         var sw = new Stopwatch();
         //         sw.Start();
@@ -71,7 +77,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //             sw.Stop();
         //             res.TryAdd(-i, sw.ElapsedMilliseconds);
         //         }
-  
+
         //     });
         //    totalTime.Stop();
         //    var secondRunTime = totalTime.ElapsedMilliseconds;
@@ -98,7 +104,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         //       // threadToKill.Abort();
         //        throw new TimeoutException();
         //    }
-            
+
         //}
         //const int SleepTime = 50;
         //static int Sleep()
@@ -122,7 +128,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 //}
                 //Assert.IsFalse(vertex.IsValid);
                 var vertices = new List<IXbimVertex>(10000);
-                var geomEngine = new XbimGeometryEngine(new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()), loggerFactory);
+                var geomEngine = new XbimGeometryEngine(new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()), _loggerFactory);
                 for (int i = 0; i < 1000000; i++)
                 {
                     vertices.Add(geomEngine.CreateVertexPoint(aPoint, 0.005));

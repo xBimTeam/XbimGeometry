@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.GeometricConstraintResource;
 using Xbim.Ifc4.GeometryResource;
 using Xbim.Ifc4.Interfaces;
@@ -13,17 +14,24 @@ using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
-   
+
     public class LocationAndPlacementTests
     {
-        
-        
-        static private ILogger logger = NullLogger<LocationAndPlacementTests>.Instance;
-        static private ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-        [Fact(Skip = "SRL to investigate - displacement difference")]
+
+        private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
+
+        public LocationAndPlacementTests(ILoggerFactory loggerFactory)
+        {
+
+            _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<LocationAndPlacementTests>();
+        }
+
+        [Fact]
         // [DeploymentItem("TestFiles\\LargeTriangulatedCoordinates.ifc")]
         public void LargeCoordinatesDisplacementTest()
         {
@@ -86,8 +94,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 {
                     {
                         var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                        var geomEngine = new XbimGeometryEngine(m, loggerFactory);
-                        var solid = geomEngine.CreateSolid(block, logger);
+                        var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
+                        var solid = geomEngine.CreateSolid(block, _logger);
                         var ax3D = IfcModelBuilder.MakeAxis2Placement3D(m);
                         ax3D.Location.Y = 100;
                         var solidA = geomEngine.Moved(solid, ax3D) as IXbimSolid;
@@ -97,7 +105,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                         displacement.Should().BeEquivalentTo(new XbimVector3D(0, 100, 0));
                         var bbA = solidA.BoundingBox;
                         var solidB = geomEngine.Moved(solid, ax3D);
-                        (bbA.Centroid() - solidB.BoundingBox.Centroid()).Should().BeEquivalentTo( new XbimVector3D(0, 0, 0));
+                        (bbA.Centroid() - solidB.BoundingBox.Centroid()).Should().BeEquivalentTo(new XbimVector3D(0, 0, 0));
                     }
                 }
             }
@@ -113,8 +121,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(block, logger);
+                    var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(block, _logger);
                     var transform = IfcModelBuilder.MakeCartesianTransformationOperator3D(m);
                     transform.Scale = 2;
                     var solidA = geomEngine.Transformed(solid, transform);
@@ -141,12 +149,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 using (var txn = m.BeginTransaction("Test"))
                 {
                     var block = IfcModelBuilder.MakeBlock(m, 50, 10, 10);
-                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(block, logger);
+                    var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(block, _logger);
                     var placement = IfcModelBuilder.MakeLocalPlacement(m);
                     ((IfcAxis2Placement3D)placement.RelativePlacement).Location.X = 100;
                     var bb = solid.BoundingBox;
-                    var solidA = geomEngine.Moved(solid, placement, logger) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, placement, _logger) as IXbimSolid;
                     solidA.Should().NotBeNull();
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     displacement.Should().BeEquivalentTo(new XbimVector3D(100, 0, 0));
@@ -157,7 +165,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var yDir = m.Instances.New<IfcDirection>(d => d.SetXYZ(0, 1, 0));
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).RefDirection = yDir; //point in Y
                     ((IfcAxis2Placement3D)placementRelTo.RelativePlacement).Location.X = 2000;
-                    var solidB = geomEngine.Moved(solid, placement, logger) as IXbimSolid;
+                    var solidB = geomEngine.Moved(solid, placement, _logger) as IXbimSolid;
                     displacement = solidB.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     var meshbuilder = new MeshHelper();
                     geomEngine.Mesh(meshbuilder, solidB, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance);
@@ -178,15 +186,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 using (var txn = m.BeginTransaction("Test"))
                 {
-                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
+                    var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                     var block = IfcModelBuilder.MakeBlock(m, 10, 10, 10);
-                    var solid = geomEngine.CreateSolid(block, logger);
+                    var solid = geomEngine.CreateSolid(block, _logger);
                     var grid = IfcModelBuilder.MakeGrid(m, 3, 100);
                     var gridPlacement = m.Instances.New<IfcGridPlacement>();
                     gridPlacement.PlacementLocation = m.Instances.New<IfcVirtualGridIntersection>();
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.UAxes.Last());
                     gridPlacement.PlacementLocation.IntersectingAxes.Add(grid.VAxes.Last());
-                    var solidA = geomEngine.Moved(solid, gridPlacement,logger) as IXbimSolid;
+                    var solidA = geomEngine.Moved(solid, gridPlacement, _logger) as IXbimSolid;
                     solidA.Should().NotBeNull();
                     var displacement = solidA.BoundingBox.Centroid() - solid.BoundingBox.Centroid();
                     displacement.Should().BeEquivalentTo(new XbimVector3D(200, 200, 0));
@@ -203,8 +211,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
                     var profile = IfcModelBuilder.MakeRectangleHollowProfileDef(m, 20, 10, 1);
                     var extrude = IfcModelBuilder.MakeExtrudedAreaSolid(m, profile, 40);
-                    var geomEngine = new XbimGeometryEngine(m, loggerFactory);
-                    var solid = geomEngine.CreateSolid(extrude, logger);
+                    var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
+                    var solid = geomEngine.CreateSolid(extrude, _logger);
                     var transform = new XbimMatrix3D(); //test first with identity
                     var solid2 = (IXbimSolid)solid.Transform(transform);
                     var s1Verts = solid.Vertices.ToList();

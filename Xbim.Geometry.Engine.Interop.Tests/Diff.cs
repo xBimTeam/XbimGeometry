@@ -210,13 +210,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     /// <returns>Returns a array of Items that describe the differences.</returns>
     public static Item [] DiffText(string TextA, string TextB, bool trimSpace, bool ignoreSpace, bool ignoreCase) {
       // prepare the input-text and convert to comparable numbers.
-      Hashtable h = new Hashtable(TextA.Length + TextB.Length);
+      Hashtable? h = new Hashtable(TextA.Length + TextB.Length);
 
       // The A-Version of the data (original data) to be compared.
-      DiffData DataA = new DiffData(DiffCodes(TextA, h, trimSpace, ignoreSpace, ignoreCase));
+      DiffData? DataA = new DiffData(DiffCodes(TextA, h, trimSpace, ignoreSpace, ignoreCase));
 
       // The B-Version of the data (modified data) to be compared.
-      DiffData DataB = new DiffData(DiffCodes(TextB, h, trimSpace, ignoreSpace, ignoreCase));
+      DiffData? DataB = new DiffData(DiffCodes(TextB, h, trimSpace, ignoreSpace, ignoreCase));
 
       h = null; // free up hashtable memory (maybe)
 
@@ -233,10 +233,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     /// <returns>Returns a array of Items that describe the differences.</returns>
     public static Item [] DiffInt(int[] ArrayA, int[] ArrayB) {
       // The A-Version of the data (original data) to be compared.
-      DiffData DataA = new DiffData(ArrayA);
+      DiffData? DataA = new DiffData(ArrayA);
 
       // The B-Version of the data (modified data) to be compared.
-      DiffData DataB = new DiffData(ArrayB);
+      DiffData? DataB = new DiffData(ArrayB);
 
       LCS(DataA, 0, DataA.Length, DataB, 0, DataB.Length);
       return CreateDiffs(DataA, DataB);
@@ -276,9 +276,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
 
         if (ignoreCase)
           s = s.ToLower();
-        
-        aCode = h[s];
-        if (aCode == null) {
+
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                aCode = h[s];
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                if (aCode == null) {
           lastUsedCode++;
           h[s] = lastUsedCode;
           Codes[i] = lastUsedCode;
@@ -456,7 +458,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     /// </summary>
     /// dynamic array
     private static Item[] CreateDiffs(DiffData DataA, DiffData DataB) {
-      ArrayList a = new ArrayList();
+      ArrayList? a = new ArrayList();
       Item aItem;
       Item []result;
 

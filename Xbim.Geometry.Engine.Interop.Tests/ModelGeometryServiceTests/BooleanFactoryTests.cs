@@ -1,7 +1,5 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
@@ -9,7 +7,7 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class BooleanFactoryTests
@@ -17,17 +15,18 @@ namespace Xbim.Geometry.NetCore.Tests
 
         #region Setup
 
-       
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
+
+   
+        private readonly MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
         const double minGap = 0.2;
         private readonly IXbimGeometryServicesFactory factory;
+        private readonly ILoggerFactory _loggerFactory;
 
-
-        public BooleanFactoryTests(IXbimGeometryServicesFactory factory)
+        public BooleanFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             this.factory = factory;
+            _loggerFactory = loggerFactory;
             _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
             _modelSvc.MinimumGap = minGap;
         }
@@ -51,8 +50,9 @@ namespace Xbim.Geometry.NetCore.Tests
                 Assert.True(compound.IsSolidsOnly && compound.Solids.Count() == 1);
                 solid = compound.Solids.First();
             }
-            solid.Shells.Should().HaveCount(1); //one shell
-            solid.Shells.First().Faces.Should().HaveCount(6); //6 faces
+            solid.Should().NotBeNull();
+            solid?.Shells.Should().HaveCount(1); //one shell
+            solid?.Shells.First().Faces.Should().HaveCount(6); //6 faces
         }
         [Fact]
         public void Can_cut_two_coincidental_blocks()
@@ -207,7 +207,7 @@ namespace Xbim.Geometry.NetCore.Tests
         public void Can_Clip_With_HalfSpace()
         {
             using var model = MemoryModel.OpenRead("testfiles/BooleanClippingWithHalfSpace.ifc"); 
-            var geomEngine = factory.CreateGeometryEngineV6(model, loggerFactory);
+            var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Build(booleanOp);
             shape.Should().NotBeNull();

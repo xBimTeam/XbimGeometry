@@ -6,7 +6,7 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xunit;
 using FluentAssertions;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public static class HelperFunctions
     {
@@ -187,7 +187,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             }
         }
 
-        private static IXbimSolidSet CreateSolids(this IIfcGeometricRepresentationItem repItem, IXbimGeometryEngine engine, ILogger logger)
+        private static IXbimSolidSet? CreateSolids(this IIfcGeometricRepresentationItem repItem, IXbimGeometryEngine engine, ILogger logger)
         {
             var sSet = engine.CreateSolidSet();
             var sweptArea = repItem as IIfcSweptAreaSolid;

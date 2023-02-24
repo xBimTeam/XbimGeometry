@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using Xbim.Common;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class ItemListMoq<T> : IItemSet<T>
     {
@@ -15,23 +15,25 @@ namespace Xbim.Geometry.NetCore.Tests
         public T this[int index] { get => impl[index]; }
         T IList<T>.this[int index] { get => impl[index]; set => impl[index] = value; }
 
-        public int Count => 
+        public int Count =>
             impl.Count;
 
         public bool IsReadOnly => false;
 
-        public IPersistEntity OwningEntity => null;
+        public IPersistEntity? OwningEntity => null;
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event NotifyCollectionChangedEventHandler? CollectionChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnCollectionChanged()
         {
-            CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            if (CollectionChanged != null)
+                CollectionChanged(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
         protected void OnPropertyChanged()
         {
-            PropertyChanged(this, new PropertyChangedEventArgs("Count"));
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs("Count"));
         }
         public void Add(T item)
         {
@@ -60,15 +62,23 @@ namespace Xbim.Geometry.NetCore.Tests
 
         public T FirstOrDefault(Func<T, bool> predicate)
         {
+#pragma warning disable CS8603 // Possible null reference return.
             return impl.FirstOrDefault();
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         public TF FirstOrDefault<TF>(Func<TF, bool> predicate) where TF : T
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             var e = (TF)impl.FirstOrDefault();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8603 // Possible null reference return.
             if (predicate(e))
                 return e;
-            else return default(TF);
+            else return default;
+#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning restore CS8604 // Possible null reference argument.
         }
 
         public T GetAt(int index)

@@ -24,7 +24,7 @@
 #include <BRepCheck_Solid.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include "NCurveFactory.h"
-
+#include <math.h>
 
 bool NSolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 {
@@ -412,7 +412,7 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 		if (oSweepMaker.IsDone())
 		{
 			//do we need an inner shell
-			if (innerRadius > 0)
+			if (!isnan(innerRadius))
 			{
 
 				Handle(Geom_Circle) inner = new Geom_Circle(axis, innerRadius);

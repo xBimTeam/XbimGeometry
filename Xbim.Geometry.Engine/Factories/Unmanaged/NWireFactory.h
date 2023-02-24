@@ -53,7 +53,7 @@ public:
 
 	TopoDS_Wire BuildOffset(TopoDS_Wire basisWire, double distance, gp_Dir dir);
 
-	//TopoDS_Wire BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance);
+	TopoDS_Wire Fillet(const TopoDS_Wire& wire, double filletRadius, double tolerance);
 
 
 	bool GetParameter(const TopoDS_Wire& wire, gp_Pnt pnt, double tolerance, double& val);

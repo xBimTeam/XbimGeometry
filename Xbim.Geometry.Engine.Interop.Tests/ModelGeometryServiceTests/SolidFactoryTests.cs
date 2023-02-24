@@ -11,14 +11,14 @@ using Xbim.IO.Memory;
 using Xunit;
 using Xbim.Ifc2x3.PresentationDimensioningResource;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class SolidFactoryTests
     {
         #region Setup
 
-        static ILoggerFactory _loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
         readonly IXModelGeometryService _modelSvc;
         public SolidFactoryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)

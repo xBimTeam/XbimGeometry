@@ -1092,9 +1092,8 @@ namespace Xbim
 
 		void XbimFace::Init(IIfcArbitraryProfileDefWithVoids^ profile, ILogger^ logger)
 		{
-			TopoDS_Face f = ActiveModelGeometryService(profile)->GetProfileFactory()->BuildProfileFace(profile);
-			pFace = new TopoDS_Face();
-			*pFace = f;
+			pFace = new TopoDS_Face(_modelServices->GetProfileFactory()->BuildProfileFace(profile));
+
 		}
 
 

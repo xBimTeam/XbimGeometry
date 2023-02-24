@@ -17,7 +17,7 @@ DEFINE_STANDARD_HANDLE(FlexApp_Application, TDocStd_Application)
 
 class FlexApp_Application : public TDocStd_Application
 {
-
+	
 public:
 	
 	//! methods from TDocStd_Application

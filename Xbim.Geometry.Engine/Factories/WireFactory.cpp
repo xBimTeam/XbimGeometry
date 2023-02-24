@@ -58,17 +58,17 @@ namespace Xbim
 				case XCurveType::IfcBSplineCurveWithKnots:
 					return BuildWire(static_cast<IIfcBSplineCurveWithKnots^>(ifcCurve), true);
 				case XCurveType::IfcCircle:
-					return BuildWire(static_cast<IIfcCircle^>(ifcCurve), asSingleEdge);
+					return BuildWire(static_cast<IIfcCircle^>(ifcCurve));
 				case XCurveType::IfcCompositeCurve:
 					return BuildWire(static_cast<IIfcCompositeCurve^>(ifcCurve), asSingleEdge);
 					/*case XCurveType::IfcCompositeCurveOnSurface:
 						return BuildWire2d(static_cast<IIfcCompositeCurveOnSurface^>(ifcCurve), asSingleEdge);*/
 				case XCurveType::IfcEllipse:
-					return BuildWire(static_cast<IIfcEllipse^>(ifcCurve), true);
+					return BuildWire(static_cast<IIfcEllipse^>(ifcCurve));
 				case XCurveType::IfcIndexedPolyCurve:
 					return BuildWire(static_cast<IIfcIndexedPolyCurve^>(ifcCurve), asSingleEdge);
 				case XCurveType::IfcLine:
-					return BuildWire(static_cast<IIfcLine^>(ifcCurve), true);
+					return BuildWire(static_cast<IIfcLine^>(ifcCurve));
 				case XCurveType::IfcOffsetCurve2D:
 					return BuildWire(static_cast<IIfcOffsetCurve2D^>(ifcCurve), asSingleEdge);
 				case XCurveType::IfcOffsetCurve3D:
@@ -78,7 +78,7 @@ namespace Xbim
 				case XCurveType::IfcPolyline:
 					return BuildWire(static_cast<IIfcPolyline^>(ifcCurve), asSingleEdge);
 				case XCurveType::IfcRationalBSplineCurveWithKnots:
-					return BuildWire(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcCurve), true);
+					return BuildWire(static_cast<IIfcRationalBSplineCurveWithKnots^>(ifcCurve));
 					/*case XCurveType::IfcSurfaceCurve:
 						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));*/
 				case XCurveType::IfcTrimmedCurve:
@@ -343,18 +343,18 @@ namespace Xbim
 						if (wire.IsNull())
 						{
 #ifdef _DEBUG
-							
+
 							System::Text::StringBuilder msg("Error building Composite curve\n");
 							gp_Pnt lastPnt;
 							for (auto&& seg : segments)
-							{							
+							{
 								auto start = seg->StartPoint();
 								auto end = seg->EndPoint();
-								msg.AppendFormat("({0},{1},{2}) -> ({3},{4},{5}) \t\tGAP {6}\n", start.X(), start.Y(), start.Z(), end.X(), end.Y(), end.Z(), Math::Round(lastPnt.Distance(start),3));
+								msg.AppendFormat("({0},{1},{2}) -> ({3},{4},{5}) \t\tGAP {6}\n", start.X(), start.Y(), start.Z(), end.X(), end.Y(), end.Z(), Math::Round(lastPnt.Distance(start), 3));
 								lastPnt = end;
 
 							}
-							LogDebug(ifcCompositeCurve,nullptr,msg.ToString());
+							LogDebug(ifcCompositeCurve, nullptr, msg.ToString());
 #endif // _DEBUG
 
 							throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
@@ -410,132 +410,11 @@ namespace Xbim
 				return directrix;
 			}
 
-			//void WireFactory::AdjustDirectrixTrimParameters(IIfcCurve^ basisCurve, Nullable<IfcParameterValue> startParam, Nullable<IfcParameterValue> endParam, double& start, double& end)
-			//{
-			//	if (!startParam.HasValue && !endParam.HasValue) //no trim required
-			//	{
-			//		start = -1;
-			//		end = -1;
-			//		return;
-			//	}
-			//	//BRepAdaptor_CompCurve cc(wire, Standard_True);
-
-			//	//if we have a trimmed curve we need to get the basis curve for correct parameterisation
-
-			//	//IIfcCurve^ basisCurve = directrix;
-			//	while (dynamic_cast<IIfcTrimmedCurve^>(basisCurve))
-			//		basisCurve = ((IIfcTrimmedCurve^)basisCurve)->BasisCurve;
-			//	double start = 0;
-			//	double end = double::PositiveInfinity;
-
-			//	if (dynamic_cast<IIfcLine^>(basisCurve)) //params are different need to consider magnitude
-			//	{
-			//		IIfcLine^ line = (IIfcLine^)(basisCurve);
-			//		double mag = line->Dir->Magnitude;
-			//		if (startParam.HasValue && endParam.HasValue)
-			//		{
-			//			start = startParam.Value * mag;
-			//			end = endParam.Value * mag;
-			//		}
-			//		else if (startParam.HasValue && !endParam.HasValue)
-			//		{
-			//			start = startParam.Value * mag;
-			//			endPar = cc.LastParameter();
-			//		}
-			//		else if (!startParam.HasValue && endParam.HasValue)
-			//		{
-			//			startPar = cc.FirstParameter();
-			//			endPar = endParam.Value * mag;
-			//		}
-			//	}
-			//	else if (dynamic_cast<IIfcCompositeCurve^>(basisCurve)) //params are different
-			//	{
-
-			//		if (startParam.HasValue)
-			//			startPar = startParam.Value;
-			//		if (endParam.HasValue)
-			//			endPar = endParam.Value;
-			//		double occStart = 0;
-			//		double occEnd = 0;
-			//		double totCurveLen = 0;
-
-			//		// for each segment we encounter, we will see if the threshold falls within its length
-			//		//
-			//		IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(basisCurve);
-			//		for each (IIfcCompositeCurveSegment ^ segment in curve->Segments)
-			//		{
-			//			XbimWire^ segWire = gcnew XbimWire(segment, logger);
-			//			double wireLen = segWire->Length;       // this is the length to add to the OCC command if we use all of the segment
-			//			double segValue = SegLength(segment, logger);   // this is the IFC size of the segment
-			//			totCurveLen += wireLen;
-
-
-			//			if (startPar > 0)
-			//			{
-			//				double ratio = System::Math::Min(startPar / segValue, 1.0);
-			//				startPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-			//				occStart += ratio * wireLen; // progress the occ amount by the ratio of the lenght
-			//			}
-
-			//			if (endPar > 0)
-			//			{
-			//				double ratio = System::Math::Min(endPar / segValue, 1.0);
-			//				endPar -= ratio * segValue; // reduce the outstanding amount (since it's been accounted for in the segment just processed)
-			//				occEnd += ratio * wireLen; // progress the occ amount by the ratio of the lenght
-			//			}
-			//		}
-			//		double precision = XbimConvert::ModelGeometryService(directrix)->MinimumGap;
-			//		// only trim if needed either from start or end
-			//		if ((occStart > 0 && System::Math::Abs(occStart - 0.0) > precision) || (occEnd < totCurveLen && System::Math::Abs(occEnd - totCurveLen) > precision))
-			//		{
-			//			return (XbimWire^)wire->Trim(occStart, occEnd, precision, logger);
-			//		}
-			//		else
-			//			return wire;
-			//	}
-			//	else if (dynamic_cast<IIfcPolyline^>(basisCurve) &&
-			//		(double)startParam.Value == 0. &&
-			//		(double)endParam.Value == 1. &&
-			//		directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
-			//	{
-			//		startPar = startParam.Value;
-			//		endPar = cc.LastParameter();
-			//		XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {originatingSystem}", directrix->Model->Header->FileName->OriginatingSystem);
-			//	}
-			//	else
-			//	{
-			//		bool isConic = (dynamic_cast<IIfcConic^>(basisCurve) != nullptr);
-			//		double parameterFactor = isConic ? directrix->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
-			//		if (isConic && directrix->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::SurfaceOfLinearExtrusion)) //part of a family of revit issues with Ifc4
-			//		{
-			//			XbimGeometryCreator::LogInfo(logger, directrix, "Workaround for Revit conic trim export applied, trims ignored");
-			//			//do nothing
-			//			return wire;
-			//		}
-			//		else
-			//		{
-			//			if (startParam.HasValue && endParam.HasValue)
-			//			{
-			//				startPar = startParam.Value * parameterFactor;
-			//				endPar = endParam.Value * parameterFactor;
-			//			}
-			//			else if (startParam.HasValue && !endParam.HasValue)
-			//			{
-
-			//				startPar = startParam.Value * parameterFactor;
-			//				endPar = cc.LastParameter();
-			//			}
-			//			else if (!startParam.HasValue && endParam.HasValue)
-			//			{
-			//				startPar = cc.FirstParameter();
-			//				endPar = endParam.Value * parameterFactor;
-			//			}
-			//		}
-
-			//	}
-			//}
-
-
+			bool WireFactory::Fillet(const TopoDS_Wire& directrix, TopoDS_Wire& filletedDirectrix, double filletRadius)
+			{
+				filletedDirectrix = EXEC_NATIVE->Fillet(directrix, filletRadius, _modelService->Precision);
+				return !filletedDirectrix.IsNull();
+			}
 
 
 		}

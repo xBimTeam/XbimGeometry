@@ -7,23 +7,24 @@ using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 
-namespace Xbim.Geometry.NetCore.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
 
     public class ShapeServiceTests
     {
         #region Setup
 
-        static ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-        static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
+        
+        private readonly MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
         private readonly IXShapeService _shapeService;
         private readonly IXbimGeometryServicesFactory factory;
 
+
         #endregion
 
 
-        public ShapeServiceTests(IXShapeService shapeService, IXbimGeometryServicesFactory factory)
+        public ShapeServiceTests(IXShapeService shapeService, IXbimGeometryServicesFactory factory,ILoggerFactory loggerFactory)
         {
             _shapeService = shapeService;
             this.factory = factory;
