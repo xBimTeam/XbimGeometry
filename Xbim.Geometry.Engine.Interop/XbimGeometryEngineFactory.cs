@@ -7,10 +7,16 @@ using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
 {
+    /// <summary>
+    /// Factory used to create new <see cref="IXbimGeometryEngine"/> instances
+    /// </summary>
     public class XbimGeometryEngineFactory
     {
         private readonly Func<IXbimManagedGeometryEngine> engineFn;
- 
+
+        /// <summary>
+        /// Constructs a new <see cref="XbimGeometryEngineFactory"/>
+        /// </summary>
         public XbimGeometryEngineFactory() : 
             this(XbimServices.Current.ServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>())
         {

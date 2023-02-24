@@ -8,6 +8,9 @@ using Xbim.Geometry.Engine.Interop.Configuration;
 
 namespace Xbim.Geometry.Engine.Interop.Extensions
 {
+    /// <summary>
+    /// Extension methods for <see cref="IGeometryEngineBuilder"/>
+    /// </summary>
     public static class GeometryEngineBuilderExtensions
     {
         /// <summary>

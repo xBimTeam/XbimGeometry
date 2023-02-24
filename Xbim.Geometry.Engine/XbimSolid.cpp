@@ -392,7 +392,7 @@ namespace Xbim
 			if (ras != nullptr) return Init(ras, overrideProfileDef, logger);
 			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(solid);
 			if (fas != nullptr) return Init(fas, overrideProfileDef, logger);
-			XbimGeometryCreator::LogError(logger, solid, "Swept Solid of Type {0} is not implemented", solid->GetType()->Name);
+			XbimGeometryCreator::LogError(logger, solid, "Swept Solid of Type {ifcType} is not implemented", solid->GetType()->Name);
 		}
 
 		void XbimSolid::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
@@ -1078,7 +1078,7 @@ namespace Xbim
 				if (!ok)
 				{
 					BRepBuilderAPI_PipeError err = pipeMaker1.GetStatus();
-					XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build outer shell of sectioned spine {0}", (int)err);
+					XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build outer shell of sectioned spine {occError}", (int)err);
 					return;
 				}
 				if (pipeMaker1.IsDone())
@@ -1113,7 +1113,7 @@ namespace Xbim
 						if (!ok)
 						{
 							BRepBuilderAPI_PipeError err = pipeMaker2.GetStatus();
-							XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build inner shell of sectioned spine {0}", (int)err);
+							XbimGeometryCreator::LogWarning(logger, repItem, "Failed to build inner shell of sectioned spine {occError}", (int)err);
 							return;
 						}
 						if (pipeMaker2.IsDone())
@@ -1509,7 +1509,7 @@ namespace Xbim
 			{
 				startPar = startParam.Value;
 				endPar = cc.LastParameter();
-				XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {0}", directrix->Model->Header->FileName->OriginatingSystem);
+				XbimGeometryCreator::LogInfo(logger, directrix, "Polyline trim (0:1) does not comply with schema. {originatingSystem}", directrix->Model->Header->FileName->OriginatingSystem);
 			}
 			else
 			{

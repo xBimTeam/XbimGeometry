@@ -5,19 +5,11 @@
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
-		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-		<Version>5.7.2-V9Experimental</Version>
-		<SignAssembly>False</SignAssembly>
-		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/</GeometryEnginePath>
-		<AssemblyVersion>6.1.1.0</AssemblyVersion>
-		<FileVersion>6.1.1.0</FileVersion>
-		<GenerateDocumentationFile>False</GenerateDocumentationFile>
 	</PropertyGroup>
-
 
 
 	<!--This creates the nuget package-->
@@ -123,6 +115,5 @@
 		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
 		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.294-develop" />
 	</ItemGroup>
-
 
 </Project>

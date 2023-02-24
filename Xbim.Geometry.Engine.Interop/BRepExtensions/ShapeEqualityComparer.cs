@@ -3,7 +3,7 @@ using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Interop.BRepExtensions
 {
-    public class ShapeEqualityComparer : IEqualityComparer<IXShape>
+    internal class ShapeEqualityComparer : IEqualityComparer<IXShape>
     {
         public bool Equals( IXShape x,  IXShape y)
         {

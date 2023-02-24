@@ -730,7 +730,7 @@ namespace Xbim
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
+					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{ifcEntityLabel}. It must be 2 or more. A single Profile has been used", repItem->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem, logger, _modelServices);
 					if (s->IsValid)
 					{
@@ -882,7 +882,7 @@ namespace Xbim
 			}
 			else
 			{
-				XbimGeometryCreator::LogError(logger, boolOp, "Not Implemented boolean operand {0})", boolOp->GetType()->Name);
+				XbimGeometryCreator::LogError(logger, boolOp, "Not Implemented boolean operand {ifcType})", boolOp->GetType()->Name);
 			}
 		}
 
@@ -973,7 +973,7 @@ namespace Xbim
 			}
 			catch (System::Exception^ e)
 			{
-				XbimGeometryCreator::LogError(logger, boolOp, "Failed to perform boolean result from #{0} with #{1}. {2}", boolOp->FirstOperand->EntityLabel, boolOp->SecondOperand->EntityLabel, e->Message);
+				XbimGeometryCreator::LogError(logger, boolOp, "Failed to perform boolean result from #{ifcEntityLabel1} with #{ifcEntityLabel2}. {error}", boolOp->FirstOperand->EntityLabel, boolOp->SecondOperand->EntityLabel, e->Message);
 				solids->AddRange(left);; //return the left operand
 				return;
 			}

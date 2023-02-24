@@ -666,7 +666,7 @@ namespace Xbim
 			else
 			{
 				System::Type^ type = circle->Position->GetType();
-				XbimGeometryCreator::LogError(logger, circle, "Placement of type {0} is not implemented", type->Name);
+				XbimGeometryCreator::LogError(logger, circle, "Placement of type {ifcType} is not implemented", type->Name);
 				return;
 			}
 

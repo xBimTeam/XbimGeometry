@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
+using Xbim.Geometry.Engine.Interop.Extensions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
@@ -178,19 +179,32 @@ namespace Xbim.Geometry.Engine.Tests
             point.Should().NotBeNull();
         }
 
+        [Fact]
+        public void CanRegisterServicesMultipleTimes()
+        {
+            //Arrange
+            var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddXbimToolkit(conf => conf.AddEsentModel().AddGeometryServices());
+
+            var count = serviceCollection.Count;
+            
+            // Act 
+            serviceCollection.AddXbimToolkit(conf => conf.AddEsentModel().AddGeometryServices());
+
+            serviceCollection.Count.Should().Be(count); 
+        }
 
         private IServiceProvider BuildServices()
         {
-            // TODO: Can't create a ServiceProvider per test - need to make internal CreateService() available
 
-            //var services = XbimServices.Current;
-            //services.ConfigureServices(s => s
-            //    //.AddXbimToolkit()
-            //    .AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)))
-            //    .AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5))
-            //);
+            IServiceCollection services = new ServiceCollection();
+            services
+                .AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)))
+                .AddXbimToolkit(conf => conf.AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5)))
+            ;
 
-            return XbimServices.Current.ServiceProvider;
+            return services.BuildServiceProvider(); 
         }
     }
 }

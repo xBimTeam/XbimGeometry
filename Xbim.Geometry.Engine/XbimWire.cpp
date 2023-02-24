@@ -1239,7 +1239,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcArbitraryOpenProfileDef^>(profile))
 				return Init((IIfcArbitraryOpenProfileDef^)profile, logger);
 			else
-				XbimGeometryCreator::LogError(logger, profile, "Profile definition {0} is not implemented", profile->GetType()->Name);
+				XbimGeometryCreator::LogError(logger, profile, "Profile definition {ifcType} is not implemented", profile->GetType()->Name);
 
 		}
 
@@ -1294,7 +1294,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcEllipseProfileDef^>(profile))
 				return Init((IIfcEllipseProfileDef^)profile, logger);
 			else
-				XbimGeometryCreator::LogError(logger, profile, "Profile type {0} is not implemented", profile->GetType()->Name);
+				XbimGeometryCreator::LogError(logger, profile, "Profile type {ifcType} is not implemented", profile->GetType()->Name);
 		}
 
 		//Builds a wire from a CircleProfileDef
@@ -1384,7 +1384,7 @@ namespace Xbim
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::LogInfo(logger, rectProfile, "Invalid rectangle profile with a zero or less dimension, XDim = {0}, YDim = {1}. Face discarded", rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::LogInfo(logger, rectProfile, "Invalid rectangle profile with a zero or less dimension, XDim = {xDim}, YDim = {yDim}. Face discarded", rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
@@ -2308,7 +2308,7 @@ namespace Xbim
 					if (!wm.IsDone())
 					{
 						BRepBuilderAPI_WireError err = wm.Error();
-						XbimGeometryCreator::LogWarning(logger, this, "Error trimming. Trim discarded. Error {0}", (int)err);
+						XbimGeometryCreator::LogWarning(logger, this, "Error trimming. Trim discarded. Error {occError}", (int)err);
 						return this;
 					}
 

@@ -757,7 +757,7 @@ namespace Xbim
 						goto makePlane;
 					}
 					if (!planeMaker.Found())
-						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build planar face due to a non-planar wire, entity #{0}", entityLabel);
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build planar face due to a non-planar wire, entity #{ifcEntityLabel}", entityLabel);
 					else
 					{
 						BRepBuilderAPI_MakeFace faceMaker(planeMaker.Plane()->Pln(), wire, Standard_True);
@@ -775,7 +775,7 @@ namespace Xbim
 					}
 					else
 					{
-						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build non-planar face, entity #{0}", entityLabel);
+						XbimGeometryCreator::LogWarning(logger, nullptr, "Failure to build non-planar face, entity #{ifcEntityLabel}", entityLabel);
 					}
 				}
 			}
@@ -1185,7 +1185,7 @@ namespace Xbim
 		{
 			if (rectProfile->XDim <= 0 || rectProfile->YDim <= 0)
 			{
-				XbimGeometryCreator::LogInfo(logger, rectProfile, "Profile has a dimension <= 0,  XDim = {0}, YDim = {1}. Face ignored", rectProfile->XDim, rectProfile->YDim);
+				XbimGeometryCreator::LogInfo(logger, rectProfile, "Profile has a dimension <= 0,  XDim = {xDim}, YDim = {yDim}. Face ignored", rectProfile->XDim, rectProfile->YDim);
 			}
 			else
 			{
@@ -1485,7 +1485,7 @@ namespace Xbim
 		{
 			if (sRev->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 			{
-				XbimGeometryCreator::LogWarning(logger, sRev, "Only profiles of type curve are valid in a surface of revolution {0}. Face discarded", sRev->SweptCurve->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, sRev, "Only profiles of type curve are valid in a surface of revolution {ifcEntityLabel}. Face discarded", sRev->SweptCurve->EntityLabel);
 				return;
 			}
 			XbimEdge^ edge = gcnew XbimEdge(sRev->SweptCurve, logger, _modelServices);
@@ -1532,7 +1532,7 @@ namespace Xbim
 					pFace->EmptyCopy();
 				}
 				else
-					XbimGeometryCreator::LogWarning(logger, def, "Invalid trimed surface = #{0} in rectangular trimmed surface. Face discarded", def->BasisSurface->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, def, "Invalid trimed surface = #{ifcEntityLabel} in rectangular trimmed surface. Face discarded", def->BasisSurface->EntityLabel);
 			}
 		}
 
@@ -1550,7 +1550,7 @@ namespace Xbim
 					if (innerBound->IsValid)
 						builder.Add(innerBound);
 					else
-						XbimGeometryCreator::LogWarning(logger, def, "Invalid inner bound = #{0} found in curve bounded plane. Inner bound ignored", innerCurve->EntityLabel);
+						XbimGeometryCreator::LogWarning(logger, def, "Invalid inner bound = #{ifcEntityLabel} found in curve bounded plane. Inner bound ignored", innerCurve->EntityLabel);
 
 				}
 				if (builder.IsDone())
@@ -1559,7 +1559,7 @@ namespace Xbim
 					*pFace = builder.Face();
 				}
 				else
-					XbimGeometryCreator::LogWarning(logger, def, "Invalid outer bound = #{0} found in curve bounded plane. Face discarded", def->OuterBoundary->EntityLabel);
+					XbimGeometryCreator::LogWarning(logger, def, "Invalid outer bound = #{ifcEntityLabel} found in curve bounded plane. Face discarded", def->OuterBoundary->EntityLabel);
 			}
 		}
 		void XbimFace::Init(IIfcSurfaceOfLinearExtrusion^ sLin, ILogger^ logger)
@@ -1577,7 +1577,7 @@ namespace Xbim
 		{
 			if (sLin->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 			{
-				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion {0}. Face discarded", sLin->SweptCurve->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, sLin, "Only profiles of type curve are valid in a surface of linearExtrusion #{ifcEntityLabel}. Face discarded", sLin->SweptCurve->EntityLabel);
 				return;
 			}
 			IModelFactors^ mf = sLin->Model->ModelFactors;

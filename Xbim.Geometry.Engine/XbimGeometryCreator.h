@@ -64,11 +64,13 @@ namespace Xbim
 
 			}
 			ILogger^ _logger;
+			System::IDisposable^ _loggerScope;
 			ModelGeometryService^ _modelService;
 		protected:
 			~XbimGeometryCreator()
 			{
-
+				if (_loggerScope != nullptr)
+					delete _loggerScope;
 			}
 
 		public:
@@ -80,6 +82,7 @@ namespace Xbim
 			static void LogWarning(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogError(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
 			static void LogDebug(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);
+			static void Log(ILogger^ logger, LogLevel logLevel, Object^ entity, System::String^ format, ...array<Object^>^ arg);
 
 			static int BooleanTimeOut;
 			static double FuzzyFactor;

@@ -166,7 +166,8 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 				if (myLastId == aResID) //its the same as the previous point, just ignore and carry on
 				{
 					char message[128];
-					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", keyedPnt.myID, meshVert.Location3d());
+					// We should really use structured logging here
+					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", it->myID, keyedPnt.Location3d());
 					pLoggingService->LogInformation(message);
 					hasInfo = true;
 					continue;
@@ -175,7 +176,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 				{
 					if (!warnedOfSelfIntersection)
 					{
-						pLoggingService->LogInformation("Self intersecting polyline");
+						pLoggingService->LogDebug("Self intersecting polyline");
 						hasInfo = true;
 						warnedOfSelfIntersection = true; //just do it once
 					}
@@ -191,12 +192,12 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
 		{
-			pLoggingService->LogInformation("Duplicate points removed from polyline");
+			pLoggingService->LogDebug("Duplicate points removed from polyline");
 			hasInfo = true;
 		}
 		if (actualPointCount < 2)
 		{
-			pLoggingService->LogInformation("Polyline must have at least 2 vertices");
+			pLoggingService->LogDebug("Polyline must have at least 2 vertices");
 			hasInfo = true;
 			return TopoDS_Wire();
 		}
@@ -254,9 +255,10 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 			double segLength = edgeVec.Magnitude();
 			if (segLength < pointTolerance)
 			{
+				// We should used structured logging if we can.
 				char message[128];
 				sprintf_s(message, 128, "Polyline point ignored: (%f,%f,%f) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
-				pLoggingService->LogInformation(message);
+				pLoggingService->LogDebug(message);
 				hasInfo = true;
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two

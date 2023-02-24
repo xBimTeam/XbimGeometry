@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
@@ -145,11 +146,10 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(10, true, true)]
         public void Can_convert_ifc_circle_2d(double radius, bool location3d = false, bool checkException = false)
         {
-           
             var ifcCircle = IfcMoq.IfcCircle2dMock(radius: radius, location: location3d ? IfcMoq.IfcAxis2Placement3DMock() : null);
             var curveFactory = _modelSvc.CurveFactory;
             if (checkException)
-                ifcCircle.Invoking(c => curveFactory.Build(c)).Should().Throw<Exception>();
+                ifcCircle.Invoking(c => curveFactory.Build(c)).Should().Throw<XbimGeometryFactoryException>();
             else
             {
                 var circle = curveFactory.Build(ifcCircle);

@@ -91,6 +91,21 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Theory(Skip = "SRL To investigate: Volume difference")]
+        [InlineData("SweptDiskSolid_1", 15902.721708130202/*, DisplayName = "Directrix is polyline"*/)]
+        public void SweptDiskSolidTest_ToFix(string fileName, double requiredVolume)
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
+            {
+                var sweptDisk = model.Instances.OfType<IIfcSweptDiskSolid>().FirstOrDefault();
+                sweptDisk.Should().NotBeNull();
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
+                var solid = geomEngine.CreateSolid(sweptDisk, _logger);
+                solid.Should().NotBeNull();
+                solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+            }
+        }
+
         [Theory]
         [InlineData("SweptDiskSolidPolygonal_1", 83575.33307798137/*, DisplayName = "IFC SweptDiskSolidPolygonal reference test"*/)]
         public void SweptDiskSolidPolygonalTest(string fileName, double requiredVolume)

@@ -423,12 +423,12 @@ namespace Xbim
 
 			if (semiAx1 <= 0)
 			{
-				XbimGeometryCreator::LogWarning(logger, ellipse, "WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse, "WC002: Illegal Ellipse Semi Axis 1, must be greater than 0, in entity #{ifcEntityLabel}", ellipse->EntityLabel);
 				return;
 			}
 			if (semiAx2 <= 0)
 			{
-				XbimGeometryCreator::LogWarning(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{0}", ellipse->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, ellipse, "WE005: Illegal Ellipse Semi Axis 2, must be greater than 0, in entity #{ifcEntityLabel}", ellipse->EntityLabel);
 				return;
 			}
 			bool rotateElipse = false;
