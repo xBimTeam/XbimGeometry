@@ -10,7 +10,7 @@ using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
-using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Configuration;
 using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
@@ -36,15 +36,6 @@ namespace Xbim.Geometry.Engine.Interop
         private GeometryEngineOptions _engineOptions;
 
 
-
-        static XbimGeometryEngine()
-        {
-            // Initialise services with defaults. This honours any registratios made earlier.
-            if (XbimServices.Current.IsBuilt == false)
-            {
-                XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => conf.AddGeometryServices()));
-            }
-        }
 
         private XbimGeometryEngine() { }
 
@@ -194,9 +185,7 @@ namespace Xbim.Geometry.Engine.Interop
         }
 
 
-        /// <summary>
-        /// Gets the ModelService associated with the engine
-        /// </summary>
+
         public IXModelGeometryService ModelService
         {
             get
@@ -206,10 +195,7 @@ namespace Xbim.Geometry.Engine.Interop
                 return factory.GeometryConverterFactory.GetUnderlyingModelGeometryService(_engine);
             }
         }
-
-        /// <summary>
-        /// Gets the native Geometry Engine
-        /// </summary>
+        
         protected IXbimGeometryEngine Engine
         {
             get
@@ -220,17 +206,13 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         public IXbimGeometryObject Create(IIfcGeometricRepresentationItem ifcRepresentation, ILogger logger)
-
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, ifcRepresentation))
             {
                 return Engine.Create(ifcRepresentation, null, logger);
             }
         }
-
 
         public XbimShapeGeometry CreateShapeGeometry(IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle, XbimGeometryType storageType, ILogger logger)
@@ -762,26 +744,11 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        /// <summary>
-        /// Writes a triangulation to the provided TextWriter
-        /// </summary>
-        /// <param name="tw"></param>
-        /// <param name="shape"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="deflection"></param>
         public void WriteTriangulation(TextWriter tw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(tw, shape, tolerance, deflection: deflection, angle: 0.5);
         }
 
-        /// <summary>
-        /// Writes a triangulation to the provided TextWriter
-        /// </summary>
-        /// <param name="tw"></param>
-        /// <param name="shape"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="deflection"></param>
-        /// <param name="angle"></param>
         public void WriteTriangulation(TextWriter tw, IXbimGeometryObject shape, double tolerance, double deflection, double angle)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shape))
@@ -789,15 +756,6 @@ namespace Xbim.Geometry.Engine.Interop
                 Engine.WriteTriangulation(tw, shape, tolerance, deflection, angle);
             }
         }
-
-        /// <summary>
-        /// Writes a triangulation to the provided BinaryWriter
-        /// </summary>
-        /// <param name="bw"></param>
-        /// <param name="shape"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="deflection"></param>
-        /// <param name="angle"></param>
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection, double angle)
         {
             using (new Tracer(LogHelper.CurrentFunctionName(), this._logger, shape))
@@ -806,14 +764,6 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        /// <summary>
-        /// Creates a mesh for the given <see cref="IXbimGeometryObject"/>
-        /// </summary>
-        /// <param name="receiver"></param>
-        /// <param name="geometryObject"></param>
-        /// <param name="precision"></param>
-        /// <param name="deflection"></param>
-        /// <param name="angle"></param>
         public void Mesh(IXbimMeshReceiver receiver, IXbimGeometryObject geometryObject, double precision, double deflection,
             double angle = 0.5)
         {
@@ -823,13 +773,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        /// <summary>
-        /// Writes a triangulation to the provided BinaryWriter
-        /// </summary>
-        /// <param name="bw"></param>
-        /// <param name="shape"></param>
-        /// <param name="tolerance"></param>
-        /// <param name="deflection"></param>
+
         public void WriteTriangulation(BinaryWriter bw, IXbimGeometryObject shape, double tolerance, double deflection)
         {
             WriteTriangulation(bw, shape, tolerance, deflection: deflection, angle: 0.5);
@@ -847,7 +791,7 @@ namespace Xbim.Geometry.Engine.Interop
             }
             catch (Exception e)
             {
-                (logger ?? _logger).LogError("EE001: Failed to create geometry #{ifcEntityLabel} of type {ifcType}, {error}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
+                (logger ?? _logger).LogError("EE001: Failed to create geometry #{0} of type {1}, {2}", ifcRepresentation.EntityLabel, ifcRepresentation.GetType().Name, e.Message);
                 return null;
             }
 
@@ -1032,22 +976,12 @@ namespace Xbim.Geometry.Engine.Interop
             }
         }
 
-        /// <summary>
-        /// Write the <see cref="IXbimGeometryObject"/> Brep to a file
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <param name="geomObj"></param>
         public void WriteBrep(string filename, IXbimGeometryObject geomObj)
         {
             // no logger is provided so no tracing is started for this function
             Engine.WriteBrep(filename, geomObj);
         }
 
-        /// <summary>
-        /// Read a <see cref="IXbimGeometryObject"/> Brep from a file
-        /// </summary>
-        /// <param name="filename"></param>
-        /// <returns></returns>
         public IXbimGeometryObject ReadBrep(string filename)
         {
             // no logger is provided so no tracing is started for this function
@@ -1056,8 +990,7 @@ namespace Xbim.Geometry.Engine.Interop
 
     }
 
-
-    internal static class LogHelper
+    public static class LogHelper
     {
         public static string CurrentFunctionName([CallerMemberName] string caller = "")
         {

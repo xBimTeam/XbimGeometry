@@ -5,13 +5,8 @@ using Xbim.Geometry.Abstractions.WexBim;
 
 namespace Xbim.Geometry.WexBim
 {
+    public delegate int ReadIndex(byte[] array, int offset);
 
-
-    internal delegate int ReadIndex(byte[] array, int offset);
-
-    /// <summary>
-    /// Class representing an xbim Mesh in the wexbim format
-    /// </summary>
     public class WexBimMesh : IWexBimMesh
     {
         private byte[] _array;
@@ -19,34 +14,14 @@ namespace Xbim.Geometry.WexBim
         const int VertexCountPos = VersionPos + sizeof(byte);
         const int TriangleCountPos = VertexCountPos + sizeof(int);
         const int VertexPos = TriangleCountPos + sizeof(int);
-
-        /// <summary>
-        /// Constructs a new <see cref="WexBimMesh"/> from a <see cref="byte"/>[]
-        /// </summary>
-        /// <param name="meshData"></param>
         public WexBimMesh(byte[] meshData)
         {
             _array = meshData;
         }
 
-        /// <summary>
-        /// Gets the version of the wexbim file
-        /// </summary>
         public byte Version => _array?.Length > 0 ? _array[VersionPos] : (byte)0;
-
-        /// <summary>
-        /// Gets the number of Vertices in the file
-        /// </summary>
         public int VertexCount => _array?.Length > 0 ? BitConverter.ToInt32(_array, VertexCountPos) : 0;
-
-        /// <summary>
-        /// Gets the number of Triangles in the file
-        /// </summary>
         public int TriangleCount => _array?.Length > 0 ? BitConverter.ToInt32(_array, TriangleCountPos) : 0;
-
-        /// <summary>
-        /// Gets the number of Faces in the file
-        /// </summary>
         public int FaceCount
         {
             get
@@ -55,22 +30,8 @@ namespace Xbim.Geometry.WexBim
                 return _array?.Length > 0 ? BitConverter.ToInt32(_array, faceCountPos) : 0;
             }
         }
-
-        /// <summary>
-        /// Gets the size of the file in bytes
-        /// </summary>
         public int Length => _array?.Length > 0 ? _array.Length : 0;
-
-        /// <summary>
-        /// Gets the underlying <see cref="byte"/>[] of the file
-        /// </summary>
-        /// <returns></returns>
         public byte[] ToByteArray() => _array;
-
-
-        /// <summary>
-        /// Returns the Vertices
-        /// </summary>
         public IEnumerable<IFloat3> Vertices
         {
             get
@@ -101,10 +62,6 @@ namespace Xbim.Geometry.WexBim
 
             }
         }
-
-        /// <summary>
-        /// Gets the Faces
-        /// </summary>
         public IEnumerable<IWexBimMeshFace> Faces
         {
             get
@@ -140,10 +97,7 @@ namespace Xbim.Geometry.WexBim
 
     }
 
-    /// <summary>
-    /// Class representing a wexbim face mesh
-    /// </summary>
-    internal class WexBimMeshFace : IWexBimMeshFace
+    public class WexBimMeshFace : IWexBimMeshFace
     {
         private byte[] _array;
         private int _offsetStart;
@@ -275,36 +229,18 @@ namespace Xbim.Geometry.WexBim
         
     }
 
-    /// <summary>
-    /// A three dimensional vector
-    /// </summary>
     public struct Vector3 : IFloat3
     {
         const double PackSize = 252;
         const double PackTolerance = 1e-4;
         float _x; float _y; float _z;
-
-        /// <summary>
-        /// The X component of the vector
-        /// </summary>
         public float X => _x;
-        /// <summary>
-        /// The Y component of the vector
-        /// </summary>
 
         public float Y => _y;
-        /// <summary>
-        /// The Z component of the vector
-        /// </summary>
 
         public float Z => _z;
 
 
-        /// <summary>
-        /// Constructs a new vector from UV coordinates
-        /// </summary>
-        /// <param name="u"></param>
-        /// <param name="v"></param>
         public Vector3(short u, short v) : this()
         {
             var lon = u / PackSize * Math.PI * 2;
@@ -316,12 +252,6 @@ namespace Xbim.Geometry.WexBim
 
         }
 
-        /// <summary>
-        /// Constructs a new vector from X, Y and Z components
-        /// </summary>
-        /// <param name="v1"></param>
-        /// <param name="v2"></param>
-        /// <param name="v3"></param>
         public Vector3(float v1, float v2, float v3)
         {
             _x = v1;

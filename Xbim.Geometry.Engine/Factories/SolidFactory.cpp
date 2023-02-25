@@ -188,12 +188,6 @@ namespace Xbim
 				return  gcnew XSolid(solid);
 			}
 
-			IXSolid^ SolidFactory::Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid)
-			{
-				// TODO: SRL
-				throw gcnew System::NotImplementedException("Build IfcHalfSpaceSolid not implemented yet");
-			}
-
 			///this method builds all solid models and is the main entry point
 			//all methods called will throw an excpetion if they cannot build their part of a solid
 			TopoDS_Shape SolidFactory::BuildSolidModel(IIfcSolidModel^ ifcSolid)

@@ -3,10 +3,16 @@
 	<PropertyGroup>
 		<TargetFrameworks>net472;net6.0</TargetFrameworks>
 		<Title>Xbim ModelGeometry Scene</Title>
+		<IsPackable>true</IsPackable>
 		<Description>Provides support for the Geometry Scene creation.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <NoWarn>CS1591</NoWarn>
+		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
+		<Version>5.1.0.0-Dev</Version>
+		<AssemblyVersion>5.1.0.1</AssemblyVersion>
+		<FileVersion>5.1.0.1</FileVersion>
+		<SignAssembly>False</SignAssembly>
+		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
 	

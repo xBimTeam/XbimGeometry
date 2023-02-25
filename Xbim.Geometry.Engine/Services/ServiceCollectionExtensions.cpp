@@ -1,6 +1,5 @@
 #pragma warning(disable:4691) //turn off netstandard 2.0 library warnings, its in the same module
 #include "ServiceCollectionExtensions.h"
-#include "../storage/BRepDocumentManager.h"
 #include "../Primitives/GeometryPrimitives.h"
 #include "ShapeService.h"
 using namespace Xbim::Geometry::DependencyInjection;

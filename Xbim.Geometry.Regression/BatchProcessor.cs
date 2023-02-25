@@ -324,7 +324,7 @@ namespace XbimRegression
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    logger.LogError(ex, "Problem converting file: {ifcFile}", ifcFile);
+                    logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
@@ -350,7 +350,7 @@ namespace XbimRegression
             IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
             {
-                logger.LogError("Missing file to parse: '{ifcFileName}'", ifcFileName);
+                logger.LogError("Missing file to parse: '{0}'", ifcFileName);
                 return null;
             }
             // create a callback for progress

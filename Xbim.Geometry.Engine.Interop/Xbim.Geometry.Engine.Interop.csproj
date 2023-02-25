@@ -5,6 +5,7 @@
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
+		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -15,6 +16,24 @@
 	<!--This creates the nuget package-->
 	<PropertyGroup>
 		<TargetsForTfmSpecificContentInPackage>GetNativeOccFiles;GetGeometryEngineFiles;GetIjwHostFiles</TargetsForTfmSpecificContentInPackage>
+		<Version>5.1.0.0-develop</Version>
+		<SignAssembly>False</SignAssembly>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+	  <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+	  <NoWarn>CS1591;NU5104</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
+	  <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+	  <NoWarn>CS1591;NU5104</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
+	  <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+	  <NoWarn>CS1591;NU5104</NoWarn>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
+	  <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+	  <NoWarn>CS1591;NU5104</NoWarn>
 	</PropertyGroup>
 
 	<Target Name="GetGeometryEngineFiles">
@@ -113,7 +132,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.294-develop" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.295-develop" />
 	</ItemGroup>
 
 </Project>

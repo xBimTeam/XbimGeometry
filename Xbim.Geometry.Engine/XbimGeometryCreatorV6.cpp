@@ -222,7 +222,7 @@ namespace Xbim
 					if (objectLocation != nullptr) this->LogError(geomRep, "Move is not implemented for IIfcGeometricSet");
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep, Logger());
 				}
-				throw gcnew System::NotSupportedException("Geometry Representation Item is not supported: " + geomRep->GetType()->Name);
+				throw gcnew System::NotSupportedException("Geometry Representation Item is not supported");
 			}
 			catch (System::Exception^ e)
 			{
@@ -1036,12 +1036,12 @@ namespace Xbim
 					System::String^ err = gcnew System::String(sf.GetMessageString());
 
 					failedGridLines = true;
-					this->LogWarning(grid, "Grid axis #{ifcEntityLabel} caused exception. Status={geomStatus}, {occError}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
+					this->LogWarning(grid, "Grid axis #{0} caused exception. Status={1}, {2}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus), err);
 					failedGridLines = true;
 				}
 				catch (...)
 				{
-					this->LogWarning(grid, "Grid axis #{ifcEntityLabel} caused internal exception. Status={geomStatus}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
+					this->LogWarning(grid, "Grid axis #{0} caused internal exception. Status={1}", curveWithTag->Item1.ToString(), gcnew System::Int32(pipeMakerStatus));
 					failedGridLines = true;
 				}
 

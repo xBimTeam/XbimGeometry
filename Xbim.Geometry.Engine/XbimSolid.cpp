@@ -1854,7 +1854,7 @@ namespace Xbim
 					BRepGProp::VolumeProperties(solid, gProps);
 					return gProps.Mass();
 				}
-				catch (const Standard_Failure& sf)
+				catch (const Standard_Failure& )
 				{
 					_modelServices->LogError("Error calculating volume");
 					return 0;

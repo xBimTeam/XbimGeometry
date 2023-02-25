@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
+
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Engine.Interop;
-using Xbim.Geometry.Engine.Interop.Extensions;
+
+using Xbim.Geometry.Engine.Extensions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 namespace Xbim.Geometry.Engine.Tests
@@ -28,14 +28,12 @@ namespace Xbim.Geometry.Engine.Tests
 
         public void ConfigureServices(IServiceCollection services)
         {
-
+            
             services
                 .AddLogging(configure => configure
                     .SetMinimumLevel(DefaultLogLevel)
                     .AddConsole())
-                .AddXbimToolkit(configure => configure
-                    .AddMemoryModel()
-                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V5))
+                .AddXbimToolkit(configure => configure.Services.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V5))
                     )
                 ;
 

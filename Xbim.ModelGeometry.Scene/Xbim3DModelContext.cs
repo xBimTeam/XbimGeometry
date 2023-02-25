@@ -484,10 +484,6 @@ namespace Xbim.ModelGeometry.Scene
 
 
         private readonly ILogger _logger;
-        /// <summary>
-        /// Defines the duration milliseconds that Boolean operations will be allowed to run for.
-        /// </summary>
-        /// <remarks>Defaults to 60 secomds if not specified in 'BooleanTimeOut' appSetting - but overideable statically</remarks>
         static public int BooleanTimeOutMilliSeconds;
         private readonly IfcRepresentationContextCollection _contexts;
         private readonly IXbimGeometryEngine _engine;
@@ -569,15 +565,6 @@ namespace Xbim.ModelGeometry.Scene
 
             }
         }
-
-        /// <summary>
-        /// Initialises a model context from the model
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="loggerFactory"></param>
-        /// <param name="engineVersion"></param>
-        /// <param name="contextType"></param>
-        /// <param name="requiredContextIdentifier"></param>
         public Xbim3DModelContext(IModel model, ILoggerFactory loggerFactory, XGeometryEngineVersion engineVersion, string contextType = "model", string requiredContextIdentifier = null)
             :this(model, contextType, requiredContextIdentifier, loggerFactory.CreateLogger<Xbim3DModelContext>(), engineVersion, loggerFactory)
         {
@@ -600,16 +587,12 @@ namespace Xbim.ModelGeometry.Scene
         {
             var xbimServices = XbimServices.Current;
             var services = xbimServices.ServiceProvider;
-            var factory = services.GetService<IXbimGeometryServicesFactory>();
-            if(factory == null)
-            {
-                throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found\n\nEnsure you have registered the GeometryEngine with services.AddXbimGeometryEngine()");
-            }
-            
+            var factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
+
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
+             _logger = logger ?? (xbimServices.CreateLogger<XbimGeometryEngine>());
             _model = model;
-            if(loggerFactory==null) loggerFactory = xbimServices.GetLoggerFactory();
-            _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
+            if(loggerFactory==null) loggerFactory= xbimServices.GetLoggerFactory();
             
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
 
@@ -706,9 +689,6 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        /// <summary>
-        /// Gets the mode associated with this <see cref="Xbim3DModelContext"/>
-        /// </summary>
         public IModel Model
         {
             get { return _model; }
@@ -791,42 +771,15 @@ namespace Xbim.ModelGeometry.Scene
             return true;
         }
 
-        /// <summary>
-        /// Enum defining Meshing behaviour
-        /// </summary>
         [Flags]
         public enum MeshingBehaviourResult
         {
-            /// <summary>
-            /// Perform additions
-            /// </summary>
             PerformAdditions = 1,
-            /// <summary>
-            /// Perform subtractuions
-            /// </summary>
             PerformSubtractions = 2,
-            /// <summary>
-            /// Replace bounding boxes
-            /// </summary>
             ReplaceBoundingBox = 4,
-            /// <summary>
-            /// Skip Meshing
-            /// </summary>
             Skip = 8,
-            /// <summary>
-            /// Default Meshing
-            /// </summary>
             Default = PerformAdditions | PerformSubtractions
         }
-
-        /// <summary>
-        /// Delegate enabling custom meshing behaviour
-        /// </summary>
-        /// <param name="elementId"></param>
-        /// <param name="typeId"></param>
-        /// <param name="linearDeflection"></param>
-        /// <param name="angularDeflection"></param>
-        /// <returns></returns>
 
         public delegate MeshingBehaviourResult MeshingBehaviourSetter(int elementId, int typeId, ref double linearDeflection,
             ref double angularDeflection);
@@ -1695,10 +1648,6 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        /// <summary>
-        /// Returns the list of ShapeGeometries in the model in this context.
-        /// </summary>
-        /// <returns></returns>
         public IEnumerable<XbimShapeGeometry> ShapeGeometries()
         {
 
@@ -1711,11 +1660,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        /// <summary>
-        /// Returns a single <see cref="XbimShapeGeometry"/> matching the provided label
-        /// </summary>
-        /// <param name="shapeGeometryLabel"></param>
-        /// <returns></returns>
+
         public XbimShapeGeometry ShapeGeometry(int shapeGeometryLabel)
         {
             using (var reader = _model.GeometryStore.BeginRead())
@@ -1724,20 +1669,11 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-        /// <summary>
-        /// Returns a single <see cref="XbimShapeGeometry"/> matching the provided ShapeInstance's label
-        /// </summary>
-        /// <param name="shapeInstance"></param>
-        /// <returns></returns>
         public XbimShapeGeometry ShapeGeometry(XbimShapeInstance shapeInstance)
         {
             return ShapeGeometry(shapeInstance.ShapeGeometryLabel);
         }
 
-        /// <summary>
-        /// Returns the list of regions in the context
-        /// </summary>
-        /// <returns></returns>
         public IEnumerable<XbimRegion> GetRegions()
         {
             var contextIds = _contexts.Select(c => c.EntityLabel).ToList();
@@ -1809,12 +1745,6 @@ namespace Xbim.ModelGeometry.Scene
                 );
         }
 
-        /// <summary>
-        /// Gets the list of <see cref="XbimShapeInstance"/> matching the label
-        /// </summary>
-        /// <param name="geometryLabel"></param>
-        /// <param name="ignoreFeatures"></param>
-        /// <returns></returns>
         public IEnumerable<XbimShapeInstance> ShapeInstancesOf(int geometryLabel, bool ignoreFeatures = false)
         {
             using (var reader = _model.GeometryStore.BeginRead())

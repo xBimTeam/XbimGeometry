@@ -6,11 +6,12 @@
   <PropertyGroup>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <GenerateDocumentationFile Condition=" '$(IsTestProject)' != 'true' ">true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>6.0.0.0</Version>
-    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <Version>5.1.0.0</Version>
+    <AssemblyVersion>5.1.0.0</AssemblyVersion>
     <Copyright>Copyright © XBIM Ltd</Copyright>
     <Company>Xbim Ltd.</Company>
     <Authors>Steve Lockley, Martin Cerny and XBIMTeam Contributors</Authors>
@@ -21,11 +22,13 @@
     <PackageReleaseNotes>TODO: Update for v6. See https://github.com/xBimTeam/XbimGeometry/blob/master/CHANGELOG.md
     </PackageReleaseNotes>
     <PackageTags>BIM, IFC, Geometry, Meshing, Tesselation</PackageTags>
-    <RepositoryUrl>https://github.com/xBimTeam/XbimGeometry/tree/master</RepositoryUrl>
+    <RepositoryUrl>https://github.com/xBimTeam/XbimEssentials/tree/master</RepositoryUrl>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <SignAssembly>false</SignAssembly>
-    <LangVersion>9.0</LangVersion>
+    <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
+    <SignAssembly>true</SignAssembly>   
+    <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>   
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
 </Project>

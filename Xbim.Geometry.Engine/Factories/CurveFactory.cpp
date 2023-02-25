@@ -767,63 +767,6 @@ namespace Xbim
 				return bspline;
 			}
 
-			void CurveFactory::BuildIndexPolyCurveSegments2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom2d_SequenceOfBoundedCurve& segments)
-			{
-
-				IIfcCartesianPointList2D^ pointList2D = dynamic_cast<IIfcCartesianPointList2D^>(ifcIndexedPolyCurve->Points);
-				if (pointList2D == nullptr)
-					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve point list is not 2D", ifcIndexedPolyCurve->Points);
-
-
-				//get a index of all the points
-				int pointCount = pointList2D->CoordList->Count;
-				TColgp_Array1OfPnt2d poles(1, pointCount);
-				int i = 1;
-				for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in pointList2D->CoordList)
-				{
-					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
-					enumer->MoveNext();
-					gp_Pnt2d p;
-					p.SetX((double)enumer->Current);
-					enumer->MoveNext();
-					p.SetY((double)enumer->Current);
-					poles.SetValue(i, p);
-					i++;
-				}
-
-				if (ifcIndexedPolyCurve->Segments != nullptr && Enumerable::Any(ifcIndexedPolyCurve->Segments))
-				{
-
-
-					for each (IIfcSegmentIndexSelect ^ segment in  ifcIndexedPolyCurve->Segments)
-					{
-						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
-						Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
-						if (arcIndex != nullptr)
-						{
-
-							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
-							if (indices->Count != 3)
-								throw RaiseGeometryFactoryException("There should be three indices in an arc index segment", ifcIndexedPolyCurve);
-							gp_Pnt2d start = poles.Value((int)indices[0]);
-							gp_Pnt2d mid = poles.Value((int)indices[1]);
-							gp_Pnt2d end = poles.Value((int)indices[2]);
-							Handle(Geom2d_Circle) circle = OccHandle().BuildCircle2d(start, mid, end);
-							if (!circle.IsNull()) //it is a valid arc
-							{
-								Handle(Geom2d_TrimmedCurve) arcSegment = OccHandle().BuildTrimmedCurve2d(circle, start, end, ModelGeometryService->MinimumGap);
-								if (arcSegment.IsNull())
-									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
-								segments.Append(arcSegment);
-							}
-							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
-							{
-								LogDebug(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
-								Handle(Geom2d_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine2d(start, end);
-								if (lineSegment.IsNull())
-									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
-								segments.Append(lineSegment);
-
 
 			Handle(Geom2d_LineWithMagnitude) CurveFactory::BuildCurve2d(IIfcLine^ ifcLine)
 			{
@@ -868,7 +811,7 @@ namespace Xbim
 					gp_Pnt2d end = GEOMETRY_FACTORY->BuildPoint2d(ifcPolyline->Points[1]);
 					if (start.IsEqual(end, ModelGeometryService->Precision))
 					{
-						LogDebug(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
+						LogInformation(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
 						return Handle(Geom2d_Curve)();
 					}
 					Handle(Geom2d_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine2d(start, end);
@@ -1086,7 +1029,7 @@ namespace Xbim
 							}
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
 							{
-								LogDebug(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
 								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
@@ -1150,7 +1093,7 @@ namespace Xbim
 					{
 						//the parameters must be in radians
 						if (startParam > 2 * Math::PI || endParam > Math::PI * 2)
-							LogDebug(curve, "Directix trims parameters of periodice curves should be in radians");
+							LogInformation(curve, "Directix trims parameters of periodice curves should be in radians");
 						Handle(Geom_Curve)  geomCurveTrimmed = new Geom_TrimmedCurve(geomCurve, startParam, endParam);
 						if (geomCurve.IsNull())
 							throw RaiseGeometryFactoryException("Directrix could not be trimmed");
@@ -1336,185 +1279,24 @@ namespace Xbim
 						/*if (!segment->SameSense)
 							boundedCurve->Reverse();*/
 						segments.Append(boundedCurve);
-					}
-
+					} 
 				}
 			}
-
-
-			Handle(Geom_TrimmedCurve) CurveFactory::BuildCurve3d(IIfcTrimmedCurve^ ifcTrimmedCurve)
+			 
+			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildLinearSegment(const gp_Pnt2d& start, const gp_Pnt2d& end)
 			{
-				//Validation
-				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-					LogDebug(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
-				XCurveType curveType;
-				Handle(Geom_Curve) basisCurve = BuildCurve3d(ifcTrimmedCurve->BasisCurve, curveType);
-				if (!basisCurve.IsNull())
-				{
-					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool sense = ifcTrimmedCurve->SenseAgreement;
-					//get the parametric values
-					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
-
-					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
-					IIfcCartesianPoint^ cp1 = nullptr;
-					IIfcCartesianPoint^ cp2 = nullptr;
-
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
-					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
-						else u1 = (double)(IfcParameterValue)trim; //its parametric	
-					}
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
-					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
-						else u2 = (double)(IfcParameterValue)trim; //its parametric	
-					}
-
-					if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
-						(cp1 != nullptr && cp2 != nullptr &&
-							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
-					{
-						gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(cp1);
-						gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(cp2);
-						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
-							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
-						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
-							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
-					}
-					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
-					else //we prefer to use parameters but need to adjust
-					{
-						if (isConic)
-						{
-							u1 *= ModelGeometryService->RadianFactor; //correct to radians
-							u2 *= ModelGeometryService->RadianFactor; //correct to radians
-
-						}
-					}
-
-					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
-
-					if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
-					{
-						if (isConic) 
-							return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-						else
-						{
-							LogDebug(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
-							return Handle(Geom_TrimmedCurve)();
-						}
-					}
-					else
-						return Ptr()->BuildTrimmedCurve3d(basisCurve, u1, u2, sense);
-				}
-				else
-					throw RaiseGeometryFactoryException("Failed to build Trimmed Basis Curve", ifcTrimmedCurve->BasisCurve);
-
-			}
-
-			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildCurve2d(IIfcTrimmedCurve^ ifcTrimmedCurve)
-			{
-
-
-				//Validation
-				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-					throw RaiseGeometryFactoryException("Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed.");
-				XCurveType curveType;
-				Handle(Geom2d_Curve) basisCurve = BuildCurve2d(ifcTrimmedCurve->BasisCurve, curveType);
-				if (!basisCurve.IsNull())
-				{
-					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					bool sense = ifcTrimmedCurve->SenseAgreement;
-					//get the parametric values
-					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
-
-					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
-					IIfcCartesianPoint^ cp1 = nullptr;
-					IIfcCartesianPoint^ cp2 = nullptr;
-
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim1)
-					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp1 = (IIfcCartesianPoint^)trim;
-						else u1 = (double)(IfcParameterValue)trim; //its parametric	
-					}
-					for each (IIfcTrimmingSelect ^ trim in ifcTrimmedCurve->Trim2)
-					{
-						if (dynamic_cast<IIfcCartesianPoint^>(trim))cp2 = (IIfcCartesianPoint^)trim;
-						else u2 = (double)(IfcParameterValue)trim; //its parametric	
-					}
-
-					if ((trim_cartesian && cp1 != nullptr && cp2 != nullptr) ||
-						(cp1 != nullptr && cp2 != nullptr &&
-							(double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)))) //we want cartesian and we have both or we don't have both parameters but have cartesians
-					{
-						gp_Pnt2d p1;
-						gp_Pnt2d p2;
-						if (!GEOMETRY_FACTORY->BuildPoint2d(cp1, p1))
-							throw RaiseGeometryFactoryException("Trim Point1 is not a 2d point", cp1);
-						if (!GEOMETRY_FACTORY->BuildPoint2d(cp2, p2))
-							throw RaiseGeometryFactoryException("Trim Point2 is not a 2d point", cp1);
-						if (!GeomLib_Tool::Parameter(basisCurve, p1, ModelGeometryService->MinimumGap, u1))
-							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
-						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
-							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
-					}
-					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
-						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");
-					else //we prefer to use parameters but need to adjust
-					{
-						if (isConic)
-						{
-							u1 *= ModelGeometryService->RadianFactor; //correct to radians
-							u2 *= ModelGeometryService->RadianFactor; //correct to radians
-						}
-					}
-					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
-						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points");
-					if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
-					{
-						if (isConic) 
-							return Ptr()->BuildTrimmedCurve2d(basisCurve, 0, Math::PI * 2, true); //return a full circle
-						else
-						{
-							LogDebug(ifcTrimmedCurve->BasisCurve, "Parametric Trim Points are equal and will result in an empty curve");
-							return Handle(Geom2d_TrimmedCurve)();
-						}
-					}
-					else
-						return Ptr()->BuildTrimmedCurve2d(basisCurve, u1, u2, sense);
-				}
+				auto segment = EXEC_NATIVE->BuildTrimmedLine2d(start, end);
+				if (segment.IsNull())
+					throw RaiseGeometryFactoryException("Not a valid linear segment");
 				else
 					return segment;
 			}
 
-			Handle(Geom_Curve) CurveFactory::BuildCurve3d(IIfcPolyline^ ifcPolyline)
+			Handle(Geom_TrimmedCurve) CurveFactory::BuildLinearSegment(const gp_Pnt& start, const gp_Pnt& end)
 			{
-				//validate
-				int pointCount = ifcPolyline->Points->Count;
-				if (pointCount < 2)
-					throw RaiseGeometryFactoryException("IfcPolyline has less than 2 points. It cannot be built", ifcPolyline);
-				if (pointCount == 2) //just build a line
-				{
-					gp_Pnt start = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[0]);
-					gp_Pnt end = GEOMETRY_FACTORY->BuildPoint3d(ifcPolyline->Points[1]);
-					if (start.IsEqual(end, ModelGeometryService->Precision))
-						LogDebug(ifcPolyline, "IfcPolyline has only 2 identical points. It has been ignored");
-					Handle(Geom_TrimmedCurve) lineSeg = OccHandle().BuildTrimmedLine3d(start, end);
-					if (lineSeg.IsNull())
-						throw RaiseGeometryFactoryException("Invalid IfcPolyline definition", ifcPolyline);
-					return lineSeg;
-				}
+				auto segment = EXEC_NATIVE->BuildTrimmedLine3d(start, end);
+				if (segment.IsNull())
+					throw RaiseGeometryFactoryException("Not a valid linear segment");
 				else
 					return segment;
 			}

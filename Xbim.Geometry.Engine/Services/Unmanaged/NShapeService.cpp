@@ -100,5 +100,5 @@ TopoDS_Shape NShapeService::Intersect(const TopoDS_Shape& body, const TopoDS_Sha
 {
 	TopTools_ListOfShape otherShapes;
 	otherShapes.Append(otherShape);
-	return Intersect(body, otherShapes, precision);
+	return Union(body, otherShapes, precision);
 }

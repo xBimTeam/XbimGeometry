@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
@@ -8,29 +11,21 @@ using Microsoft.Extensions.Logging;
 
 namespace Xbim.Geometry.Engine.Interop
 {
-    /// <summary>
-    /// Extension methods for <see cref="IModel"/>s applying workarounds for known issues in varuous authoring tool versions
-    /// </summary>
     public static class ModelWorkArounds
     {
         //this bug exists in ifc files exported by Revit up to releases 20.1 
-        const string RevitIncorrectBsplineSweptCurve = "#RevitIncorrectBsplineSweptCurve";
+        public const string RevitIncorrectBsplineSweptCurve = "#RevitIncorrectBsplineSweptCurve";
         //this bug exists in all current Revit exported Ifc files
-        const string RevitIncorrectArcCentreSweptCurve = "#RevitIncorrectArcCentreSweptCurve";
+        public const string RevitIncorrectArcCentreSweptCurve = "#RevitIncorrectArcCentreSweptCurve";
         //this bug exists in all current Revit exported Ifc files
-        const string RevitSweptSurfaceExtrusionInFeet = "#RevitSweptSurfaceExtrusionInFeet";
-        const string PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
+        public const string RevitSweptSurfaceExtrusionInFeet = "#RevitSweptSurfaceExtrusionInFeet";
+        public const string PolylineTrimLengthOneForEntireLine = "#PolylineTrimLengthOneForEntireLine";
 
         // Incorrect precision specified in Archicad models,
         // we make the model more precise since Archicad is casual about it.
-        const string ArchicadPrecisionWorkaround = "#ArchicadPrecisionWorkaround";
+        public const string ArchicadPrecisionWorkaround = "#ArchicadPrecisionWorkaround";
 
 
-        /// <summary>
-        /// Adds ArchiCAD specific workarounds
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="_logger"></param>
         public static void AddArchicadWorkArounds(this IModel model, Microsoft.Extensions.Logging.ILogger _logger)
         {
             var header = model.Header;
@@ -56,7 +51,7 @@ namespace Xbim.Geometry.Engine.Interop
                             if (lpPrec)
                             {
                                 // we apply the workaround and exit
-                                _logger.LogWarning("Added ArchicadPrecisionWorkaround for #{ifcEntityLabel}.", faceBound.Bound.EntityLabel);
+                                _logger.LogWarning("Added ArchicadPrecisionWorkaround for #{0}.", faceBound.Bound.EntityLabel);
                                 modelFactors.Precision /= 100;
                                 modelFactors.AddWorkAround(ArchicadPrecisionWorkaround);
                                 return;

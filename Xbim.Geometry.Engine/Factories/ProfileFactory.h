@@ -28,7 +28,6 @@ namespace Xbim
 				TopLoc_Location BuildParameterizedProfilePosition(IIfcAxis2Placement^ position);
 				TopoDS_Wire BuildProfileWire(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
-				virtual IXCurve^ BuildCurve(IIfcProfileDef^ profileDef);
 			internal:
 				
 				

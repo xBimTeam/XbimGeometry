@@ -3,14 +3,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Configuration;
 
 
-namespace Xbim.Geometry.Engine.Interop.Extensions
+namespace Xbim.Geometry.Engine.Extensions
 {
-    /// <summary>
-    /// Extension methods for <see cref="IGeometryEngineBuilder"/>
-    /// </summary>
     public static class GeometryEngineBuilderExtensions
     {
         /// <summary>

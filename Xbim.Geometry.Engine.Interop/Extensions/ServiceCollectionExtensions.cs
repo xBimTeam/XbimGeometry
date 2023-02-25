@@ -4,48 +4,39 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
-using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Engine.Configuration;
 using Xbim.Ifc4.Interfaces;
 
-namespace Xbim.Geometry.Engine.Interop.Extensions
+namespace Xbim.Geometry.Engine.Extensions
 {
-    /// <summary>
-    /// ServiceCollection Extensions for xbim Geometry
-    /// </summary>
     public static class ServiceCollectionExtensions
     {
 
-        /// <summary>
-        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
-        /// </summary>
-        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
-        /// <param name="services"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
+        public static IServiceCollection AddGeometryServices(this IServiceCollection services)
         {
-            return services.AddXbimGeometryServices(delegate { });
+            return services.AddGeometryServices(delegate { });
         }
 
         /// <summary>
-        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
+        /// Adds xbim geometry to the specified <see cref="IServiceCollection"/>
         /// </summary>
-        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
-        public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
+        public static IServiceCollection AddGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
         {
             services.AddOptions();
 
             // We want the same instance of GE regardless of interface used. This 'forwarding factory' is the only approach current M.E.DI
-            services.TryAddScoped<XbimGeometryEngine>();
-            services.TryAddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
-            services.TryAddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+            services.AddScoped<XbimGeometryEngine>();
+            services.AddScoped<IXbimGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
+            services.AddScoped<IXbimManagedGeometryEngine>(x => x.GetRequiredService<XbimGeometryEngine>());
             services.AddFactory<IXbimManagedGeometryEngine>();
   
-            services.TryAddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
-            services.TryAddSingleton<XbimGeometryEngineFactory>();
-            services.AddNativeGeometryServices();
+            services.AddSingleton<IXbimGeometryServicesFactory, XbimGeometryServicesFactory>();
+            services.AddSingleton<XbimGeometryEngineFactory>();
+            services.AddXbimGeometryServices();
             
             
             services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(Abstractions.XGeometryEngineVersion.V6)));
@@ -58,7 +49,7 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        private static IServiceCollection AddNativeGeometryServices(this IServiceCollection services)
+        private static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
         {
             // We can't invoke the mixed mode/native code directly. We have to go via reflection to invoke:
             // Xbim.Geometry.DependencyInjection.ServiceCollectionExtensions.AddXbimGeometryEngine(services);
@@ -75,7 +66,7 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
 
 
         /// <summary>
-        /// Shorthand for adding service of <see cref="Func{T, TResult}"/> where TResult is<typeparamref name="TService"/>
+        /// Shorthand for adding service of see cref="Func{}" where TResult is<typeparamref name="TService"/>
         /// </summary>
         /// <typeparam name="TService"></typeparam>
         /// <param name="serviceCollection"></param>
@@ -84,9 +75,8 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
             where TService : class
          
         {
-            serviceCollection
-                .TryAddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
-            return serviceCollection;
+            return serviceCollection
+                .AddSingleton<Func<TService>>(sp => sp.GetRequiredService<TService>);
         }
         
 

@@ -51,7 +51,7 @@ namespace Xbim
 						//LogInformation("Native Logger handle released");
 					}
 					else
-						LogWarning("Duplicate call to release Native Logger");
+						LogInformation("Duplicate call to release Native Logger");
 					return XbimHandle::ReleaseHandle();
 				}
 				virtual property ILogger^ Logger {ILogger^  get() { return _logger; }};

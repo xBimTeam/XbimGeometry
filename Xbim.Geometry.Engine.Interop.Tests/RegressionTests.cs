@@ -4,7 +4,6 @@ using System.Diagnostics;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
-using Xbim.IO.Memory;
 using Xunit;
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -26,7 +25,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void IfcHalfspace_FailingGeom()
         {
-            using (var m = MemoryModel.OpenRead("TestFiles\\Regression\\FailingGeom.ifc"))
+            using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
             {
                 var geomEngine = new XbimGeometryEngine(m, _loggerFactory);
                 var extSolid = m.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(hs => hs.EntityLabel == 185025);

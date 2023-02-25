@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.Geometry.Engine.Interop.Tests;
+
 using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.GeometricModelResource;
 using Xbim.Ifc4.Interfaces;
@@ -154,8 +154,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
 
         }
-
-        [Fact(Skip = "SRL to investigate - solid set count difference")]
+        [Fact]
         public void closed_shell_is_valid_test()
         {
             using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(closed_shell_is_valid_test)))
@@ -292,7 +291,7 @@ namespace Xbim.Geometry.Engine.Tests
 
         #region IfcAdvancedBrep geometries
 
-        [Fact(Skip = "SRL to investigate - volume difference")]
+        [Fact]
         public void AdvancedMultiSegmentPolylineTest()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\advanced-face-multisegment-polyline.ifc"))
@@ -607,7 +606,8 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
 
-        [Fact(Skip = "SRL to investigate - Not Implemented")]
+
+        [Fact]
         public void CylindricalSurfaceTest()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\cylindrical-surface.ifc"))
