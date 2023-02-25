@@ -230,12 +230,6 @@ namespace Xbim
 				return gcnew XEdge(edge);
 			}
 
-			IXCurve^ ProfileFactory::BuildCurve(IIfcProfileDef^ profileDef)
-			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
-			}
-
 			TopoDS_Face ProfileFactory::BuildProfileFace(const TopoDS_Wire& wire)
 			{
 				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
