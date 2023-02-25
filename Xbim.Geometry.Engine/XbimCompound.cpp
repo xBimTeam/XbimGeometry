@@ -549,7 +549,7 @@ namespace Xbim
 				theSolid = gcnew XbimSolid(solidmaker.Solid(), _modelServices);
 			}
 			else
-				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as outer shell is not a solid #{ifcEntityLabel} is not a solid.", brepWithVoids->EntityLabel);
+				XbimGeometryCreator::LogWarning(logger, brepWithVoids, "Cannot cut voids properly as outer shell is not a solid #{0} is not a solid.", brepWithVoids->EntityLabel);
 
 			BRepBuilderAPI_MakeSolid builder(theSolid);
 			for each (IIfcClosedShell ^ IIfcVoidShell in brepWithVoids->Voids)
