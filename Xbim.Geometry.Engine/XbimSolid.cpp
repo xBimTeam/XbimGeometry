@@ -1856,7 +1856,8 @@ namespace Xbim
 				}
 				catch (const Standard_Failure& sf)
 				{
-					_modelServices->LogError("Error calculating volume");
+					System::String^ err = gcnew System::String(sf.GetMessageString());
+					_modelServices->LogError("Error calculating XbimSolid volume " + err);
 					return 0;
 				}
 			}
