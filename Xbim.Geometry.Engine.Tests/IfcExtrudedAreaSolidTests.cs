@@ -86,7 +86,6 @@ namespace Xbim.Geometry.Engine.Tests
                 var str = solid.ToBRep;
                 solid.Should().NotBeNull();
 
-                solid.Should().NotBeNull();
                 solid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
         }

@@ -6,7 +6,7 @@ using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop.Extensions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     public class Startup
     {

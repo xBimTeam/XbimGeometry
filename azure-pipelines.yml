@@ -143,7 +143,7 @@ jobs:
     displayName: 'VsTest - testAssemblies'
     inputs:
       testSelector: 'testAssemblies'
-      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Interop.Tests.dll'
+      testAssemblyVer2: '**\bin\**\$(BuildConfiguration)\**\Xbim.Geometry.Engine.Tests.dll'
       searchFolder: '$(System.DefaultWorkingDirectory)'
       testFiltercriteria: 'Category!=ExcludeFromCI'
       vsTestVersion: 'toolsInstaller'

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "Xbim.Geometry.Engine.Interop.Tests": {
+    "Xbim.Geometry.Engine.Tests": {
       "commandName": "Project",
       "nativeDebugging": true
     }

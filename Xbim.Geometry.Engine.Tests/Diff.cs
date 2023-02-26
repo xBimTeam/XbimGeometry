@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Text.RegularExpressions;
 
-namespace Xbim.Geometry.Engine.Interop.Tests
+namespace Xbim.Geometry.Engine.Tests
 {
     /// <summary>
   /// This Class implements the Difference Algorithm published in

@@ -46,7 +46,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine.net472
 		{E847C989-FCE5-4DBD-AD7D-575007DF2164} = {E847C989-FCE5-4DBD-AD7D-575007DF2164}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Interop.Tests", "Xbim.Geometry.Engine.Interop.Tests\Xbim.Geometry.Engine.Interop.Tests.csproj", "{6E1DB0AE-EB6E-4CF5-978F-E96DD07C8B6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Tests", "Xbim.Geometry.Engine.Tests\Xbim.Geometry.Engine.Tests.csproj", "{6E1DB0AE-EB6E-4CF5-978F-E96DD07C8B6F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

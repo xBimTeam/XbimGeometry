@@ -1,9 +1,8 @@
 ﻿using System;
-using Xbim.Common.Configuration;
 using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Geometry.Engine.Interop.Extensions;
 
-namespace Xbim.Geometry.Engine.Interop
+namespace Xbim.Common.Configuration
 {
     /// <summary>
     /// Extension methods for <see cref="IXbimConfigurationBuilder"/>

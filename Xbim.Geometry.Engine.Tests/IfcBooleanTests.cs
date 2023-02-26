@@ -207,7 +207,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Fact(Skip = "SRL to investigate - Solid set count difference")]
+        [Fact]
         //[Ignore("The test was formally passing, but returning the wrong geometry in the previous release, it needs to be investigated, but it's not a regression.")]
         public void memory_hungry_boolean3()
         {
