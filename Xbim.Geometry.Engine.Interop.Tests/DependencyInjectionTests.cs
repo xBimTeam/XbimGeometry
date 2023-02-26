@@ -26,6 +26,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
         [InlineData(typeof(IXShapeService))]
+        [InlineData(typeof(ILoggerFactory))]
         [InlineData(typeof(IXGeometryPrimitives))]
         //[InlineData(typeof(IXBRepDocumentManager))]   // Issues with running under another AppDomain.
         [InlineData(typeof(IXGeometryConverterFactory))]
