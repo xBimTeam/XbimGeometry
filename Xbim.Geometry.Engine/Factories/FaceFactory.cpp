@@ -80,8 +80,7 @@ namespace Xbim
 				return gcnew XFace(result);
 			}
 
-
-
+			
 
 			TopoDS_Face FaceFactory::BuildFaceSurface(IIfcFaceSurface^ faceSurface, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices)
 			{
@@ -89,11 +88,16 @@ namespace Xbim
 				//workaround for badly defined linear extrusions in old Revit files
 				IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(faceSurface->FaceSurface);
 				bool buildRuledSurface = (solExtrusion != nullptr);
-
+				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(faceSurface->FaceSurface)!=nullptr;
 				TopoDS_Wire outerLoop;
 				TopTools_SequenceOfShape  innerLoops;
 				XSurfaceType surfaceType;
 				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(faceSurface->FaceSurface, surfaceType); //throws exception
+				
+				if (!faceSurface->SameSense && !isBspline)
+				{
+					surface->UReverse();					
+				}
 				for each (IIfcFaceBound ^ ifcBound in faceSurface->Bounds) //build all the loops
 				{
 					TopTools_SequenceOfShape loopEdges;
@@ -127,7 +131,7 @@ namespace Xbim
 							else
 								edge = TopoDS::Edge(edgeCurves.Find(edgeCurve->EntityLabel));
 						}
-						System::String^ edgeBrep = _modelService->GetBrep(edge);
+						//System::String^ edgeBrep = _modelService->GetBrep(edge);
 						loopEdges.Append(edge);
 					}
 					TopoDS_Wire wire = WIRE_FACTORY->BuildWire(loopEdges);
@@ -163,9 +167,10 @@ namespace Xbim
 				if (outerLoop.IsNull())
 					throw RaiseGeometryFactoryException("Face has no outer bound", faceSurface);//no bounded face
 				TopoDS_Face face = BuildFace(surface, outerLoop, innerLoops); //throws exception
-				if (!faceSurface->SameSense)
-					face.Reverse();
 				//System::String^ brep = _modelService->GetBrep(face);
+				if (!faceSurface->SameSense && isBspline)
+					face.Reverse();
+				//brep = _modelService->GetBrep(face);
 		
  				
 
@@ -176,7 +181,7 @@ namespace Xbim
 			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops)
 			{
 
-				TopoDS_Face face = OccHandle().BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
+				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Could not apply inner bound to face, it has been ignored");
 

@@ -2,11 +2,23 @@
 #pragma warning( disable : 4691 )
 #include "Unmanaged/FlexDrivers.h"
 #include "../XbimHandle.h"
-#include "Unmanaged//FlexApp_Application.h"
-#include "../Services//LoggingService.h"
+#include "Unmanaged/FlexApp_Application.h"
+#include "../Services/LoggingService.h"
 
 using namespace Xbim::Geometry::Abstractions;
-using namespace Xbim::Geometry::Services;
+
+namespace Xbim
+{
+	namespace Geometry
+	{
+
+		namespace Services
+		{
+			ref class ModelGeometryService;
+		}
+	}
+}
+
 namespace Xbim
 {
 	namespace Geometry
@@ -16,16 +28,11 @@ namespace Xbim
 			public ref class BRepDocumentManager : XbimHandle<Handle(FlexApp_Application)>, IXBRepDocumentManager
 			{
 			private:
-				LoggingService^ _loggingService;
+				IXLoggingService^ _loggingService;
+				Xbim::Geometry::Services::ModelGeometryService^ _modelService;
 				Object^ _lockObject = gcnew Object();
 			public:
-				BRepDocumentManager(ILogger<BRepDocumentManager^>^ logger) :
-					XbimHandle(new Handle(FlexApp_Application)(FlexApp_Application::GetApplication())) //ensure only one application per session
-
-				{
-					_loggingService = gcnew LoggingService(logger);
-					FlexDrivers::DefineFormat(Ref()); //initialise the application drivers
-				};
+				BRepDocumentManager(Xbim::Geometry::Services::ModelGeometryService^ modelService);
 				/// <summary>
 				/// Returns true if the document manager is fully loaded
 				/// </summary>

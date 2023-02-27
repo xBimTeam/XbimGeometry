@@ -1,4 +1,5 @@
 #include "CompoundFactory.h"
+
 #include <BRep_Builder.hxx>
 #include "../BRep/XCompound.h"
 #include "../BRep/XEdge.h"
@@ -36,6 +37,7 @@ namespace Xbim
 				return gcnew XCompound(compound);
 
 			}
+			
 		}
 	}
 }

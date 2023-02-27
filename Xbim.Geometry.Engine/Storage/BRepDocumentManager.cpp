@@ -1,5 +1,5 @@
 #include "BRepDocumentManager.h"
-
+#include "../Services/ModelGeometryService.h"
 #include "BRepDocument.h"
 //#include <TDocStd_Document.hxx>
 //#include <chrono>
@@ -35,6 +35,15 @@ namespace Xbim
 	{
 		namespace Storage
 		{
+			BRepDocumentManager::BRepDocumentManager(Xbim::Geometry::Services::ModelGeometryService^ modelService) :
+				XbimHandle(new Handle(FlexApp_Application)(FlexApp_Application::GetApplication())) //ensure only one application per session
+
+			{
+				_modelService = modelService;
+				_loggingService = modelService->LoggingService;
+				FlexDrivers::DefineFormat(Ref()); //initialise the application drivers
+			};
+			
 			int BRepDocumentManager::InSession(System::String^ filePath)
 			{
 				System::IntPtr p = System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(filePath);
@@ -61,7 +70,7 @@ namespace Xbim
 			{
 				Handle(TDocStd_Document) aDoc;
 				Ref()->GetDocument(docIndex, aDoc);
-				return gcnew BRepDocument(aDoc);
+				return gcnew BRepDocument(aDoc, _modelService);
 			}
 			IXBRepDocument^ BRepDocumentManager::Open(array<System::Byte>^ bytes)
 			{
@@ -76,7 +85,7 @@ namespace Xbim
 					switch (status)
 					{
 					case PCDM_RS_OK:
-						return gcnew BRepDocument(aDoc);
+						return gcnew BRepDocument(aDoc, _modelService);
 					case PCDM_RS_NoDriver:
 						_loggingService->LogError("Open Document Failed: PCDM_RS_NoDriver");
 						break;
@@ -181,7 +190,7 @@ namespace Xbim
 					switch (status)
 					{
 					case PCDM_RS_OK:
-						return gcnew BRepDocument(aDoc);
+						return gcnew BRepDocument(aDoc, _modelService);
 					case PCDM_RS_NoDriver:
 						_loggingService->LogError("Open Document Failed: PCDM_RS_NoDriver");
 						break;
@@ -276,7 +285,7 @@ namespace Xbim
 				{
 					Handle(TDocStd_Document) aDoc;
 					Ref()->NewDocument("BinXCAF", aDoc);
-					return gcnew BRepDocument(aDoc);
+					return gcnew BRepDocument(aDoc, _modelService);
 				}
 				catch (const Standard_Failure& sf)
 				{

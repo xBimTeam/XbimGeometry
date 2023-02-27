@@ -6,7 +6,7 @@
 
 #include "../XbimHandle.h"
 #include "BRepDocument.h"
-
+#include "../Services/ModelGeometryService.h"
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Geometry::Abstractions;
@@ -16,6 +16,7 @@ using namespace System::Collections::Generic;
 using namespace Microsoft::Extensions::Logging;
 
 #define The_ShapeTool() XCAFDoc_DocumentTool::ShapeTool(Ref())
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -25,16 +26,18 @@ namespace Xbim
 			public ref class BRepDocumentItem : XbimHandle<TDF_Label>, IXBRepDocumentItem
 			{
 			private:
-				
+				Xbim::Geometry::Services::ModelGeometryService^ _modelServices;
 			public:
 				static void SetName(const TDF_Label& label, System::String^ name);
 				
-				BRepDocumentItem(TDF_Label label) : XbimHandle(new TDF_Label(label))
+				BRepDocumentItem(TDF_Label label, Xbim::Geometry::Services::ModelGeometryService^ modelServices) : XbimHandle(new TDF_Label(label))
 				{		
+					_modelServices = modelServices;
 				};
 
-				BRepDocumentItem() : XbimHandle(new TDF_Label())
+				BRepDocumentItem(Xbim::Geometry::Services::ModelGeometryService^ modelServices) : XbimHandle(new TDF_Label())
 				{
+					_modelServices = modelServices;
 				};
 
 				virtual property IXShape^ Shape {IXShape^ get(); void set(IXShape^ shape); }

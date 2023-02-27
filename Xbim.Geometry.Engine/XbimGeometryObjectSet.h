@@ -23,8 +23,10 @@ namespace Xbim
 			
 		private:
 			List<IXbimGeometryObject^>^ geometryObjects;
-			static XbimGeometryObjectSet^ empty = gcnew XbimGeometryObjectSet();
 			
+			
+			void GetShapeList(TopTools_ListOfShape& shapes);
+
 			static bool ParseGeometry(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
 				TopoDS_Shell& facesToIgnore, double tolerance);
 			
@@ -35,13 +37,11 @@ namespace Xbim
 		internal:
 			static TopoDS_Compound CreateCompound(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects);
 		public:
-			static property IXbimGeometryObjectSet^ Empty{IXbimGeometryObjectSet^ get(){ return empty; }};	
-			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
-			static IXbimGeometryObjectSet^ PerformBoolean(BOPAlgo_Operation bop, IXbimGeometryObject^ geomObject, IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
-
-			XbimGeometryObjectSet::XbimGeometryObjectSet();
-			XbimGeometryObjectSet(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ objects);
-			XbimGeometryObjectSet(int size){geometryObjects = gcnew List<IXbimGeometryObject^>(size);}
+			
+			XbimGeometryObjectSet::XbimGeometryObjectSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			XbimGeometryObjectSet::XbimGeometryObjectSet(ModelGeometryService^ modelService);
+			XbimGeometryObjectSet(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ objects, ModelGeometryService^ modelService);
+			XbimGeometryObjectSet(int size, ModelGeometryService^ modelService) : XbimSetObject(modelService) {geometryObjects = gcnew List<IXbimGeometryObject^>(size);}
 
 #pragma region destructors
 
@@ -51,7 +51,7 @@ namespace Xbim
 #pragma endregion
 
 #pragma region IXbimGeometryObjectSet Interface
-			virtual property bool IsValid {bool get() { return geometryObjects != nullptr && this != XbimGeometryObjectSet::Empty; }; }
+			virtual property bool IsValid {bool get() { return geometryObjects != nullptr && this->Count != 0; }; }
 			virtual property bool IsSet{bool get(){ return true; }; }
 			virtual property IXbimGeometryObject^ First{IXbimGeometryObject^ get(); }
 			virtual property int Count {int get() override; }

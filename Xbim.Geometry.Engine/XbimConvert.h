@@ -29,10 +29,10 @@ namespace Xbim
 			//this is a work around to get the Model Service reliably through all the legacy code
 			//this service deals with ifc exporter different precisions and tolerances
 			//it is essential to set the Tag property of the IModel before making any calls to the geometry creator
-			static IXModelGeometryService^ ModelGeometryService(IPersistEntity^ ifcEntity);
+			static ModelGeometryService^ ModelGeometryService(IPersistEntity^ ifcEntity);
 			// Converts a Local Placement into a TopLoc_Location
-			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger);
-			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger);
+			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
+			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
 			// Converts a Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcPlacement^ placement);
 			// Converts a IfcAxis2Placement into a TopLoc_Location
@@ -62,7 +62,7 @@ namespace Xbim
 			static XbimMatrix3D ToMatrix3D(IIfcAxis2Placement3D^ axis3);
 			// Builds a windows Matrix3D from a CartesianTransformationOperator3D
 			static XbimMatrix3D ConvertMatrix3D(IIfcCartesianTransformationOperator3D ^ stepTransform);
-			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement, ILogger^ logger);
+			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelService);
 			static bool IsEqual(IIfcCartesianPoint^ ptA, IIfcCartesianPoint^ ptB, double tolerance);
 			static double DistanceSquared(IIfcCartesianPoint^ pt1, IIfcCartesianPoint^ pt2);
 			static bool Is3D(IIfcPolyline^ pline);

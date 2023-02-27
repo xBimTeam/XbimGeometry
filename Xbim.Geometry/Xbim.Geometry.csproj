@@ -23,6 +23,7 @@ Currently this library supports IFC2x2, IFC2x3, IFC4 Addendum 2 and IFC Alignmen
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
   </ItemGroup>
   <ItemGroup>

@@ -13,22 +13,22 @@ namespace Xbim
 		{
 		private:			
 			List<IXbimEdge^>^ edges;
-			static XbimEdgeSet^ empty = gcnew XbimEdgeSet();
-			XbimEdgeSet::XbimEdgeSet(){ edges = gcnew List<IXbimEdge^>(); }
+			
+			
 			void InstanceCleanup()
 			{
 				edges = nullptr;
 			};
 		public:
-			static property XbimEdgeSet^ Empty{XbimEdgeSet^ get(){ return empty; }};
+			
 
 #pragma region Constructors
-
-			XbimEdgeSet(const TopoDS_Shape& shape);
+			XbimEdgeSet(ModelGeometryService^ modelService) : XbimSetObject(modelService) { edges = gcnew List<IXbimEdge^>(); }
+			XbimEdgeSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
 			IXCompound^ ToXCompound();
 			operator  TopoDS_Shape () override;
-			XbimEdgeSet(System::Collections::Generic::IEnumerable<IXbimEdge^>^ edges);
-			XbimEdgeSet(XbimWire^ wire);
+			XbimEdgeSet(System::Collections::Generic::IEnumerable<IXbimEdge^>^ edges, ModelGeometryService^ modelService);
+			XbimEdgeSet(XbimWire^ wire, ModelGeometryService^ modelService);
 			
 #pragma endregion
 

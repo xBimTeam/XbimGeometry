@@ -71,12 +71,12 @@ namespace Xbim
 				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
 				TDF_Label aLabel = The_ShapeTool()->AddShape(topoShape, expand);
 				SetName(aLabel, name);
-				return gcnew BRepDocumentItem(aLabel);
+				return gcnew BRepDocumentItem(aLabel, _modelServices);
 			}
 
 			void BRepDocumentItem::SetPlacement(IIfcObjectPlacement^ placement)
 			{
-				TopLoc_Location location = XbimConvert::ToLocation(placement, nullptr);
+				TopLoc_Location location = XbimConvert::ToLocation(placement, _modelServices->Logger(), _modelServices);
 				XCAFDoc_Location::Set(Ref(), location);
 			}
 
@@ -94,11 +94,11 @@ namespace Xbim
 				TDF_Label subAssembly = The_ShapeTool()->NewShape();
 				TopLoc_Location location;
 				if (placement != nullptr)
-					location = XbimConvert::ToLocation(placement, nullptr);
+					location = XbimConvert::ToLocation(placement, _modelServices->Logger(), _modelServices);
 				TDF_Label aLabel = The_ShapeTool()->AddComponent(Ref(), subAssembly, location);
 				SetName(aLabel, subAssemblyName);
 				SetName(subAssembly, subAssemblyName);
-				return gcnew BRepDocumentItem(subAssembly);
+				return gcnew BRepDocumentItem(subAssembly, _modelServices);
 			}
 
 			IXBRepDocumentItem^ BRepDocumentItem::AddAssembly(System::String^ subAssemblyName, XbimMatrix3D transform)
@@ -120,7 +120,7 @@ namespace Xbim
 					SetName(aLabel, subAssemblyName);
 				}
 				SetName(subAssemblyLabel, subAssemblyName);
-				return gcnew BRepDocumentItem(subAssemblyLabel);
+				return gcnew BRepDocumentItem(subAssemblyLabel, _modelServices);
 			}
 
 			IXBRepDocumentItem^ BRepDocumentItem::AddComponent(System::String^ name, IXBRepDocumentItem^ component, IIfcObjectPlacement^ objPlacement, ILogger^ logger)
@@ -128,9 +128,9 @@ namespace Xbim
 
 				TDF_Label label = static_cast<BRepDocumentItem^>(component)->Ref();
 				//add the shape to the parent to avoid having to call update assemblies
-				TDF_Label componentLabel = The_ShapeTool()->AddComponent(Ref(), label, XbimConvert::ToLocation(objPlacement, logger));
+				TDF_Label componentLabel = The_ShapeTool()->AddComponent(Ref(), label, XbimConvert::ToLocation(objPlacement, logger,_modelServices));
 				SetName(componentLabel, name);
-				BRepDocumentItem^ shapeRepNode = gcnew BRepDocumentItem(componentLabel);
+				BRepDocumentItem^ shapeRepNode = gcnew BRepDocumentItem(componentLabel, _modelServices);
 				shapeRepNode->IsShapeRepresentation = true;
 				return shapeRepNode;
 
@@ -152,7 +152,7 @@ namespace Xbim
 				TopLoc_Location occLoc(occTrans);
 				TDF_Label	aLabel = The_ShapeTool()->AddComponent(Ref(), storageLabel, occLoc);
 				SetName(aLabel, name);
-				return gcnew BRepDocumentItem(aLabel);
+				return gcnew BRepDocumentItem(aLabel, _modelServices);
 			}
 
 			IXBRepDocumentItem^ BRepDocumentItem::AddComponent(System::String^ name, int shapeId, IXShape^ shape, IIfcObjectPlacement^ objPlacement, ILogger^ logger)
@@ -176,11 +176,11 @@ namespace Xbim
 				TopLoc_Location location = topoShape.Location();
 				if (objPlacement != nullptr)
 				{
-					location = location.Multiplied(XbimConvert::ToLocation(objPlacement, logger));
+					location = location.Multiplied(XbimConvert::ToLocation(objPlacement, logger, _modelServices));
 				}
 				componentLabel = The_ShapeTool()->AddComponent(Ref(), componentLabel, location);
 				SetName(componentLabel, name);
-				return gcnew BRepDocumentItem(componentLabel);
+				return gcnew BRepDocumentItem(componentLabel, _modelServices);
 
 
 			}
@@ -203,7 +203,7 @@ namespace Xbim
 				if (ok)
 				{
 					SetName(addedSubShape, name);
-					return gcnew BRepDocumentItem(addedSubShape);
+					return gcnew BRepDocumentItem(addedSubShape, _modelServices);
 				}
 				else
 					throw gcnew System::Exception("Shape is not a sub shape of the selected assembly");
@@ -436,7 +436,7 @@ namespace Xbim
 				if (!found) return Enumerable::Empty<IXBRepDocumentItem^>();
 				List<IXBRepDocumentItem^>^ components = gcnew List<IXBRepDocumentItem^>(labels.Size());
 				for (auto& it = labels.cbegin(); it != labels.cend(); ++it)
-					components->Add(gcnew BRepDocumentItem(*it));
+					components->Add(gcnew BRepDocumentItem(*it, _modelServices));
 				return components;
 			}
 
@@ -461,7 +461,7 @@ namespace Xbim
 				if (!found) return Enumerable::Empty<IXBRepDocumentItem^>();
 				List<IXBRepDocumentItem^>^ components = gcnew List<IXBRepDocumentItem^>(labels.Size());
 				for (auto& it = labels.cbegin(); it != labels.cend(); ++it)
-					components->Add(gcnew BRepDocumentItem(*it));
+					components->Add(gcnew BRepDocumentItem(*it, _modelServices));
 				return components;
 			}
 
@@ -471,7 +471,7 @@ namespace Xbim
 				bool found = The_ShapeTool()->GetReferredShape(Ref(), refLabel);
 				if (!found || refLabel.IsNull()) return nullptr;
 				else
-					return gcnew BRepDocumentItem(refLabel);
+					return gcnew BRepDocumentItem(refLabel, _modelServices);
 			}
 			void BRepDocumentItem::SetDoubleAttribute(System::String^ attributeName, System::Nullable<double> attributeValue)
 			{
@@ -613,7 +613,7 @@ namespace Xbim
 					if (aMatTool->GetShapeMaterial(Ref(), materialLabel))
 					{
 						Handle(XCAFDoc_VisMaterial) aMat = aMatTool->GetMaterial(materialLabel);
-						return gcnew Xbim::Geometry::Visual::VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel));
+						return gcnew Xbim::Geometry::Visual::VisualMaterial(aMat, gcnew BRepDocumentItem(materialLabel, _modelServices));
 					}
 					return nullptr;
 				}
@@ -675,7 +675,7 @@ namespace Xbim
 					Handle(TDataStd_TreeNode) f = tree->First();
 					for (int i = 0; i < nbKids; i++)
 					{
-						users->Add(gcnew BRepDocumentItem(f->Label()));
+						users->Add(gcnew BRepDocumentItem(f->Label(), _modelServices));
 						f = f->Next();
 					}
 				}

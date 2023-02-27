@@ -13,20 +13,21 @@ namespace Xbim
 		{
 		private:
 			List<IXbimFace^>^ faces;
-			static XbimFaceSet^ empty = gcnew XbimFaceSet();
-			XbimFaceSet::XbimFaceSet(){ faces = gcnew List<IXbimFace^>(1); }
+			
+			
 			void InstanceCleanup()
 			{
 				faces = nullptr;
 			};
 		public:
-			static property XbimFaceSet^ Empty{XbimFaceSet^ get(){ return empty; }};
+			
 
 #pragma region Constructors
 			IXCompound^ ToXCompound();
-			XbimFaceSet(const TopoDS_Shape& shape);
-			XbimFaceSet(const TopTools_ListOfShape & shapes);
-			XbimFaceSet(List<IXbimFace^>^ faces);
+			XbimFaceSet(ModelGeometryService^ modelService) :XbimSetObject(modelService) { faces = gcnew List<IXbimFace^>(1); }
+			XbimFaceSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			XbimFaceSet(const TopTools_ListOfShape & shapes, ModelGeometryService^ modelService);
+			XbimFaceSet(List<IXbimFace^>^ faces, ModelGeometryService^ modelService);
 #pragma endregion
 
 #pragma region destructors

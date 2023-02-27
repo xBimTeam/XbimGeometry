@@ -1,5 +1,6 @@
 #include "ShapeFactory.h"
 #include "GeometryFactory.h"
+#include "ShellFactory.h"
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS.hxx>
 #include <HLRBRep_PolyAlgo.hxx>
@@ -35,6 +36,8 @@
 
 #include "../BRep/XPolyLoop2d.h"
 #include "../XbimGeometryObject.h"
+#include <ShapeFix_Solid.hxx>
+
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -76,7 +79,7 @@ namespace Xbim
 				}
 				finally
 				{
-				System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
+					System::Runtime::InteropServices::Marshal::FreeHGlobal(System::IntPtr((void*)cStr));
 				}
 				throw gcnew XbimGeometryServiceException("Failure to convert from Brep string");
 			}
@@ -207,7 +210,7 @@ namespace Xbim
 				TopoDS_Shape result = OccHandle().Union(topoBody, topoAddition, _modelService->MinimumGap);
 				return GetXbimShape(result);
 			}
-			
+
 
 			IXShape^ ShapeFactory::Cut(IXShape^ body, IXShape^ substraction)
 			{
@@ -257,7 +260,7 @@ namespace Xbim
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 
 				if (s.IsNull()) return nullptr;
-				s.Location(XbimConvert::ToLocation(placement, Logger()));
+				s.Location(XbimConvert::ToLocation(placement, Logger(), _modelService));
 				return  GetXbimShape(s);
 			}
 
@@ -266,9 +269,9 @@ namespace Xbim
 			{
 				TopoDS_Shape s = TOPO_SHAPE(shape);
 				if (invertPlacement)
-					s.Move(XbimConvert::ToLocation(placement, Logger()).Inverted());
+					s.Move(XbimConvert::ToLocation(placement, Logger(), _modelService).Inverted());
 				else
-					s.Move(XbimConvert::ToLocation(placement, Logger()));
+					s.Move(XbimConvert::ToLocation(placement, Logger(), _modelService));
 				return  GetXbimShape(s);
 			}
 
@@ -313,9 +316,13 @@ namespace Xbim
 				return gTran.Shape();
 			}
 
-		
-			
 
+			TopoDS_Shape ShapeFactory::BuildClosedShell(IIfcClosedShell^ closedShell)
+			{
+				bool isFixed;
+				return SHELL_FACTORY->BuildClosedShell(closedShell, isFixed); //throws exeptions
+				
+			}
 		}
 	}
 }

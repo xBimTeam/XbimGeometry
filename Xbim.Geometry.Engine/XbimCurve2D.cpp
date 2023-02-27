@@ -2,7 +2,7 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Ax2.hxx>
 #include <GeomLib_Tool.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
+
 #include <Geom2dAPI_InterCurveCurve.hxx>
 #include <Geom2d_OffsetCurve.hxx>
 #include <GeomLib.hxx>
@@ -35,17 +35,8 @@ namespace Xbim
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurve2D::XbimCurve2D(const Handle(Geom2d_Curve)& curve2d)
-		{
-			this->pCurve2D = new Handle(Geom2d_Curve);
-			*pCurve2D = curve2d;
-		}
 
-		XbimCurve2D::XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2)
-		{
-			this->pCurve2D = new Handle(Geom2d_Curve);
-			*pCurve2D = new Geom2d_TrimmedCurve(curve2d, p1, p2, true);
-		}
+
 
 		XbimRect3D XbimCurve2D::BoundingBox::get()
 		{
@@ -105,7 +96,7 @@ namespace Xbim
 		IXbimCurve^ XbimCurve2D::ToCurve3D()
 		{
 			if (!IsValid) return nullptr;
-			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D));
+			return gcnew XbimCurve(GeomLib::To3d(gp_Ax2(), *pCurve2D), _modelServices);
 		}
 
 		XbimVector3D XbimCurve2D::TangentAt(double parameter)
@@ -162,13 +153,13 @@ namespace Xbim
 
 		void XbimCurve2D::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
-			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger, _modelServices);
 
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
 				projector.Init(face->GetSurface(), XbimConvert::ModelGeometryService(curve)->MinimumGap);
-				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger, _modelServices);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;

@@ -3,6 +3,10 @@
 #include "GeometryFactory.h"
 #include <vector>
 #include <unordered_map>
+#include <ShapeFix_Shape.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Iterator.hxx>
+
 using namespace System::Collections::Generic;
 using namespace System::Linq;
 
@@ -12,16 +16,51 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			TopoDS_Shell ShellFactory::BuildClosedShell(IIfcClosedShell^ closedShell, CheckClosedStatus& isCheckedClosed)
+			TopoDS_Shape ShellFactory::BuildClosedShell(IIfcClosedShell^ closedShell, bool& isFixed)
 			{
-				return BuildConnectedFaceSet(closedShell, isCheckedClosed);
+				TopoDS_Shape shape =  BuildConnectedFaceSet(closedShell, isFixed);
+
+				//since we have planar faces only then any valid solid must have at least 4 faces (pyramid), we will dispose of any shells that have less than four planar faces
+				//upgrade to solids
+				//if a compound is returned we have more than one shell
+				ShapeFix_Solid sfs;
+				if (shape.ShapeType() == TopAbs_COMPOUND)
+				{
+					//any shells in here will have been fixed
+					BRep_Builder b;
+					TopoDS_Compound solidCompound;
+					b.MakeCompound(solidCompound);
+
+					for (TopoDS_Iterator childIterator(shape); childIterator.More(); childIterator.Next())
+						if (childIterator.Value().ShapeType() == TopAbs_SHELL)
+						{
+							const TopoDS_Shell& shell = TopoDS::Shell(childIterator.Value());
+							if (shell.NbChildren() < 4)
+								LogInformation(closedShell, "A Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
+							else
+								b.Add(solidCompound, sfs.SolidFromShell(shell));
+						}
+					return solidCompound;
+				}
+				else if (shape.ShapeType() == TopAbs_SHELL)//it will be a shell
+				{
+					const TopoDS_Shell& shell = TopoDS::Shell(shape);
+					if (shell.NbChildren() < 4)
+					{
+						LogInformation(closedShell, "Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
+						return TopoDS_Solid();
+					}
+					else return sfs.SolidFromShell(shell);
+				}
+				else
+					throw RaiseGeometryFactoryException("Failed to build closed shell", closedShell);
 			}
 
-			TopoDS_Shell ShellFactory::BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed)
+			TopoDS_Shape ShellFactory::BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->CfsFaces->Count == 0) return TopoDS_Shell();
 				if (dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces)))
-					return ShellFactory::BuildConnectedFaceSurfaceSet(faceSet, isCheckedClosed);
+					return ShellFactory::BuildConnectedFaceSurfaceSet(faceSet, isFixed);
 				else //build IfcFace set
 				{
 					if (!dynamic_cast<IIfcFace^>(Enumerable::First(faceSet->CfsFaces)))
@@ -55,19 +94,43 @@ namespace Xbim
 						}
 						faceMesh.push_back(faceLoops);
 					}
-					TopoDS_Shell shell = OccHandle().BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+					bool needsFixing;
+					TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
 					if (shell.IsNull())
 						throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
-					isCheckedClosed = NotChecked;
-					return shell;
+					if (needsFixing) 
+						LogInformation(faceSet, "Attempting to fix errors in faceset definition");
+					return FixShell(shell, faceSet, isFixed);
+					
 				}
 			}
 
-			TopoDS_Shell ShellFactory::BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed)
+			TopoDS_Shape ShellFactory::FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed)
+			{
+				isFixed = false;
+				ShapeFix_Shell shapeFixer(shell);
+				bool fixed = shapeFixer.Perform();
+				if (!fixed) return shell;
+				if (shapeFixer.Shape().IsNull()) return shell;
+				if (shapeFixer.Shape().ShapeType() == TopAbs_SHELL)
+				{
+					isFixed = true; 
+					return shapeFixer.Shell();
+				}
+				if (shapeFixer.Shape().ShapeType() == TopAbs_COMPOUND)
+				{
+					isFixed = true;
+					return shapeFixer.Shape();
+				}
+				LogWarning(entity, "Connected face set has definition errors that could not be fixed");
+				return shell;
+			}
+
+			TopoDS_Shape ShellFactory::BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->CfsFaces->Count == 0) return TopoDS_Shell();
 				if (!dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces)))
-					return BuildConnectedFaceSet(faceSet, isCheckedClosed);
+					return BuildConnectedFaceSet(faceSet, isFixed);
 				TopTools_DataMapOfIntegerShape edges;
 				TopTools_DataMapOfIntegerShape vertices;
 				TopTools_DataMapOfIntegerShape faces;
@@ -81,12 +144,11 @@ namespace Xbim
 					builder.Add(shell, face);
 					//System::String^ brep = _modelService->GetBrep(shell);
 				}
-				isCheckedClosed = NotChecked;
 
 				return shell;
 			}
 
-			TopoDS_Shell ShellFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed)
+			TopoDS_Shape ShellFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->Faces->Count == 0) return TopoDS_Shell();
 				std::unordered_map<int, gp_XYZ> points;
@@ -97,19 +159,18 @@ namespace Xbim
 					points[i++] = gp_XYZ(coords[0], coords[1], coords[2]);
 				}
 
-				
 				for each (auto face in faceSet->Faces)
 				{
 					std::vector<std::vector<int>> faceLoops;
-					
+
 					std::vector<int> outerLoop;
 					for each (auto coordIndex in Enumerable::Concat(face->CoordIndex, Enumerable::Take(face->CoordIndex, 1))) //repeat first point at end to close the loop
 					{
 						outerLoop.push_back((int)coordIndex);
 					}
 					faceLoops.push_back(outerLoop); //outer loop
-					
-					IIfcIndexedPolygonalFaceWithVoids^  faceWithVoids = dynamic_cast<IIfcIndexedPolygonalFaceWithVoids^>(face);
+
+					IIfcIndexedPolygonalFaceWithVoids^ faceWithVoids = dynamic_cast<IIfcIndexedPolygonalFaceWithVoids^>(face);
 					if (faceWithVoids != nullptr)
 					{
 						for each (auto faceVoid in faceWithVoids->InnerCoordIndices)
@@ -124,12 +185,13 @@ namespace Xbim
 					}
 					faceMesh.push_back(faceLoops);
 				}
-
-				TopoDS_Shell shell = OccHandle().BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+				bool needsFixing;
+				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build PolygonalFaceSet", faceSet);
-				isCheckedClosed = NotChecked;
-				return shell;
+				if (needsFixing) LogInformation(faceSet, "Attempting to fix errors in faceset definition");
+				return FixShell(shell, faceSet, isFixed);
+
 			}
 		}
 	}

@@ -4,12 +4,13 @@
 #include <BRepBuilderAPI_Copy.hxx>
 #include <OSD_Timer.hxx>
 #include "XbimGeometryObject.h"
+
 using namespace System::IO;
 using namespace System::Collections::Generic;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Microsoft::Extensions::Logging;
-
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -32,7 +33,7 @@ namespace Xbim
 			
 		public:
 			static void WriteIndex(BinaryWriter^ bw, System::UInt32 index, System::UInt32 maxInt);
-			XbimOccShape();
+			XbimOccShape(ModelGeometryService^ modelService) :XbimGeometryObject(modelService) {};
 			//operators
 			virtual operator const TopoDS_Shape& () abstract;
 			void WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle);

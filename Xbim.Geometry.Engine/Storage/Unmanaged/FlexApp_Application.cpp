@@ -9,10 +9,10 @@
 #include <XCAFPrs_Driver.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(FlexApp_Application, TDocStd_Application)
-
+static Handle(FlexApp_Application) locApp;
 Handle(FlexApp_Application) FlexApp_Application::GetApplication()
 {
-	static Handle(FlexApp_Application) locApp;
+	
 	if (locApp.IsNull()) locApp = new FlexApp_Application;
 	return locApp;
 }

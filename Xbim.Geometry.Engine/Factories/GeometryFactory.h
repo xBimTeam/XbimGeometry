@@ -19,6 +19,9 @@
 #include <TopLoc_Location.hxx>
 
 #include "../BRep/XMatrix.h"
+#define NULLABLE_TO_DOUBLE(p) p.HasValue ? (double)p.Value : double::NaN
+
+
 
 using namespace Xbim::Ifc4::MeasureResource;
 using namespace Xbim::Geometry::BRep;
@@ -28,7 +31,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			
+
 			public ref class GeometryFactory : public FactoryBase<NGeometryFactory>, IXGeometryFactory
 			{
 
@@ -43,14 +46,14 @@ namespace Xbim
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
 				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
 				gp_Pnt2d BuildPoint2d(IIfcCartesianPoint^ ifcPoint);
-				
+
 				bool BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& pnt);
 
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				bool BuildDirection2d(IIfcDirection^ ifcDir, gp_Vec2d& dir);
 
-				
+
 				//builds a 3d vector, if the Ifc Vector is 2d the Z component is 0
 				//throws a XbimGeometryFactoryException if the normal of the vector is 0
 				bool BuildVector3d(IIfcVector^ ifcVec, gp_Vec& vec);
@@ -58,14 +61,16 @@ namespace Xbim
 				//builds a 2d direction, if the Ifc Direction is 3d an exception is thrown
 				bool BuildVector2d(IIfcVector^ ifcVec, gp_Vec2d& vec);
 
+				gp_Ax2 BuildAxis2Placement(IIfcAxis2Placement^ axis2);
+
 				bool BuildAxis2Placement3d(IIfcAxis2Placement3D^ axis2, gp_Ax2& ax2);
 				bool BuildAxis2Placement2d(IIfcAxis2Placement2D^ axis, gp_Ax22d& ax22d);
 
 				bool ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& loc);
 				bool ToLocation(IIfcAxis2Placement3D^ axis3D, TopLoc_Location& loc);
-				gp_Trsf ToTransform(Xbim::Common::Geometry::XbimMatrix3D m3D);
-				
 
+				gp_Trsf ToTransform(Xbim::Common::Geometry::XbimMatrix3D m3D);
+				gp_Trsf BuildTransform(IIfcAxis2Placement^ axis2Placement);
 				void GetPolylinePoints3d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt& points);
 				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
 
@@ -81,7 +86,7 @@ namespace Xbim
 				virtual IXDirection^ BuildDirection2d(double x, double y);
 				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				virtual IXPoint^ BuildPoint2d(double x, double y);
-				
+
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);

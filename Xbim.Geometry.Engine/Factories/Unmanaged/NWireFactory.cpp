@@ -45,6 +45,8 @@
 #include <GeomLib_Tool.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
+#include <TopTools_Array1OfShape.hxx>
+#include <BRepFilletAPI_MakeFillet2d.hxx>
 
 
 bool NWireFactory::IsClosed(const TopoDS_Wire& wire, double tolerance)
@@ -101,13 +103,14 @@ TopoDS_Wire NWireFactory::BuildWire(const TopTools_SequenceOfShape& edgeList)
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance)
+TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance, bool& hasInfo)
 {
 	//we need to ensure that no points are technically duplicate, i.e. < tolerance of the model apart
 	//the method of removing duplicates that are tolerance away from each other is flawed when the polyline is used
 	//in a shared vertex context such as a brep definition, using cell filters and controlling precision is better
 	try
 	{
+		hasInfo = false;
 		int id = 0;
 		NCollection_Vector<KeyedPnt2d> pointSeq;
 		for (auto&& point : points)
@@ -130,10 +133,10 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 
 		TopTools_SequenceOfShape vertices;
 		int pCount = pointSeq.Size();
-		for (auto& it = pointSeq.cbegin(); it != pointSeq.cend(); ++it)
+		for (auto&& keyedPnt : pointSeq)
 		{
 			pCount--;
-			gp_XY pnt = it->myPnt2d;
+			gp_XY pnt = keyedPnt.myPnt2d;
 			gp_XY pMin = gp_XY(pnt.X() - tolerance, pnt.Y() - tolerance);
 			gp_XY pMax = gp_XY(pnt.X() + tolerance, pnt.Y() + tolerance);
 			anInspector.SetPoint(pnt);
@@ -142,16 +145,16 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 
 			if (aResID <= 0) //its not in the vertex content we need to create it
 			{
-				BRepMesh_Vertex keyedVertex(pnt, it->myID, BRepMesh_DegreeOfFreedom::BRepMesh_OnCurve);
+				BRepMesh_Vertex keyedVertex(pnt, keyedPnt.myID, BRepMesh_DegreeOfFreedom::BRepMesh_OnCurve);
 				myLastId = anInspector.Add(keyedVertex);
 				theCells.Add(myLastId, pMin, pMax);
-				vertices.Append(it->CreateTopoVertex());
+				vertices.Append(keyedPnt.CreateTopoVertex());
 			}
 			else //we have a coincidental vertex from the context
 			{
 				//adjust its tolerance and position so that the shared vertex is a surrogate for both regardless 
-				const BRepMesh_Vertex& keyedPnt = anInspector.GetVertex(aResID);
-				gp_XY foundPoint = keyedPnt.Coord();
+				const BRepMesh_Vertex& meshVert = anInspector.GetVertex(aResID);
+				gp_XY foundPoint = meshVert.Coord();
 				gp_Vec2d vecBetween(foundPoint, pnt); //vector between the found point and the inspected point
 				gp_Vec2d displacement = vecBetween.Divided(2);//get the vector to move to a point half way between the two
 				foundPoint.Add(displacement.XY());
@@ -164,8 +167,9 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 				{
 					char message[128];
 					// We should really use structured logging here
-					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", it->myID, keyedPnt.Location3d());
+					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", keyedPnt.myID, meshVert.Location3d());
 					pLoggingService->LogDebug(message);
+					hasInfo = true;
 					continue;
 				}
 				else if (pCount != 0) //we are adding a point we already have connnected and we are not on the last point
@@ -173,6 +177,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 					if (!warnedOfSelfIntersection)
 					{
 						pLoggingService->LogDebug("Self intersecting polyline");
+						hasInfo = true;
 						warnedOfSelfIntersection = true; //just do it once
 					}
 
@@ -186,10 +191,14 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 		int desiredPointCount = pointSeq.Length();
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
+		{
 			pLoggingService->LogDebug("Duplicate points removed from polyline");
+			hasInfo = true;
+		}
 		if (actualPointCount < 2)
 		{
 			pLoggingService->LogDebug("Polyline must have at least 2 vertices");
+			hasInfo = true;
 			return TopoDS_Wire();
 		}
 
@@ -219,9 +228,9 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 //creates polyline removes  segments if they are >= tolerance in length, nb this method does not check for intersecting or notched lines
 TopoDS_Wire NWireFactory::BuildPolyline3d(
 	const TColgp_Array1OfPnt& points,
-	double tolerance)
+	double tolerance, bool& hasInfo)
 {
-
+	hasInfo = false;
 	try
 	{
 		BRep_Builder builder;
@@ -250,6 +259,7 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 				char message[128];
 				sprintf_s(message, 128, "Polyline point ignored: (%f,%f,%f) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
 				pLoggingService->LogDebug(message);
+				hasInfo = true;
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two
 				gp_Pnt startTranslated = start.Translated(displacement);
@@ -836,7 +846,7 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom_SequenceOfBoundedCurve& segme
 			else //we need to add this segment to the start of end of the edges
 			{
 
-				
+
 
 				gp_Pnt lastEdgeEndPoint = BRep_Tool::Pnt(TopExp::LastVertex(TopoDS::Edge(edges.Last()))); //the last point
 
@@ -1032,108 +1042,98 @@ TopoDS_Wire NWireFactory::BuildOffset(TopoDS_Wire basisWire, double distance)
 TopoDS_Wire NWireFactory::BuildOffset(TopoDS_Wire basisWire, double distance, gp_Dir dir)
 {
 	return TopoDS_Wire();
-	/*try
+
+}
+
+TopoDS_Wire NWireFactory::Fillet(const TopoDS_Wire& wire, double filletRadius, double tolerance)
+{
+	try
 	{
-		BRepOffsetAPI_MakeOffset offsetMaker(basisWire);
-		offsetMaker.Perform(distance);
-		if (!offsetMaker.IsDone() || offsetMaker.Shape().ShapeType() != TopAbs_WIRE)
-			Standard_Failure::Raise("Error building offset curve as a wire");
-		return TopoDS::Wire(offsetMaker.Shape());
+		if (wire.IsNull()) return wire;
+
+		Standard_Integer nbEdges = wire.NbChildren();
+
+		//get an array of all the edges
+		TopTools_Array1OfShape edges(1, nbEdges);
+		TopTools_Array1OfShape vertices(1, nbEdges);
+		TopTools_Array1OfShape filleted(1, nbEdges * 2);
+		Standard_Integer nb = 0;
+		for (BRepTools_WireExplorer edgeExp(wire); edgeExp.More(); edgeExp.Next())
+		{
+			nb++;
+			edges(nb) = TopoDS::Edge(edgeExp.Current());
+			vertices(nb) = TopoDS::Vertex(edgeExp.CurrentVertex());
+		}
+		//need to do each pair to ensure they are on face
+		int totalEdges = 1;
+		for (int i = 1; i < nbEdges; i++)
+		{
+			BRepBuilderAPI_MakeWire filletWireMaker;
+			filletWireMaker.Add(TopoDS::Edge(edges(i)));
+			filletWireMaker.Add(TopoDS::Edge(edges(i + 1)));
+			BRepBuilderAPI_MakeFace faceMaker(filletWireMaker.Wire());
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+			filleter.AddFillet(TopoDS::Vertex(vertices(i + 1)), filletRadius);
+			filleter.Build();
+			if (filleter.IsDone() && filleter.NbFillet() > 0)
+			{
+				const TopTools_SequenceOfShape& fillets = filleter.FilletEdges();
+				filleted(2 * i - 1) = filleter.DescendantEdge(TopoDS::Edge(edges(i)));
+				edges(i) = filleted(2 * i - 1);
+				filleted(2 * i) = fillets(1);
+				filleted(2 * i + 1) = filleter.DescendantEdge(TopoDS::Edge(edges(i + 1)));
+				edges(i + 1) = filleted(2 * i + 1);
+				totalEdges += 2;
+
+			}
+			else //no fillet happened just store existing
+			{
+				pLoggingService->LogInformation("Failed to fillet wire edge");
+				filleted(2 * i - 1) = edges(i);
+				filleted(2 * i) = edges(i + 1);
+				totalEdges++;
+			}
+		}
+		if (IsClosed(wire,tolerance) && nbEdges > 1)
+		{
+			BRepBuilderAPI_MakeWire filletWireMaker;
+			filletWireMaker.Add(TopoDS::Edge(edges(1)));
+			filletWireMaker.Add(TopoDS::Edge(edges(nbEdges)));
+			BRepBuilderAPI_MakeFace faceMaker(filletWireMaker.Wire());
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+			filleter.AddFillet(TopoDS::Vertex(vertices(1)), filletRadius);
+			filleter.Build();
+			if (filleter.IsDone() && filleter.NbFillet() > 0)
+			{
+				const TopTools_SequenceOfShape& fillets = filleter.FilletEdges();
+				filleted(2 * nbEdges - 1) = filleter.DescendantEdge(TopoDS::Edge(edges(nbEdges)));
+				filleted(2 * nbEdges) = fillets(1);
+				filleted(1) = filleter.DescendantEdge(TopoDS::Edge(edges(1)));
+				totalEdges++;
+			}
+			else
+				pLoggingService->LogInformation("Failed to close fillet wire edge");
+
+		}
+		BRepBuilderAPI_MakeWire wireMaker;
+		for (int i = 1; i <= totalEdges; i++)
+		{
+			if (!TopoDS::Edge(filleted(i)).IsNull())
+				wireMaker.Add(TopoDS::Edge(filleted(i)));
+		}
+
+		if (!wireMaker.IsDone())
+			Standard_Failure::Raise("Failed to fillet wire");
+		else
+			return wireMaker.Wire();
 	}
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
 	}
-	return TopoDS_Wire();*/
+	return TopoDS_Wire();
 }
 
-//
-//TopoDS_Wire NWireFactory::BuildDirectrix(TColGeom_SequenceOfCurve& segments, double trimStart, double trimEnd, double tolerance)
-//{
-//	TopTools_SequenceOfShape edges;
-//	try
-//	{
-//		BRep_Builder builder;
-//		double parametricLength = 0;
-//		TopoDS_Wire wire;
-//		for (auto&& segment : segments)
-//		{
-//			double segLength = Abs(segment->LastParameter() - segment->FirstParameter());
-//			if (segLength < trimStart) //don't need this
-//				trimStart -= segLength;
-//			else
-//			{
-//				if (trimStart < segLength) //need a trimmed version of this segment
-//				{
-//					if (trimEnd <= parametricLength + segLength) //need no more after this
-//					{
-//						segment = new Geom_TrimmedCurve(segment, trimStart, trimEnd - parametricLength);
-//						parametricLength += (trimEnd - parametricLength);
-//						//stop concatenating
-//					}
-//					else //trimStart to end seg					
-//					{
-//						if (trimStart > 0)
-//							segment = new Geom_TrimmedCurve(segment, trimStart, segment->LastParameter());
-//						parametricLength += (segment->LastParameter() - segment->FirstParameter());
-//					}
-//					trimStart = 0; //we have the first segment at 0
-//				}
-//				else //take the whole segment up to end trim
-//				{
-//					if (trimEnd <= parametricLength + segLength)
-//					{
-//						segment = new Geom_TrimmedCurve(segment, 0, trimEnd - parametricLength);
-//						parametricLength += (trimEnd - parametricLength);
-//						//stop concatenating
-//					}
-//					else //add the segment
-//					{
-//						parametricLength += (segment->LastParameter() - segment->FirstParameter());
-//					}
-//				}
-//				//make the segment an edge
-//
-//				if (edges.Length() == 0) //just add the first one
-//				{
-//					BRepBuilderAPI_MakeEdge edgeMaker(segment);
-//					TopoDS_Edge edgeToAdd = edgeMaker.Edge();
-//					edges.Append(edgeToAdd);
-//				}
-//				else //we need to add this segment ot the start of end of the edges
-//				{
-//					TopoDS_Edge lastEdge = TopoDS::Edge(edges.Last());
-//					TopoDS_Vertex vLast = TopExp::LastVertex(lastEdge); //get the vertex at the end of the wire
-//					gp_Pnt lastPoint = BRep_Tool::Pnt(vLast); //the last point
-//
-//					gp_Pnt segStartPoint = segment->Value(segment->FirstParameter()); //start and end of segment to add
-//					gp_Pnt segEndPoint = segment->Value(segment->LastParameter());
-//
-//					double lastGap = lastPoint.Distance(segStartPoint);
-//					
-//					if (lastGap > tolerance)
-//						Standard_Failure::Raise("Segments are not contiguous");
-//					AdjustVertexTolerance(vLast, lastPoint, segStartPoint, lastGap);
-//					TopoDS_Vertex segEndVertex;
-//					builder.MakeVertex(segEndVertex, segEndPoint, Precision::Confusion());
-//					BRepBuilderAPI_MakeEdge edgeMaker(segment, vLast, segEndVertex);
-//					edges.Append(edgeMaker.Edge());
-//				}
-//			}
-//		}
-//		builder.MakeWire(wire);
-//		for (auto&& edge: edges)
-//			builder.Add(wire, edge);
-//		return wire;
-//	}
-//	catch (const Standard_Failure& e)
-//	{
-//		pLoggingService->LogWarning("Could not build directrix");
-//		LogStandardFailure(e);
-//	}
-//	
-//	return TopoDS_Wire();
-//}
 
 bool NWireFactory::GetParameter(const TopoDS_Wire& wire, gp_Pnt pnt, double tolerance, double& val)
 {

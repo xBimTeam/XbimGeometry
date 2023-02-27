@@ -9,6 +9,8 @@
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
+#include <Geom_SphericalSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
 namespace Xbim
 {
 	namespace Geometry
@@ -24,7 +26,8 @@ namespace Xbim
 			internal:
 				Handle(Geom_Surface) BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType);
 				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane);
-				Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcPlane);
+				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane, bool snap );
+				Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution);
 				Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion);
 				TopoDS_Face BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);
 				TopoDS_Face BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface);
@@ -32,7 +35,8 @@ namespace Xbim
 				Handle(Geom_BSplineSurface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
 				Handle(Geom_BSplineSurface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
 				Handle(Geom_CylindricalSurface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
-				
+				Handle(Geom_SphericalSurface) BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface);
+				Handle(Geom_ToroidalSurface) BuildToroidalSurface(IIfcToroidalSurface^ ifcToroidalSurface);
 			protected:
 				
 			};

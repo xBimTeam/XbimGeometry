@@ -20,10 +20,11 @@ namespace Xbim
 				
 			public:
 				ShellFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NShellFactory()){}
-				TopoDS_Shell BuildClosedShell(IIfcClosedShell^ closedShell, CheckClosedStatus& isCheckedClosed);
-				TopoDS_Shell BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed);
-				TopoDS_Shell BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed);
-				TopoDS_Shell BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, CheckClosedStatus& isCheckedClosed);
+				TopoDS_Shape BuildClosedShell(IIfcClosedShell^ closedShell, bool& isFixed);
+				TopoDS_Shape BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
+				TopoDS_Shape FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed);
+				TopoDS_Shape BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
+				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, bool& isFixed);
 			};
 		}
 	}

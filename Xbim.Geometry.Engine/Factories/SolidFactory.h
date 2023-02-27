@@ -42,8 +42,9 @@ namespace Xbim
 				virtual IXSolid^ Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
 
 
-
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
+
+				TopoDS_Solid BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal);
 
 #pragma region CSG solids		
 				
@@ -56,6 +57,8 @@ namespace Xbim
 				TopoDS_Solid BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder));
 				TopoDS_Solid BuildSphere(IIfcSphere^ ifcSphere);
 
+				TopoDS_Solid BuildHalfSpace(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
+				
 #pragma endregion
 
 #pragma region Swept solids
@@ -64,9 +67,9 @@ namespace Xbim
 
 #pragma endregion
 				TopoDS_Solid BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
-				TopoDS_Solid BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
-				TopoDS_Compound BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
-				TopoDS_Solid BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
+				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
+				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
+				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
 				
 
 			};
