@@ -195,7 +195,8 @@ jobs:
       publishFeedCredentials: 'MyGetDev'
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
-  - task: NuGetCommand@2
+
+  - task: DotNetCoreCLI@2
     name: 'Xbim_Publishing'
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/netcore'))
     inputs:
