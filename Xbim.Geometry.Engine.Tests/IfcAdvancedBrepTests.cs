@@ -97,7 +97,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Theory(Skip = "SRL to investigate: Volume difference")]
+        [Theory]
         [InlineData("SurfaceCurveSweptAreaSolid_6", 12.603349469526613/*, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit"*/)]
         [InlineData("SurfaceCurveSweptAreaSolid_7", 12.603349469526613, false/*, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit"*/)]
         public void SurfaceCurveSweptAreaSolid_Tests_ToFix(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)

@@ -26,11 +26,7 @@ namespace Xbim
 			static IfcDimensionCount dimensions3D = IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
-			//this is a work around to get the Model Service reliably through all the legacy code
-			//this service deals with ifc exporter different precisions and tolerances
-			//it is essential to set the Tag property of the IModel before making any calls to the geometry creator
-			static ModelGeometryService^ ModelGeometryService(IPersistEntity^ ifcEntity);
-			// Converts a Local Placement into a TopLoc_Location
+		// Converts a Local Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
 			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
 			// Converts a Placement into a TopLoc_Location

@@ -38,23 +38,22 @@ namespace Xbim
 		{
 			point = p->Point;
 			tolerance = p->Tolerance;
-			CalculateHashCode();
-			
+			CalculateHashCode();	
 		}
 
-		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger)
+		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, double minGap,ILogger^ logger)
 		{
 			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger, nullptr);
 			this->point = w->PointAtParameter(point->PointParameter);
-			this->tolerance = XbimConvert::ModelGeometryService(point)->MinimumGap;
+			this->tolerance = minGap;
 			CalculateHashCode();
 		}
 
-		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, ILogger^ logger)
+		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, double minGap, ILogger^ logger)
 		{
 			XbimFace^ f = gcnew XbimFace(point->BasisSurface, logger, nullptr);
 			this->point = f->PointAtParameters(point->PointParameterU, point->PointParameterV);
-			this->tolerance = XbimConvert::ModelGeometryService(point)->MinimumGap;
+			this->tolerance = minGap;
 			CalculateHashCode();
 		}
 

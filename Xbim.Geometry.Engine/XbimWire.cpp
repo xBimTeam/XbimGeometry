@@ -213,7 +213,7 @@ namespace Xbim
 
 		void XbimWire::Init(IIfcArbitraryClosedProfileDef^ profile, ILogger^ logger)
 		{
-			auto wire = XbimConvert::ModelGeometryService(profile)->GetProfileFactory()->BuildProfileWire(profile); //throws an exception on failure
+			auto wire = _modelServices->GetProfileFactory()->BuildProfileWire(profile); //throws an exception on failure
 			pWire = new TopoDS_Wire(wire);
 		}
 

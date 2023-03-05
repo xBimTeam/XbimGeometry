@@ -239,7 +239,7 @@ namespace Xbim
 		XbimEdge::XbimEdge(IIfcCurve^ edgeCurve, XbimVertex^ start, XbimVertex^ end, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(edgeCurve, logger);
-			double tolerance = XbimConvert::ModelGeometryService(edgeCurve)->MinimumGap;
+			double tolerance = _modelServices->MinimumGap;
 			double toleranceMax = edgeCurve->Model->ModelFactors->PrecisionMax;
 			double currentTolerance = tolerance;
 			if (IsValid && !start->Equals(end))//must be a closed loop or nothing, no need to trim			
@@ -999,7 +999,7 @@ namespace Xbim
 				pEdge = new TopoDS_Edge();
 				*pEdge = edgeMaker.Edge();
 				ShapeFix_ShapeTolerance FTol;
-				FTol.LimitTolerance(*pEdge, XbimConvert::ModelGeometryService(curve)->Precision);
+				FTol.LimitTolerance(*pEdge, _modelServices->Precision);
 			}
 		}
 

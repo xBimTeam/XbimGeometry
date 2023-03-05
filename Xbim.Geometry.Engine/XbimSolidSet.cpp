@@ -459,7 +459,7 @@ namespace Xbim
 			else
 				return gcnew XbimSolidSet(_modelServices->GetBooleanFactory()->Cut(arguments, tools), _modelServices);
 		}
-		
+
 		IXbimSolidSet^ XbimSolidSet::Union(IXbimSolidSet^ solidTools, double tolerance, ILogger^ logger)
 		{
 			TopoDS_ListOfShape arguments;
@@ -831,8 +831,7 @@ namespace Xbim
 		//Booleans
 		void XbimSolidSet::Init(IIfcBooleanClippingResult^ solid, ILogger^ logger)
 		{
-			ModelGeometryService^ ms = XbimConvert::ModelGeometryService(solid);
-			auto shape = ms->GetBooleanFactory()->BuildBooleanResult(solid);
+			auto shape = _modelServices->GetBooleanFactory()->BuildBooleanResult(solid);
 			InitSolidsFromShape(shape);
 		}
 
@@ -951,7 +950,7 @@ namespace Xbim
 				return;
 			}
 
-			ModelGeometryService^ mf = XbimConvert::ModelGeometryService(boolOp);
+
 
 			IXbimSolidSet^ result;
 			try
@@ -960,13 +959,13 @@ namespace Xbim
 				switch (boolOp->Operator)
 				{
 				case IfcBooleanOperator::UNION:
-					result = left->Union(right, mf->Precision, logger);
+					result = left->Union(right, _modelServices->Precision, logger);
 					break;
 				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, mf->Precision, logger);
+					result = left->Intersection(right, _modelServices->Precision, logger);
 					break;
 				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, mf->Precision, logger);
+					result = left->Cut(right, _modelServices->Precision, logger);
 					break;
 				}
 				//XbimOccWriter::Write(result, "c:/tmp/bop" + boolOp->ToString()->Replace(";","") +".txt");

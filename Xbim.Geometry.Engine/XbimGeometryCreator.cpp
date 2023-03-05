@@ -469,12 +469,12 @@ namespace Xbim
 
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IIfcPointOnCurve^ p, ILogger^)
 		{
-			return gcnew XbimPoint3DWithTolerance(p, _logger);
+			return gcnew XbimPoint3DWithTolerance(p, _modelService->MinimumGap, _logger);
 		}
 
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(IIfcPointOnSurface^ p, ILogger^)
 		{
-			return gcnew XbimPoint3DWithTolerance(p, _logger);
+			return gcnew XbimPoint3DWithTolerance(p, _modelService->MinimumGap, _logger);
 		}
 
 		IXbimPoint^ XbimGeometryCreator::CreatePoint(XbimPoint3D p, double tolerance)

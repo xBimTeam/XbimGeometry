@@ -223,53 +223,54 @@ namespace Xbim
 
 		XbimCompound::XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(faceSet)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(faceSet, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(sbsm)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(sbsm, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(fbsm)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(fbsm, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(solid, logger);
 		}
 		XbimCompound::XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(solid, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
-			Init(solid, logger);
+			_sewingTolerance = modelService->MinimumGap;
+			Init(solid, logger); 
 		}
+
 		XbimCompound::XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(solid, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(solid, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcClosedShell^ solid, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(solid)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			Init(solid, logger);
 		}
 
@@ -338,13 +339,13 @@ namespace Xbim
 
 		XbimCompound::XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(faceSet)->MinimumGap;;
+			_sewingTolerance = modelService->MinimumGap;;
 			Init(faceSet, logger);
 		}
 
 		XbimCompound::XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
-			_sewingTolerance = XbimConvert::ModelGeometryService(faceSet)->MinimumGap;
+			_sewingTolerance = modelService->MinimumGap;
 			System::Collections::Generic::IList<IIfcFace^>^ faceList = gcnew XbimPolygonalFaceSet(faceSet);
 			//if the face set has more than max faces just abandon and try and mesh
 			/*if (faceList->Count > MaxFacesToSew)
@@ -733,7 +734,7 @@ namespace Xbim
 				IModel^ model = aFace->Model;
 				ShapeFix_ShapeTolerance FTol;
 
-				_sewingTolerance = XbimConvert::ModelGeometryService(aFace)->MinimumGap;
+				_sewingTolerance = _modelServices->MinimumGap;
 
 				//collect all the geometry components				
 
@@ -1366,7 +1367,7 @@ namespace Xbim
 
 		TopoDS_Shape XbimCompound::InitFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ ifcFaces, IIfcRepresentationItem^ theItem, ILogger^ logger)
 		{
-			double tolerance = XbimConvert::ModelGeometryService(theItem)->MinimumGap;
+			double tolerance = _modelServices->MinimumGap;
 
 			//bool useVertexMap = ifcFaces->GetType() != XbimPolygonalFaceSet::typeid;
 			BRep_Builder builder;
@@ -1644,7 +1645,7 @@ namespace Xbim
 			//XbimPoint3D p(first->X, first->Y, first->Z);
 			XbimVector3D n = XbimConvert::NewellsNormal(wires[0]->Item2);
 
-			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, true, XbimConvert::ModelGeometryService(owningFace)->MinimumGap, owningFace->EntityLabel, logger, _modelServices);
+			XbimFace^ face = gcnew XbimFace(wires[0]->Item1, true, _modelServices->MinimumGap, owningFace->EntityLabel, logger, _modelServices);
 			if (n.DotProduct(face->Normal) <= 0) //they should be in the same direction
 				face->Reverse();
 			if (!wires[0]->Item3)
@@ -1666,7 +1667,7 @@ namespace Xbim
 
 			if (face->OuterBound == nullptr) return face;
 
-			face = gcnew XbimFace(outerBound, true, XbimConvert::ModelGeometryService(owningFace)->MinimumGap, owningFace->EntityLabel, logger, _modelServices); //create  a face with the right bound and direction
+			face = gcnew XbimFace(outerBound, true, _modelServices->MinimumGap, owningFace->EntityLabel, logger, _modelServices); //create  a face with the right bound and direction
 
 			for (int i = 0; i < wires->Count; i++)
 			{

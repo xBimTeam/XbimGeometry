@@ -158,7 +158,7 @@ namespace Xbim
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
-				projector.Init(face->GetSurface(), XbimConvert::ModelGeometryService(curve)->MinimumGap);
+				projector.Init(face->GetSurface(), _modelServices->MinimumGap);
 				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger, _modelServices);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
@@ -173,7 +173,7 @@ namespace Xbim
 		}
 		void XbimCurve2D::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
-			double tolerance = XbimConvert::ModelGeometryService(polyCurve)->MinimumGap;
+			double tolerance = _modelServices->MinimumGap;
 
 			IItemSet<IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^>^ coordList;
 
@@ -472,8 +472,8 @@ namespace Xbim
 					centre = gp_Pnt2d(ax2->Location->X, ax2->Location->Y);
 				}
 				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);
-				double parameterFactor = isConic ? XbimConvert::ModelGeometryService(curve)->RadianFactor : 1;
-				double precision = XbimConvert::ModelGeometryService(curve)->MinimumGap;
+				double parameterFactor = isConic ? _modelServices->RadianFactor : 1;
+				double precision = _modelServices->MinimumGap;
 				bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
 
 				double u1 = 0;
