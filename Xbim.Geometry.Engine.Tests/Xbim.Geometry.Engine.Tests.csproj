@@ -327,6 +327,9 @@
 		<None Update="TestFiles\SweptDiskSolid_2.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\test_rebro.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\triangulation_error.brep">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
