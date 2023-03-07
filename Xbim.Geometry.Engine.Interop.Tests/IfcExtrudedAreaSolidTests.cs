@@ -89,5 +89,16 @@ namespace Xbim.Geometry.Engine.Interop.Tests.TestFiles
             }
         }
 
+        [DataTestMethod]
+        public void IfcCShapeProfileDefGirthTest()
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\test_rebro.ifc"))
+            {
+                var extrudedAreaSolid = model.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault();
+                Assert.IsNotNull(extrudedAreaSolid);
+                var solid = geomEngine.CreateSolid(extrudedAreaSolid);
+                solid.Should().NotBeNull();
+            }
+        }
     }
 }
