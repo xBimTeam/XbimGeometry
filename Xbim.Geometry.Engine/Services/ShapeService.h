@@ -76,6 +76,7 @@ namespace Xbim
                 virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds);
                 
                 static array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurvesbool, bool checkEdges, bool cleanBefore, bool cleanAfter);
+
             };
 		}
 	}

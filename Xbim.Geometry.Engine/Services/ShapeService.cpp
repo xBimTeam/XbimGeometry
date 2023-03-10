@@ -3,14 +3,28 @@
 #include "Unmanaged/NShapeProximityUtils.h"
 #include "Unmanaged/NShapeService.h"
 #include "ModelGeometryService.h"
-#include "BRepBuilderAPI_Transform.hxx"
-#include "../BRep//XShape.h"
-#include "../BRep//XCompound.h"
-#include "../BRep//XFace.h"
-#include <vector>
+
+#include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Builder.hxx>
 #include <TopoDS_Compound.hxx>
 #include <BRepGProp_Face.hxx>
+#include <TopoDS.hxx>
+
+#include "../Extensions/ToGTransform.h"
+
+#include "../BRep/XShape.h"
+#include "../BRep/XCompound.h"
+#include "../BRep/XFace.h"
+#include "../BRep/XVertex.h"
+#include "../BRep/XEdge.h"
+#include "../BRep/XWire.h"
+#include "../BRep/XShell.h"
+#include "../BRep/XSolid.h" 
+#include "../Brep/XPlane.h"
+#include "../Brep/XLocation.h"
+
+#include <vector>
+
 
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
@@ -133,10 +147,29 @@ namespace Xbim
 
 			IXShape^ ShapeService::Transform(IXShape^ shape, IXMatrix^ transform)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				gp_GTrsf trans = transform<-ToGTransform();
+				XShapeType shapeType = shape->ShapeType;
+				switch (shapeType)
+				{
+				case XShapeType::Vertex:
+					return gcnew XVertex(TopoDS::Vertex(Ptr()->Transform(*static_cast<XVertex^>(shape)->Ptr(), trans)));
+				case XShapeType::Edge:
+					return gcnew XEdge(TopoDS::Edge(Ptr()->Transform(*static_cast<XEdge^>(shape)->Ptr(), trans)));
+				case XShapeType::Wire:
+					return gcnew XWire(TopoDS::Wire(Ptr()->Transform(*static_cast<XWire^>(shape)->Ptr(), trans)));
+				case XShapeType::Face:
+					return gcnew XFace(TopoDS::Face(Ptr()->Transform(*static_cast<XFace^>(shape)->Ptr(), trans)));
+				case XShapeType::Shell:
+					return gcnew XShell(TopoDS::Shell(Ptr()->Transform(*static_cast<XShell^>(shape)->Ptr(), trans)));
+				case XShapeType::Solid:
+					return gcnew XSolid(TopoDS::Solid(Ptr()->Transform(*static_cast<XSolid^>(shape)->Ptr(), trans)));
+				case XShapeType::Compound:
+					return gcnew XCompound(TopoDS::Compound(Ptr()->Transform(*static_cast<XCompound^>(shape)->Ptr(), trans)));
+				default:
+					throw gcnew XbimGeometryServiceException("Transform not supported for this shape type: " + shapeType.ToString());
+				}
 			}
-
+			 
 			IXShape^ ShapeService::Intersect(IXShape^ body, IXShape^ intersect, double precision)
 			{
 				TopoDS_Shape topoBody;

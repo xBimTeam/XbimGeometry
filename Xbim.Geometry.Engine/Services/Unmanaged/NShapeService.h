@@ -14,6 +14,6 @@ public:
 	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double precision);
 	TopoDS_Shape Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double precision);
 	TopoDS_Shape Intersect(const TopoDS_Shape& body, const TopTools_ListOfShape& others, double precision);
-
+	TopoDS_Shape Transform(const TopoDS_Shape& shape, const gp_GTrsf& trans);
 };
 

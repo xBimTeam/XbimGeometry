@@ -56,6 +56,7 @@ namespace Xbim
 			{
 				return gcnew Xbim::Geometry::BRep::XDirection(x, y, z);
 			};
+
 			IXDirection^ GeometryFactory::BuildDirection2d(double x, double y)
 			{
 				return gcnew Xbim::Geometry::BRep::XDirection(x, y);
@@ -65,6 +66,7 @@ namespace Xbim
 			{
 				return gcnew XPoint(x, y, z);
 			};
+
 			IXPoint^ GeometryFactory::BuildPoint2d(double x, double y)
 			{
 				return gcnew XPoint(x, y);
@@ -271,6 +273,7 @@ namespace Xbim
 				}
 
 			}
+
 			bool GeometryFactory::ToLocation(IIfcAxis2Placement^ axis, TopLoc_Location& location)
 			{
 				if (dynamic_cast<IIfcAxis2Placement2D^>(axis))
@@ -279,6 +282,7 @@ namespace Xbim
 					return ToLocation(static_cast<IIfcAxis2Placement3D^>(axis), location);
 
 			}
+
 			bool GeometryFactory::ToLocation(IIfcAxis2Placement2D^ axis2D, TopLoc_Location& location)
 			{
 				gp_Pnt2d pnt2d;
@@ -325,6 +329,7 @@ namespace Xbim
 					m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ);
 				return trsf;
 			}
+
 			gp_Trsf GeometryFactory::BuildTransform(IIfcAxis2Placement^ axis2Placement)
 			{
 				gp_Ax2 ax2 = BuildAxis2Placement(axis2Placement);
@@ -332,7 +337,6 @@ namespace Xbim
 				trsf.SetTransformation(gp_Ax3(ax2)), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
 				return trsf;
 			}
-
 
 			bool GeometryFactory::IsFacingAwayFrom(IXFace^ face, IXDirection^ direction)
 			{
@@ -359,18 +363,21 @@ namespace Xbim
 				Handle(Geom_Plane) geomPlane = new Geom_Plane(ax3);
 				return gcnew XPlane(geomPlane);
 			}
+			
 			double GeometryFactory::Distance(IXPoint^ a, IXPoint^ b)
 			{
 				gp_Pnt aPnt(a->X, a->Y, a->Z);
 				gp_Pnt bPnt(b->X, b->Y, b->Z);
 				return aPnt.Distance(bPnt);
 			}
+			
 			double GeometryFactory::IsEqual(IXPoint^ a, IXPoint^ b, double tolerance)
 			{
 				gp_Pnt aPnt(a->X, a->Y, a->Z);
 				gp_Pnt bPnt(b->X, b->Y, b->Z);
 				return aPnt.IsEqual(bPnt, tolerance);
 			}
+
 			IXDirection^ GeometryFactory::NormalAt(IXFace^ face, IXPoint^ position, double tolerance)
 			{
 				gp_Pnt pt(position->X, position->Y, position->Z);
@@ -401,18 +408,19 @@ namespace Xbim
 
 			IXMatrix^ GeometryFactory::BuildTransform(IIfcCartesianTransformationOperator^ transOp)
 			{
-				auto trans3d = dynamic_cast<IIfcCartesianTransformationOperator3D^>(transOp);
-				if (trans3d != nullptr)
-					return ToTransform(trans3d);
-				auto trans2d = dynamic_cast<IIfcCartesianTransformationOperator2D^>(transOp);
-				if (trans2d != nullptr)
-					return ToTransform(trans2d);
+				// checking if it's a non-uniform sub-type first
 				auto trans3dNU = dynamic_cast<IIfcCartesianTransformationOperator3DnonUniform^>(transOp);
 				if (trans3dNU != nullptr)
 					return ToTransform(trans3dNU);
 				auto trans2dNU = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(transOp);
 				if (trans2dNU != nullptr)
 					return ToTransform(trans2dNU);
+				auto trans3d = dynamic_cast<IIfcCartesianTransformationOperator3D^>(transOp);
+				if (trans3d != nullptr)
+					return ToTransform(trans3d);
+				auto trans2d = dynamic_cast<IIfcCartesianTransformationOperator2D^>(transOp);
+				if (trans2d != nullptr)
+					return ToTransform(trans2d);
 				throw RaiseGeometryFactoryException("Unsupported Transformation type", transOp);
 			}
 
@@ -599,7 +607,6 @@ namespace Xbim
 				return TopLoc_Location(ToTransform(placement));
 			}
 
-
 			bool GeometryFactory::MakeDir3d(IEnumerable<IfcLengthMeasure>^ offsets, gp_Vec& v)
 			{
 				IEnumerator<IfcLengthMeasure>^ enumer = offsets->GetEnumerator();
@@ -609,20 +616,20 @@ namespace Xbim
 				);
 			}
 
-
-
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3DnonUniform^ ct3D)
 			{
 				auto matrix = ToTransform(dynamic_cast<IIfcCartesianTransformationOperator3D^>(ct3D));
 				matrix->SetScale(ct3D->Scl, ct3D->Scl2, ct3D->Scl3);
 				return matrix;
 			}
+
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D)
 			{
 				auto matrix = ToTransform(dynamic_cast<IIfcCartesianTransformationOperator2D^>(ct2D));
 				matrix->SetScale(ct2D->Scl, ct2D->Scl2, 1.0);
 				return matrix;
 			}
+
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2D^ ct)
 			{
 				gp_Trsf2d m;
@@ -659,6 +666,7 @@ namespace Xbim
 				return gcnew XMatrix(m);
 
 			}
+
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
 			{
 				gp_Dir U3(gp::DZ()); //Z Axis Direction

@@ -43,6 +43,26 @@ namespace Xbim.Geometry.Engine.Tests
 
         }
 
+
+        [Fact]
+        public void Can_Build_IfcCartesianTransformationOperator3DnonUniform()
+        {
+            double scale1 = 0.5, scale2 = 1.5, scale3 = 0.1;
+            var ct3dNu = IfcMoq.IfcCartesianTransformationOperator3DMoqNonUniform(scale1, scale2, scale3);
+            var ax3 = IfcMoq.IfcAxis2Placement3DMock(loc: IfcMoq.IfcCartesianPoint3dMock(10, 5, 2));
+            IXLocation location;
+            IXMatrix matrix;
+            _modelSvc.GeometryFactory.BuildMapTransform(ct3dNu, ax3, out location, out matrix);
+            location.Should().NotBeNull();
+            matrix.Should().NotBeNull();
+            matrix.ScaleX.Should().Be(scale1);
+            matrix.ScaleY.Should().Be(scale2);
+            matrix.ScaleZ.Should().Be(scale3);
+            location.Translation.X.Should().Be(-10);
+            location.Translation.Y.Should().Be(-5);
+            location.Translation.Z.Should().Be(-2);
+        }
+
     }
 
 }

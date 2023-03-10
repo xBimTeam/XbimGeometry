@@ -338,6 +338,7 @@
   <ItemGroup>
     <ClCompile Include="BRep\Unmanaged\NFootprint.cpp" />
     <ClCompile Include="BRep\XEllipse.cpp" />
+    <ClCompile Include="Extensions\ToGTransform.h" />
     <ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="BRep\XAxisAlignedBox.cpp" />
     <ClCompile Include="BRep\XBSplineCurve.cpp" />

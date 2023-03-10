@@ -1,6 +1,8 @@
 #include "NShapeService.h"
 #include <BOPAlgo_BOP.hxx>
 #include "NProgressMonitor.h"
+#include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 
  
 TopoDS_Shape NShapeService::Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double precision)
@@ -101,4 +103,10 @@ TopoDS_Shape NShapeService::Intersect(const TopoDS_Shape& body, const TopoDS_Sha
 	TopTools_ListOfShape otherShapes;
 	otherShapes.Append(otherShape);
 	return Intersect(body, otherShapes, precision);
+}
+
+TopoDS_Shape NShapeService::Transform(const TopoDS_Shape& shape, const gp_GTrsf& trans)
+{
+	BRepBuilderAPI_GTransform gTran(shape, trans, Standard_True);
+	return gTran.Shape();
 }
