@@ -110,7 +110,7 @@ namespace Xbim.Geometry.Engine.Tests
                     model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 surfaceSweep.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
                 var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
                 sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
