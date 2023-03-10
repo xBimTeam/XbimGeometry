@@ -10,7 +10,7 @@ public:
 		return *this;
 	}
 
-	friend const gp_GTrsf& operator<(IXMatrix^ matrix, const ToGTransform& mthd) {
+	friend gp_GTrsf operator<(IXMatrix^ matrix, const ToGTransform& mthd) {
 		gp_GTrsf trsf;
 
 		trsf.SetValue(1, 1, matrix->M11);
