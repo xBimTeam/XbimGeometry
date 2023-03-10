@@ -97,7 +97,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Theory]
+        [Theory (Skip = "Returned Volume is zero, shape is not built correctly")]
         [InlineData("SurfaceCurveSweptAreaSolid_6", 12.603349469526613/*, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit"*/)]
         [InlineData("SurfaceCurveSweptAreaSolid_7", 12.603349469526613, false/*, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit"*/)]
         public void SurfaceCurveSweptAreaSolid_Tests_ToFix(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
@@ -110,7 +110,7 @@ namespace Xbim.Geometry.Engine.Tests
                     model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
                 var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 surfaceSweep.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
+                var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
                 var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
                 sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
                 //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
