@@ -53,7 +53,7 @@ namespace Xbim
 
 			XbimGeometryCreatorV6(IModel^ model, ILoggerFactory^ loggerFactory) : Xbim::Geometry::Services::ModelGeometryService(model, loggerFactory)
 			{
-				_shapeService = gcnew ShapeService();
+				_shapeService = gcnew ShapeService(loggerFactory);
 			}
 			//Central point for logging all errors
 			static void LogInfo(ILogger^ logger, Object^ entity, System::String^ format, ... array<Object^>^ arg);

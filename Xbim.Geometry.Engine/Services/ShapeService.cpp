@@ -27,6 +27,7 @@
 
 
 using namespace Xbim::Geometry::BRep;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -58,28 +59,26 @@ namespace Xbim
 			}
 
 			IXShape^ ShapeService::Cut(IXShape^ body, IXShape^ subtraction, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 				TopoDS_Shape subtractionShape = TOPO_SHAPE(subtraction);
-				TopoDS_Shape result = Ptr()->Cut(topoBody, subtractionShape, precision);
+				TopoDS_Shape result = Ptr()->Cut(topoShape, subtractionShape, precision);
 
 				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Cut(IXShape^ body, IEnumerable<IXShape^>^ subtractions, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 
-				TopTools_ListOfShape subtractionShapes;
+				TopoDS_ListOfShape subtractionShapes;
 				for each (IXShape ^ sub in subtractions)
 				{
 					TopoDS_Shape topoSubShape = TOPO_SHAPE(sub);
 					subtractionShapes.Append(topoSubShape);
 				}
 
-				TopoDS_Shape result = Ptr()->Cut(topoBody, subtractionShapes, precision);
+				TopoDS_Shape result = Ptr()->Cut(topoShape, subtractionShapes, precision);
 				return XShape::GetXbimShape(result);
 			}
 
@@ -113,28 +112,26 @@ namespace Xbim
 			}
 
 			IXShape^ ShapeService::Union(IXShape^ body, IXShape^ addition, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 				TopoDS_Shape additionShape = TOPO_SHAPE(addition);
-				TopoDS_Shape result = Ptr()->Union(topoBody, additionShape, precision);
+				TopoDS_Shape result = Ptr()->Union(topoShape, additionShape, precision);
 
 				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Union(IXShape^ body, IEnumerable<IXShape^>^ additions, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 
-				TopTools_ListOfShape additionShapes;
+				TopoDS_ListOfShape additionShapes;
 				for each (IXShape ^ add in additions)
 				{
 					TopoDS_Shape addShape = TOPO_SHAPE(add);
 					additionShapes.Append(addShape);
 				}
 
-				TopoDS_Shape result = Ptr()->Union(topoBody, additionShapes, precision);
+				TopoDS_Shape result = Ptr()->Union(topoShape, additionShapes, precision);
 
 				return XShape::GetXbimShape(result);
 			}
@@ -171,28 +168,26 @@ namespace Xbim
 			}
 			 
 			IXShape^ ShapeService::Intersect(IXShape^ body, IXShape^ intersect, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 				TopoDS_Shape intersectShape = TOPO_SHAPE(intersect);
-				TopoDS_Shape result = Ptr()->Intersect(topoBody, intersectShape, precision);
+				TopoDS_Shape result = Ptr()->Intersect(topoShape, intersectShape, precision);
 
 				return XShape::GetXbimShape(result);
 			}
 
 			IXShape^ ShapeService::Intersect(IXShape^ body, IEnumerable<IXShape^>^ intersects, double precision)
-			{
-				TopoDS_Shape topoBody;
+			{ 
 				TopoDS_Shape topoShape = TOPO_SHAPE(body);
 
-				TopTools_ListOfShape intersectShapes;
+				TopoDS_ListOfShape intersectShapes;
 				for each (IXShape ^ intersect in intersects)
 				{
 					TopoDS_Shape intersectShape = TOPO_SHAPE(intersect);
 					intersectShapes.Append(intersectShape);
 				}
 
-				TopoDS_Shape result = Ptr()->Intersect(topoBody, intersectShapes, precision);
+				TopoDS_Shape result = Ptr()->Intersect(topoShape, intersectShapes, precision);
 
 				return XShape::GetXbimShape(result);
 			}
