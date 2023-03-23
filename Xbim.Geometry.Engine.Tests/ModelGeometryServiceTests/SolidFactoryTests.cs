@@ -10,6 +10,7 @@ using Xbim.Ifc4;
 using Xbim.IO.Memory;
 using Xunit;
 using Xbim.Ifc2x3.PresentationDimensioningResource;
+using Xbim.Common;
 
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -26,6 +27,7 @@ namespace Xbim.Geometry.Engine.Tests
             _loggerFactory = loggerFactory;
             this.factory = factory;
             var dummyModel = new MemoryModel(new EntityFactoryIfc4());
+            dummyModel.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
             _modelSvc = factory.CreateModelGeometryService(dummyModel, _loggerFactory);
         }
 

@@ -35,7 +35,26 @@ gp_Vec NFaceFactory::Normal(const TopoDS_Face& face)
 	prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, faceNormal);
 	return faceNormal;
 
-}TopoDS_Face NFaceFactory::BuildFace(Handle(Geom_Surface) surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops, double tolerance)
+}
+
+TopoDS_Face NFaceFactory::BuildFace(Handle(Geom_Surface) surface, double tolerance)
+{
+	try
+	{
+		BRepBuilderAPI_MakeFace faceMaker(surface, false);
+		if (!faceMaker.IsDone())
+			Standard_Failure::Raise("Could not apply surface to face");
+		return faceMaker.Face();
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e, "Face specification error");
+	}
+
+	return TopoDS_Face();
+
+}
+TopoDS_Face NFaceFactory::BuildFace(Handle(Geom_Surface) surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops, double tolerance)
 {
 	try
 	{
@@ -61,14 +80,14 @@ gp_Vec NFaceFactory::Normal(const TopoDS_Face& face)
 			sfw->ClearModes();
 			sfw->FixAddPCurveMode() = true;
 			sfw->FixSameParameterMode() = true;
-			
-			const TopoDS_Face& face = faceMaker.Face();			
+
+			const TopoDS_Face& face = faceMaker.Face();
 			for (TopExp_Explorer exp(face, TopAbs_WIRE); exp.More(); exp.Next())
 			{
 				auto wire = TopoDS::Wire(exp.Current());
 				sfw->Init(wire, face, tolerance);
 				sfw->FixEdgeCurves();
-				
+
 			}
 		}
 		return faceMaker.Face();

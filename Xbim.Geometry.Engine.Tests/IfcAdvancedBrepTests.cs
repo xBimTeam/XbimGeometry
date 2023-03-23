@@ -7,6 +7,8 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Exceptions;
+using Xbim.Geometry.Abstractions;
 
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -73,12 +75,15 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Theory]
-        [InlineData("SurfaceCurveSweptAreaSolid_1", 2944208.3398366235/*, DisplayName = "Handles Self Intersection unorientable shape"*/)]
-        [InlineData("SurfaceCurveSweptAreaSolid_2", 0.00025657473102144062/*, DisplayName = "Handles Planar reference surface, parallel to sweep"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_1", 5888416.692/*, DisplayName = "Handles Swepted elipse, sweep parameters override directrix trims"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_2", 0.0,true,false,true/*, DisplayName = "Handles  reference surface incorrectly parallel to sweep"*/)]
         [InlineData("SurfaceCurveSweptAreaSolid_3", 0.26111117805532907, false/*, DisplayName = "Reference Model from IFC documentation"*/)]
         [InlineData("SurfaceCurveSweptAreaSolid_4", 19.276830224679465/*, DisplayName = "Handles Trimmed directrix is periodic"*/)]
         [InlineData("SurfaceCurveSweptAreaSolid_5", 12.603349469526613, false, true/*, DisplayName = "Handles Polylines Incorrectly Trimmed as 0 to 1"*/)]
-        public void SurfaceCurveSweptAreaSolid_Tests(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
+        [InlineData("SurfaceCurveSweptAreaSolid_6", 333574/*, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit, creates a sphere"*/)]
+        [InlineData("SurfaceCurveSweptAreaSolid_7", 760884, false/*, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit. Creates a 90 deg elbow"*/)]
+
+        public void SurfaceCurveSweptAreaSolid_Tests(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false, bool throwsException = false)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
             {
@@ -89,35 +94,21 @@ namespace Xbim.Geometry.Engine.Tests
                 var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
                 surfaceSweep.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
-                var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
-                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
-                //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
-                //    model.ModelFactors.Precision, logger);
-
+                if (throwsException)
+                {
+                    var ex = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateSolid(surfaceSweep));
+                    ex.Message.Should().Be("Failure building SurfaceCurveSweptAreaSolid");
+                }
+                else
+                { 
+                    var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
+                    sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1);
+                }
+                
             }
         }
 
-        [Theory (Skip = "Returned Volume is zero, shape is not built correctly")]
-        [InlineData("SurfaceCurveSweptAreaSolid_6", 12.603349469526613/*, DisplayName = "Directrix trim incorrectly set to 0, 360 by Revit"*/)]
-        [InlineData("SurfaceCurveSweptAreaSolid_7", 12.603349469526613, false/*, DisplayName = "Directrix trim from Flex Ifc Exporter trim  set to 270, 360 by Revit"*/)]
-        public void SurfaceCurveSweptAreaSolid_Tests_ToFix(string fileName, double requiredVolume, bool addLinearExtrusionWorkAround = true, bool addPolyTrimWorkAround = false)
-        {
-            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
-            {
-                if (addLinearExtrusionWorkAround)
-                    ((XbimModelFactors)model.ModelFactors).AddWorkAround("#SurfaceOfLinearExtrusion");
-                if (addPolyTrimWorkAround)
-                    model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
-                var surfaceSweep = model.Instances.OfType<IIfcSurfaceCurveSweptAreaSolid>().FirstOrDefault();
-                surfaceSweep.Should().NotBeNull();
-                var geomEngine = factory.CreateGeometryEngineV5(model, _loggerFactory);
-                var sweptSolid = geomEngine.CreateSolid(surfaceSweep);
-                sweptSolid.Volume.Should().BeApproximately(requiredVolume, 1e-3);
-                //var shapeGeom = geomEngine.CreateShapeGeometry(model.ModelFactors.OneMilliMeter,sweptSolid,
-                //    model.ModelFactors.Precision, logger);
-
-            }
-        }
+       
 
         [Fact]
         public void Advanced_brep_with_sewing_issues()

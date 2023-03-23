@@ -24,8 +24,19 @@
 #include <BRepCheck_Solid.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include "NCurveFactory.h"
+#include "ShapeAnalysis.hxx"
 #include <math.h>
-
+#include <BRepGProp_Face.hxx>
+#include <ShapeAnalysis_Surface.hxx>
+#include <BRep_Tool.hxx>
+#include <Geom_Plane.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+#include <TopExp.hxx>
+#include <BRepTools.hxx>
+#include <CSLib_NormalStatus.hxx>
+#include <CSLib.hxx>
+#include <GeomLProp_SLProps.hxx>
+#include <ShapeFix_Edge.hxx>
 bool NSolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 {
 	try
@@ -473,6 +484,110 @@ TopoDS_Solid NSolidFactory::BuildSweptDiskSolid(const TopoDS_Wire& directrixWire
 
 	return TopoDS_Solid();
 }
+TopoDS_Solid NSolidFactory::BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& sweptArea, const Handle(Geom_Surface)& refSurface, const TopoDS_Wire& directrixWire, bool isPlanarReferenceSurface, double precision)
+{
+	try
+	{
+		BRepAdaptor_CompCurve cc(directrixWire, Standard_True);
+		BRepBuilderAPI_TransitionMode transitionMode = (cc.Continuity() == GeomAbs_Shape::GeomAbs_C0 ? BRepBuilderAPI_RightCorner : BRepBuilderAPI_Transformed);
+		//place the directrix on the surface
+		BRepBuilderAPI_MakeFace faceMaker(refSurface, directrixWire);
+		if (!faceMaker.IsDone())
+			Standard_Failure::Raise("Directrix could not be projected onto the reference surface");
+		//the swept area must be a plane
+		//get the origin of the surface that contains the outer wire of the sweep, it should be planar
+		/*BRepTools::Write(directrixWire, "/tmp/directrix.brep");
+		BRepTools::Write(faceMaker.Face(), "/tmp/sweptFace.brep");
+		BRepTools::Write(sweptArea, "/tmp/sweptArea.brep");*/
+		//this surface should be planar
+		Handle(Geom_Plane) sweptAreaPlane = Handle(Geom_Plane)::DownCast(BRep_Tool::Surface(sweptArea));
+		if (sweptAreaPlane.IsNull()) Standard_Failure::Raise("Swept Area must be a plane");
+		gp_Dir sweptAreaZDir = sweptAreaPlane->Axis().Direction();
+		gp_Vec sweptAreaXDir = sweptAreaPlane->Position().XDirection();
+		gp_Pnt sweptAreaPosition = sweptAreaPlane->Position().Location();
+		//ensure that the swept area bound is in the correct starting position
+
+		gp_Pnt directrixWireStart;
+		gp_Pnt startPointOnSurface;
+		gp_Vec tangentAtDirectrixStart;
+		gp_Vec normalAtDirectrixStart;
+		
+		cc.D1(cc.FirstParameter(), directrixWireStart, tangentAtDirectrixStart);
+
+		ShapeAnalysis_Surface surfaceAnalyser(refSurface);
+		gp_Pnt2d uv = surfaceAnalyser.ValueOfUV(directrixWireStart, precision);
+		
+		GeomLProp_SLProps props(refSurface,uv.X(), uv.Y(), 1 /* max 1 derivation */, precision);
+		if(!props.IsNormalDefined())
+			Standard_Failure::Raise("Error building surface. Most likely the U and V directions of the surface are incorrectly defined and are parallel");
+		normalAtDirectrixStart = props.Normal();
+		
+		tangentAtDirectrixStart.Normalize();
+		normalAtDirectrixStart.Normalize();
+
+		gp_Ax3 toAx3(directrixWireStart, tangentAtDirectrixStart, normalAtDirectrixStart); //Zdir pointing tangentally to sweep, XDir perpendicular to the ref surface
+		gp_Ax3 fromAx3(gp::Origin(), sweptAreaZDir, sweptAreaXDir);
+		gp_Trsf sweptAreaTransform;
+		sweptAreaTransform.SetTransformation(toAx3, fromAx3);
+
+		
+		TopoDS_Face sweptAreaRepostioned = TopoDS::Face(BRepBuilderAPI_Transform(sweptArea, sweptAreaTransform));
+		TopoDS_Wire sweptAreaBound = ShapeAnalysis::OuterWire(sweptAreaRepostioned);
+		/*BRepTools::Write(sweptAreaRepostioned, "/tmp/sweptAreaRepostioned.brep");
+		BRepTools::Write(sweptAreaBound, "/tmp/sweptAreaBound.brep");*/
+		TopoDS_Face referenceFace = faceMaker.Face();
+		if (!isPlanarReferenceSurface) {
+			ShapeFix_Edge sfe;
+			TopExp_Explorer exp(directrixWire, TopAbs_EDGE);
+			for (; exp.More(); exp.Next()) {
+				sfe.FixAddPCurve(TopoDS::Edge(exp.Current()), referenceFace, false, precision);
+			}
+		}
+		BRepOffsetAPI_MakePipeShell pipeMaker(directrixWire);
+		
+		pipeMaker.SetTransitionMode(transitionMode);
+		
+		pipeMaker.SetMode(referenceFace);
+		
+		TopoDS_Edge firstEdge;
+		double uOnEdge;
+		cc.Edge(cc.FirstParameter(), firstEdge, uOnEdge);
+		pipeMaker.Add(sweptAreaBound, TopExp::FirstVertex(firstEdge), Standard_False, Standard_False);
+
+		pipeMaker.Build();
+		if (!pipeMaker.IsDone())
+		{
+			if (pipeMaker.ErrorOnSurface())
+				Standard_Failure::Raise("Could not build swept pipe: Error on surface");
+			BRepBuilderAPI_PipeError status = pipeMaker.GetStatus();
+			switch (status)
+			{
+			case BRepBuilderAPI_PipeNotDone:
+				Standard_Failure::Raise("Could not build swept pipe");
+			case BRepBuilderAPI_PlaneNotIntersectGuide:
+				Standard_Failure::Raise("Could not build swept pipe: Plane Not Intersect Guide");
+			case BRepBuilderAPI_ImpossibleContact:
+				Standard_Failure::Raise("Could not build swept pipe: Impossible Contact");
+			default:
+				Standard_Failure::Raise("Could not build swept pipe: Unknown Error");
+			}
+		}
+		if (!pipeMaker.MakeSolid())
+			Standard_Failure::Raise("Could not make swept pipe a solid");
+		return TopoDS::Solid(pipeMaker.Shape());
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	catch (...)
+	{
+		pLoggingService->LogError("Could not build SurfaceCurveSweptAreaSolid");
+	}
+
+	return TopoDS_Solid();
+}
+
 
 TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth, const TopLoc_Location& location)
 {
@@ -513,7 +628,7 @@ TopoDS_Solid NSolidFactory::MakeSolid(const TopoDS_Shell& shell)
 
 TopoDS_Solid NSolidFactory::CastToSolid(const TopoDS_Shape& shape)
 {
-	try 
+	try
 	{
 		return TopoDS::Solid(shape);
 	}

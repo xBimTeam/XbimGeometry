@@ -9,23 +9,18 @@ bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::FixRevitIncorrectAr
 	if (!ShouldApplyRevitIncorrectArcCentreSweptCurve()) return false;
 	if (surfaceOfLinearExtrusions->Position == nullptr) return false;
 	IIfcArbitraryOpenProfileDef^ arbitraryOpenProfileDef = dynamic_cast<IIfcArbitraryOpenProfileDef^>(surfaceOfLinearExtrusions->SweptCurve);
-
 	if (arbitraryOpenProfileDef == nullptr) return false; //not in scope
-
 	IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(arbitraryOpenProfileDef->Curve);
-	IIfcCircle^ circle = nullptr;
-	//IIfcBSplineCurveWithKnots^ bspline = nullptr;
-	if (tc != nullptr)
-	{
-		circle = dynamic_cast<IIfcCircle^>(tc->BasisCurve);
-		//bspline = dynamic_cast<IIfcBSplineCurveWithKnots^>(tc->BasisCurve);
-	}
-	if (circle == nullptr) return false;
+	if (tc == nullptr) return false; //its always a trimmed curve in this error
+	IIfcCircle^ circle = dynamic_cast<IIfcCircle^>(tc->BasisCurve);
+	if (circle == nullptr) return false; //always a circle
 
-	//the centre has been transformed twice, recalculate and update temporarily the centre
-	//trim 1 and trim 2 will be cartesian points
+	//In this error the centre has been transformed twice, recalculate and update temporarily the centre
+	//trim 1 and trim 2 will be only cartesian points in this error
 	IIfcCartesianPoint^ trim1 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim1));
 	IIfcCartesianPoint^ trim2 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim2));
+	if (trim1 == nullptr || trim2 == nullptr) return false;
+
 	gp_Pnt p1 = GEOMETRY_FACTORY->BuildPoint3d(trim1);
 	gp_Pnt p2 = GEOMETRY_FACTORY->BuildPoint3d(trim2);
 
@@ -56,7 +51,18 @@ bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::FixRevitSweptSurfac
 
 bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::FixRevitIncorrectBsplineSweptCurve(IIfcSurfaceOfLinearExtrusion^ surfaceOfLinearExtrusions, TopoDS_Edge& fixedEdge)
 {
-	if (dynamic_cast<IIfcBSplineCurveWithKnots^>(surfaceOfLinearExtrusions->SweptCurve) == nullptr) return false; //no need to fix if its not an IfcBSplineCurveWithKnots
+	IIfcArbitraryOpenProfileDef^ pDef = dynamic_cast<IIfcArbitraryOpenProfileDef^>(surfaceOfLinearExtrusions->SweptCurve);
+	IIfcTrimmedCurve^ tc = nullptr;
+	IIfcBSplineCurveWithKnots^ bspline = nullptr;
+	if (pDef != nullptr)
+	{
+		tc = dynamic_cast<IIfcTrimmedCurve^>(pDef->Curve);
+		if (tc != nullptr)
+			bspline = dynamic_cast<IIfcBSplineCurveWithKnots^>(tc->BasisCurve);
+		else //it might just be a bspline
+			bspline = dynamic_cast<IIfcBSplineCurveWithKnots^>(pDef->Curve);
+	}
+	if (bspline == nullptr) return false; //no need to fix if its not an IfcBSplineCurveWithKnots
 	if (surfaceOfLinearExtrusions->Position == nullptr) return false;
 
 	if (!ShouldApplyRevitIncorrectBsplineSweptCurve()) return false;
@@ -128,5 +134,11 @@ void Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::InitRevitWorkAround
 			}
 
 		}
+	}
+	else
+	{
+		ApplyRevitIncorrectArcCentreSweptCurve = false;
+		ApplyRevitSweptSurfaceExtrusionInFeet = false;
+		ApplyRevitIncorrectBsplineSweptCurve = false;
 	}
 }

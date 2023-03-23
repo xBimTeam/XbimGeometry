@@ -164,6 +164,12 @@ namespace Xbim
 			{
 				if (ifcSurfaceOfLinearExtrusion->SweptCurve->ProfileType != IfcProfileTypeEnum::CURVE)
 					throw RaiseGeometryFactoryException("Only profiles of type curve are valid in a surface of linearExtrusion", ifcSurfaceOfLinearExtrusion);
+				TopLoc_Location location;
+				if (ifcSurfaceOfLinearExtrusion->Position != nullptr)
+				{
+					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(ifcSurfaceOfLinearExtrusion->Position);
+				}
+				
 				TopoDS_Edge sweptEdge;
 				if (!BIM_WORKAROUNDS->FixRevitIncorrectArcCentreSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge))
 				{
@@ -175,11 +181,13 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Direction of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion->ExtrudedDirection);
 				extrude *= ifcSurfaceOfLinearExtrusion->Depth;
 				BIM_WORKAROUNDS->FixRevitSweptSurfaceExtrusionInFeet(extrude);
-				BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
+				bool hasRevitBSplineIssue = BIM_WORKAROUNDS->FixRevitIncorrectBsplineSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge);
 
-				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude);
+				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude, hasRevitBSplineIssue);
 				if (surface.IsNull())
 					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);
+				
+				if (!hasRevitBSplineIssue && !location.IsIdentity()) surface->Transform(location);
 				return surface;
 			}
 

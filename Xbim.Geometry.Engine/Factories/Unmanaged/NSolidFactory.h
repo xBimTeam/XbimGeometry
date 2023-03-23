@@ -7,6 +7,7 @@
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <Geom_Curve.hxx>
 #include <TopLoc_Location.hxx>
+#include <Geom_Surface.hxx>
 class NSolidFactory : public NFactoryBase
 {
 
@@ -20,6 +21,7 @@ public:
 	TopoDS_Solid BuildSphere(gp_Ax2 ax2, double radius);
 	TopoDS_Solid BuildSweptDiskSolid(const Handle(Geom_Curve) directrixCurve, double radius, double innerRadius);
 	TopoDS_Solid BuildSweptDiskSolid(const TopoDS_Wire& directrix, double radius, double innerRadius);
+	TopoDS_Solid BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& sweptArea, const Handle(Geom_Surface)& refSurface, const TopoDS_Wire& directrixWire, bool isPlanarReferenceSurface, double precision);
 	TopoDS_Solid BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth, const TopLoc_Location& location);
 
 	TopoDS_Solid MakeSolid(const TopoDS_Shell& faceSet);

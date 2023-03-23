@@ -44,6 +44,8 @@ namespace Xbim
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
 
+				TopoDS_Solid BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid);
+
 				TopoDS_Solid BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal);
 
 #pragma region CSG solids		

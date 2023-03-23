@@ -38,9 +38,9 @@ public:
 
 	TopoDS_Wire BuildDirectrixWire(const TopoDS_Wire& wire, double trimStart, double trimEnd, double tolerance, double gapSize);
 
-	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance);
+	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance, double radianFactor);
 	
-	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance);
+	TopoDS_Wire BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance, double radianFactor);
 
 	TopoDS_Wire BuildWire(const TColGeom2d_SequenceOfBoundedCurve& segments, double tolerance, double gapSize);
 

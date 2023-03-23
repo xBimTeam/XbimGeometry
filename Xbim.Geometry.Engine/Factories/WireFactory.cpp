@@ -3,6 +3,7 @@
 #include "GeometryFactory.h"
 #include "EdgeFactory.h"
 #include "ProfileFactory.h"
+#include "BIMAuthoringToolWorkArounds.h"
 #include <BRepBuilderAPI_MakeEdge2d.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <TopoDS.hxx>
@@ -259,7 +260,8 @@ namespace Xbim
 				}
 				else
 				{
-					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelGeometryService->MinimumGap);
+					//nb force the radian factor to 1.0 as we have already made the radian angle conversion for the pramameters
+					TopoDS_Wire trimmedWire = EXEC_NATIVE->BuildTrimmedWire(basisWire, p1, p2, u1, u2, trim_cartesian, ifcTrimmedCurve->SenseAgreement, ModelGeometryService->MinimumGap, 1.0);
 					if (trimmedWire.IsNull())
 						throw RaiseGeometryFactoryException("IfcTrimmedCurve could not be built as a wire", ifcTrimmedCurve);
 					return trimmedWire;
@@ -401,10 +403,19 @@ namespace Xbim
 			{
 
 				TopoDS_Wire wire = BuildWire(ifcCurve, false); //throws exception
-
+				
 				if (double::IsNaN(startParam) && double::IsNaN(endParam)) return wire; //no trimming required
-
-				TopoDS_Wire directrix = EXEC_NATIVE->BuildTrimmedWire(wire, startParam, endParam, true, ModelGeometryService->Precision);
+				if (dynamic_cast<IIfcPolyline^>(ifcCurve) &&
+					startParam == 0. &&
+					endParam == 1. &&
+					ModelGeometryService->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
+				{	
+					endParam = double::NaN; //set to max
+					LogDebug(ifcCurve, "Polyline trim (0:1) does not comply with schema. {0}. It has been expanded to the entire length of the Polyline", ModelGeometryService->Model->Header->FileName->OriginatingSystem);
+				}
+				//nb, at this point we have made no attempt to convert the params to radians, the BuildTrimmedWire will do this if we pass the radian conversion factor through
+				TopoDS_Wire directrix = EXEC_NATIVE->BuildTrimmedWire(wire, startParam , endParam , true, ModelGeometryService->Precision, ModelGeometryService->RadianFactor);
+				
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);
 				return directrix;

@@ -19,7 +19,6 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		static void BuildIfcSurfaceCurveSweptAreaSolid(TopoDS_Wire& sweepOcc, TopoDS_Face& refSurface, TopoDS_Face& faceStartOcc, double precision, TopoDS_Solid & result,  int& retflag);
 		ref class XbimSolid :IXbimSolid, XbimOccShape
 		{
 		
@@ -54,9 +53,6 @@ namespace Xbim
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
 			
-			XbimWire^ CreateDirectrix(IIfcCurve^ directrix, System::Nullable<IfcParameterValue> startParam, System::Nullable<IfcParameterValue> endParam, ILogger^ logger);
-			// this is case handled by IIfcSweptDiskSolid 
-			// void Init(IIfcSweptDiskSolidPolygonal^ solid, ILogger^ logger);
 			void Init(IIfcBoundingBox^ solid, ILogger^ logger);
 			void Init(IIfcHalfSpaceSolid^ solid, ILogger^ logger);
 			

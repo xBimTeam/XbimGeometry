@@ -206,6 +206,8 @@ namespace Xbim
 					return BuildExtrudedAreaSolid(static_cast<IIfcExtrudedAreaSolid^>(ifcSolid));
 				case XSolidModelType::IfcSweptDiskSolidPolygonal:
 					return BuildSweptDiskSolidPolygonal(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid));
+				case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
+					return BuildSurfaceCurveSweptAreaSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid));
 					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation
 				case XSolidModelType::IfcAdvancedBrep:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger(), _modelService);
@@ -221,13 +223,47 @@ namespace Xbim
 					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolid^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcRevolvedAreaSolidTapered:
 					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
+
 				default:
 					break;
 				}
 				throw RaiseGeometryFactoryException("Not implemented. SolidModel type", ifcSolid);
 			}
+
+			TopoDS_Solid SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid)
+			{
+				//build the swept area
+				if (ifcSurfaceCurveSweptAreaSolid->SweptArea->ProfileType != IfcProfileTypeEnum::AREA)
+					throw RaiseGeometryFactoryException("Rule SweptAreType must be IfcProfileTypeEnum::AREA", ifcSurfaceCurveSweptAreaSolid->SweptArea);
+				auto sweptArea = PROFILE_FACTORY->BuildProfileFace(ifcSurfaceCurveSweptAreaSolid->SweptArea);
+				if (sweptArea.IsNull())
+					throw RaiseGeometryFactoryException("Error build swept area", ifcSurfaceCurveSweptAreaSolid->SweptArea);
+
+
+				
+
+					//build the reference surface
+				XSurfaceType surfaceType;
+				auto refSurface = SURFACE_FACTORY->BuildSurface(ifcSurfaceCurveSweptAreaSolid->ReferenceSurface, surfaceType);
+				if (refSurface.IsNull())
+					throw RaiseGeometryFactoryException("Reference Surface is invalid", ifcSurfaceCurveSweptAreaSolid->ReferenceSurface);
+				bool isPlanarReferenceSurface = (surfaceType == XSurfaceType::IfcPlane);
+
+				//build the directrix
+				auto directrixWire = WIRE_FACTORY->BuildDirectrixWire(ifcSurfaceCurveSweptAreaSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSurfaceCurveSweptAreaSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSurfaceCurveSweptAreaSolid->EndParam));
+				if (directrixWire.IsNull())
+					throw RaiseGeometryFactoryException("Directrix is invalid", ifcSurfaceCurveSweptAreaSolid->Directrix);
+				auto dstr = (gcnew XWire(directrixWire))->BrepString();
+				
+				auto solid = EXEC_NATIVE->BuildSurfaceCurveSweptAreaSolid(sweptArea, refSurface, directrixWire, isPlanarReferenceSurface, ModelGeometryService->MinimumGap);
+				if(solid.IsNull())
+					throw RaiseGeometryFactoryException("Failure building SurfaceCurveSweptAreaSolid", ifcSurfaceCurveSweptAreaSolid);
+				TopLoc_Location location;
+				if (ifcSurfaceCurveSweptAreaSolid->Position != nullptr) location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(ifcSurfaceCurveSweptAreaSolid->Position);
+				if (!location.IsIdentity()) solid.Move(location, false);
+				return solid;
+			}
+
 
 			TopoDS_Solid SolidFactory::BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal)
 			{
@@ -259,7 +295,7 @@ namespace Xbim
 			TopoDS_Solid SolidFactory::BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSweptDiskSolid)
 			{
 				auto ifcSweptDiskSolidPolygonal = dynamic_cast<IIfcSweptDiskSolidPolygonal^>(ifcSweptDiskSolid);
-				if (ifcSweptDiskSolidPolygonal != nullptr) 
+				if (ifcSweptDiskSolidPolygonal != nullptr)
 					return BuildSweptDiskSolidPolygonal(ifcSweptDiskSolidPolygonal);
 				else
 				{
