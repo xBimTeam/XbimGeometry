@@ -49,6 +49,52 @@ namespace Xbim.Geometry.Engine.Tests
             volDiff.Should().BeLessThan(Math.Pow(scale, 3));
         }
 
+
+        [Fact]
+        public void CanUnionShapes()
+        {
+            var solidService = _modelSvc.SolidFactory;
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(startParam: 0, endParam: 60, radius: 30, innerRadius: 15);
+            var ifcSweptDisk2 = IfcMoq.IfcSweptDiskSolidMoq(startParam: 50, endParam: 100, radius: 20, innerRadius:  5);
+            var solid1 = (IXSolid)solidService.Build(ifcSweptDisk);
+            var solid2 = (IXSolid)solidService.Build(ifcSweptDisk2);
+
+            var unioinShape = _shapeService.Union(solid1, solid2, _modelSvc.Precision);
+
+            unioinShape.Should().NotBeNull();
+        }
+
+
+        [Fact]
+        public void CanCutShapes()
+        {
+            var solidService = _modelSvc.SolidFactory;
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(startParam: 0, endParam: 60, radius: 30, innerRadius: 15);
+            var ifcSweptDisk2 = IfcMoq.IfcSweptDiskSolidMoq(startParam: 50, endParam: 100, radius: 30, innerRadius: 15);
+            var solid1 = (IXSolid)solidService.Build(ifcSweptDisk);
+            var solid2 = (IXSolid)solidService.Build(ifcSweptDisk2);
+
+            var cutShape = _shapeService.Cut(solid1, solid2, _modelSvc.Precision);
+
+            cutShape.Should().NotBeNull();
+        }
+
+
+        [Fact]
+        public void CanIntersectShapes()
+        {
+            var solidService = _modelSvc.SolidFactory;
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq(startParam: 0, endParam: 60, radius: 30, innerRadius: 10);
+            var block = IfcMoq.IfcBlockMoq();
+            var solid1 = (IXSolid)solidService.Build(ifcSweptDisk);
+            var solid2 = solidService.Build(block);
+
+            var intersectShape = _shapeService.Intersect(solid1, solid2, _modelSvc.Precision);
+
+            intersectShape.Should().NotBeNull();
+        }
+
+
         [Theory]
         [MemberData(nameof(Transformations))]
         public void CanTransformShape(IXMatrix mat, double volFactor, IIfcBlock ifcBlock)
@@ -69,6 +115,7 @@ namespace Xbim.Geometry.Engine.Tests
             transformed.IsValidShape().Should().BeTrue();
             transformed.Volume.Should().BeApproximately(solid.Volume * volFactor, 0.001);
         }
+
 
         [Fact]
         public void CanTransformShape_WithIfcTransformationOperator3D()
@@ -92,6 +139,7 @@ namespace Xbim.Geometry.Engine.Tests
             transformed.IsValidShape().Should().BeTrue();
             transformed.Volume.Should().BeApproximately(solid.Volume * Math.Pow(scale, 3), 0.001);
         }
+
 
         [Fact]
         public void CanTransformShape_WithIfcTransformationOperator3DnonUniform()

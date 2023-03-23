@@ -2,8 +2,14 @@
 #include "../XbimHandle.h"
 #include "../XbimGeometryObject.h"
 #include "../Services/Unmanaged/NShapeService.h"
+#include "LoggingService.h"
+
 using namespace Xbim::Geometry;
 using namespace Xbim::Geometry::Abstractions;
+using namespace Microsoft::Extensions::Logging;
+using namespace Microsoft::Extensions::Logging::Abstractions;
+
+
 namespace Xbim
 {
 	namespace Geometry
@@ -15,10 +21,16 @@ namespace Xbim
 			public ref class ShapeService : XbimHandle<NShapeService>, IXShapeService
 			{
               
+            private:
+                LoggingService^ _loggingService;
             public:
-                ShapeService() : XbimHandle(new NShapeService(5))
+                ShapeService(ILoggerFactory^ loggerFactory) : XbimHandle(new NShapeService(20))
                 {
+                    auto logger = LoggerFactoryExtensions::CreateLogger<ModelGeometryService^>(loggerFactory);
+                    _loggingService = gcnew Xbim::Geometry::Services::LoggingService(logger);
+                    Ptr()->SetLogger(static_cast<WriteLog>(_loggingService->LogDelegatePtr.ToPointer()));
                 };
+
                 virtual IXShape^ Convert(System::String^ brepString);
 
                 virtual System::String^ Convert(IXShape^ shape);
