@@ -91,7 +91,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 	//start at the lowest, leftist point and proceed anticlockwise around the perimeter
 	//start with the direction being downward, of the left most point, measure angle counter next segment clockwise from downward, the smallest angle will be the outbound segment we want
 
-	auto& arcIt = arcs.cbegin();
+	auto&& arcIt = arcs.cbegin();
 	gp_XY currentPoint = anInspector.GetVertex(arcIt->first).Coord();
 	int currentPointId = arcIt->first;
 	gp_XY leftMostPoint = currentPoint;
@@ -134,7 +134,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 			double minAngle = twoPi;
 			gp_XY nextPoint;
 			int nextPointId = 0;
-			for (auto& segIt = toPoints.cbegin(); segIt != toPoints.cend(); segIt++)
+			for (auto&& segIt = toPoints.cbegin(); segIt != toPoints.cend(); segIt++)
 			{
 				if (*segIt == previousPointId || currentPointId == *segIt) //we are going backwards or nowhere, skip it
 					continue;
@@ -169,13 +169,13 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 	//find all the points connected to points in this boundary, these can be ignored
 	std::set<int> connected;
 	ConnectedPoints(leftMostPointIndex, arcs, connected);
-	for (auto& keyIt = connected.cbegin(); keyIt != connected.cend(); keyIt++)
+	for (auto&& keyIt = connected.cbegin(); keyIt != connected.cend(); keyIt++)
 		arcs.erase(*keyIt);
 
 	//record the boundary as a closed polygon
 	TColgp_Array1OfPnt2d arrayOfPnt2d(1, (int)outerBound.size());
 	int i = 1;
-	for (auto& loopIt = outerBound.cbegin(); loopIt != outerBound.cend(); loopIt++, i++)
+	for (auto&& loopIt = outerBound.cbegin(); loopIt != outerBound.cend(); loopIt++, i++)
 		arrayOfPnt2d.SetValue(i, anInspector.GetVertex(*loopIt).Coord());
 
 
@@ -289,7 +289,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 					{
 						double u = segmentA->FirstParameter() + distA;
 						//ensure we are inserted with an empty set
-						auto& result = segmentSplits.emplace(i, std::vector<double>());
+						auto&& result = segmentSplits.emplace(i, std::vector<double>());
 						result.first->second.push_back(u);
 					}
 					//u value will be the distance between the first point and this point
@@ -301,7 +301,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 					{
 						double u = segmentB->FirstParameter() + distB;
 						//do the other segment
-						auto& result = segmentSplits.emplace(j, std::vector<double>());
+						auto&& result = segmentSplits.emplace(j, std::vector<double>());
 						result.first->second.push_back(u);
 					}
 				}
@@ -309,7 +309,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		}
 
 		//apply any splits to the appropriate segments
-		for (auto& splitSegIt = segmentSplits.cbegin(); splitSegIt != segmentSplits.cend(); splitSegIt++)
+		for (auto&& splitSegIt = segmentSplits.cbegin(); splitSegIt != segmentSplits.cend(); splitSegIt++)
 		{
 			//append the new segments
 			int segmentIndex = splitSegIt->first;
@@ -361,9 +361,9 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		anInspector.SetTolerance(tolerance);
 
 
-		for (auto& segIt = segments.cbegin(); segIt != segments.cend(); segIt++)
+		for (auto&& segIt :segments)
 		{
-			Handle(Geom2d_TrimmedCurve) seg = Handle(Geom2d_TrimmedCurve)::DownCast(*segIt);
+			Handle(Geom2d_TrimmedCurve) seg = Handle(Geom2d_TrimmedCurve)::DownCast(segIt);
 			gp_Pnt2d pointA = seg->StartPoint();
 			gp_Pnt2d pointB = seg->EndPoint();
 
@@ -420,7 +420,7 @@ void NProjectionFactory::ConvertToLinearSegments(const TopoDS_Edge& edge, TColGe
 	gp_Trsf matrix;
 	//this should be unnecessary and never happen, as with projection code it is always identity; protective measure in case OCC code changes in the future
 	if (!isIdentity) matrix = location.Transformation();
-	auto& segIt = polygon3d->Nodes().cbegin(); //grab the first point
+	auto&& segIt = polygon3d->Nodes().cbegin(); //grab the first point
 	gp_XYZ pointA = segIt->XYZ();
 	if (!isIdentity) matrix.Transforms(pointA);
 	gp_XYZ firstPoint = pointA;
@@ -550,7 +550,7 @@ TopoDS_Compound NProjectionFactory::FindClosedWires(const TopTools_ListOfShape& 
 	b.MakeCompound(open);
 	b.MakeCompound(closed);
 
-	for (auto& edgeIt = edgeList.cbegin(); edgeIt != edgeList.cend(); edgeIt++)
+	for (auto&& edgeIt = edgeList.cbegin(); edgeIt != edgeList.cend(); edgeIt++)
 		edges->Append(*edgeIt);
 
 	ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, tolerance, false, wires);
@@ -575,9 +575,9 @@ int NProjectionFactory::FindNextNearestOuterPoint(int currentPointIndex, int pre
 	double minDistance = 10000;
 	int nextOuterPoint = 0;
 
-	for (auto& arcIt = arcs.cbegin(); arcIt != arcs.cend(); arcIt++) //check every point
+	for (auto&& arcIt : arcs) //check every point
 	{
-		int pointId = arcIt->first;
+		int pointId = arcIt.first;
 		if (pointId != currentPointIndex && pointId != previousPointIndex) //ignore any points on the current segment
 		{
 			gp_XY point = anInspector.GetVertex(pointId).Coord();
@@ -617,7 +617,7 @@ int NProjectionFactory::FindNextNearestOuterPoint(int currentPointIndex, int pre
 /// <param name="arcs"></param>
 void NProjectionFactory::ConnectedPoints(int connectedTo, const std::map<int, std::set<int>>& arcs, std::set<int>& connected)
 {
-	auto& insertResult = connected.insert(connectedTo);
+	auto&& insertResult = connected.insert(connectedTo);
 	if (insertResult.second) //we have not previously inserted this element
 	{
 		auto& segs = arcs.find(connectedTo);
