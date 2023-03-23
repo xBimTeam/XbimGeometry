@@ -1,7 +1,9 @@
 
+
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System;
+using Xbim.Common;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Exceptions;
@@ -17,16 +19,17 @@ namespace Xbim.Geometry.Engine.Tests
 
         #region Setup
 
-        readonly ILoggerFactory loggerFactory;
-        static MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
+        readonly ILoggerFactory _loggerFactory;
         private readonly IXModelGeometryService _modelSvc;
         private readonly IXbimGeometryServicesFactory factory;
 
         public CurveFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
-            this.loggerFactory = loggerFactory;
+            this._loggerFactory = loggerFactory;
             this.factory = factory;
-            _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
+            var dummyModel = new MemoryModel(new EntityFactoryIfc4());
+            dummyModel.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
+            _modelSvc = factory.CreateModelGeometryService(dummyModel, loggerFactory);
         }
 
         #endregion
@@ -46,7 +49,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(0.1)]
         public void Can_convert_ifc_line_3d(double parametricLength)
         {
-          
+
             var ifcLine = IfcMoq.IfcLine3dMock(magnitude: parametricLength);
             var ifcLineSegment = IfcMoq.IfcTrimmedCurve3dMock(ifcLine, 0, 100);//when we trim a line, the magnitude is considered to meet IFC rules, if magnitude is 0.1 then the last parameter will be 0.1 * 100=10
 
@@ -85,7 +88,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(0.1)]
         public void Can_convert_ifc_line_2d(double parametricLength)
         {
-            
+
             var ifcLine = IfcMoq.IfcLine2dMock(magnitude: parametricLength);
             var ifcLineSegment = IfcMoq.IfcTrimmedCurve2dMock(ifcLine, 0, 100);//when we trim a line, the magnitude is considered to meet IFC rules, if magnitude is 0.1 then the last parameter will be 0.1 * 100=10
             var curveFactory = _modelSvc.CurveFactory;
@@ -98,7 +101,7 @@ namespace Xbim.Geometry.Engine.Tests
             Assert.Equal(ifcLine.Dir.Orientation.X, line.Direction.X);
             Assert.Equal(ifcLine.Dir.Orientation.Y, line.Direction.Y);
 
-            trimmedLine.LastParameter.Should().Be(Math.Abs(parametricLength* 100));
+            trimmedLine.LastParameter.Should().Be(Math.Abs(parametricLength * 100));
 
             trimmedLine.EndPoint.X.Should().Be(parametricLength * 100);
             var p1 = line.GetPoint(500);
@@ -126,7 +129,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(10, true)]
         public void Can_convert_ifc_circle_3d(double radius, bool location2d = false, bool checkException = false)
         {
-           
+
             var ifcCircle = IfcMoq.IfcCircle3dMock(radius: radius, location: location2d ? IfcMoq.IfcAxis2Placement2DMock() : null);
             var curveFactory = _modelSvc.CurveFactory;
             if (checkException)
@@ -169,7 +172,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(-1, 1, true)]
         public void Can_convert_ifc_ellipse_3d(double major, double minor, bool checkException = false)
         {
-           
+
             var ifcEllipse = IfcMoq.IfcEllipse3dMock(semi1: major, semi2: minor);
             var curveFactory = _modelSvc.CurveFactory;
             if (checkException)
@@ -191,7 +194,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(-1, 1, true)]
         public void Can_convert_ifc_ellipse_2d(double semi1, double semi2, bool checkException = false)
         {
-           
+
             var ifcEllipse = IfcMoq.IfcEllipse2dMock(semi1: semi1, semi2: semi2);
             var curveFactory = _modelSvc.CurveFactory;
             if (checkException)
@@ -217,7 +220,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(10, 10, 100)]
         public void Can_convert_ifc_trimmed_line_3d(double parametricLength = 1, double trim1 = 0, double trim2 = 10)
         {
-          
+
             var basisLine = IfcMoq.IfcLine3dMock(
             magnitude: parametricLength,
             origin: IfcMoq.IfcCartesianPoint3dMock(0, 0, 0),
@@ -238,7 +241,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(10, 10, 100)]
         public void Can_convert_ifc_trimmed_line_2d(double parametricLength = 1, double trim1 = 0, double trim2 = 10)
         {
-          
+
             var basisLine = IfcMoq.IfcLine2dMock(
               magnitude: parametricLength,
               origin: IfcMoq.IfcCartesianPoint2dMock(0, 0),
@@ -267,11 +270,11 @@ namespace Xbim.Geometry.Engine.Tests
 
         //}
         [Theory] //see the IFC definition https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/link/ifctrimmedcurve.htm
-        [InlineData(90, 180, true, 1)] //Ifc Case 1
-        [InlineData(180, 90, true, 2)] //Ifc Case 2
-        [InlineData(180, 90, false, 3)]//Ifc Case 3
-        [InlineData(90, 180, false, 4)]//Ifc Case 4
-        [InlineData(12, 0, false, 5)]//custom
+        [InlineData(Math.PI / 2, Math.PI, true, 1)] //Ifc Case 1
+        [InlineData(Math.PI, Math.PI / 2, true, 2)] //Ifc Case 2
+        [InlineData(Math.PI, Math.PI / 2, false, 3)]//Ifc Case 3
+        [InlineData(Math.PI / 2, Math.PI, false, 4)]//Ifc Case 4
+        [InlineData((Math.PI / 180) * 12, 0, false, 5)]//custom
 
         public void Can_convert_ifc_trimmed_circle_2d(double trim1, double trim2, bool sameSense, int ifcCase)
         {
@@ -290,7 +293,7 @@ namespace Xbim.Geometry.Engine.Tests
             Assert.NotNull(basisCurve);
             var origin = basisCurve.Position as IXAxisPlacement2d;
             Assert.NotNull(origin);
-           
+
             switch (ifcCase)
             {
                 case 1:
@@ -315,9 +318,9 @@ namespace Xbim.Geometry.Engine.Tests
                     tc.EndPoint.X.Should().BeApproximately(-radius, _modelSvc.Precision);
                     break;
                 case 5:
-                    tc.Length.Should().BeApproximately(radius * trim1 * Math.PI / 180, _modelSvc.Precision);
-                    tc.StartPoint.X.Should().BeApproximately(radius*Math.Cos(trim1 * Math.PI / 180), _modelSvc.Precision);
-                    tc.StartPoint.Y.Should().BeApproximately(radius * Math.Sin(trim1 * Math.PI / 180), _modelSvc.Precision);
+                    tc.Length.Should().BeApproximately(radius * trim1, _modelSvc.Precision);
+                    tc.StartPoint.X.Should().BeApproximately(radius * Math.Cos(trim1), _modelSvc.Precision);
+                    tc.StartPoint.Y.Should().BeApproximately(radius * Math.Sin(trim1), _modelSvc.Precision);
                     tc.EndPoint.X.Should().BeApproximately(radius, _modelSvc.Precision);
                     tc.EndPoint.Y.Should().BeApproximately(0, _modelSvc.Precision);
                     break;
@@ -328,13 +331,13 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Theory] //see the IFC definition https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2/HTML/link/ifctrimmedcurve.htm
-        [InlineData(90, 180, true, 1)] //Ifc Case 1
-        [InlineData(180, 90, true, 2)] //Ifc Case 2
-        [InlineData(180, 90, false, 3)]//Ifc Case 3
-        [InlineData(90, 180, false, 4)]//Ifc Case 4
+        [InlineData(Math.PI / 2, Math.PI, true, 1)] //Ifc Case 1
+        [InlineData(Math.PI, Math.PI / 2, true, 2)] //Ifc Case 2
+        [InlineData(Math.PI, Math.PI / 2, false, 3)]//Ifc Case 3
+        [InlineData(Math.PI / 2, Math.PI, false, 4)]//Ifc Case 4
         public void Can_convert_ifc_trimmed_circle_3d(double trim1, double trim2, bool sameSense, int ifcCase)
         {
-           
+
             double radius = 10;
             var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve3dMock(
                 trimParam1: trim1,
@@ -383,19 +386,19 @@ namespace Xbim.Geometry.Engine.Tests
 
         [Theory]
 
-        [InlineData(90, 180, true, true)]
-        [InlineData(180, 90, true, true)]
-        [InlineData(180, 90, true, false)]
-        [InlineData(90, 180, true, false)]
-        [InlineData(90, 180, false, true)]
-        [InlineData(180, 90, false, true)]
-        [InlineData(180, 90, false, false)]
-        [InlineData(90, 180, false, false)]
+        [InlineData(Math.PI / 2, Math.PI, true, true)]
+        [InlineData(Math.PI, Math.PI / 2, true, true)]
+        [InlineData(Math.PI, Math.PI / 2, true, false)]
+        [InlineData(Math.PI / 2, Math.PI, true, false)]
+        [InlineData(Math.PI / 2, Math.PI, false, true)]
+        [InlineData(Math.PI, Math.PI / 2, false, true)]
+        [InlineData(Math.PI, Math.PI / 2, false, false)]
+        [InlineData(Math.PI / 2, Math.PI, false, false)]
 
         // [DataRow(5, 10, true)]
         public void Can_convert_ifc_trimmed_ellipse_3d(double trim1, double trim2, bool reverseAxis, bool sameSense = true)
         {
-          
+
             double semi1 = reverseAxis ? 5 : 10;
             double semi2 = reverseAxis ? 10 : 5;
             double quadrantLength = 12.110560271815889;
@@ -404,7 +407,7 @@ namespace Xbim.Geometry.Engine.Tests
                 trimParam2: trim2,
                 sense: sameSense,
                 basisCurve: IfcMoq.IfcEllipse3dMock(semi1: semi1, semi2: semi2));
-            
+
             var curveFactory = _modelSvc.CurveFactory;
             var tc = curveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
             Assert.Equal(XCurveType.IfcTrimmedCurve, tc.CurveType);
@@ -452,10 +455,10 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(5, 10)]
         public void Can_convert_ifc_trimmed_ellipse_2d(double semi1 = 10, double semi2 = 5)
         {
-           
+
             var ifcTrimmedCurve = IfcMoq.IfcTrimmedCurve2dMock(
             trimParam1: 0,
-            trimParam2: 90,
+            trimParam2: Math.PI / 2,
             basisCurve: IfcMoq.IfcEllipse2dMock(semi1: semi1, semi2: semi2));
 
             var tc = _modelSvc.CurveFactory.Build(ifcTrimmedCurve) as IXTrimmedCurve; //initialise the factory with the curve
@@ -478,7 +481,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void Can_convert_ifc_composite_curve_simple_arc()
         {
-           
+
             var ifcCompCurve = IfcMoq.IfcCompositeCurve3dMock();
             var curveService = _modelSvc.CurveFactory;
             var edgeService = _modelSvc.EdgeFactory;
@@ -498,16 +501,16 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void Can_convert_ifc_composite_curve_three_arcs()
         {
-          
-            
+
+
             var circ1 = IfcMoq.IfcCircle3dMock(radius: 20);
             var circ2 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcAxis2Placement3DMock(refDir: IfcMoq.IfcDirection3dMock(-1, 0, 0), loc: IfcMoq.IfcCartesianPoint3dMock(0, 40, 0)));
             var circ3 = IfcMoq.IfcCircle3dMock(radius: 20, IfcMoq.IfcAxis2Placement3DMock(loc: IfcMoq.IfcCartesianPoint3dMock(-40, 40, 0)));
 
 
-            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: 90);
-            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam1: 90, trimParam2: 0, sense: true);
-            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: 90);
+            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI / 2);
+            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam1: Math.PI / 2, trimParam2: 0, sense: true);
+            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: Math.PI / 2);
 
             var x1 = _modelSvc.CurveFactory.Build(arc1) as IXTrimmedCurve;
             var x2 = _modelSvc.CurveFactory.Build(arc2) as IXTrimmedCurve;
@@ -531,8 +534,8 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void Can_convert_ifc_composite_curve_three_arcs_two_lines()
         {
-           
-     
+
+
             var ifcCompCurve = IfcMoq.TypicalCompositeCurveMock(_modelSvc.CurveFactory, out double totalParametricLength, out double totalLength);
 
             var cc = _modelSvc.CurveFactory.Build(ifcCompCurve) as IXBSplineCurve; //initialise the factory with the curve
@@ -545,7 +548,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void Can_convert_ifc_composite_curve_to_directrix()
         {
-           
+
             var ifcCompCurve = IfcMoq.TypicalCompositeCurveMock(_modelSvc.CurveFactory, out double totalParametricLength, out double totalLength);
 
             var cc = _modelSvc.CurveFactory.BuildDirectrix(ifcCompCurve, 10, totalParametricLength - 10) as IXBSplineCurve; //initialise the factory with the curve

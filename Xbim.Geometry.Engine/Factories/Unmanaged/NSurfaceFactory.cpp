@@ -48,15 +48,21 @@ Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtru
 /// <param name="sweptEdge"></param>
 /// <param name="sweepDirection"></param>
 /// <returns></returns>
-Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(const TopoDS_Edge& sweptEdge, const gp_Vec& sweepDirection)
+Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtrusion(const TopoDS_Edge& sweptEdge, const gp_Vec& sweepDirection, bool hasRevitBSplineIssue)
 {
 	try
 	{
 		TopLoc_Location loc;
 		double start = 0, end = 0;
 		Handle(Geom_Curve) sweptCurve = BRep_Tool::Curve(sweptEdge, loc, start, end);
+		//to get an accurate ruled surface we should use the trim parameters to define the bounds
+		//however, when the surface is used in aspects such as IfcSurfaceCurveSweptAreaSolid then some BIM tools redefine the bounds to be larger than the ruled surface
+		//this will throw an error, should we need rigidly bounded surafaces it is suggested these are built as Faces with appropriate Edges
+		//To create a ruled surface use the line below and pass the TrimmedCurve to the Geom_SurfaceOfLinearExtrusion ctor
+		//Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(sweptCurve, start, end);
 		Handle(Geom_SurfaceOfLinearExtrusion) surface = new Geom_SurfaceOfLinearExtrusion(sweptCurve, sweepDirection);
-		if(!loc.IsIdentity()) surface->Transform(loc.Transformation());
+		if(!hasRevitBSplineIssue && !loc.IsIdentity())
+			surface->Transform(loc.Transformation());
 		return surface;
 	}
 	catch (const Standard_Failure& sf)

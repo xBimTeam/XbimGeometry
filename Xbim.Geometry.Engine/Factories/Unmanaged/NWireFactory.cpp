@@ -551,12 +551,12 @@ TopoDS_Wire NWireFactory::BuildDirectrixWire(const TopoDS_Wire& wire, double tri
 	return TopoDS_Wire();
 }
 
-TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance)
+TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, double first, double last, bool sameSense, double tolerance, double radianFactor)
 {
-	return BuildTrimmedWire(basisWire, gp::Origin(), gp::Origin(), first, last, false, sameSense, tolerance);
+	return BuildTrimmedWire(basisWire, gp::Origin(), gp::Origin(), first, last, false, sameSense, tolerance, radianFactor);
 }
 
-TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance)
+TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt p1, gp_Pnt p2, double u1, double u2, bool preferCartesian, bool sameSense, double tolerance, double radianFactor)
 {
 	try
 	{
@@ -566,8 +566,9 @@ TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt 
 		GeomAbs_Shape continuity = cc.Continuity();
 		int numIntervals = cc.NbIntervals(continuity);
 
-		//calcualte the start and end parameters
-		double first = u1, last = u2;
+		//calculate the start and end parameters
+		double first;
+		double last;
 		if (preferCartesian)
 		{
 			if (!GetParameter(basisWire, p1, tolerance, first))
@@ -575,6 +576,12 @@ TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt 
 			if (!GetParameter(basisWire, p2, tolerance, last))
 				Standard_Failure::Raise("Trim Point2 is not on the wire");
 		}
+		else
+		{
+			first = double::IsNaN(u1) ? 0 : u1;
+			last = double::IsNaN(u2) ? cc.LastParameter() - cc.FirstParameter() : u2;
+		}
+
 		if (numIntervals == 1)
 		{
 			TopoDS_Edge edge; // the edge we are interested in
@@ -590,8 +597,8 @@ TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt 
 			}
 			if (curve->IsPeriodic()) //stay in bounds for splines etc, keep orientation for periodics, 
 			{
-				l = f + last;
-				f = f + first;
+				l = last * radianFactor; //override any trims set, ensure in radians
+				f = first * radianFactor;
 			}
 			else
 			{
@@ -1094,7 +1101,7 @@ TopoDS_Wire NWireFactory::Fillet(const TopoDS_Wire& wire, double filletRadius, d
 				totalEdges++;
 			}
 		}
-		if (IsClosed(wire,tolerance) && nbEdges > 1)
+		if (IsClosed(wire, tolerance) && nbEdges > 1)
 		{
 			BRepBuilderAPI_MakeWire filletWireMaker;
 			filletWireMaker.Add(TopoDS::Edge(edges(1)));

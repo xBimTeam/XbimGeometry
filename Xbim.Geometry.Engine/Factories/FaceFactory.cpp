@@ -178,12 +178,22 @@ namespace Xbim
 
 			}
 		
+			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface)
+			{
+
+				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, _modelService->Precision);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Could not apply bounds to face");
+
+				return face;
+			}
+
 			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops)
 			{
 
 				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
 				if (face.IsNull())
-					throw RaiseGeometryFactoryException("Could not apply inner bound to face, it has been ignored");
+					throw RaiseGeometryFactoryException("Could not apply bounds to face");
 
 				return face;
 			}

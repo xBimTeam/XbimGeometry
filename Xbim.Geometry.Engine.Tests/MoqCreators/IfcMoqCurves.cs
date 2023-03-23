@@ -198,6 +198,14 @@ namespace Xbim.Geometry.Engine.Tests
         #endregion
 
         #region Trimmed curve mocks
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="basisCurve"></param>
+        /// <param name="trimParam1">If Periodic In Radians</param>
+        /// <param name="trimParam2">If Periodic In Radians</param>
+        /// <param name="sense"></param>
+        /// <returns></returns>
         public static IIfcTrimmedCurve IfcTrimmedCurve3dMock(IIfcCurve? basisCurve = null, double trimParam1 = 0, double trimParam2 = 1, bool sense = true)
         {
 
@@ -245,7 +253,7 @@ namespace Xbim.Geometry.Engine.Tests
             cCurveSegMoq.SetupGet(x => x.ExpressType).Returns(metaData.ExpressType(typeof(IfcCompositeCurveSegment)));
             cCurveSegMoq.SetupGet(v => v.EntityLabel).Returns(entityLabel);
             var cCurveSeg = cCurveSegMoq.Object;
-            cCurveSeg.ParentCurve = parent ?? IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), 0, 90);
+            cCurveSeg.ParentCurve = parent ?? IfcTrimmedCurve3dMock(IfcMoq.IfcCircle3dMock(), 0, Math.PI/2);
             cCurveSeg.SameSense = sameSense;
             return cCurveSeg;
 
@@ -278,9 +286,9 @@ namespace Xbim.Geometry.Engine.Tests
             var line2 = IfcMoq.IfcLine3dMock(origin: IfcMoq.IfcCartesianPoint3dMock(x: -20, y: 40, z: 0), direction: IfcMoq.IfcDirection3dMock(x: 0, y: 1, z: 0));
             var lineSeg2 = IfcMoq.IfcTrimmedCurve3dMock(line2, trimParam1: 0, trimParam2: lineLen2);
 
-            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: 90);
-            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam2: 90, trimParam1: 0, sense: true);
-            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: 90);
+            var arc1 = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI/2);
+            var arc2 = IfcMoq.IfcTrimmedCurve3dMock(circ2, trimParam2: Math.PI / 2, trimParam1: 0, sense: true);
+            var arc3 = IfcMoq.IfcTrimmedCurve3dMock(circ3, trimParam2: Math.PI / 2);
 
             var x1 = curveFactory.Build(lineSeg1) as IXTrimmedCurve;
             var x2 = curveFactory.Build(arc1) as IXTrimmedCurve;
