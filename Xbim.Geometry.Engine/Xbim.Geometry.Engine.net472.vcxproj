@@ -336,6 +336,7 @@
     <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NGeometryFactory.h" />
+	<ClInclude Include="Factories\Unmanaged\NLoopSegment.h" />	  
     <ClInclude Include="Factories\Unmanaged\NProfileFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShapeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />

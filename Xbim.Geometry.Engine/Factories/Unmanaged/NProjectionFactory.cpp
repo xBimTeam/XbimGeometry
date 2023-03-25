@@ -19,7 +19,7 @@
 #include <HLRBRep_Algo.hxx>
 #include <IMeshTools_Parameters.hxx>
 #include <TopTools_SequenceOfShape.hxx>
-#include "../../Factories/Unmanaged/NShapeFactory.h"
+#include "NShapeFactory.h"
 #include <TopoDS.hxx>
 #include <Geom_Plane.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -28,6 +28,9 @@
 #include <TopTools_SequenceOfShape.hxx>
 #include <gp_Ax2.hxx>
 #include <BRepAlgo_FaceRestrictor.hxx>
+#include "NLoopSegment.h"
+#include <unordered_set>
+#include <BRepTools.hxx>
 
 int NProjectionFactory::GetOrAddVertex(
 	BRepMesh_VertexInspector& anInspector,
@@ -93,6 +96,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 
 	auto&& arcIt = arcs.cbegin();
 	gp_XY currentPoint = anInspector.GetVertex(arcIt->first).Coord();
+	gp_XY previousPoint;
 	int currentPointId = arcIt->first;
 	gp_XY leftMostPoint = currentPoint;
 	int leftMostPointIndex = currentPointId;
@@ -106,27 +110,42 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 	currentPointId = leftMostPointIndex;
 	currentPoint = leftMostPoint;
 	gp_Dir2d currentDir(0, -1);
+	gp_Dir2d previousDir;
 	std::vector<int> outerBound;
+
 	outerBound.push_back(currentPointId);
 	int previousPointId = 0;
+	//nb we never want to traverse a segment more than once as this will create a recursion
+	std::unordered_set<NLoopSegment> outerBoundSegments;
 	do
 	{
-		const std::set<int>& toPoints = arcs[currentPointId];
+		const std::set<int>& toPoints = arcs[currentPointId]; //get the target points for this segment arc start
 
 		if (toPoints.size() == 1)
 		{
-			int nextId = *toPoints.cbegin();
+			int nextId = *(toPoints.cbegin());
 			gp_XY pt = anInspector.GetVertex(nextId).Coord();
-			if (nextId == previousPointId) //we are going backwards, but there is no alternative to go forward
-				Standard_Failure::Raise("Footprint is an invalid, boundary cannot be determined");
-
+			if (nextId == previousPointId) //we are going backwards to the point we came from and there is no alternative to go forward, 
+				//reset to the previous point, the outerBoundSegments set will have recorded this traversal so it will be ignored next time
+			{
+				//consider possibility that the first point has size of 1
+				if(outerBound.size()==0)
+					Standard_Failure::Raise("Footprint is an invalid, boundary cannot be determined");
+				currentPointId = previousPointId;
+				currentPoint = previousPoint;
+				currentDir = previousDir;
+				continue;
+				
+			}
 			//remove the current point and arcs as we have processed them
 			//arcs.erase(currentPointId);
-			gp_XY lastPoint = currentPoint;
+
 			previousPointId = currentPointId;
+			previousPoint = currentPoint;
 			currentPointId = nextId;
+			previousDir = currentDir;
 			currentPoint = anInspector.GetVertex(nextId).Coord(); //when we lookup the vertices internally they are 0 based
-			currentDir = currentPoint - lastPoint;
+			currentDir = currentPoint - previousPoint;
 			outerBound.push_back(currentPointId);
 		}
 		else
@@ -134,13 +153,18 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 			double minAngle = twoPi;
 			gp_XY nextPoint;
 			int nextPointId = 0;
-			for (auto&& segIt = toPoints.cbegin(); segIt != toPoints.cend(); segIt++)
+			for (auto&& pntId : toPoints)
 			{
-				if (*segIt == previousPointId || currentPointId == *segIt) //we are going backwards or nowhere, skip it
-					continue;
-				gp_XY nextCandidatePoint = anInspector.GetVertex(*segIt).Coord();
 
-				gp_Dir2d nextDir = nextCandidatePoint - currentPoint;
+				if (pntId == previousPointId || currentPointId == pntId) //we are going backwards or nowhere, skip it
+					continue;
+				//check if the segment has already been traversed, ignore if it has
+				if (auto find = outerBoundSegments.find(NLoopSegment(currentPointId, pntId)); find != outerBoundSegments.cend())
+					continue;
+
+				gp_XY nextCandidatePoint = anInspector.GetVertex(pntId).Coord();
+
+				gp_Vec2d nextDir = nextCandidatePoint - currentPoint;
 				double angle = currentDir.Angle(nextDir);// +std::_Pi; //range is 0 to <2Pi in radians
 				if (angle <= 0) //adjust to range 0 -> 2Pi
 					angle = twoPi + angle;
@@ -148,35 +172,45 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 				if (angle < minAngle) //this is a candidate for min clockwise angle
 				{
 					nextPoint = nextCandidatePoint;
-					nextPointId = *segIt;
+					nextPointId = pntId;
 					minAngle = angle;
 				}
+
 			}
 			//if we do't have a next valid point throw exception
 			if (nextPointId == 0 || nextPointId == currentPointId)
+			{
 				Standard_Failure::Raise("Footprint is an invalid, boundary cannot be determined");
-			previousPointId = currentPointId;
-			currentDir = currentPoint - nextPoint; //reverse the direction to ensure counter clockwise angles
-			currentPoint = nextPoint;
-			//remove the current point and arcs as we have processed them
-			//arcs.erase(currentPointId);
-			currentPointId = nextPointId;
-			outerBound.push_back(currentPointId);
+			}
+			else
+			{
+				outerBoundSegments.insert(NLoopSegment(currentPointId, nextPointId));
+				outerBound.push_back(nextPointId);
+				previousPointId = currentPointId;
+				previousPoint = currentPoint;
+				previousDir = currentDir;
+				currentDir = currentPoint - nextPoint; //reverse the direction to ensure counter clockwise angles
+				currentPoint = nextPoint;
+				currentPointId = nextPointId;
+			}
+
 
 		}
-	} while (currentPointId != leftMostPointIndex);
+	} while (currentPointId != leftMostPointIndex); //test if we are back at the start of the bound
 
 	//find all the points connected to points in this boundary, these can be ignored
 	std::set<int> connected;
 	ConnectedPoints(leftMostPointIndex, arcs, connected);
-	for (auto&& keyIt = connected.cbegin(); keyIt != connected.cend(); keyIt++)
-		arcs.erase(*keyIt);
+	for (auto&& arc : connected)
+		arcs.erase(arc);
 
 	//record the boundary as a closed polygon
 	TColgp_Array1OfPnt2d arrayOfPnt2d(1, (int)outerBound.size());
 	int i = 1;
-	for (auto&& loopIt = outerBound.cbegin(); loopIt != outerBound.cend(); loopIt++, i++)
-		arrayOfPnt2d.SetValue(i, anInspector.GetVertex(*loopIt).Coord());
+	for (auto&& vertex : outerBound)
+	{
+		arrayOfPnt2d.SetValue(i++, anInspector.GetVertex(vertex).Coord());
+	}
 
 
 	//push to the footprint
@@ -241,6 +275,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		meshParams.Angle = angularDeflection;
 
 		TopTools_SequenceOfShape visibleEdges;
+
 		for (TopExp_Explorer e(aBrepHlr2Shape.CompoundOfEdges(HLRBRep_TypeOfResultingEdge::HLRBRep_Sharp, true, false), TopAbs_EDGE); e.More(); e.Next())
 		{
 			//triangulate the edge to get the polygon we want to represent it
@@ -264,9 +299,14 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 			TopoDS_Edge edge = TopoDS::Edge(outlineEdges.Value(i));
 			ConvertToLinearSegments(edge, segments, tolerance);
 		}
-
+		//turn the visible edges to segments too
+		for (int i = 1; i <= visibleEdges.Size(); i++)
+		{
+			TopoDS_Edge edge = TopoDS::Edge(visibleEdges.Value(i));
+			ConvertToLinearSegments(edge, segments, tolerance);
+		}
 		//ensure that no segments intersect, essential for determining the correct outer boundary
-		//NB this code may be optimised for large objects by using octrees, current implementation avoids processing shapes with large numbers of edges
+		//NB this code may be optimised for large objects by using octrees, 
 		std::map<int, std::vector<double>> segmentSplits; //key is the segment index in "segments" value is the U parameter of the interesction on the line
 		for (int i = 1; i <= segments.Size(); i++)
 		{
@@ -276,8 +316,8 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 				Handle(Geom2d_TrimmedCurve) segmentB = Handle(Geom2d_TrimmedCurve)::DownCast(segments.Value(j));
 				//check if there are any interections between this segment pair
 				Geom2dAPI_InterCurveCurve curveInter(segmentA, segmentB, tolerance);
-
-				for (int p = 1; p <= curveInter.NbPoints(); p++)
+				int numIntersections = curveInter.NbPoints();
+				for (int p = 1; p <= numIntersections; p++)
 				{
 
 					//u value will be the distance between the first point and this point
@@ -320,6 +360,8 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 			double start = segment->FirstParameter();
 			auto& splitsIt = splitParams.cbegin();
 			double end = *splitsIt;
+			if (start == end)
+				continue;
 			Handle(Geom2d_TrimmedCurve) shortenedSegment = new Geom2d_TrimmedCurve(segment->BasisCurve(), start, end);
 			segments.SetValue(segmentIndex, shortenedSegment);
 			splitsIt++; //we have used the first one
@@ -327,6 +369,8 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 			{
 				start = end;
 				end = *splitsIt;
+				if (start == end)
+					continue;
 				Handle(Geom2d_TrimmedCurve) newSegment = new Geom2d_TrimmedCurve(segment->BasisCurve(), start, end);
 				segments.Append(newSegment);
 			}
@@ -337,12 +381,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 				segments.Append(lastSegment);
 			}
 		}
-		//turn the visible edges to segments too
-		for (int i = 1; i <= visibleEdges.Size(); i++)
-		{
-			TopoDS_Edge edge = TopoDS::Edge(visibleEdges.Value(i));
-			ConvertToLinearSegments(edge, segments, tolerance);
-		}
+
 
 
 		if (segments.Size() == 0)
@@ -361,7 +400,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		anInspector.SetTolerance(tolerance);
 
 
-		for (auto&& segIt :segments)
+		for (auto&& segIt : segments)
 		{
 			Handle(Geom2d_TrimmedCurve) seg = Handle(Geom2d_TrimmedCurve)::DownCast(segIt);
 			gp_Pnt2d pointA = seg->StartPoint();
@@ -510,11 +549,11 @@ bool NProjectionFactory::CreateSection(const TopoDS_Shape& shape, const Handle(G
 		//create a set of closed and open wires, we will only consider closed wires
 		TopoDS_Compound closedWires = FindClosedWires(edgeList, tolerance);
 
-		BRepAlgo_FaceRestrictor fr;		
+		BRepAlgo_FaceRestrictor fr;
 		fr.Init(cutFace, Standard_True, Standard_True);
 
 		for (TopExp_Explorer exp(closedWires, TopAbs_WIRE); exp.More(); exp.Next())
-		{	
+		{
 			TopoDS_Wire wire = TopoDS::Wire(exp.Current());
 			fr.Add(wire);
 		}
@@ -529,7 +568,7 @@ bool NProjectionFactory::CreateSection(const TopoDS_Shape& shape, const Handle(G
 			}
 			return true;
 		}
-		
+
 	}
 	catch (const Standard_Failure& sf)
 	{
@@ -620,13 +659,13 @@ void NProjectionFactory::ConnectedPoints(int connectedTo, const std::map<int, st
 	auto&& insertResult = connected.insert(connectedTo);
 	if (insertResult.second) //we have not previously inserted this element
 	{
-		auto& segs = arcs.find(connectedTo);
-		for (auto& arcIt = segs->second.cbegin(); arcIt != segs->second.cend(); arcIt++)
+		auto&& segs = arcs.find(connectedTo);
+		for (auto&& arcIt : segs->second)
 		{
 			//auto res = connected.insert(*arcIt);
 			//if (res.second) //we have not previously inserted this element
 			//{
-			ConnectedPoints(*arcIt, arcs, connected);
+			ConnectedPoints(arcIt, arcs, connected);
 			//}
 		}
 	}

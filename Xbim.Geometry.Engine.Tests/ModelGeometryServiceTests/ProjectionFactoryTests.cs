@@ -31,7 +31,7 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
 
-        [Theory(Skip = "CreateFootprint stuck with some infinite loop.")]
+        [Theory(/*Skip = "CreateFootprint stuck with some infinite loop."*/)]
         [InlineData("TestFiles/Brep/Flow Terminal.brep")]
         public void Can_project_shape(string shapePath)
         {

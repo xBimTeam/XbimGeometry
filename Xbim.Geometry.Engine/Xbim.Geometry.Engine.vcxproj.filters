@@ -450,6 +450,9 @@
     <ClInclude Include="Services\Unmanaged\NShapeProximityUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NLoopSegment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XbimCompound.cpp">
@@ -807,6 +810,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Extensions\ToGTransform.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NLoopSegment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
