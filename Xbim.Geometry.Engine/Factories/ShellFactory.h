@@ -23,7 +23,7 @@ namespace Xbim
 				TopoDS_Shape BuildClosedShell(IIfcClosedShell^ closedShell, bool& isFixed);
 				TopoDS_Shape BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
 				TopoDS_Shape FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed);
-				TopoDS_Shape BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
+				TopoDS_Shape BuildConnectedAdvancedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
 				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, bool& isFixed);
 			};
 		}

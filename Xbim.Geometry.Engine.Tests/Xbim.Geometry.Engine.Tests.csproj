@@ -97,6 +97,9 @@
 		<None Update="TestFiles\FacetedBrepForSmoothing.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\Github\BIM Logo.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\Github\Github_issue_281_minimal.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -451,10 +454,6 @@
 		<None Update="TestFiles\CuttingOpeningInIfcClosedShellTest.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="TestFiles\Github\" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -17,6 +17,8 @@
 #include <BRepTools_WireExplorer.hxx>
 #include <TopExp_Explorer.hxx>
 
+#include <ShapeFix_Face.hxx>
+
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
 	TopoDS_Compound compound;
@@ -190,18 +192,25 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wir
 	return MakeFace(outer, inners);
 }
 
+//This function will check the orientation of the inner loops to ensure they are reverse of the outer bound
+
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops)
 {
 	try
 	{
 
 		BRepBuilderAPI_MakeFace faceMaker(_xyPlane, wire, true);
+		
 		for (auto&& inner : innerLoops)
-		{
+		{		
 			faceMaker.Add(TopoDS::Wire(inner));
 		}
 		if (faceMaker.IsDone())
-			return faceMaker.Face();
+		{
+			ShapeFix_Face fixFace(faceMaker.Face());
+			fixFace.FixOrientation();// it is necessary to fix the orientation as models vary in the winding consistency of loops, often the inner loops are not CCW or opposite to the outer loops 
+			return fixFace.Face();
+		}
 		else
 		{
 			BRepBuilderAPI_FaceError error = faceMaker.Error();

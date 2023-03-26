@@ -1,16 +1,12 @@
 ﻿using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
+using Xbim.Common;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
-using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
-using Xbim.Ifc2x3.PresentationDimensioningResource;
-using Xbim.Common;
 
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -350,6 +346,9 @@ namespace Xbim.Geometry.Engine.Tests
             v5Solid.Volume.Should().BeApproximately(v6Solid.Volume, 1e-5);
         }
         #endregion
+   
+    
+    
     }
 
 }

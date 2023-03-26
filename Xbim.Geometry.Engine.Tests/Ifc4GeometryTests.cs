@@ -768,6 +768,7 @@ namespace Xbim.Geometry.Engine.Tests
                 eas.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
+                var brep = geom.ToBRep;
                 geom.Volume.Should().BeApproximately(2278352481546.0352, 1e-5);
             }
         }

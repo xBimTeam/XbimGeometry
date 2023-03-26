@@ -208,6 +208,8 @@ namespace Xbim
 					return BuildSweptDiskSolidPolygonal(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid));
 				case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
 					return BuildSurfaceCurveSweptAreaSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid));
+				case XSolidModelType::IfcCsgSolid:
+					return BuildCsgSolid(static_cast<IIfcCsgSolid^>(ifcSolid));
 					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation
 				case XSolidModelType::IfcAdvancedBrep:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger(), _modelService);
@@ -414,8 +416,12 @@ namespace Xbim
 			}
 			TopoDS_Solid SolidFactory::BuildBooleanResult(IIfcBooleanResult^ ifcBooleanResult)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				auto shape = BOOLEAN_FACTORY->BuildBooleanResult(ifcBooleanResult);
+				if(shape.IsNull())
+					throw RaiseGeometryFactoryException("Failed to build Boolean Result", ifcBooleanResult);
+				if(shape.ShapeType()!=TopAbs_SOLID)
+					throw RaiseGeometryFactoryException("Failed to build Boolean Result as a solid", ifcBooleanResult);
+				return TopoDS::Solid(shape);
 			}
 			TopoDS_Solid SolidFactory::BuildCsgPrimitive3D(IIfcCsgPrimitive3D^ ifcCsgPrimitive3D)
 			{

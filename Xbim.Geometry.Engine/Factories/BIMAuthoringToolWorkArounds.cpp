@@ -84,7 +84,12 @@ bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::ShouldApplyRevitInc
 	return ApplyRevitIncorrectArcCentreSweptCurve.Value;
 }
 
-
+bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::ShouldApplyPolylineTrimLengthOneForEntireLine()
+{
+	if (!ApplyPolylineTrimLengthOneForEntireLine.HasValue) InitRevitWorkArounds();
+	return ApplyPolylineTrimLengthOneForEntireLine.Value;
+	
+}
 
 bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::ShouldApplyRevitSweptSurfaceExtrusionInFeet()
 {
@@ -94,6 +99,8 @@ bool Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::ShouldApplyRevitSwe
 
 void Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::InitRevitWorkArounds()
 {
+	//always apply this
+	ApplyPolylineTrimLengthOneForEntireLine = true;
 	//it looks like all revit exports up to the 2020 release do not consider the local placement, so broadening the previous catch
 	auto header = ModelGeometryService->Model->Header;
 
@@ -140,5 +147,6 @@ void Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds::InitRevitWorkAround
 		ApplyRevitIncorrectArcCentreSweptCurve = false;
 		ApplyRevitSweptSurfaceExtrusionInFeet = false;
 		ApplyRevitIncorrectBsplineSweptCurve = false;
+		
 	}
 }

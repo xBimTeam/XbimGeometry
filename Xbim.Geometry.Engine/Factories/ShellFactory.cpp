@@ -18,7 +18,7 @@ namespace Xbim
 		{
 			TopoDS_Shape ShellFactory::BuildClosedShell(IIfcClosedShell^ closedShell, bool& isFixed)
 			{
-				TopoDS_Shape shape =  BuildConnectedFaceSet(closedShell, isFixed);
+				TopoDS_Shape shape = BuildConnectedFaceSet(closedShell, isFixed);
 
 				//since we have planar faces only then any valid solid must have at least 4 faces (pyramid), we will dispose of any shells that have less than four planar faces
 				//upgrade to solids
@@ -59,50 +59,56 @@ namespace Xbim
 			TopoDS_Shape ShellFactory::BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->CfsFaces->Count == 0) return TopoDS_Shell();
-				if (dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces)))
-					return ShellFactory::BuildConnectedFaceSurfaceSet(faceSet, isFixed);
-				else //build IfcFace set
+				if (dynamic_cast<IIfcAdvancedFace^>(Enumerable::First(faceSet->CfsFaces)))
+					return ShellFactory::BuildConnectedAdvancedFaceSet(faceSet, isFixed);
+				auto faceSurface = dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces));
+				if (faceSurface != nullptr)
 				{
-					if (!dynamic_cast<IIfcFace^>(Enumerable::First(faceSet->CfsFaces)))
-						throw RaiseGeometryFactoryException("IfcConnectedFaceSet must comprises faces of either IfcFace, IfcFaceSurface or IfcAdvancedFace", faceSet);
-					//process into native structure
-					std::vector<std::vector<std::vector<int>>> faceMesh;
-					std::unordered_map<int, gp_XYZ> points;
-
-					for each (IIfcFace ^ face in  faceSet->CfsFaces)
-					{
-						std::vector<std::vector<int>> faceLoops;
-
-						for each (IIfcFaceBound ^ bound in face->Bounds) //build all the loops
-						{
-							IIfcPolyLoop^ polyloop = dynamic_cast<IIfcPolyLoop^>(bound->Bound);
-							if (polyloop != nullptr)
-							{
-								IEnumerable<IIfcCartesianPoint^>^ polygon = polyloop->Polygon;
-								if (!bound->Orientation) polygon = Enumerable::Reverse(polyloop->Polygon);
-								std::vector<int> loop;
-								for each (IIfcCartesianPoint ^ cp in Enumerable::Concat(polyloop->Polygon, Enumerable::Take(polyloop->Polygon, 1)))
-								{
-									points[cp->EntityLabel] = GEOMETRY_FACTORY->BuildXYZ(cp);
-									loop.push_back(cp->EntityLabel);
-								}
-								if (loop.size() < 4) //its not a min of a closed triangle, fourth point is first point repeated for closure
-									LogDebug(polyloop, "Bound is not a valid boundary, it has less than 3 points");
-								else
-									faceLoops.push_back(loop);
-							}
-						}
-						faceMesh.push_back(faceLoops);
-					}
-					bool needsFixing;
-					TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
-					if (shell.IsNull())
-						throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
-					if (needsFixing) 
-						LogInformation(faceSet, "Attempting to fix errors in faceset definition");
-					return FixShell(shell, faceSet, isFixed);
-					
+					auto plane = dynamic_cast<IIfcPlane^>(faceSurface->FaceSurface);
+					if (plane == nullptr)
+						LogWarning(faceSet, "IfcFaceSurface treated as a planar IfcFace, but the surface is not a plane");
 				}
+				//build as IfcFace set
+				if (!dynamic_cast<IIfcFace^>(Enumerable::First(faceSet->CfsFaces)))
+					throw RaiseGeometryFactoryException("IfcConnectedFaceSet must comprises faces of either IfcFace, IfcFaceSurface or IfcAdvancedFace", faceSet);
+				//process into native structure
+				std::vector<std::vector<std::vector<int>>> faceMesh;
+				std::unordered_map<int, gp_XYZ> points;
+
+				for each (IIfcFace ^ face in  faceSet->CfsFaces)
+				{
+					std::vector<std::vector<int>> faceLoops;
+
+					for each (IIfcFaceBound ^ bound in face->Bounds) //build all the loops
+					{
+						IIfcPolyLoop^ polyloop = dynamic_cast<IIfcPolyLoop^>(bound->Bound);
+						if (polyloop != nullptr)
+						{
+							IEnumerable<IIfcCartesianPoint^>^ polygon = polyloop->Polygon;
+							if (!bound->Orientation) polygon = Enumerable::Reverse(polyloop->Polygon);
+							std::vector<int> loop;
+							for each (IIfcCartesianPoint ^ cp in Enumerable::Concat(polyloop->Polygon, Enumerable::Take(polyloop->Polygon, 1)))
+							{
+								points[cp->EntityLabel] = GEOMETRY_FACTORY->BuildXYZ(cp);
+								loop.push_back(cp->EntityLabel);
+							}
+							if (loop.size() < 4) //its not a min of a closed triangle, fourth point is first point repeated for closure
+								LogDebug(polyloop, "Bound is not a valid boundary, it has less than 3 points");
+							else
+								faceLoops.push_back(loop);
+						}
+					}
+					faceMesh.push_back(faceLoops);
+				}
+				bool needsFixing;
+				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
+				if (shell.IsNull())
+					throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
+				if (needsFixing)
+					LogInformation(faceSet, "Attempting to fix errors in faceset definition");
+				return FixShell(shell, faceSet, isFixed);
+
+
 			}
 
 			TopoDS_Shape ShellFactory::FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed)
@@ -114,7 +120,7 @@ namespace Xbim
 				if (shapeFixer.Shape().IsNull()) return shell;
 				if (shapeFixer.Shape().ShapeType() == TopAbs_SHELL)
 				{
-					isFixed = true; 
+					isFixed = true;
 					return shapeFixer.Shell();
 				}
 				if (shapeFixer.Shape().ShapeType() == TopAbs_COMPOUND)
@@ -126,7 +132,7 @@ namespace Xbim
 				return shell;
 			}
 
-			TopoDS_Shape ShellFactory::BuildConnectedFaceSurfaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
+			TopoDS_Shape ShellFactory::BuildConnectedAdvancedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->CfsFaces->Count == 0) return TopoDS_Shell();
 				if (!dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces)))
@@ -137,9 +143,9 @@ namespace Xbim
 				TopoDS_Shell shell;
 				BRep_Builder builder;
 				builder.MakeShell(shell);
-				for each (auto ifcFaceSurface in Enumerable::Cast<IIfcFaceSurface^>(faceSet->CfsFaces))
+				for each (auto ifcFaceSurface in Enumerable::Cast<IIfcAdvancedFace^>(faceSet->CfsFaces))
 				{
-					TopoDS_Face face = FACE_FACTORY->BuildFaceSurface(ifcFaceSurface, edges, vertices);
+					TopoDS_Face face = FACE_FACTORY->BuildAdvancedFace(ifcFaceSurface, edges, vertices);
 					faces.Bind(ifcFaceSurface->EntityLabel, face);
 					builder.Add(shell, face);
 					//System::String^ brep = _modelService->GetBrep(shell);

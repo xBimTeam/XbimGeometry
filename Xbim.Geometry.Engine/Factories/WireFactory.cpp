@@ -408,7 +408,7 @@ namespace Xbim
 				if (dynamic_cast<IIfcPolyline^>(ifcCurve) &&
 					startParam == 0. &&
 					endParam == 1. &&
-					ModelGeometryService->Model->ModelFactors->ApplyWorkAround(XbimGeometryCreator::PolylineTrimLengthOneForEntireLine)) //consider work around for incorrectly set trims
+					BIM_WORKAROUNDS->ShouldApplyPolylineTrimLengthOneForEntireLine()) //consider work around for incorrectly set trims
 				{	
 					endParam = double::NaN; //set to max
 					LogDebug(ifcCurve, "Polyline trim (0:1) does not comply with schema. {0}. It has been expanded to the entire length of the Polyline", ModelGeometryService->Model->Header->FileName->OriginatingSystem);

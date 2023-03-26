@@ -39,8 +39,8 @@ namespace Xbim.Geometry.Engine.Tests
                 var v6Shape = v6GeomEngine.Build(er.Entity);
                 var solidSet = geomEngine.CreateSolidSet(er.Entity, _logger);
                 solidSet.Count.Should().Be(1, "This solid set should have 1 solid");
-                solidSet.First().Faces.Count.Should().Be(34);
-                v6Shape.AllFaces().Count().Should().Be(34);
+                solidSet.First().Faces.Count.Should().Be(28);
+                v6Shape.AllFaces().Count().Should().Be(28);
             }
 
         }

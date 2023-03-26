@@ -82,23 +82,23 @@ namespace Xbim
 
 			
 
-			TopoDS_Face FaceFactory::BuildFaceSurface(IIfcFaceSurface^ faceSurface, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices)
+			TopoDS_Face FaceFactory::BuildAdvancedFace(IIfcAdvancedFace^ advancedFace, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices)
 			{
-				int numberOfBounds = faceSurface->Bounds->Count;
+				int numberOfBounds = advancedFace->Bounds->Count;
 				//workaround for badly defined linear extrusions in old Revit files
-				IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(faceSurface->FaceSurface);
+				IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(advancedFace->FaceSurface);
 				bool buildRuledSurface = (solExtrusion != nullptr);
-				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(faceSurface->FaceSurface)!=nullptr;
+				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(advancedFace->FaceSurface)!=nullptr;
 				TopoDS_Wire outerLoop;
 				TopTools_SequenceOfShape  innerLoops;
 				XSurfaceType surfaceType;
-				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(faceSurface->FaceSurface, surfaceType); //throws exception
+				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(advancedFace->FaceSurface, surfaceType); //throws exception
 				
-				if (!faceSurface->SameSense && !isBspline)
+				if (!advancedFace->SameSense && !isBspline)
 				{
 					surface->UReverse();					
 				}
-				for each (IIfcFaceBound ^ ifcBound in faceSurface->Bounds) //build all the loops
+				for each (IIfcFaceBound ^ ifcBound in advancedFace->Bounds) //build all the loops
 				{
 					TopTools_SequenceOfShape loopEdges;
 					bool isOuter = (numberOfBounds == 1) || (dynamic_cast<IIfcFaceOuterBound^>(ifcBound) != nullptr);
@@ -165,10 +165,10 @@ namespace Xbim
 						innerLoops.Remove(foundIndex); //remove outer loop from inner loops
 				}
 				if (outerLoop.IsNull())
-					throw RaiseGeometryFactoryException("Face has no outer bound", faceSurface);//no bounded face
+					throw RaiseGeometryFactoryException("Face has no outer bound", advancedFace);//no bounded face
 				TopoDS_Face face = BuildFace(surface, outerLoop, innerLoops); //throws exception
 				//System::String^ brep = _modelService->GetBrep(face);
-				if (!faceSurface->SameSense && isBspline)
+				if (!advancedFace->SameSense && isBspline)
 					face.Reverse();
 				//brep = _modelService->GetBrep(face);
 		

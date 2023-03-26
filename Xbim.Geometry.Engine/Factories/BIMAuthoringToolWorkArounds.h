@@ -30,9 +30,11 @@ namespace Xbim
 				System::Nullable<bool> ApplyRevitIncorrectArcCentreSweptCurve;
 				System::Nullable<bool> ApplyRevitIncorrectBsplineSweptCurve;
 				System::Nullable<bool> ApplyRevitSweptSurfaceExtrusionInFeet;
-
+				System::Nullable<bool> ApplyPolylineTrimLengthOneForEntireLine;
+			public:
 				bool ShouldApplyRevitIncorrectArcCentreSweptCurve();
 				bool ShouldApplyRevitIncorrectBsplineSweptCurve();
+				bool ShouldApplyPolylineTrimLengthOneForEntireLine();
 				bool ShouldApplyRevitSweptSurfaceExtrusionInFeet();
 
 				void InitRevitWorkArounds();
