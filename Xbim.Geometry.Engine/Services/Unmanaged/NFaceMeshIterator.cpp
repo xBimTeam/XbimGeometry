@@ -95,13 +95,13 @@ void NFaceMeshIterator::initFace()
 	myIsMirrored = myTrsf.VectorialPart().Determinant() < 0.0;
 	myNormals = NULL;
 	if (myCheckEdges) HasCurves = hasCurves();
-	//myNodes = &myPolyTriang->Nodes();
-	/*if (!myPolyTriang->HasNormals())
+
+	if (!myPolyTriang->HasNormals())
 	{
 		Poly::ComputeNormals(myPolyTriang);
+		myHasNormals = myPolyTriang->HasNormals();
 	}
-	myNormals = &myPolyTriang->Normals();
-	myHasNormals = true;*/
+	
 	if (myPolyTriang->HasUVNodes() && !myHasNormals)
 	{
 
@@ -141,12 +141,10 @@ void NFaceMeshIterator::initFace()
 gp_Dir NFaceMeshIterator::normal(Standard_Integer theNode)
 {
 	gp_Dir aNormal(gp::DZ());
-	if (myNormals != NULL)
+	if (myPolyTriang->HasNormals())
 	{
-		const Standard_Integer aNodeIndex = theNode - myNodes->Lower();
-		const Graphic3d_Vec3 aNormVec3(myNormals->Value(myNormals->Lower() + aNodeIndex * 3),
-			myNormals->Value(myNormals->Lower() + aNodeIndex * 3 + 1),
-			myNormals->Value(myNormals->Lower() + aNodeIndex * 3 + 2));
+		Graphic3d_Vec3 aNormVec3;
+		myPolyTriang->Normal(theNode, aNormVec3);
 		if (aNormVec3.Modulus() != 0.0f)
 		{
 			aNormal.SetCoord(aNormVec3.x(), aNormVec3.y(), aNormVec3.z());

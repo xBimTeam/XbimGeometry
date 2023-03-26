@@ -3,12 +3,14 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System.IO;
 using System.Linq;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Common.XbimExtensions;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Tests;
 using Xbim.Geometry.WexBim;
 using Xbim.Ifc;
+using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
@@ -20,12 +22,17 @@ namespace Xbim.Geometry.Engine.Tests
         private readonly IXShapeService _shapeService;
         private readonly IXGeometryConverterFactory _geomConverterFactory;
         private readonly ILoggerFactory _loggerFactory;
+        readonly IXModelGeometryService _modelSvc;
+        
 
         public WexBimTests(IXShapeService shapeService, IXGeometryConverterFactory geomConverterFactory, ILoggerFactory loggerFactory)
         {
             _shapeService = shapeService;
             _geomConverterFactory = geomConverterFactory;
             _loggerFactory = loggerFactory;
+            var dummyModel = new MemoryModel(new EntityFactoryIfc4());
+            dummyModel.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
+            _modelSvc = geomConverterFactory.CreateModelGeometryService(dummyModel, _loggerFactory);
         }
 
         [Fact]
@@ -96,6 +103,28 @@ namespace Xbim.Geometry.Engine.Tests
             wexBimV5.FaceCount.Should().Be(wexBimV6.FaceCount);
             wexBimV5.TriangleCount.Should().Be(wexBimV6.TriangleCount);
             wexBimV5.VertexCount.Should().Be(wexBimV6.VertexCount);
+        }
+
+        [Fact]
+        public void Can_Create_Correct_Normals_For_Non_Planar_Mesh()
+        {
+            var sphereMoq = IfcMoq.IfcSphereMoq(radius: 10);
+
+            var model = new MemoryModel(new EntityFactoryIfc4());
+            model.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
+            var geomEngineV6 = _geomConverterFactory.CreateGeometryEngineV6(model, _loggerFactory);
+            var geomEngineV5 = _geomConverterFactory.CreateGeometryEngineV5(model, _loggerFactory);
+            var solid = geomEngineV6.Create(sphereMoq) as IXbimSolid;
+            using var ms = new MemoryStream();
+            using var bw = new BinaryWriter(ms);
+            geomEngineV6.WriteTriangulation(bw, solid, model.ModelFactors.Precision, 20, 10);
+            var wexBimV6 = new WexBimMesh(ms.ToArray());
+            var numTriangles = wexBimV6.TriangleCount;
+            var normals = wexBimV6.Faces.First().Normals;
+            var indices = wexBimV6.Faces.First().Indices;
+            var nodes = wexBimV6.Vertices;
+
+
         }
     }
 }

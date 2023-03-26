@@ -204,7 +204,7 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 	VectorOfPackedNormal normals;
 	bool hasNormals = theFaceIter.HasNormals();
 
-	//first save the nodes for this face and remvoe duplicates
+	//first save the nodes for this face and remove duplicates
 	std::vector<int> nodeIndexes;
 	saveNodes(theFaceIter, nodeIndexes);
 	for (Standard_Integer anElemIter = anElemLower; anElemIter <= anElemUpper; ++anElemIter)
@@ -313,7 +313,7 @@ int NWexBimMesh::AddPoint(gp_XYZ point)
 	pointInspector.SetCurrent(point);
 	pointFilter.Inspect(point, pointInspector);
 	int idx = pointInspector.ResInd();
-	if (idx >= 0) //hit and existing one
+	if (idx >= 0) //hit an existing one
 	{
 		//just take the first one as we don't add vertices more than once to a cell
 		vertexIndexlookup.Append(idx);
