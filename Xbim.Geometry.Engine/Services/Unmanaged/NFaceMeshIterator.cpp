@@ -19,7 +19,7 @@ NFaceMeshIterator::NFaceMeshIterator(
 	const TopLoc_Location& location,
 	double linearDeflection,
 	double angularDeflection,
-	bool checkEdges) :
+	bool checkEdges, bool computeNormals) :
 	myCheckEdges(checkEdges),
 	mySLTool(1, 1e-12),
 	myNodes(NULL),
@@ -29,7 +29,8 @@ NFaceMeshIterator::NFaceMeshIterator(
 	myDefaultStyle(theStyle),
 	myHasFaceColor(false),
 	myAngularDeflection(angularDeflection),
-	myLinearDeflection(linearDeflection)
+	myLinearDeflection(linearDeflection),
+	myComputeNormals(computeNormals)
 {
 	TopoDS_Shape aShape;
 	if (!XCAFDoc_ShapeTool::GetShape(theLabel, aShape)
@@ -46,13 +47,14 @@ NFaceMeshIterator::NFaceMeshIterator(
 	Next();
 }
 
-NFaceMeshIterator::NFaceMeshIterator(const TopoDS_Shape& aShape, bool checkEdges) :
+NFaceMeshIterator::NFaceMeshIterator(const TopoDS_Shape& aShape, bool checkEdges, bool computeNormals) :
 	myCheckEdges(checkEdges),
 	mySLTool(1, 1e-12),
 	myNodes(NULL),
 	myNormals(NULL),
 	myHasNormals(false),
-	myIsMirrored(false)
+	myIsMirrored(false),
+	myComputeNormals(computeNormals)
 {
 	myFaceIter.Init(aShape, TopAbs_FACE);
 	Next();
@@ -69,6 +71,7 @@ void NFaceMeshIterator::Next()
 	{
 		myFace = TopoDS::Face(myFaceIter.Current());
 		myPolyTriang = BRep_Tool::Triangulation(myFace, myFaceLocation);
+		if (myComputeNormals) Poly::ComputeNormals(myPolyTriang);
 		myTrsf = myFaceLocation.Transformation();
 		if (myPolyTriang.IsNull()
 			|| myPolyTriang->NbTriangles() == 0)
@@ -91,16 +94,11 @@ void NFaceMeshIterator::Next()
 // =======================================================================
 void NFaceMeshIterator::initFace()
 {
-	myHasNormals = false;
+	myHasNormals = myPolyTriang->HasNormals();
 	myIsMirrored = myTrsf.VectorialPart().Determinant() < 0.0;
 	myNormals = NULL;
 	if (myCheckEdges) HasCurves = hasCurves();
 
-	/*if (!myPolyTriang->HasNormals())
-	{
-		Poly::ComputeNormals(myPolyTriang);
-		myHasNormals = myPolyTriang->HasNormals();
-	}*/
 	
 	if (myPolyTriang->HasUVNodes() && !myHasNormals)
 	{

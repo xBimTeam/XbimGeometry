@@ -17,8 +17,8 @@ public:
 		const TopLoc_Location& location, 
 		double linearDeflection,
 		double angularDeflection, 
-		bool checkEdges);
-	NFaceMeshIterator(const TopoDS_Shape& shape, bool checkEdges);
+		bool checkEdges, bool computeNormals);
+	NFaceMeshIterator(const TopoDS_Shape& shape, bool checkEdges, bool computeNormals);
 	
 	//! Return true if iterator points to the valid triangulation.
 	bool More() const { return !myPolyTriang.IsNull(); }
@@ -147,7 +147,7 @@ private:
 	BRepAdaptor_Surface             myFaceAdaptor;  //!< surface adaptor for fetching normals from surface
 	const TColgp_Array1OfPnt*		myNodes;        //!< node positions of current face
 	const TShort_Array1OfShortReal* myNormals;      //!< node normals of current face
-	
+	bool							myComputeNormals;
 	Standard_Boolean                myHasNormals;   //!< flag indicating that current face has normals
 	gp_Trsf                         myTrsf;         //!< current face transformation
 	Standard_Boolean                myIsMirrored;   //!< flag indicating that face triangles should be mirrored

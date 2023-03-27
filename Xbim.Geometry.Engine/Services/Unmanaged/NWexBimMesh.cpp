@@ -3,6 +3,7 @@
 #include <BRep_Tool.hxx>
 #include <Geom_Plane.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
+#include <Poly.hxx>
 
 
 int NWexBimMesh::TriangleCount()
@@ -146,12 +147,13 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 	{
 		if (cleanBefore) BRepTools::Clean(shape); //remove triangulation
 		BRepMesh_IncrementalMesh incrementalMesh(shape, linearDeflection, Standard_False, angularDeflection); //triangulate the first time	
-
-		for (NFaceMeshIterator aFaceIter(shape, checkEdges); aFaceIter.More(); aFaceIter.Next())
+		
+		for (NFaceMeshIterator aFaceIter(shape, checkEdges, true); aFaceIter.More(); aFaceIter.Next())
 		{
 			if (aFaceIter.IsEmptyMesh())
 				continue;
 			if (!mesh.HasCurves) mesh.HasCurves = aFaceIter.HasCurves;
+			
 			mesh.saveIndicesAndNormals(aFaceIter);
 
 		}
