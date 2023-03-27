@@ -66,7 +66,6 @@ public:
 	//! Implementation of inspection method
 	Standard_EXPORT NCollection_CellFilter_Action Inspect(const Standard_Integer theTarget);
 	VectorOfXYZ myPoints;
-	VectorOfXYZ myNormals;
 	Standard_Real mySQToler;
 private:
 

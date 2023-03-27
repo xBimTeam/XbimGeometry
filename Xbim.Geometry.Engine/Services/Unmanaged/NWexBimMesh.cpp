@@ -17,8 +17,7 @@ int NWexBimMesh::TriangleCount()
 }
 
 PackedNormal NWexBimMesh::ToPackedNormal(const gp_Dir& vec)
-{
-	
+{	
 	const double PackTolerance = std::tan(1 / PackSize);
 	static  PackedNormal SingularityNegativeY((unsigned char)PackSize, (unsigned char)PackSize);
 	static  PackedNormal SingularityPositiveY(0, 0);
@@ -137,8 +136,11 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 			}
 			else //need to write every normal as well
 			{
-				WriteTriangleIndicesWithNormals(oStream, *triangleIt, normalIt[0], normalIt[1], normalIt[2], numVertices);
-				normalIt++;
+				const PackedNormal& a = *normalIt; normalIt++;
+				const PackedNormal& b = *normalIt; normalIt++;
+				const PackedNormal& c = *normalIt; normalIt++;
+				WriteTriangleIndicesWithNormals(oStream, *triangleIt, a, b, c, numVertices);
+				
 			}
 		}
 	}
@@ -212,6 +214,7 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 	//first save the nodes for this face and remove duplicates
 	std::vector<int> nodeIndexes;
 	saveNodes(theFaceIter, nodeIndexes);
+	
 	for (Standard_Integer anElemIter = anElemLower; anElemIter <= anElemUpper; ++anElemIter)
 	{
 		Poly_Triangle aTri = theFaceIter.TriangleOriented(anElemIter);
@@ -230,7 +233,7 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 				continue;
 			else
 				if (isPlanar) donePlanar = true;
-			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));			
+			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));	
 			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
 			if (!isPlanar)
 			{
@@ -242,9 +245,6 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 		}
 	}
 	AddTriangleIndices(triangleIndices);
-	
-		
-	
 	AddNormals(normals);
 }
 
