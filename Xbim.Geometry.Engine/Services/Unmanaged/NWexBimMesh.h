@@ -13,8 +13,9 @@
 typedef struct PackedNormal {
 	unsigned char byte[2];
 	PackedNormal(unsigned char u, unsigned char v) : byte{ u,v } { }
-	unsigned char u() { return byte[0]; }
-	unsigned char v() { return byte[1]; }
+public:
+	unsigned char U() { return byte[0]; }
+	unsigned char V() { return byte[1]; }
 } PackedNormal;
 typedef NCollection_Vector<int> VectorOfInt;
 typedef NCollection_Vec3<int> Vec3OfInt;
@@ -33,7 +34,7 @@ private:
 	double myTolerance;
 	double myScale;
 	PointInspector pointInspector;
-	VectorOfInt vertexIndexlookup;
+	
 	NCollection_CellFilter<PointInspector> pointFilter;
 	VectorOfTriangleIndices indicesPerFace;
 	VectorOfTriangleNormals normalsPerFace;
@@ -60,12 +61,13 @@ public:
 	int AddPoint(gp_XYZ point);
 	int VertexCount() { return pointInspector.myPoints.Length(); }
 	const VectorOfXYZ& Vertices() { return pointInspector.myPoints; }
-	const gp_XYZ& LookupVertex(int idx) { return pointInspector.myPoints(vertexIndexlookup.Value(idx)); }
+	
 	void AddTriangleIndices(TriangleIndices triangleIndices) { indicesPerFace.Append(triangleIndices); }
 	void AddNormals(VectorOfPackedNormal normals) { normalsPerFace.push_back(normals); };
 	int FaceCount() { return indicesPerFace.Length(); }
 	int TriangleCount();
 	static PackedNormal ToPackedNormal(const gp_Dir& vec3);
+	gp_Dir ToNormal(const PackedNormal& packedNormal);
 	const VectorOfTriangleNormals& NormalsPerFace() { return normalsPerFace; }
 	std::streampos ByteOffet;
 	void WriteToStream(std::ostream& oStream);

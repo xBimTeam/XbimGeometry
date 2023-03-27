@@ -6,7 +6,7 @@
 #include <NCollection_CellFilter.hxx>
 typedef NCollection_Vector<gp_XYZ> VectorOfXYZ;
 
-struct CellFilter_InspectorXYZ 
+struct CellFilter_InspectorXYZ
 {
 
 	//! Points dimension
@@ -31,17 +31,17 @@ class PointInspector : public CellFilter_InspectorXYZ
 public:
 	typedef Standard_Integer Target;
 	//! Constructor; remembers the tolerance
-	PointInspector(const Standard_Real theTol) :  mySQToler(theTol* theTol)
+	PointInspector(const Standard_Real theTol) : mySQToler(theTol* theTol)
 	{}
 
 	//! Keep the points used for comparison
 	int Add(const gp_XYZ& thePnt)
-	{		
+	{
 		myPoints.Append(thePnt);
-		return myPoints.Length(); //0 based index
+		return myPoints.Length() - 1; //0 based index
 	}
 
-	
+
 	//! Set current point to search for coincidence
 	void SetCurrent(const gp_XYZ& theCurPnt)
 	{
@@ -57,7 +57,7 @@ public:
 
 	inline Standard_Real SquareDistance(const gp_XYZ& a, const gp_XYZ& b) const
 	{
-		Standard_Real d = 0, dd;		
+		Standard_Real d = 0, dd;
 		dd = a.X(); dd -= b.X(); dd *= dd; d += dd;
 		dd = a.Y(); dd -= b.Y(); dd *= dd; d += dd;
 		dd = a.Z(); dd -= b.Z(); dd *= dd; d += dd;
@@ -66,9 +66,10 @@ public:
 	//! Implementation of inspection method
 	Standard_EXPORT NCollection_CellFilter_Action Inspect(const Standard_Integer theTarget);
 	VectorOfXYZ myPoints;
+	VectorOfXYZ myNormals;
 	Standard_Real mySQToler;
 private:
-	
+
 	int myResInd = -1;
 	gp_XYZ myCurrent;
 };

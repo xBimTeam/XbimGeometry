@@ -5,7 +5,7 @@
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly.hxx>
 
-
+const double PackSize = 252;
 int NWexBimMesh::TriangleCount()
 {
 	int triangleCount = 0;
@@ -18,7 +18,7 @@ int NWexBimMesh::TriangleCount()
 
 PackedNormal NWexBimMesh::ToPackedNormal(const gp_Dir& vec)
 {
-	const double PackSize = 252;
+	
 	const double PackTolerance = std::tan(1 / PackSize);
 	static  PackedNormal SingularityNegativeY((unsigned char)PackSize, (unsigned char)PackSize);
 	static  PackedNormal SingularityPositiveY(0, 0);
@@ -78,7 +78,15 @@ PackedNormal NWexBimMesh::ToPackedNormal(const gp_Dir& vec)
 	return result;
 }
 
-
+gp_Dir NWexBimMesh::ToNormal(const PackedNormal& packedNormal)
+{
+	auto lon = packedNormal.byte[0] / PackSize * std::_Pi * 2;
+	auto lat = packedNormal.byte[1] / PackSize * std::_Pi;
+	auto y = std::cos(lat);
+	auto x = std::sin(lon) * std::sin(lat);
+	auto z = std::cos(lon) * std::sin(lat);
+	return gp_Dir(x, y, z);
+}
 
 void NWexBimMesh::WriteToStream(std::ostream& oStream)
 {
@@ -148,7 +156,7 @@ NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance,
 		if (cleanBefore) BRepTools::Clean(shape); //remove triangulation
 		BRepMesh_IncrementalMesh incrementalMesh(shape, linearDeflection, Standard_False, angularDeflection); //triangulate the first time	
 		
-		for (NFaceMeshIterator aFaceIter(shape, checkEdges, true); aFaceIter.More(); aFaceIter.Next())
+		for (NFaceMeshIterator aFaceIter(shape, checkEdges, false); aFaceIter.More(); aFaceIter.Next())
 		{
 			if (aFaceIter.IsEmptyMesh())
 				continue;
@@ -222,7 +230,7 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 				continue;
 			else
 				if (isPlanar) donePlanar = true;
-			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));
+			gp_Dir aNormal = theFaceIter.NormalTransformed(aTri(1));			
 			normals.push_back(NWexBimMesh::ToPackedNormal(aNormal));
 			if (!isPlanar)
 			{
@@ -234,6 +242,9 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 		}
 	}
 	AddTriangleIndices(triangleIndices);
+	
+		
+	
 	AddNormals(normals);
 }
 
@@ -311,18 +322,11 @@ int NWexBimMesh::AddPoint(gp_XYZ point)
 	pointFilter.Inspect(point, pointInspector);
 	int idx = pointInspector.ResInd();
 	if (idx >= 0) //hit an existing one
-	{
-		//just take the first one as we don't add vertices more than once to a cell
-		vertexIndexlookup.Append(idx);
 		return idx;
-	}
 	else //else keep it and add
 	{
-		int newIdx = pointInspector.Add(point) - 1;
-		/*gp_XYZ coordMin = pointInspector.Shift(point, -myTolerance);
-		gp_XYZ coordMax = pointInspector.Shift(point, myTolerance);*/
+		int newIdx = pointInspector.Add(point);
 		pointFilter.Add(newIdx, point);
-		vertexIndexlookup.Append(newIdx);
 		return newIdx;
 	}
 
