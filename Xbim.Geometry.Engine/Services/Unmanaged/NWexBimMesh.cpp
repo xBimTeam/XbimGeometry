@@ -128,13 +128,8 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 			}
 			else //need to write every normal as well
 			{
-
-				//the normals are in the same order as the triangle indices
-				const PackedNormal& a = normalIt[0];
-				const PackedNormal& b = normalIt[1];
-				const PackedNormal& c = normalIt[2];
+				WriteTriangleIndicesWithNormals(oStream, *triangleIt, normalIt[0], normalIt[1], normalIt[2], numVertices);
 				normalIt++;
-				WriteTriangleIndicesWithNormals(oStream, *triangleIt, a, b, c, numVertices);
 			}
 		}
 	}
@@ -250,7 +245,7 @@ void NWexBimMesh::WriteTriangleIndicesWithNormals(
 	const PackedNormal& c,
 	unsigned int maxVertices)
 {
-
+	
 	if (maxVertices <= 0xFF)
 	{
 		unsigned char x = (unsigned char)triangle.x();

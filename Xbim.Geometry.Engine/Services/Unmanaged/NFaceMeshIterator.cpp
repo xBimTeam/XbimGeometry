@@ -96,11 +96,11 @@ void NFaceMeshIterator::initFace()
 	myNormals = NULL;
 	if (myCheckEdges) HasCurves = hasCurves();
 
-	if (!myPolyTriang->HasNormals())
+	/*if (!myPolyTriang->HasNormals())
 	{
 		Poly::ComputeNormals(myPolyTriang);
 		myHasNormals = myPolyTriang->HasNormals();
-	}
+	}*/
 	
 	if (myPolyTriang->HasUVNodes() && !myHasNormals)
 	{
