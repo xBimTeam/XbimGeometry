@@ -86,6 +86,8 @@ void NFaceMeshIterator::Next()
 void NFaceMeshIterator::initFace()
 {
 	myIsMirrored = myTrsf.VectorialPart().Determinant() < 0.0;
+	myNormals.Clear();
+	myIsPlanar = false;
 	if (myCheckEdges) HasCurves = hasCurves();
 
 	if (myPolyTriang->HasUVNodes())

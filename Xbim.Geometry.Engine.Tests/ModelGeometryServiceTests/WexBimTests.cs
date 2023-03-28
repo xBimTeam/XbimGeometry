@@ -106,7 +106,7 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Fact]
-        public void Can_Create_Correct_Normals_For_Non_Planar_Mesh()
+        public void Can_Create_Correct_Mesh_For_Sphere()
         {
             var sphereMoq = IfcMoq.IfcSphereMoq(radius: 10);
 
@@ -118,6 +118,7 @@ namespace Xbim.Geometry.Engine.Tests
             using var bw = new BinaryWriter(ms);
             geomEngineV6.WriteTriangulation(bw, solid, model.ModelFactors.Precision, 20, 10);
             var wexBimV6 = new WexBimMesh(ms.ToArray());
+            wexBimV6.Should().NotBeNull();
             var numTriangles = wexBimV6.TriangleCount;
             var normals = wexBimV6.Faces.First().Normals.ToArray();
 
@@ -128,10 +129,38 @@ namespace Xbim.Geometry.Engine.Tests
             {
                 var node = new XbimPoint3D(nodes[index].X, nodes[index].Y, nodes[index].Z);
                 var normal = new XbimVector3D(normals[i].X, normals[i].Y, normals[i].Z);
-                var dir = (node - centre).Normalized();      
-                normal.Angle(dir).Should().BeApproximately(0,1e-5,"All normals should point away from the centre to the node");
+                var dir = (node - centre).Normalized();
+                normal.Angle(dir).Should().BeApproximately(0, 1e-5, "All normals should point away from the centre to the node");
                 i++;
             }
+        }
+        [Fact]
+        public void Can_Create_Correct_Mesh_For_Block()
+        {
+            var blockMoq = IfcMoq.IfcBlockMoq();
+
+            var model = new MemoryModel(new EntityFactoryIfc4());
+            model.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
+            var geomEngineV6 = _geomConverterFactory.CreateGeometryEngineV6(model, _loggerFactory);
+            var solid = geomEngineV6.Create(blockMoq) as IXbimSolid;
+            using var ms = new MemoryStream();
+            using var bw = new BinaryWriter(ms);
+            geomEngineV6.WriteTriangulation(bw, solid, model.ModelFactors.Precision, 20, 10);
+            var wexBimV6 = new WexBimMesh(ms.ToArray());
+            var numTriangles = wexBimV6.TriangleCount;
+            wexBimV6.Should().NotBeNull();
+            wexBimV6.FaceCount.Should().Be(6);
+            var correctNormals = new HashSet<XbimVector3D>(new[] { new XbimVector3D(1,0,0), new XbimVector3D(0, 1, 0), new XbimVector3D(0, 0, 1),
+                                        new XbimVector3D(-1,0,0), new XbimVector3D(0, -1, 0), new XbimVector3D(0, 0, -1)});
+
+            foreach (var face in wexBimV6.Faces)
+            {
+                face.Normals.Count().Should().Be(1);
+                var n = face.Normals.First();
+                var normal = new XbimVector3D((Math.Abs(n.X) < 1e-5) ? 0 : n.X, (Math.Abs(n.Y) < 1e-5) ? 0 : n.Y, (Math.Abs(n.Z) < 1e-5) ? 0 : n.Z);
+                bool gone = correctNormals.Remove(normal);
+            }
+            correctNormals.Any().Should().BeFalse();
         }
     }
 }
