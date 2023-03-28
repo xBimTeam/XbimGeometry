@@ -23,7 +23,7 @@ namespace Xbim.Geometry.Engine.Tests
         private readonly IXGeometryConverterFactory _geomConverterFactory;
         private readonly ILoggerFactory _loggerFactory;
         readonly IXModelGeometryService _modelSvc;
-        
+
 
         public WexBimTests(IXShapeService shapeService, IXGeometryConverterFactory geomConverterFactory, ILoggerFactory loggerFactory)
         {
@@ -43,15 +43,15 @@ namespace Xbim.Geometry.Engine.Tests
             var blockMoq = IfcMoq.IfcBlockMoq() as IIfcCsgPrimitive3D;
             var solid = geomEngineV6.Build(blockMoq) as IXSolid; //initialise the factory with the block
             var meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Normal);
-            
+
             IXAxisAlignedBoundingBox bounds;
-            byte [] bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
+            byte[] bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
 
             var wexBimMesh = new WexBimMesh(bytes);
             wexBimMesh.Vertices.Count().Should().Be(8);
             wexBimMesh.TriangleCount.Should().Be(12);
             wexBimMesh.FaceCount.Should().Be(6);
-            
+
         }
 
         [Fact]
@@ -113,18 +113,25 @@ namespace Xbim.Geometry.Engine.Tests
             var model = new MemoryModel(new EntityFactoryIfc4());
             model.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
             var geomEngineV6 = _geomConverterFactory.CreateGeometryEngineV6(model, _loggerFactory);
-            var geomEngineV5 = _geomConverterFactory.CreateGeometryEngineV5(model, _loggerFactory);
             var solid = geomEngineV6.Create(sphereMoq) as IXbimSolid;
             using var ms = new MemoryStream();
             using var bw = new BinaryWriter(ms);
             geomEngineV6.WriteTriangulation(bw, solid, model.ModelFactors.Precision, 20, 10);
             var wexBimV6 = new WexBimMesh(ms.ToArray());
             var numTriangles = wexBimV6.TriangleCount;
-            var normals = wexBimV6.Faces.First().Normals;
-            var indices = wexBimV6.Faces.First().Indices;
-            var nodes = wexBimV6.Vertices;
+            var normals = wexBimV6.Faces.First().Normals.ToArray();
 
-
+            var nodes = wexBimV6.Vertices.ToArray();
+            var centre = new XbimPoint3D(sphereMoq.Position.Location.X, sphereMoq.Position.Location.Y, sphereMoq.Position.Location.Z);
+            int i = 0;
+            foreach (var index in wexBimV6.Faces.First().Indices)
+            {
+                var node = new XbimPoint3D(nodes[index].X, nodes[index].Y, nodes[index].Z);
+                var normal = new XbimVector3D(normals[i].X, normals[i].Y, normals[i].Z);
+                var dir = (node - centre).Normalized();      
+                normal.Angle(dir).Should().BeApproximately(0,1e-5,"All normals should point away from the centre to the node");
+                i++;
+            }
         }
     }
 }
