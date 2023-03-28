@@ -1,7 +1,7 @@
 #include "NFaceMeshIterator.h"
 #include <TopoDS.hxx>
 #include <BRep_Tool.hxx>
-
+#include <Geom_Plane.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Graphic3d_Vec3.hxx>
@@ -19,18 +19,14 @@ NFaceMeshIterator::NFaceMeshIterator(
 	const TopLoc_Location& location,
 	double linearDeflection,
 	double angularDeflection,
-	bool checkEdges, bool computeNormals) :
+	bool checkEdges) :
 	myCheckEdges(checkEdges),
 	mySLTool(1, 1e-12),
-	myNodes(NULL),
-	myNormals(NULL),
-	myHasNormals(false),
 	myIsMirrored(false),
 	myDefaultStyle(theStyle),
 	myHasFaceColor(false),
 	myAngularDeflection(angularDeflection),
-	myLinearDeflection(linearDeflection),
-	myComputeNormals(computeNormals)
+	myLinearDeflection(linearDeflection)
 {
 	TopoDS_Shape aShape;
 	if (!XCAFDoc_ShapeTool::GetShape(theLabel, aShape)
@@ -47,14 +43,10 @@ NFaceMeshIterator::NFaceMeshIterator(
 	Next();
 }
 
-NFaceMeshIterator::NFaceMeshIterator(const TopoDS_Shape& aShape, bool checkEdges, bool computeNormals) :
+NFaceMeshIterator::NFaceMeshIterator(const TopoDS_Shape& aShape, bool checkEdges) :
 	myCheckEdges(checkEdges),
 	mySLTool(1, 1e-12),
-	myNodes(NULL),
-	myNormals(NULL),
-	myHasNormals(false),
-	myIsMirrored(false),
-	myComputeNormals(computeNormals)
+	myIsMirrored(false)
 {
 	myFaceIter.Init(aShape, TopAbs_FACE);
 	Next();
@@ -71,7 +63,6 @@ void NFaceMeshIterator::Next()
 	{
 		myFace = TopoDS::Face(myFaceIter.Current());
 		myPolyTriang = BRep_Tool::Triangulation(myFace, myFaceLocation);
-		if (myComputeNormals) Poly::ComputeNormals(myPolyTriang);
 		myTrsf = myFaceLocation.Transformation();
 		if (myPolyTriang.IsNull()
 			|| myPolyTriang->NbTriangles() == 0)
@@ -94,25 +85,39 @@ void NFaceMeshIterator::Next()
 // =======================================================================
 void NFaceMeshIterator::initFace()
 {
-	myHasNormals = myPolyTriang->HasNormals();
 	myIsMirrored = myTrsf.VectorialPart().Determinant() < 0.0;
-	myNormals = NULL;
 	if (myCheckEdges) HasCurves = hasCurves();
 
-	
-	if (myPolyTriang->HasUVNodes() && !myHasNormals)
+	if (myPolyTriang->HasUVNodes())
 	{
 
 		TopoDS_Face aFaceFwd = TopoDS::Face(myFace.Oriented(TopAbs_FORWARD));
 		aFaceFwd.Location(TopLoc_Location());
 		TopLoc_Location aLoc;
-		if (!BRep_Tool::Surface(aFaceFwd, aLoc).IsNull())
+		Handle(Geom_Surface) surface = BRep_Tool::Surface(aFaceFwd, aLoc);
+		if (!surface.IsNull())
 		{
+			Handle(Geom_Plane) hPlane = Handle(Geom_Plane)::DownCast(surface);
+			myIsPlanar = !hPlane.IsNull();
 			myFaceAdaptor.Initialize(aFaceFwd, false);
 			mySLTool.SetSurface(myFaceAdaptor);
-			myHasNormals = true;
+			//cache the normals
+			int numNodesToProcess = myIsPlanar ? 1 : myPolyTriang->NbNodes();
+			for (int i = 1; i <= numNodesToProcess; i++)
+			{
+				gp_Dir aNormal(gp::DZ());
+				if (myPolyTriang->HasUVNodes())
+				{
+					const gp_XY& anUV = myPolyTriang->UVNode(i).XY();
+					mySLTool.SetParameters(anUV.X(), anUV.Y());
+					if (mySLTool.IsNormalDefined())
+					{
+						aNormal = mySLTool.Normal();
+					}
+				}
+				myNormals.Append(aNormal);
+			}
 		}
-
 	}
 	if (!myStyles.Find(myFace, myFaceStyle))
 	{
@@ -138,27 +143,10 @@ void NFaceMeshIterator::initFace()
 // =======================================================================
 gp_Dir NFaceMeshIterator::normal(Standard_Integer theNode)
 {
-	gp_Dir aNormal(gp::DZ());
-	if (myPolyTriang->HasNormals())
-	{
-		Graphic3d_Vec3 aNormVec3;
-		myPolyTriang->Normal(theNode, aNormVec3);
-		if (aNormVec3.Modulus() != 0.0f)
-		{
-			aNormal.SetCoord(aNormVec3.x(), aNormVec3.y(), aNormVec3.z());
-		}
-	}
-	else if (myHasNormals
-		&& myPolyTriang->HasUVNodes())
-	{
-		const gp_XY& anUV = myPolyTriang->UVNode(theNode).XY();
-		mySLTool.SetParameters(anUV.X(), anUV.Y());
-		if (mySLTool.IsNormalDefined())
-		{
-			aNormal = mySLTool.Normal();
-		}
-	}
-	return aNormal;
+	if (myIsPlanar)
+		return myNormals(0); //all normals will be the same
+	else
+		return myNormals.Value(theNode-1);
 }
 
 bool NFaceMeshIterator::hasCurves()

@@ -255,12 +255,12 @@
     <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NGeometryFactory.h" />
-	<ClInclude Include="Factories\Unmanaged\NLoopSegment.h" />
+    <ClInclude Include="Factories\Unmanaged\NLoopSegment.h" />
     <ClInclude Include="Factories\Unmanaged\NProfileFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShapeFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
-    <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />	
+    <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
     <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="Factories\FactoryBase.h" />
@@ -270,6 +270,7 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
     <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
     <ClInclude Include="Services\Unmanaged\NShapeProximityUtils.h" />
@@ -416,6 +417,7 @@
     <ClCompile Include="Factories\Unmanaged\NProjectionFactory.cpp" />
     <ClCompile Include="Services\ShapeService.cpp" />
     <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
+    <ClCompile Include="Services\Unmanaged\PackedNormal.cpp" />
     <ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
     <ClCompile Include="Storage\BRepDocument.cpp" />
     <ClCompile Include="Storage\BRepDocumentManager.cpp" />

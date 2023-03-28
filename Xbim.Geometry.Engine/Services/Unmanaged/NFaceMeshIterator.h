@@ -5,9 +5,12 @@
 #include <Poly_Triangulation.hxx>
 #include <TDF_Label.hxx>
 #include <NCollection_DataMap.hxx>
+#include <NCollection_Vector.hxx>
 #include <TopTools_ShapeMapHasher.hxx>
 #include <XCAFPrs_Style.hxx>
 #include <BRepTools.hxx>
+#include "PackedNormal.h"
+
 class NFaceMeshIterator 
 {
 public:
@@ -17,8 +20,8 @@ public:
 		const TopLoc_Location& location, 
 		double linearDeflection,
 		double angularDeflection, 
-		bool checkEdges, bool computeNormals);
-	NFaceMeshIterator(const TopoDS_Shape& shape, bool checkEdges, bool computeNormals);
+		bool checkEdges);
+	NFaceMeshIterator(const TopoDS_Shape& shape, bool checkEdges);
 	
 	//! Return true if iterator points to the valid triangulation.
 	bool More() const { return !myPolyTriang.IsNull(); }
@@ -39,9 +42,7 @@ public:
 		return myPolyTriang.IsNull()
 			|| (myPolyTriang->NbNodes() < 1 && myPolyTriang->NbTriangles() < 1);
 	}
-	//! Return true if triangulation has defined normals.
-	bool HasNormals() const { return myHasNormals; }
-
+	
 	//! Return true if triangulation has defined normals.
 	bool HasTexCoords() const { return !myPolyTriang.IsNull() && myPolyTriang->HasUVNodes(); }
 	//! Return normal at specified node index with face transformation applied and face orientation applied.
@@ -80,7 +81,7 @@ public:
 		aNode.Transform(myTrsf);
 		return aNode;
 	}
-
+	bool IsPlanar() { return myIsPlanar; }
 	//! Return texture coordinates for the node.
 	gp_Pnt2d NodeTexCoord(const Standard_Integer theNode) const
 	{
@@ -112,6 +113,7 @@ public:
 	{
 		Poly_Triangle aTri = triangle(theElemIndex);
 		auto myReversed = (myFace.Orientation() == TopAbs_REVERSED);
+		
 		if (myReversed ^ myIsMirrored)
 		{
 			return Poly_Triangle(aTri.Value(1), aTri.Value(3), aTri.Value(2));
@@ -125,14 +127,15 @@ public:
 	{
 		myPolyTriang.Nullify();
 		myFace.Nullify();
-		myNodes = NULL;
-		myNormals = NULL;		
-		myHasNormals = false;
+		myNormals.Clear();
 		myHasFaceColor = false;
 		myFaceColor = Quantity_ColorRGBA();
 		myFaceStyle = XCAFPrs_Style();
+		myIsPlanar = false;
 	}
 private:
+	NCollection_Vector<gp_Dir>		myNormals;
+	bool							myIsPlanar;
 	NCollection_DataMap<TopoDS_Shape, XCAFPrs_Style, TopTools_ShapeMapHasher>
 		myStyles;       //!< Face -> Style map
 	XCAFPrs_Style                   myDefaultStyle;      //!< default material definition to be used for nodes with only color defined
@@ -145,10 +148,7 @@ private:
 	TopLoc_Location                 myFaceLocation; //!< current face location
 	BRepLProp_SLProps               mySLTool;       //!< auxiliary tool for fetching normals from surface
 	BRepAdaptor_Surface             myFaceAdaptor;  //!< surface adaptor for fetching normals from surface
-	const TColgp_Array1OfPnt*		myNodes;        //!< node positions of current face
-	const TShort_Array1OfShortReal* myNormals;      //!< node normals of current face
-	bool							myComputeNormals;
-	Standard_Boolean                myHasNormals;   //!< flag indicating that current face has normals
+	
 	gp_Trsf                         myTrsf;         //!< current face transformation
 	Standard_Boolean                myIsMirrored;   //!< flag indicating that face triangles should be mirrored
 	Quantity_ColorRGBA              myFaceColor;    //!< current face color

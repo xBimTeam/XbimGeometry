@@ -9,14 +9,9 @@
 #include <Graphic3d_Vec3.hxx>
 #include <TopoDS_Shape.hxx>
 #include "NFaceMeshIterator.h"
+#include "PackedNormal.h"
 
-typedef struct PackedNormal {
-	unsigned char byte[2];
-	PackedNormal(unsigned char u, unsigned char v) : byte{ u,v } { }
-public:
-	unsigned char U() { return byte[0]; }
-	unsigned char V() { return byte[1]; }
-} PackedNormal;
+
 typedef NCollection_Vector<int> VectorOfInt;
 typedef NCollection_Vec3<int> Vec3OfInt;
 typedef std::vector<PackedNormal> VectorOfPackedNormal;
@@ -66,8 +61,7 @@ public:
 	void AddNormals(VectorOfPackedNormal normals) { normalsPerFace.push_back(normals); };
 	int FaceCount() { return indicesPerFace.Length(); }
 	int TriangleCount();
-	static PackedNormal ToPackedNormal(const gp_Dir& vec3);
-	gp_Dir ToNormal(const PackedNormal& packedNormal);
+	
 	const VectorOfTriangleNormals& NormalsPerFace() { return normalsPerFace; }
 	std::streampos ByteOffet;
 	void WriteToStream(std::ostream& oStream);
