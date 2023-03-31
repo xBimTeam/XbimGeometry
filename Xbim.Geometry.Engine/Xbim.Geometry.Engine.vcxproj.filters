@@ -453,7 +453,7 @@
     <ClInclude Include="Factories\Unmanaged\NLoopSegment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PackedNormal.h">
+    <ClInclude Include="Services\Unmanaged\PackedNormal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -813,6 +813,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Extensions\ToGTransform.h">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\PackedNormal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -35,16 +35,19 @@ namespace Xbim
 				IXShape^ Convert(System::String^ brepStr);
 
 				virtual IXShape^ Build(IIfcSolidModel^ ifcSolid);
-				virtual IXSolid^ Build(IIfcExtrudedAreaSolid^ ifcExtrudedAreaSolid);
 				virtual IXShape^ Build(IIfcFacetedBrep^ ifcBrep);
 				virtual IXShape^ Build(IIfcFaceBasedSurfaceModel^ ifcSurfaceModel);
 				virtual IXSolid^ Build(IIfcCsgPrimitive3D^ ifcCsgPrimitive);
 				virtual IXSolid^ Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
-
+				virtual IXShape^ Build(IIfcShellBasedSurfaceModel^ ifcSurfaceModel);
+				virtual IXShape^ Build(IIfcTessellatedItem^ ifcTessellatedItem);
+				virtual IXShape^ Build(IIfcSectionedSpine^ ifcSectionedSpine);
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
 
-				TopoDS_Solid BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid);
+				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid);
+
+				
 
 				TopoDS_Solid BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal);
 
@@ -65,15 +68,21 @@ namespace Xbim
 
 #pragma region Swept solids
 				TopoDS_Solid BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSolid);
-				TopoDS_Solid BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
+				
+				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
 
 #pragma endregion
 				TopoDS_Solid BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
-				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);			
+				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid);
+				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);
 				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
 				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
 				
-
+			
+				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef);
+				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef);
+				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid, IIfcProfileDef^ profileDef, IIfcProfileDef^ endProfileDef);
+				
 			};
 		}
 	}

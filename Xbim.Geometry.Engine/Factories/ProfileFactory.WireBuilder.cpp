@@ -15,6 +15,8 @@
 #include <Geom2d_TrimmedCurve.hxx>
 #include <GeomLib.hxx>
 #include "../BRep/XCurve.h"
+#include <BRepBuilderAPI_Transform.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Ifc4::Interfaces;
@@ -28,6 +30,11 @@ namespace Xbim
 			IXWire^ ProfileFactory::BuildWire(IIfcProfileDef^ profileDef)
 			{
 				XProfileDefType profileType;
+				auto wire = BuildProfileWire(profileDef, profileType);
+				return gcnew XWire(wire);
+			}
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcProfileDef^ profileDef, XProfileDefType& profileType)
+			{
 
 				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
 					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
@@ -45,11 +52,11 @@ namespace Xbim
 				case XProfileDefType::IfcCenterLineProfileDef:
 					wire = BuildProfileWire(static_cast<IIfcCenterLineProfileDef^>(profileDef));
 					break;
-					/*case XProfileDefType::IfcCompositeProfileDef:
-						return BuildProfileFace(static_cast<IIfcCompositeProfileDef^>(profileDef));
-					case XProfileDefType::IfcDerivedProfileDef:
-						return BuildProfileFace(static_cast<IIfcDerivedProfileDef^>(profileDef));
-					case XProfileDefType::IfcMirroredProfileDef:
+				case XProfileDefType::IfcCompositeProfileDef:
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCompositeProfileDef", profileDef);
+				case XProfileDefType::IfcDerivedProfileDef:
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcDerivedProfileDef", profileDef);
+					/*case XProfileDefType::IfcMirroredProfileDef:
 						return BuildProfileFace(static_cast<IIfcMirroredProfileDef^>(profileDef));
 					case XProfileDefType::IfcAsymmetricIShapeProfileDef:
 						return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
@@ -57,6 +64,10 @@ namespace Xbim
 						return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));*/
 				case XProfileDefType::IfcCircleHollowProfileDef:
 					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCircleHollowProfileDef, use BuildFace", profileDef);
+				case XProfileDefType::IfcRectangleProfileDef:
+					return BuildProfileWire(static_cast<IIfcRectangleProfileDef^>(profileDef));
+				case XProfileDefType::IfcRectangleHollowProfileDef:
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcRectangleProfileDef, use BuildFace", profileDef);
 					/*	case XProfileDefType::IfcCircleProfileDef:
 							return BuildProfileFace(static_cast<IIfcCircleProfileDef^>(profileDef));
 						case XProfileDefType::IfcEllipseProfileDef:
@@ -64,14 +75,12 @@ namespace Xbim
 						case XProfileDefType::IfcIShapeProfileDef:
 							return BuildProfileFace(static_cast<IIfcIShapeProfileDef^>(profileDef));
 						case XProfileDefType::IfcLShapeProfileDef:
-							return BuildProfileFace(static_cast<IIfcLShapeProfileDef^>(profileDef));
-						case XProfileDefType::IfcRectangleProfileDef:
-							return BuildProfileFace(static_cast<IIfcRectangleProfileDef^>(profileDef));
-						case XProfileDefType::IfcRectangleHollowProfileDef:
-							return BuildProfileFace(static_cast<IIfcRectangleHollowProfileDef^>(profileDef));
+							return BuildProfileFace(static_cast<IIfcLShapeProfileDef^>(profileDef));*/
+						
+						
 						case XProfileDefType::IfcRoundedRectangleProfileDef:
-							return BuildProfileFace(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
-						case XProfileDefType::IfcTShapeProfileDef:
+							return BuildProfileWire(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
+					/*	case XProfileDefType::IfcTShapeProfileDef:
 							return BuildProfileFace(static_cast<IIfcTShapeProfileDef^>(profileDef));
 						case XProfileDefType::IfcTrapeziumProfileDef:
 							return BuildProfileFace(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
@@ -84,9 +93,8 @@ namespace Xbim
 				}
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("ProfileDef could not be built as a wire", profileDef);
-				return gcnew XWire(wire);
+				return wire;
 			}
-
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
 			{
 				//validation
@@ -140,12 +148,57 @@ namespace Xbim
 				else
 					return wire;
 			}
+			
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcRoundedRectangleProfileDef^ roundedRectangleProfile)
+			{
+				if (roundedRectangleProfile->XDim <= 0 || roundedRectangleProfile->YDim <= 0)
+					throw RaiseGeometryFactoryException("Invalid rectangle profile with at least one zero or less dimension", roundedRectangleProfile);
+				TopLoc_Location location = BuildParameterizedProfilePosition(roundedRectangleProfile->Position);
+				auto wire = EXEC_NATIVE->BuildRoundedRectangle(roundedRectangleProfile->XDim, roundedRectangleProfile->YDim, roundedRectangleProfile->RoundingRadius, location, ModelGeometryService->Precision);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", roundedRectangleProfile);
+				else
+					return wire;
+			}
 
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile)
+			{
+				if (iShapedProfile->OverallWidth <= 0 || iShapedProfile->OverallDepth <= 0)
+					throw RaiseGeometryFactoryException("Invalid I Shaped profile with at least one zero or less dimension", iShapedProfile);
+				TopLoc_Location location = BuildParameterizedProfilePosition(iShapedProfile->Position);
+				auto wire = EXEC_NATIVE->BuildIShape(iShapedProfile->OverallWidth, iShapedProfile->OverallDepth, iShapedProfile->FlangeThickness, iShapedProfile->WebThickness,
+					iShapedProfile->FilletRadius.HasValue? (double)iShapedProfile->FilletRadius.Value:0., location, ModelGeometryService->Precision, true);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", iShapedProfile);
+				else
+					return wire;
+			}
+
+			void ProfileFactory::BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires)
+			{
+				if (compositeProfile->Profiles->Count < 1)
+					throw RaiseGeometryFactoryException("At least 2 profiles are required for a valid composite profile definition", compositeProfile);
+				if ((compositeProfile->Profiles->Count < 2))
+					LogInformation(compositeProfile, "A composite profile should have at least 2 profiles, only one profile found");
+				auto uniformType = Enumerable::First(compositeProfile->Profiles)->ProfileType;
+				for each (auto profile in compositeProfile->Profiles)
+				{
+					if (dynamic_cast<IIfcCompositeProfileDef^>(profile) != nullptr)
+						throw RaiseGeometryFactoryException("Composite Profiles cannot contain nested Composite Profiles", profile);
+					if (profile->ProfileType != uniformType)
+						throw RaiseGeometryFactoryException("Composite Profiles must comprise Profiles of all the same Profile Type (Area or Curve)", profile);
+					XProfileDefType profileType;
+					auto wire = BuildProfileWire(profile, profileType); //throws exception
+					profileWires.Append(wire);
+				}
+			}
+
+			
 			TopLoc_Location ProfileFactory::BuildParameterizedProfilePosition(IIfcAxis2Placement^ position)
 			{
 				if (position == nullptr) return TopLoc_Location();
 				auto position2d = dynamic_cast<IIfcAxis2Placement2D^>(position);
-				if (position2d == nullptr) throw RaiseGeometryFactoryException("Parameterized Profile positions must be 2D",position);
+				if (position2d == nullptr) throw RaiseGeometryFactoryException("Parameterized Profile positions must be 2D", position);
 				return GEOMETRY_FACTORY->BuildAxis2PlacementLocation(position);
 			}
 

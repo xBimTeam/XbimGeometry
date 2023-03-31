@@ -32,6 +32,7 @@ public:
 	/// <returns></returns>
 	TopoDS_Solid CastToSolid(const TopoDS_Shape& shape);
 	TopoDS_Solid MakeSweptSolid(const TopoDS_Face& face, const gp_Vec& direction);
+	TopoDS_Shape BuildExtrudedAreaSolidTapered(const TopoDS_Face& sweptArea, const TopoDS_Face& endSweptArea, const gp_Dir& extrudeDirection, double depth, const TopLoc_Location& location, double precision);
 	bool TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape);
 
 

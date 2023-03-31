@@ -42,13 +42,14 @@ namespace Xbim
 			void Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
 			void Init(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcExtrudedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
-			void Init(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			
 			void Init(IIfcRevolvedAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 
 			void Init(IIfcExtrudedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcRevolvedAreaSolidTapered^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 			void Init(IIfcSectionedSpine^ solid, ILogger^ logger);
+
+			void Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger);
 
 
 			void Init(IIfcSweptDiskSolid^ solid, ILogger^ logger);
@@ -124,13 +125,12 @@ namespace Xbim
 			XbimSolid(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			XbimSolid(IIfcSweptAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			XbimSolid(IIfcSweptAreaSolid^ solid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService);
-			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			
 			XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
 
 			XbimSolid(IIfcHalfSpaceSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			
-			XbimSolid(IIfcExtrudedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
-			XbimSolid(IIfcExtrudedAreaSolid^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
+			
 			XbimSolid(IIfcExtrudedAreaSolidTapered^ solid, ILogger^ logger, ModelGeometryService^ modelService);
 			XbimSolid(IIfcExtrudedAreaSolidTapered^ IIfcSolid, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService); //support for composite profiles
 			XbimSolid(IIfcRevolvedAreaSolidTapered^ solid, ILogger^ logger, ModelGeometryService^ modelService);

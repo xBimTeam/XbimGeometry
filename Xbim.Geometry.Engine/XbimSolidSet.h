@@ -53,6 +53,7 @@ namespace Xbim
 			void Init(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
+			void Init(IIfcExtrudedAreaSolidTapered^ repItem, ILogger^ logger);
 			void Init(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;

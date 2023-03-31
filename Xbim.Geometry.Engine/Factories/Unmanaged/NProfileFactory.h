@@ -33,5 +33,7 @@ public:
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops);
 	TopoDS_Wire BuildRectangle(double dimX, double dimY, const TopLoc_Location& location);
 	TopoDS_Face BuildRectangleHollowProfileDef(const TopLoc_Location& location, double xDim, double yDim, double wallThickness, double outerFilletRadius, double innerFilletRadius, double precision);
+	TopoDS_Wire BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision);
+	TopoDS_Wire BuildIShape(double overallWidth, double overallDepth, double flangeThickness, double webThickness, double filletRadius, const TopLoc_Location& location, double precision, bool detailed);
 };
 

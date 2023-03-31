@@ -9,6 +9,11 @@ void NLoggingService::SetLogger(WriteLog lFunc)
 	//LogInformation("Native Logger attached");
 }
 
+WriteLog NLoggingService::GetLogger()
+{
+	return LoggerFunc;
+}
+
 void NLoggingService::LogCritical(const char* logMsg)
 {
 	if (LoggerFunc != nullptr)

@@ -108,9 +108,17 @@ namespace Xbim
 
 				XMatrix^ ToTransform(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
 
+				gp_GTrsf2d ToGTrsf2d(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
+
 				XMatrix^ ToTransform(IIfcCartesianTransformationOperator2D^ ct);
 
+				gp_Trsf2d ToTrsf2d(IIfcCartesianTransformationOperator2D^ ct);
+
 				XMatrix^ ToTransform(IIfcCartesianTransformationOperator3D^ ct3D);
+
+				gp_GTrsf ToGTrsf(IIfcCartesianTransformationOperator2DnonUniform^ ct2D);
+
+				gp_Trsf ToTrsf(IIfcCartesianTransformationOperator2D^ ct2D);
 
 				virtual void BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix);
 

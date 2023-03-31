@@ -715,37 +715,13 @@ namespace Xbim
 				te.Next();
 			}
 		}
-
-		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
+		void XbimSolidSet::Init(IIfcExtrudedAreaSolidTapered^ repItem, ILogger^ logger)
 		{
-			IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
-
-			if (compProfile != nullptr) //handle these as composite solids
+			IIfcCompositeProfileDef^ startProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			
+			if (startProfile != nullptr) //handle these as composite solids
 			{
-				int profileCount = Enumerable::Count(compProfile->Profiles);
-				if (profileCount == 0)
-				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
-					return;
-				}
-				if (profileCount == 1)
-				{
-					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{ifcEntityLabel}. It must be 2 or more. A single Profile has been used", repItem->EntityLabel);
-					XbimSolid^ s = gcnew XbimSolid(repItem, logger, _modelServices);
-					if (s->IsValid)
-					{
-						solids = gcnew List<IXbimSolid^>();
-						solids->Add(s);
-					}
-					return;
-				}
-				solids = gcnew List<IXbimSolid^>();
-				for each (IIfcProfileDef ^ profile in compProfile->Profiles)
-				{
-					XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger, _modelServices);
-					if (aSolid->IsValid)
-						solids->Add(aSolid);
-				}
+				throw gcnew System::NotImplementedException("IfcExtrudedAreaSolidTapered is not implemented for IfcCompositeProfileDef");
 			}
 			else
 			{
@@ -754,6 +730,55 @@ namespace Xbim
 				{
 					solids = gcnew List<IXbimSolid^>();
 					solids->Add(s);
+				}
+			}
+		}
+
+
+		void XbimSolidSet::Init(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger)
+		{
+			auto solidTapered = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
+			if (solidTapered != nullptr) Init(solidTapered,logger);
+			else
+			{
+				IIfcCompositeProfileDef^ compProfile = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+
+				if (compProfile != nullptr) //handle these as composite solids
+				{
+					int profileCount = Enumerable::Count(compProfile->Profiles);
+					if (profileCount == 0)
+					{
+						XbimGeometryCreator::LogWarning(logger, repItem, "Invalid number of profiles. It must be 2 or more. Profile discarded");
+						return;
+					}
+					if (profileCount == 1)
+					{
+						XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{ifcEntityLabel}. It must be 2 or more. A single Profile has been used", repItem->EntityLabel);
+						XbimSolid^ s = gcnew XbimSolid(repItem, logger, _modelServices);
+						if (s->IsValid)
+						{
+							solids = gcnew List<IXbimSolid^>();
+							solids->Add(s);
+						}
+						return;
+					}
+					solids = gcnew List<IXbimSolid^>();
+
+					for each (IIfcProfileDef ^ profile in compProfile->Profiles)
+					{
+						XbimSolid^ aSolid = gcnew XbimSolid(repItem, profile, logger, _modelServices);
+						if (aSolid->IsValid)
+							solids->Add(aSolid);
+					}
+				}
+				else
+				{
+					XbimSolid^ s = gcnew XbimSolid(repItem, logger, _modelServices);
+					if (s->IsValid)
+					{
+						solids = gcnew List<IXbimSolid^>();
+						solids->Add(s);
+					}
 				}
 			}
 		}

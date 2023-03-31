@@ -48,7 +48,7 @@ namespace Xbim
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
 					return BuildProfileEdge(static_cast<IIfcArbitraryOpenProfileDef^>(profileDef));
 				case XProfileDefType::IfcDerivedProfileDef:
-					return BuildProfileEdge(static_cast<IIfcDerivedProfileDef^>(profileDef));
+					throw RaiseGeometryFactoryException("Edge cannot be built from a derived profile, use BuildProfileFace()", profileDef);
 				case XProfileDefType::IfcMirroredProfileDef:
 					return BuildProfileEdge(static_cast<IIfcMirroredProfileDef^>(profileDef));
 				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
@@ -79,10 +79,6 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Profile Type cannot be built as an Edge", profileDef);
 				}
 
-			}
-			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcDerivedProfileDef^ ifcDerivedProfileDef)
-			{
-				return TopoDS_Edge();
 			}
 			
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcCircleProfileDef^ ifcCircleProfileDef)

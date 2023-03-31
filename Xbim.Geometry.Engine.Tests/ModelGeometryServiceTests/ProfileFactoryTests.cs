@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System;
+using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Exceptions;
@@ -108,8 +109,27 @@ namespace Xbim.Geometry.Engine.Tests
                 var edge = profileFactory.BuildEdge(profile);
                 var curve = profileFactory.BuildCurve(profile);
             }
+        }
 
-
+        [Fact]
+        public void Can_Build_Extruded_CompositeProfileDef()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/CuttingOpeningInCompositeProfileDefTest.ifc");
+            var engineV6 = factory.CreateGeometryEngineV6(model, _loggerFactory);
+            var extrusion = model.Instances[43] as IIfcExtrudedAreaSolid;
+            extrusion.Should().NotBeNull();
+            var occ = engineV6.Build(extrusion) as IXCompound;
+            occ.Should().NotBeNull();
+            occ.IsSolidsOnly.Should().BeTrue();
+            var compositeProfile = (IIfcCompositeProfileDef)extrusion.SweptArea;
+            occ.Solids.Count().Should().Be(compositeProfile.Profiles.Count);                                                               
+            occ.Solids.Sum(s => ((IXSolid)s).Volume).Should().BeApproximately(12399283891, 1);
+           
+            //check the old engine returns the same result
+            var engineV5 = factory.CreateGeometryEngineV5(model, _loggerFactory);
+            var occV5 = engineV5.Create(extrusion) as IXbimSolidSet;
+            occV5.Count().Should().Be(compositeProfile.Profiles.Count);
+            occV5.Sum(s=>s.Volume).Should().BeApproximately(12399283891, 1);
         }
 
     }

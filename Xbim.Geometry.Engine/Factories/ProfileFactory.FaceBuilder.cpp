@@ -15,6 +15,8 @@
 #include <Geom2d_TrimmedCurve.hxx>
 #include <GeomLib.hxx>
 #include "../BRep/XCurve.h"
+#include <BRepBuilderAPI_GTransform.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Ifc4::Interfaces;
@@ -128,10 +130,6 @@ namespace Xbim
 
 			}
 
-			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef)
-			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcDerivedProfileDef);
-			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleProfileDef^ ifcCircleProfileDef)
 			{
@@ -145,9 +143,16 @@ namespace Xbim
 					return face;
 			}
 
-			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCompositeProfileDef^ ccmpositeProfile)
+			
+			void ProfileFactory::BuildProfileFace(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileFaces)
 			{
-				return TopoDS_Face();
+				TopTools_ListOfShape wires;
+				BuildProfileWire(compositeProfile, wires); //throws exception
+				for (auto&& wire: wires)
+				{
+					auto face = EXEC_NATIVE->MakeFace(TopoDS::Wire(wire));
+					profileFaces.Append(face);
+				}
 			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCircleHollowProfileDef^ ifcCircleHollowProfileDef)
@@ -182,6 +187,31 @@ namespace Xbim
 					return face;
 			}
 
+			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcDerivedProfileDef^ derivedProfileDef)
+			{
+				
+				auto face = BuildProfileFace(derivedProfileDef->ParentProfile); //throws an exception		
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Profile face could not be built", derivedProfileDef);
+				auto nonUniform2d = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(derivedProfileDef->Operator);
+				if (nonUniform2d != nullptr)
+				{
+					gp_GTrsf transform = GEOMETRY_FACTORY->ToGTrsf(nonUniform2d);
+					BRepBuilderAPI_GTransform aBrepTrsf(face, transform);
+					if (!aBrepTrsf.IsDone())
+						throw RaiseGeometryFactoryException("Profile wire could not be transformed", derivedProfileDef);
+					face = TopoDS::Face(aBrepTrsf.Shape());
+				}
+				else
+				{
+					gp_Trsf transform = gp_Trsf(GEOMETRY_FACTORY->ToTrsf2d(derivedProfileDef->Operator));
+					BRepBuilderAPI_Transform aBrepTrsf(face, transform);
+					if (!aBrepTrsf.IsDone())
+						throw RaiseGeometryFactoryException("Profile wire could not be transformed", derivedProfileDef);
+					face = TopoDS::Face(aBrepTrsf.Shape());
+				}
+				return face;
+			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
  
@@ -218,7 +248,14 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcRoundedRectangleProfileDef);
+				auto wire = BuildProfileWire(ifcRoundedRectangleProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcRoundedRectangleProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcRoundedRectangleProfileDef);
+				else
+					return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTrapeziumProfileDef^ trapeziumProfile)
 			{
@@ -240,10 +277,19 @@ namespace Xbim
 			{
 				throw RaiseGeometryFactoryException("Failed to create Profile", ifcEllipseProfileDef);
 			}
+
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcIShapeProfileDef^ ifcIShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcIShapeProfileDef);
+				auto wire = BuildProfileWire(ifcIShapeProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcIShapeProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcIShapeProfileDef);
+				else
+					return face;
 			}
+
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcZShapeProfileDef^ ifcZShapeProfileDef)
 			{
 				throw RaiseGeometryFactoryException("Failed to create Profile", ifcZShapeProfileDef);

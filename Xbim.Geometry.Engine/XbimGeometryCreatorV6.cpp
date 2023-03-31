@@ -77,27 +77,31 @@ namespace Xbim
 		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^)
 		{
 
+
 			try
 			{
+
 				if (geomRep == nullptr)
 				{
 					throw gcnew System::NullReferenceException("Geometry Representation Item cannot be null");
 				}
-				IIfcSweptAreaSolid^ sweptAreaSolid = dynamic_cast<IIfcSweptAreaSolid^>(geomRep);
-				if (sweptAreaSolid != nullptr)
+				TopLoc_Location location;
+				if (objectLocation != nullptr)
 				{
-					if (dynamic_cast<IIfcCompositeProfileDef^>(sweptAreaSolid->SweptArea)) //handle these as composite solids
-					{
-						XbimSolidSet^ solidset = (XbimSolidSet^)CreateSolidSet(sweptAreaSolid, Logger());
-						if (objectLocation != nullptr) solidset->Move(objectLocation);
-						return Trim(solidset);
-					}
+					location = GetGeometryFactory()->BuildAxis2PlacementLocation(objectLocation);
+				}
+				IIfcSolidModel^ solidModel = dynamic_cast<IIfcSolidModel^>(geomRep);
+				if (solidModel != nullptr)
+				{
+					auto shape = GetSolidFactory()->BuildSolidModel(solidModel);
+					if (!location.IsIdentity()) shape.Move(location);
+					if (shape.ShapeType() == TopAbs_COMPOUND)
+						return gcnew XbimSolidSet(shape, this);
+					else if(shape.ShapeType() == TopAbs_SOLID)
+						return gcnew XbimSolid(TopoDS::Solid(shape), this);
 					else
-					{
-						XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptAreaSolid^)geomRep, Logger());
-						if (objectLocation != nullptr) solid->Move(objectLocation);
-						return solid;
-					}
+						throw RaiseGeometryServiceException("IfcSolidModel returned incorrect shape result", geomRep);
+
 				}
 				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
 				{
@@ -459,8 +463,10 @@ namespace Xbim
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(IIfcSolid, Logger(), this);
-			//return gcnew XbimSolid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid));
+			auto shape = GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid);
+			if (shape.ShapeType() != TopAbs_SOLID)
+				throw RaiseGeometryServiceException("An IfcExtrudedAreaSolid has returned multiple solids, mostly likely as the result of a IfcCompositeProfileDef for the swept area");
+			return gcnew XbimSolid(TopoDS::Solid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid)), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)
@@ -601,19 +607,18 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcSweptAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
-			/*IIfcExtrudedAreaSolid^ eas = dynamic_cast<IIfcExtrudedAreaSolid^>(IIfcSolid);
+			IIfcExtrudedAreaSolid^ eas = dynamic_cast<IIfcExtrudedAreaSolid^>(IIfcSolid);
 			if (eas != nullptr) return CreateSolidSet(eas, Logger());
 			IIfcRevolvedAreaSolid^ ras = dynamic_cast<IIfcRevolvedAreaSolid^>(IIfcSolid);
 			if (ras != nullptr) return CreateSolidSet(ras, Logger());
 			IIfcSurfaceCurveSweptAreaSolid^ scas = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(IIfcSolid);
 			if (scas != nullptr) return CreateSolidSet(scas, Logger());
-			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));*/
+			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
+			return gcnew XbimSolidSet(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid), this);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^)

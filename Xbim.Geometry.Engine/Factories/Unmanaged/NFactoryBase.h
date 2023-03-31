@@ -12,6 +12,14 @@ public:
 		if (pLoggingService != nullptr) delete pLoggingService;
 		pLoggingService = nullptr;
 	};
+	NFactoryBase()
+	{
+
+	}
+	NFactoryBase(WriteLog lFunc)
+	{
+		SetLogger(lFunc);
+	}
 	//this class will delete the point to the service
 	virtual void SetLogger(WriteLog lFunc)
 	{ 

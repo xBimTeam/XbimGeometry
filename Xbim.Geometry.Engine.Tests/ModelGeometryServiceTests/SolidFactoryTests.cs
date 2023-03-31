@@ -339,7 +339,7 @@ namespace Xbim.Geometry.Engine.Tests
             using var model = MemoryModel.OpenRead("testfiles/ExtrudedAreaSolidFailsOnExtrusion.ifc");
             var engine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var ifcExtrudedAreaSolid = model.Instances[1] as IIfcExtrudedAreaSolid;
-            var v6Solid = engine.SolidFactory.Build(ifcExtrudedAreaSolid);
+            var v6Solid = engine.SolidFactory.Build(ifcExtrudedAreaSolid) as IXSolid;
             Assert.NotNull(v6Solid);
             var v5Solid = engine.CreateSolid(ifcExtrudedAreaSolid);
             Assert.NotNull(v5Solid);

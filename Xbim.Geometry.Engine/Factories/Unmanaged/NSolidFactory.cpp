@@ -37,6 +37,8 @@
 #include <CSLib.hxx>
 #include <GeomLProp_SLProps.hxx>
 #include <ShapeFix_Edge.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
+#include "NBooleanFactory.h"
 bool NSolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 {
 	try
@@ -653,4 +655,69 @@ TopoDS_Solid NSolidFactory::MakeSweptSolid(const TopoDS_Face& face, const gp_Vec
 	}
 	pLoggingService->LogError("Could not build ExtrudedAreaSolid");
 	return TopoDS_Solid();
+}
+
+TopoDS_Shape NSolidFactory::BuildExtrudedAreaSolidTapered(const TopoDS_Face& sweptArea, const TopoDS_Face& endSweptArea, const gp_Dir& extrudeDirection, double depth, const TopLoc_Location& location, double precision)
+{
+	try
+	{
+		gp_Vec vec(extrudeDirection);
+		vec *= depth;
+		gp_Trsf t;
+		t.SetTranslation(vec);
+		TopoDS_Face placedEndSweptArea = TopoDS::Face(endSweptArea.Moved(t));
+		
+			BRepOffsetAPI_ThruSections pipeMaker(Standard_True, Standard_True, precision);
+			TopoDS_Wire outerBoundStart =  BRepTools::OuterWire(sweptArea);
+			TopoDS_Wire outerBoundEnd = BRepTools::OuterWire(placedEndSweptArea);
+			pipeMaker.AddWire(outerBoundStart);
+			pipeMaker.AddWire(outerBoundEnd);
+			TopExp_Explorer startExplorer(sweptArea, TopAbs_WIRE);
+			TopExp_Explorer endExplorer(placedEndSweptArea, TopAbs_WIRE);
+			pipeMaker.Build();
+			if (!pipeMaker.IsDone())
+				Standard_Failure::Raise("Failed to extrude tapered solid body");
+			auto taperedOuterBody = pipeMaker.Shape();
+			taperedOuterBody.Closed(Standard_True);
+			TopTools_ListOfShape voids;
+
+			//it is required that the faces must be the same type and have the same number of inner wires, if not this will blow and throw an exception
+			//each pair is built as a separate solid which will become a void in the final solid
+			for (; startExplorer.More() && endExplorer.More(); startExplorer.Next(), endExplorer.Next())
+			{
+				if (!startExplorer.Current().IsEqual(outerBoundStart))
+				{
+					BRepOffsetAPI_ThruSections voidPipeMaker(Standard_True, Standard_True, precision);
+					voidPipeMaker.AddWire(TopoDS::Wire(startExplorer.Current().Reversed()));
+					voidPipeMaker.AddWire(TopoDS::Wire(endExplorer.Current().Reversed()));
+					voidPipeMaker.Build();
+					if (!voidPipeMaker.IsDone())
+						Standard_Failure::Raise("Failed to extrude tapered solid void");
+					voids.Append(voidPipeMaker.Shape());
+				}
+			}
+			if (voids.Size() > 0)
+			{
+				//cut each void
+				NBooleanFactory booleanFactory(pLoggingService->GetLogger());
+				for (auto&& aVoid : voids)
+				{
+					bool hasWarnings;
+					taperedOuterBody = booleanFactory.Cut(taperedOuterBody, aVoid, precision, hasWarnings);
+					if (hasWarnings)
+						pLoggingService->LogInformation("Cutting a void in an ExtrudedAreaSolidTapered issued warnings");
+
+				}
+			}
+			if (!location.IsIdentity())
+				taperedOuterBody.Move(location);
+			return taperedOuterBody;
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e);
+	}
+	pLoggingService->LogError("Could not build ExtrudedAreaSolidTapered");
+	return TopoDS_Solid();
+
 }

@@ -21,10 +21,15 @@ namespace Xbim
 
 				virtual IXFace^ BuildFace(IIfcProfileDef^ profileDef);
 				virtual IXWire^ BuildWire(IIfcProfileDef^ profileDef);
+				TopoDS_Wire BuildProfileWire(IIfcProfileDef^ profileDef, XProfileDefType& profileType);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile);
 				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
+				TopoDS_Wire BuildProfileWire(IIfcRoundedRectangleProfileDef^ roundedRectangleProfile);
+				TopoDS_Wire BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile);
+				void BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires);
+				
 				TopLoc_Location BuildParameterizedProfilePosition(IIfcAxis2Placement^ position);
 				TopoDS_Wire BuildProfileWire(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
 				virtual IXEdge^ BuildEdge(IIfcProfileDef^ profileDef);
@@ -37,9 +42,10 @@ namespace Xbim
 				TopoDS_Face BuildProfileFace(IIfcArbitraryProfileDefWithVoids^ arbitraryClosedProfile);
 				TopoDS_Face BuildProfileFace(IIfcAsymmetricIShapeProfileDef^ asymmetricIShapeProfile);
 				TopoDS_Face BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef);
+				void BuildProfileFace(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileFaces);
 				TopoDS_Face BuildProfileFace(IIfcCircleHollowProfileDef^ ifcCircleHollowProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcCircleProfileDef^ circleProfile);
-				TopoDS_Face BuildProfileFace(IIfcCompositeProfileDef^ ccmpositeProfile);
+
 				TopoDS_Face BuildProfileFace(IIfcCShapeProfileDef^ ifcCShapeProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcDerivedProfileDef^ ifcDerivedProfileDef);
 				TopoDS_Face BuildProfileFace(IIfcEllipseProfileDef^ ellipseProfile);
@@ -60,7 +66,7 @@ namespace Xbim
 
 
 				TopoDS_Edge BuildProfileEdge(IIfcProfileDef^ ifcProfileDef);
-				TopoDS_Edge BuildProfileEdge(IIfcDerivedProfileDef^ ifcDerivedProfileDef);
+				
 				TopoDS_Edge BuildProfileEdge(IIfcCircleProfileDef^ ifcCircleProfileDef);
 				TopoDS_Edge BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef);
 				TopoDS_Edge BuildProfileEdge(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef);

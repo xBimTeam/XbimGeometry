@@ -176,22 +176,14 @@ namespace Xbim
 			Init(repItem, overrideProfileDef, logger);
 
 		}
-		XbimSolid::XbimSolid(IIfcExtrudedAreaSolid^ repItem, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
-		{
-			Init(repItem, nullptr, logger);
-
-		}
+		
 
 		XbimSolid::XbimSolid(IIfcExtrudedAreaSolidTapered^ repItem, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(repItem, nullptr, logger);
 
 		}
-		XbimSolid::XbimSolid(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
-		{
-			Init(repItem, overrideProfileDef, logger);
-
-		}
+		
 		XbimSolid::XbimSolid(IIfcSweptDiskSolid^ repItem, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
 			Init(repItem, logger);
@@ -216,10 +208,7 @@ namespace Xbim
 			Init(repItem, nullptr, logger);
 		}
 
-		XbimSolid::XbimSolid(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
-		{
-			Init(repItem, overrideProfileDef, logger);
-		}
+		
 
 		XbimSolid::XbimSolid(IIfcHalfSpaceSolid^ repItem, ILogger^ logger, ModelGeometryService^ modelService) :XbimOccShape(modelService)
 		{
@@ -392,15 +381,12 @@ namespace Xbim
 			if (ras != nullptr) return Init(ras, overrideProfileDef, logger);
 			IIfcFixedReferenceSweptAreaSolid^ fas = dynamic_cast<IIfcFixedReferenceSweptAreaSolid^>(solid);
 			if (fas != nullptr) return Init(fas, overrideProfileDef, logger);
+			IIfcSurfaceCurveSweptAreaSolid^ saw = dynamic_cast<IIfcSurfaceCurveSweptAreaSolid^>(solid);
+			if (saw != nullptr) return Init(saw, overrideProfileDef, logger);
 			XbimGeometryCreator::LogError(logger, solid, "Swept Solid of Type {ifcType} is not implemented", solid->GetType()->Name);
 		}
 
-		void XbimSolid::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
-		{
-			auto sweptAreaSolid = _modelServices->GetSolidFactory()->BuildSurfaceCurveSweptAreaSolid(repItem);
-			pSolid = new TopoDS_Solid(sweptAreaSolid);
-			
-		}
+		
 
 		void XbimSolid::Init(IIfcRevolvedAreaSolidTapered^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
 		{
@@ -607,6 +593,7 @@ namespace Xbim
 				System::GC::KeepAlive(faceEnd);
 			}
 			XbimGeometryCreator::LogWarning(logger, repItem, "Invalid tapered extrusion, depth must be >0 and faces must be correctly defined");
+
 		}
 
 		void XbimSolid::Init(IIfcFixedReferenceSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
@@ -924,79 +911,18 @@ namespace Xbim
 			//if it has failed we will have a null solid
 		}
 
-
+		void XbimSolid::Init(IIfcSurfaceCurveSweptAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
+		{
+			pSolid = new TopoDS_Solid(TopoDS::Solid(_modelServices->GetSolidFactory()->BuildSurfaceCurveSweptAreaSolid(repItem, overrideProfileDef)));
+		}
 
 		void XbimSolid::Init(IIfcExtrudedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)
 		{
 			IIfcExtrudedAreaSolidTapered^ extrudeTaperedArea = dynamic_cast<IIfcExtrudedAreaSolidTapered^>(repItem);
-			if (extrudeTaperedArea != nullptr) return Init(extrudeTaperedArea, overrideProfileDef, logger);
-			IIfcCompositeProfileDef^ compProf = dynamic_cast<IIfcCompositeProfileDef^>(repItem->SweptArea);
+			if (extrudeTaperedArea != nullptr) 
+				return Init(extrudeTaperedArea, overrideProfileDef, logger);
 
-			if (repItem->Depth > 0) //we have a valid face and extrusion  
-			{
-				IIfcDirection^ dir = repItem->ExtrudedDirection;
-				gp_Vec vec(dir->X, dir->Y, dir->Z);
-				vec.Normalize();
-				double depth = repItem->Depth;
-				if (depth > 1e36) //SRL 1e36 is as big as we can go without booleans failing, it should be big enough for most sensible cases  
-				{
-					XbimGeometryCreator::LogInfo(logger, repItem, "Extrusion is too large, it has been truncated to avoid boolean errors");
-					depth = 1e36;
-				}
-
-				vec *= depth;
-				if (compProf != nullptr && compProf->Profiles->Count > 1 && overrideProfileDef == nullptr)
-				{
-					XbimGeometryCreator::LogWarning(logger, repItem, "Composite profiles with more than 1 profile cannot create a solid, use the CreateSolidSet method");
-				}
-				else if (compProf != nullptr && compProf->Profiles->Count == 1) overrideProfileDef = compProf->Profiles->GetAt(0);
-
-				XbimFace^ face;
-				if (overrideProfileDef == nullptr)
-				{
-					if (repItem->SweptArea == nullptr)
-					{
-						XbimGeometryCreator::LogInfo(logger, repItem, "Invalid extrusion profile, it cannot be null");
-						return; //just give up
-					}
-					else
-						face = gcnew XbimFace(repItem->SweptArea, logger, _modelServices);
-				}
-				else
-					face = gcnew XbimFace(overrideProfileDef, logger, _modelServices);
-				if (face != nullptr && !face->BoundingBox.IsEmpty)
-				{
-					TopoDS_Face occFace = face;
-					try
-					{
-
-
-						BRepPrimAPI_MakePrism prism(occFace, vec);
-
-						if (prism.IsDone())
-						{
-							pSolid = new TopoDS_Solid();
-							*pSolid = TopoDS::Solid(prism.Shape());
-
-							if (repItem->Position != nullptr) //In Ifc4 this is now optional
-								pSolid->Move(XbimConvert::ToLocation(repItem->Position));
-
-							return;
-						}
-					}
-					catch (const Standard_Failure& exception)
-					{
-						auto errMsg = exception.GetMessageString();
-					}
-				}
-				// XbimGeometryCreator::LogWarning(logger, repItem, "Invalid extrusion, could not create solid");
-
-			}
-			else if (repItem->Depth <= 0)
-			{
-				XbimGeometryCreator::LogInfo(logger, repItem, "Invalid extrusion, depth must be >0");
-			}
-			//if it has failed we will have a null solid
+			pSolid = new TopoDS_Solid(TopoDS::Solid(_modelServices->GetSolidFactory()->BuildExtrudedAreaSolid(repItem, overrideProfileDef)));
 		}
 
 		void XbimSolid::Init(IIfcRevolvedAreaSolid^ repItem, IIfcProfileDef^ overrideProfileDef, ILogger^ logger)

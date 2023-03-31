@@ -12,7 +12,7 @@ public:
 
 	void SetLogger(WriteLog lFunc);
 
-
+	WriteLog GetLogger();
 	void LogCritical(const char* logMsg);
 
 	void LogError(const char* logMsg);

@@ -21,6 +21,7 @@ namespace Xbim
 				{
 					trsf.GetMat4(Ref());
 				}
+				
 				XMatrix(const gp_GTrsf& gTrsf) : XbimHandle(new Graphic3d_Mat4d()) { gTrsf.GetMat4(Ref()); }
 				XMatrix(const gp_Mat& mat, const gp_Vec& offset, const gp_XYZ& scale) : XbimHandle(new Graphic3d_Mat4d())
 				{

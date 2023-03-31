@@ -363,14 +363,14 @@ namespace Xbim
 				Handle(Geom_Plane) geomPlane = new Geom_Plane(ax3);
 				return gcnew XPlane(geomPlane);
 			}
-			
+
 			double GeometryFactory::Distance(IXPoint^ a, IXPoint^ b)
 			{
 				gp_Pnt aPnt(a->X, a->Y, a->Z);
 				gp_Pnt bPnt(b->X, b->Y, b->Z);
 				return aPnt.Distance(bPnt);
 			}
-			
+
 			double GeometryFactory::IsEqual(IXPoint^ a, IXPoint^ b, double tolerance)
 			{
 				gp_Pnt aPnt(a->X, a->Y, a->Z);
@@ -629,9 +629,52 @@ namespace Xbim
 				matrix->SetScale(ct2D->Scl, ct2D->Scl2, 1.0);
 				return matrix;
 			}
-
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2D^ ct)
 			{
+				auto nonUniform = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(ct);
+				auto matrix =  gcnew XMatrix(ToTrsf2d(ct));
+				if (nonUniform != nullptr)
+				{
+					matrix->SetScale(nonUniform->Scl, nonUniform->Scl2, 1.0);
+				}
+				return matrix;
+			}
+
+			gp_GTrsf2d GeometryFactory::ToGTrsf2d(IIfcCartesianTransformationOperator2DnonUniform^ ct2D)
+			{
+				gp_Trsf2d trsf;
+				gp_Pnt2d origin = BuildPoint2d(ct2D->LocalOrigin);
+				gp_Vec2d axis1;
+				if (!BuildDirection2d(ct2D->Axis1, axis1))
+					throw RaiseGeometryFactoryException("Illegal direction definition", ct2D->Axis1);
+				gp_Vec2d axis2;
+				if (!BuildDirection2d(ct2D->Axis1, axis2))
+					throw RaiseGeometryFactoryException("Illegal direction definition", ct2D->Axis2);
+
+				const gp_Ax2d ax2d(origin, axis1);
+				trsf.SetTransformation(ax2d);
+
+				if (ax2d.Direction().Rotated(M_PI / 2.).Dot(axis2) < 0.) {
+					gp_Trsf2d mirror; mirror.SetMirror(ax2d);
+					trsf.Multiply(mirror);
+				}
+
+				trsf.Invert();
+				double scale1 = ct2D->Scale.HasValue ? (double)ct2D->Scale.Value : 1.0;
+				double scale2 = ct2D->Scale2.HasValue ? (double)ct2D->Scale2.Value : scale1;
+				gp_GTrsf2d gtrsf;
+				gtrsf.SetValue(1, 1, scale1);
+				gtrsf.SetValue(2, 2, scale2);
+				gtrsf.Multiply(trsf);
+				return gtrsf;
+			}
+
+
+			gp_Trsf2d GeometryFactory::ToTrsf2d(IIfcCartesianTransformationOperator2D^ ct)
+			{
+				auto nonUniform = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(ct);
+				if (nonUniform != nullptr)
+					LogDebug("ToTrsf2d has bee used on a non uniform transformation, the second scale has been ignored. This is a programming error");
 				gp_Trsf2d m;
 				IIfcDirection^ axis1 = ct->Axis1;
 				IIfcDirection^ axis2 = ct->Axis2;
@@ -663,8 +706,8 @@ namespace Xbim
 						m.SetValues(d1.Y(), -d1.X(), ct->LocalOrigin->X, d1.X(), d1.Y(), ct->LocalOrigin->Y);
 					}
 				}
-				return gcnew XMatrix(m);
-
+				m.SetScaleFactor(scale);
+				return m;
 			}
 
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
@@ -721,6 +764,95 @@ namespace Xbim
 				auto m = gcnew XMatrix(trsf);
 				m->SetScale(ct3D->Scl, ct3D->Scl, ct3D->Scl);
 				return m;
+			}
+
+			gp_GTrsf GeometryFactory::ToGTrsf(IIfcCartesianTransformationOperator2DnonUniform^ ct2D)
+			{
+				gp_Dir U3(gp::DZ()); //Z Axis Direction
+				gp_Dir U2(gp::DY()); //Y Axis Direction
+				gp_Dir U1(gp::DX()); //X axis direction
+				if (ct2D->Axis2 != nullptr)
+				{
+					IIfcDirection^ dir = ct2D->Axis2;
+					U2 = gp_Dir(dir->X, dir->Y, dir->Z);
+				}
+
+				if (ct2D->Axis1 != nullptr)
+				{
+					IIfcDirection^ dir = ct2D->Axis1;
+					U1 = gp_Dir(dir->X, dir->Y, dir->Z);
+				}
+
+				auto dotU1_U3 = U1.Dot(U3);
+				auto xVec = dotU1_U3 * U3;
+				gp_Dir xAxis = gp_Vec(U1) - xVec;
+
+				auto dotU2_U3 = U2.Dot(U3);
+				auto tmpVec = dotU2_U3 * U3;
+				gp_Dir yAxis = gp_Vec(U2) - tmpVec;
+
+				auto dotU2_xAxis = U2.Dot(xAxis);
+				tmpVec = dotU2_xAxis * xAxis;
+				yAxis = gp_Vec(yAxis) - tmpVec;
+
+				U2 = yAxis;
+				U1 = xAxis;
+
+				gp_XYZ translation(ct2D->LocalOrigin->X, ct2D->LocalOrigin->Y, 0); //local origin
+				double s1 = ct2D->Scl * U1.X();
+				double s2 = ct2D->Scl2 * U2.Y();
+				double s3 = 1;
+				gp_GTrsf trsf(
+					gp_Mat(s1, U1.Y(), U1.Z(),
+						U2.X(), s2, U2.Z(),
+						U3.X(), U3.Y(), s3
+					),
+					translation);
+
+				return trsf;
+			}
+
+			gp_Trsf GeometryFactory::ToTrsf(IIfcCartesianTransformationOperator2D^ ct2D)
+			{
+				gp_Dir U3(gp::DZ()); //Z Axis Direction
+				gp_Dir U2(gp::DY()); //Y Axis Direction
+				gp_Dir U1(gp::DX()); //X axis direction
+				if (ct2D->Axis2 != nullptr)
+				{
+					IIfcDirection^ dir = ct2D->Axis2;
+					U2 = gp_Dir(dir->X, dir->Y, dir->Z);
+				}
+
+				if (ct2D->Axis1 != nullptr)
+				{
+					IIfcDirection^ dir = ct2D->Axis1;
+					U1 = gp_Dir(dir->X, dir->Y, dir->Z);
+				}
+				
+				auto dotU1_U3 = U1.Dot(U3);
+				auto xVec = dotU1_U3 * U3;
+				gp_Dir xAxis = gp_Vec(U1) - xVec;
+
+				auto dotU2_U3 = U2.Dot(U3);
+				auto tmpVec = dotU2_U3 * U3;
+				gp_Dir yAxis = gp_Vec(U2) - tmpVec;
+
+				auto dotU2_xAxis = U2.Dot(xAxis);
+				tmpVec = dotU2_xAxis * xAxis;
+				yAxis = gp_Vec(yAxis) - tmpVec;
+
+				U2 = yAxis;
+				U1 = xAxis;
+
+				gp_Vec translation(ct2D->LocalOrigin->X, ct2D->LocalOrigin->Y, 0); //local origin
+				gp_Trsf trsf;
+				trsf.SetValues(U1.X(), U1.Y(), U1.Z(), 0,
+					U2.X(), U2.Y(), U2.Z(), 0,
+					U3.X(), U3.Y(), U3.Z(), 0);
+
+				trsf.SetTranslationPart(translation);
+				trsf.SetScaleFactor(ct2D->Scl);
+				return trsf;
 			}
 
 			void GeometryFactory::BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix)

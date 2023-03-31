@@ -73,6 +73,24 @@ namespace Xbim
 				// TODO: insert return statement here
 			}
 
+			IXShape^ SolidFactory::Build(IIfcShellBasedSurfaceModel^ ifcSurfaceModel)
+			{
+				throw gcnew System::NotImplementedException();
+				// TODO: insert return statement here
+			}
+
+			IXShape^ SolidFactory::Build(IIfcTessellatedItem^ ifcTessellatedItem)
+			{
+				throw gcnew System::NotImplementedException();
+				// TODO: insert return statement here
+			}
+
+			IXShape^ SolidFactory::Build(IIfcSectionedSpine^ ifcSectionedSpine)
+			{
+				throw gcnew System::NotImplementedException();
+				// TODO: insert return statement here
+			}
+
 			TopoDS_Solid SolidFactory::BuildHalfSpace(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid)
 			{
 				//if (dynamic_cast<IIfcBoxedHalfSpace^>(ifcHalfSpaceSolid)) SRL treat as normal half space solid, the boxed bit is only for computational efficiency		
@@ -182,11 +200,7 @@ namespace Xbim
 				return  ShapeFactory::GetXbimShape(topoShape);
 			}
 
-			IXSolid^ SolidFactory::Build(IIfcExtrudedAreaSolid^ ifcExtrudedAreaSolid)
-			{
-				TopoDS_Solid solid = BuildExtrudedAreaSolid(ifcExtrudedAreaSolid);
-				return  gcnew XSolid(solid);
-			}
+			
 
 			///this method builds all solid models and is the main entry point
 			//all methods called will throw an excpetion if they cannot build their part of a solid
@@ -210,6 +224,8 @@ namespace Xbim
 					return BuildSurfaceCurveSweptAreaSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid));
 				case XSolidModelType::IfcCsgSolid:
 					return BuildCsgSolid(static_cast<IIfcCsgSolid^>(ifcSolid));
+				case XSolidModelType::IfcExtrudedAreaSolidTapered:
+					return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
 					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation
 				case XSolidModelType::IfcAdvancedBrep:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger(), _modelService);
@@ -217,8 +233,7 @@ namespace Xbim
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcFacetedBrepWithVoids:
 					return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcExtrudedAreaSolidTapered:
-					return gcnew XbimSolid(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
+				
 				case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
 					return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcRevolvedAreaSolid:
@@ -232,19 +247,42 @@ namespace Xbim
 				throw RaiseGeometryFactoryException("Not implemented. SolidModel type", ifcSolid);
 			}
 
-			TopoDS_Solid SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid)
+			
+			TopoDS_Shape SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid)
 			{
+				auto compositeProfile = dynamic_cast<IIfcCompositeProfileDef^>(ifcSurfaceCurveSweptAreaSolid->SweptArea);
+				if (compositeProfile != nullptr)
+				{
+					TopoDS_Compound shape;
+					BRep_Builder b;
+					b.MakeCompound(shape);
+					for each (auto profileDef in compositeProfile->Profiles)
+					{ 
+						auto solid = BuildSurfaceCurveSweptAreaSolid(ifcSurfaceCurveSweptAreaSolid, profileDef);
+						b.Add(shape, solid);
+					}
+					return shape;
+				}
+				else 
+					return BuildSurfaceCurveSweptAreaSolid(ifcSurfaceCurveSweptAreaSolid,ifcSurfaceCurveSweptAreaSolid->SweptArea );
+			}
+			/// <summary>
+			/// Private method that allows the profil def to be overriden to support building composite profile definitions
+			/// </summary>
+			/// <param name="ifcSurfaceCurveSweptAreaSolid"></param>
+			/// <param name="profileDef"></param>
+			/// <returns></returns>
+			TopoDS_Shape SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef)
+			{
+				if (profileDef == nullptr) profileDef = ifcSurfaceCurveSweptAreaSolid->SweptArea; //this is a work around to allow backward compatibility with V5 to allow V5 to use the new code
 				//build the swept area
-				if (ifcSurfaceCurveSweptAreaSolid->SweptArea->ProfileType != IfcProfileTypeEnum::AREA)
-					throw RaiseGeometryFactoryException("Rule SweptAreType must be IfcProfileTypeEnum::AREA", ifcSurfaceCurveSweptAreaSolid->SweptArea);
-				auto sweptArea = PROFILE_FACTORY->BuildProfileFace(ifcSurfaceCurveSweptAreaSolid->SweptArea);
+				if (profileDef->ProfileType != IfcProfileTypeEnum::AREA)
+					throw RaiseGeometryFactoryException("Rule SweptAreaType must be IfcProfileTypeEnum::AREA", profileDef);
+				auto sweptArea = PROFILE_FACTORY->BuildProfileFace(profileDef);
 				if (sweptArea.IsNull())
-					throw RaiseGeometryFactoryException("Error build swept area", ifcSurfaceCurveSweptAreaSolid->SweptArea);
+					throw RaiseGeometryFactoryException("Error build swept area", profileDef);
 
-
-				
-
-					//build the reference surface
+				//build the reference surface
 				XSurfaceType surfaceType;
 				auto refSurface = SURFACE_FACTORY->BuildSurface(ifcSurfaceCurveSweptAreaSolid->ReferenceSurface, surfaceType);
 				if (refSurface.IsNull())
@@ -321,19 +359,36 @@ namespace Xbim
 
 			}
 
-
-
-			TopoDS_Solid SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid)
+			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid)
 			{
+				auto compositeProfile = dynamic_cast<IIfcCompositeProfileDef^>(extrudedSolid->SweptArea);
+				if (compositeProfile != nullptr)
+				{
+					TopoDS_Compound shape;
+					BRep_Builder b;
+					b.MakeCompound(shape);
+					for each (auto profileDef in compositeProfile->Profiles)
+					{
+						auto solid = BuildExtrudedAreaSolid(extrudedSolid, profileDef);
+						b.Add(shape, solid);
+					}
+					return shape;
+				}
+				else
+					return BuildExtrudedAreaSolid(extrudedSolid, extrudedSolid->SweptArea);
+			}
+
+			
+
+			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef)
+			{
+				if (profileDef == nullptr) profileDef = extrudedSolid->SweptArea; //this is a work around to allow backward compatibility with V5 to allow V5 to use the new code
 				if (extrudedSolid->Depth <= 0)
 					throw RaiseGeometryFactoryException("Extruded Solid depth must be greater than 0", extrudedSolid);
-
 				gp_Vec extrudeDirection;
 				if (!GEOMETRY_FACTORY->BuildDirection3d(extrudedSolid->ExtrudedDirection, extrudeDirection))
 					throw RaiseGeometryFactoryException("Extruded Solid sweep dirction is illegal", extrudedSolid->ExtrudedDirection);
-				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(extrudedSolid->SweptArea); //if this fails it will throw an exception
-				if (sweptArea.IsNull())
-					throw RaiseGeometryFactoryException("Extruded Solid Swept area could not be built", extrudedSolid->SweptArea);
+				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(profileDef); //if this fails it will throw an exception
 				TopLoc_Location location;
 				if (extrudedSolid->Position != nullptr)
 					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(extrudedSolid->Position);
@@ -343,6 +398,58 @@ namespace Xbim
 
 				return solid;
 			}
+
+			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolidTapered)
+			{
+				auto compositeProfile = dynamic_cast<IIfcCompositeProfileDef^>(extrudedSolidTapered->SweptArea);
+				if (compositeProfile != nullptr)
+				{
+					auto endCompositeProfile = dynamic_cast<IIfcCompositeProfileDef^>(extrudedSolidTapered->EndSweptArea);
+					if(endCompositeProfile == nullptr || endCompositeProfile->Profiles->Count != compositeProfile->Profiles->Count)
+						throw RaiseGeometryFactoryException("Extruded Solid Tapered must having eqivalent Composite Profile definitions for start and end conditions", extrudedSolidTapered);
+					TopoDS_Compound shape;
+					BRep_Builder b;
+					b.MakeCompound(shape);
+					auto endCompositeProfileIter = endCompositeProfile->Profiles->GetEnumerator();
+					for each (auto profileDef in compositeProfile->Profiles)
+					{
+						auto solid = BuildExtrudedAreaSolidTapered(extrudedSolidTapered, profileDef, endCompositeProfileIter->Current);
+						b.Add(shape, solid);
+						endCompositeProfileIter->MoveNext();
+					}
+					return shape;
+				}
+				else
+					return BuildExtrudedAreaSolidTapered(extrudedSolidTapered, extrudedSolidTapered->SweptArea, extrudedSolidTapered->EndSweptArea);
+			}
+
+
+
+			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolidTapered, IIfcProfileDef^ startProfileDef, IIfcProfileDef^ endProfileDef)
+			{
+				if (startProfileDef == nullptr)
+				{
+					startProfileDef = extrudedSolidTapered->SweptArea; //this is a work around to allow backward compatibility with V5 to allow V5 to use the new code
+					endProfileDef = extrudedSolidTapered->EndSweptArea;
+				}
+				if (extrudedSolidTapered->Depth <= 0)
+					throw RaiseGeometryFactoryException("Extruded Solid depth must be greater than 0", extrudedSolidTapered);
+				gp_Vec extrudeDirection;
+				if (!GEOMETRY_FACTORY->BuildDirection3d(extrudedSolidTapered->ExtrudedDirection, extrudeDirection))
+					throw RaiseGeometryFactoryException("Extruded Solid sweep direction is illegal", extrudedSolidTapered->ExtrudedDirection);
+				TopoDS_Face sweptArea = PROFILE_FACTORY->BuildProfileFace(startProfileDef); //if this fails it will throw an exception
+				TopoDS_Face endSweptArea = PROFILE_FACTORY->BuildProfileFace(endProfileDef); //if this fails it will throw an exception
+				TopLoc_Location location;
+				if (extrudedSolidTapered->Position != nullptr)
+					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(extrudedSolidTapered->Position);
+				TopoDS_Shape solid = EXEC_NATIVE->BuildExtrudedAreaSolidTapered(sweptArea, endSweptArea, extrudeDirection, extrudedSolidTapered->Depth, location, ModelGeometryService->Precision);
+				if (solid.IsNull() || solid.NbChildren() == 0)
+					throw RaiseGeometryFactoryException("Extruded Solid Tapered could not be built", extrudedSolidTapered);
+
+				return solid;
+			}
+			
+
 			TopoDS_Shape SolidFactory::BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep)
 			{
 				bool isFixed;

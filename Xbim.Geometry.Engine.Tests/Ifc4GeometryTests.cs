@@ -499,6 +499,7 @@ namespace Xbim.Geometry.Engine.Tests
 
         #region Tapered extrusions
 
+        
         [Fact]
         public void ExtrudedAreaSolidTaperedTest()
         {
@@ -506,9 +507,14 @@ namespace Xbim.Geometry.Engine.Tests
             {
                 var taperedSolid = model.Instances.OfType<IfcExtrudedAreaSolidTapered>().FirstOrDefault();
                 taperedSolid.Should().NotBeNull();
-                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                var bar = geomEngine.CreateSolid(taperedSolid, _logger);
-                bar.Volume.Should().BeGreaterThan(0);
+                var geomEngineV5 = factory.CreateGeometryEngine(XGeometryEngineVersion.V5, model, _loggerFactory);
+                var geomEngineV6 = factory.CreateGeometryEngine(XGeometryEngineVersion.V6, model, _loggerFactory);
+                var barV5 = geomEngineV5.Create(taperedSolid, _logger) as IXbimSolid;
+                var barV6 = geomEngineV6.Create(taperedSolid) as IXbimSolid;
+                barV6.Should().NotBeNull();
+                barV6.Volume.Should().BeApproximately(611, 1);
+                barV5.Volume.Should().BeApproximately(1262,1); //NB version 5 does not do this correctly
+
             }
         }
 
@@ -703,7 +709,10 @@ namespace Xbim.Geometry.Engine.Tests
                 eas.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
-                geom.Volume.Should().BeApproximately(11443062570.814053, 1e-5);
+                //SRL V6 implementation has more accurately built the composite curve and removed a redundant segment,
+                //the volume has altered ~15 from 11443062570 in the V5 implmentation but it is now correct
+                geom.Volume.Should().BeApproximately(11443062585, 1); 
+                
             }
         }
 

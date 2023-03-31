@@ -11,7 +11,14 @@ class NBooleanFactory : public NFactoryBase
 	
 public:
 	double Timout = 20; //seconds
+	NBooleanFactory():NFactoryBase()
+	{
+			
+	}
+	NBooleanFactory(WriteLog lFunc) : NFactoryBase(lFunc)
+	{
 
+	}
 	//Union of two solids must return a solid
 	TopoDS_Shape Union(const TopoDS_Shape& left, const TopoDS_Shape& right, double fuzzyTolerance, bool& hasWarnings);
 	//Difference between two solids
