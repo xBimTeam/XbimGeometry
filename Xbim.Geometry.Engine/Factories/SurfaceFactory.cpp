@@ -113,8 +113,8 @@ namespace Xbim
 				if (ifcPlane->Position->Axis != nullptr)
 					if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
 						throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
-				gp_Vec refDir;
-				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->RefDirection, refDir))
+				gp_Vec refDir = gp::DX();
+				if (ifcPlane->Position->RefDirection!=nullptr && !GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->RefDirection, refDir))
 					throw RaiseGeometryFactoryException("Plane reference direction is incorrectly defined", ifcPlane->Position->RefDirection);
 				if (snap)
 				{
