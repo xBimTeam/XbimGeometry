@@ -113,6 +113,9 @@ namespace Xbim
 				if (ifcPlane->Position->Axis != nullptr)
 					if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->Axis, normal))
 						throw RaiseGeometryFactoryException("Plane axis is incorrectly defined", ifcPlane->Position->Axis);
+				gp_Vec refDir;
+				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcPlane->Position->RefDirection, refDir))
+					throw RaiseGeometryFactoryException("Plane reference direction is incorrectly defined", ifcPlane->Position->RefDirection);
 				if (snap)
 				{
 					gp_Dir n = normal;
@@ -129,7 +132,7 @@ namespace Xbim
 					else if (n.IsEqual(-gp::DY(), 1e-4))
 						normal = -gp::DY();
 				}
-				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal);
+				Handle(Geom_Plane) plane = EXEC_NATIVE->BuildPlane(origin, normal, refDir);
 				if (plane.IsNull())
 					throw RaiseGeometryFactoryException("Plane is badly defined. See logs", ifcPlane);
 				return plane;
@@ -169,12 +172,17 @@ namespace Xbim
 				{
 					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(ifcSurfaceOfLinearExtrusion->Position);
 				}
-				
+
 				TopoDS_Edge sweptEdge;
 				if (!BIM_WORKAROUNDS->FixRevitIncorrectArcCentreSweptCurve(ifcSurfaceOfLinearExtrusion, sweptEdge))
 				{
 					//didn't need a fix so just create it
 					sweptEdge = PROFILE_FACTORY->BuildProfileEdge(ifcSurfaceOfLinearExtrusion->SweptCurve);
+					if (sweptEdge.IsNull()) //the edge was an empty segment
+					{
+						LogDebug(ifcSurfaceOfLinearExtrusion->SweptCurve, "Swept Edge is invalid or empty");
+						return Handle(Geom_SurfaceOfLinearExtrusion)();
+					}
 				}
 				gp_Vec extrude;
 				if (!GEOMETRY_FACTORY->BuildDirection3d(ifcSurfaceOfLinearExtrusion->ExtrudedDirection, extrude))
@@ -186,7 +194,7 @@ namespace Xbim
 				Handle(Geom_SurfaceOfLinearExtrusion) surface = EXEC_NATIVE->BuildSurfaceOfLinearExtrusion(sweptEdge, extrude, hasRevitBSplineIssue);
 				if (surface.IsNull())
 					throw RaiseGeometryFactoryException("Surface of IfcSurfaceOfLinearExtrusion is invalid", ifcSurfaceOfLinearExtrusion);
-				
+
 				if (!hasRevitBSplineIssue && !location.IsIdentity()) surface->Transform(location);
 				return surface;
 			}
@@ -350,15 +358,18 @@ namespace Xbim
 				Handle(Geom_BSplineSurface) hSurface = new Geom_BSplineSurface(poles, weights, uknots, vknots, uMultiplicities, vMultiplicities, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->UDegree, (Standard_Integer)ifcRationalBSplineSurfaceWithKnots->VDegree);
 				return hSurface;
 			}
+
 			Handle(Geom_CylindricalSurface) SurfaceFactory::BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface)
 			{
 				if (ifcCylindricalSurface->Radius <= 0)
 					throw RaiseGeometryFactoryException("Radius for surface must be > 0", ifcCylindricalSurface);
-				gp_Ax2 ax2;
-				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcCylindricalSurface->Position, ax2))
-					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcCylindricalSurface);
-				gp_Ax3 ax3(ax2);
-				return new Geom_CylindricalSurface(ax3, ifcCylindricalSurface->Radius);
+				TopLoc_Location axLoc = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(ifcCylindricalSurface->Position);
+				auto cylinderSurface = EXEC_NATIVE->BuildCylindricalSurface(ifcCylindricalSurface->Radius);
+				if (cylinderSurface.IsNull())
+					throw RaiseGeometryFactoryException("Failed to build cylinder surface, see logs for details", ifcCylindricalSurface);
+
+				cylinderSurface->Transform(axLoc);
+				return cylinderSurface;
 			}
 
 			Handle(Geom_SphericalSurface) SurfaceFactory::BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface)
@@ -369,6 +380,7 @@ namespace Xbim
 				if (!GEOMETRY_FACTORY->BuildAxis2Placement3d(ifcSphericalSurface->Position, ax2))
 					throw RaiseGeometryFactoryException("Invalid axis for surface", ifcSphericalSurface);
 				gp_Ax3 ax3(ax2);
+
 				return new Geom_SphericalSurface(ax3, ifcSphericalSurface->Radius);
 			}
 

@@ -25,6 +25,7 @@
 #include "../BRep/OccExtensions/KeyedPnt.h"
 #include "../BRep/OccExtensions/KeyedPnt2d.h"
 #include <Geom2dAPI_InterCurveCurve.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -523,7 +524,7 @@ namespace Xbim
 			{
 				//Validation
 				if (dynamic_cast<IIfcBoundedCurve^>(ifcTrimmedCurve->BasisCurve))
-					LogInformation(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
+					LogDebug(ifcTrimmedCurve, "Ifc Formal Proposition: NoTrimOfBoundedCurves. Already bounded curves shall not be trimmed is violated, but processing has continued");
 				XCurveType curveType;
 				Handle(Geom_Curve) basisCurve = BuildCurve(ifcTrimmedCurve->BasisCurve, curveType);
 				if (!basisCurve.IsNull())
@@ -531,6 +532,7 @@ namespace Xbim
 					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
+					
 					bool sense = ifcTrimmedCurve->SenseAgreement;
 					//get the parametric values
 					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
@@ -562,6 +564,7 @@ namespace Xbim
 							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
 						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
 							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
+						
 					}
 					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
 						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
@@ -577,8 +580,8 @@ namespace Xbim
 
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
 						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
-
-					if (Math::Abs(u1 - u2) < ModelGeometryService->Precision) //if the parameters are the same trimming will fail if not a conic curve
+					
+					if (Math::Abs(u1 - u2) < Precision::Confusion()) //if the parameters are the same trimming will fail if not a conic curve
 					{
 						if (isConic)
 							return Ptr()->BuildTrimmedCurve3d(basisCurve, 0, Math::PI * 2, true); //return a full circle

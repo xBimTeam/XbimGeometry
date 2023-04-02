@@ -80,7 +80,7 @@ namespace Xbim
 				return gcnew XFace(result);
 			}
 
-			
+
 
 			TopoDS_Face FaceFactory::BuildAdvancedFace(IIfcAdvancedFace^ advancedFace, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices)
 			{
@@ -88,16 +88,17 @@ namespace Xbim
 				//workaround for badly defined linear extrusions in old Revit files
 				IIfcSurfaceOfLinearExtrusion^ solExtrusion = dynamic_cast<IIfcSurfaceOfLinearExtrusion^>(advancedFace->FaceSurface);
 				bool buildRuledSurface = (solExtrusion != nullptr);
-				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(advancedFace->FaceSurface)!=nullptr;
+				bool isBspline = dynamic_cast<IIfcBSplineSurface^>(advancedFace->FaceSurface) != nullptr;
 				TopoDS_Wire outerLoop;
 				TopTools_SequenceOfShape  innerLoops;
 				XSurfaceType surfaceType;
 				Handle(Geom_Surface) surface = SURFACE_FACTORY->BuildSurface(advancedFace->FaceSurface, surfaceType); //throws exception
-				
-				if (!advancedFace->SameSense && !isBspline)
+				if (surface.IsNull())
 				{
-					surface->UReverse();					
+					LogDebug(advancedFace->FaceSurface, "AdvancedFaceSurface is an empty surface. Ignoring");
+					return TopoDS_Face();
 				}
+				
 				for each (IIfcFaceBound ^ ifcBound in advancedFace->Bounds) //build all the loops
 				{
 					TopTools_SequenceOfShape loopEdges;
@@ -112,10 +113,10 @@ namespace Xbim
 						if (!edgeCurves.IsBound(orientedEdge->EdgeElement->EntityLabel)) //need to create the raw edge curve
 						{
 
-							if (edgeCurve == nullptr) 
+							if (edgeCurve == nullptr)
 								throw RaiseGeometryFactoryException("Advanced face oriented edge elements should be IfcEdgeCurve");//they always should be
 							edge = EDGE_FACTORY->BuildEdgeCurve(edgeCurve, vertices); //throws exception
-							if(edge.IsNull())
+							if (edge.IsNull())
 								throw RaiseGeometryFactoryException("Advanced face oriented edge curve should be built", orientedEdge);
 							edgeCurves.Bind(edgeCurve->EntityLabel, edge);
 							//take an  copy that is ready for parameterising to this surface		
@@ -141,7 +142,7 @@ namespace Xbim
 						outerLoop = wire;
 					else
 						innerLoops.Append(wire);
-					
+
 				}
 
 				//no outer loop defined, find the biggest
@@ -166,18 +167,14 @@ namespace Xbim
 				}
 				if (outerLoop.IsNull())
 					throw RaiseGeometryFactoryException("Face has no outer bound", advancedFace);//no bounded face
-				TopoDS_Face face = BuildFace(surface, outerLoop, innerLoops); //throws exception
-				//System::String^ brep = _modelService->GetBrep(face);
-				if (!advancedFace->SameSense && isBspline)
-					face.Reverse();
-				//brep = _modelService->GetBrep(face);
-		
- 				
-
+				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, outerLoop, innerLoops, _modelService->Precision, advancedFace->SameSense); 
+				System::String^ brep = _modelService->GetBrep(face);
+					
+				
 				return face;
 
 			}
-		
+
 			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface)
 			{
 
@@ -188,7 +185,7 @@ namespace Xbim
 				return face;
 			}
 
-			TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops)
+			/*TopoDS_Face FaceFactory::BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops)
 			{
 
 				TopoDS_Face face = EXEC_NATIVE->BuildFace(surface, outerLoop, innerLoops, _modelService->Precision);
@@ -196,8 +193,8 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Could not apply bounds to face");
 
 				return face;
-			}
-			
+			}*/
+
 		}
 	}
 }

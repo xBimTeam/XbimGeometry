@@ -146,8 +146,11 @@ namespace Xbim
 				for each (auto ifcFaceSurface in Enumerable::Cast<IIfcAdvancedFace^>(faceSet->CfsFaces))
 				{
 					TopoDS_Face face = FACE_FACTORY->BuildAdvancedFace(ifcFaceSurface, edges, vertices);
-					faces.Bind(ifcFaceSurface->EntityLabel, face);
-					builder.Add(shell, face);
+					if (!face.IsNull()) //skip face it it is empty
+					{
+						faces.Bind(ifcFaceSurface->EntityLabel, face);
+						builder.Add(shell, face);
+					}
 					//System::String^ brep = _modelService->GetBrep(shell);
 				}
 

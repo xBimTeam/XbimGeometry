@@ -47,12 +47,12 @@ namespace Xbim
 
 				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid);
 
-				
+
 
 				TopoDS_Solid BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal);
 
 #pragma region CSG solids		
-				
+
 				TopoDS_Solid BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid);
 				TopoDS_Solid BuildBooleanResult(IIfcBooleanResult^ ifcBooleanResult);
 				TopoDS_Solid BuildCsgPrimitive3D(IIfcCsgPrimitive3D^ ifcCsgPrimitive3D);
@@ -63,26 +63,26 @@ namespace Xbim
 				TopoDS_Solid BuildSphere(IIfcSphere^ ifcSphere);
 
 				TopoDS_Solid BuildHalfSpace(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid);
-				
+
 #pragma endregion
 
 #pragma region Swept solids
 				TopoDS_Solid BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSolid);
-				
-				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
-
-#pragma endregion
-				TopoDS_Solid BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
 				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid);
+				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
+				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef);
+#pragma endregion
+				TopoDS_Shape BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
+
 				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);
 				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
 				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
-				
-			
-				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef);
+
+
+
 				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef);
 				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid, IIfcProfileDef^ profileDef, IIfcProfileDef^ endProfileDef);
-				
+
 			};
 		}
 	}

@@ -328,6 +328,7 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 			u2 = line->ConvertIfcTrimParameter(u2);
 			return new Geom_TrimmedCurve(basisCurve, u1, u2, sense, true);
 		}
+		
 #ifdef _DEBUG
 		if (!Handle(Geom_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom_Ellipse)::DownCast(basisCurve).IsNull() || !Handle(Geom_Line)::DownCast(basisCurve).IsNull())
 		{

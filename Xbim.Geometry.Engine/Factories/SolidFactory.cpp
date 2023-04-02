@@ -226,9 +226,9 @@ namespace Xbim
 					return BuildCsgSolid(static_cast<IIfcCsgSolid^>(ifcSolid));
 				case XSolidModelType::IfcExtrudedAreaSolidTapered:
 					return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
-					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation
 				case XSolidModelType::IfcAdvancedBrep:
-					return gcnew XbimSolid(static_cast<IIfcAdvancedBrep^>(ifcSolid), Logger(), _modelService);
+					return BuildAdvancedBrep(static_cast<IIfcAdvancedBrep^>(ifcSolid));
+					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
 				case XSolidModelType::IfcAdvancedBrepWithVoids:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcFacetedBrepWithVoids:
@@ -504,13 +504,13 @@ namespace Xbim
 				else
 					return shape;
 			}
-			TopoDS_Solid SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
+			TopoDS_Shape SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
 			{
 				bool isFixed;
 				TopoDS_Shape shape = SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isFixed);
 				if (shape.IsNull() || shape.ShapeType() != TopAbs_SOLID)
 					throw RaiseGeometryFactoryException("Error creating solid from advanced brep", ifcAdvancedBrep);
-				return TopoDS::Solid(shape);
+				return shape;
 			}
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
 			{

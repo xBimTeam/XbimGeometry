@@ -137,7 +137,13 @@ namespace Xbim
 				else
 				{
 					Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(ifcArbitraryOpenProfileDef->Curve);
-					return EDGE_FACTORY->BuildEdge(curve);
+					if (curve.IsNull())
+					{
+						LogDebug(ifcArbitraryOpenProfileDef->Curve, "ArbitryOpenProfile is invalid");
+						return TopoDS_Edge();
+					}
+					else
+						return EDGE_FACTORY->BuildEdge(curve);
 				}
 			}
 

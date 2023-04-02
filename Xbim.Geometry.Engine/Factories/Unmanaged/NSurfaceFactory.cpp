@@ -4,7 +4,7 @@ Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, d
 {
 	try
 	{
-		return BuildPlane(gp_Pnt(originX, originY, originZ), gp_Dir(normalX, normalY, normalZ)); //normal may throw an exception
+		return new Geom_Plane(gp_Pnt(originX, originY, originZ), gp_Dir(normalX, normalY, normalZ)); //normal may throw an exception
 	}
 	catch (const Standard_Failure& sf)
 	{
@@ -13,18 +13,31 @@ Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, d
 	}
 }
 
-Handle(Geom_Plane) NSurfaceFactory::BuildPlane(const gp_Pnt& origin, const gp_Dir& normal)
+Handle(Geom_Plane) NSurfaceFactory::BuildPlane(const gp_Pnt& origin, const gp_Dir& normal, const gp_Dir& refDir)
 {
 	try
 	{
-
+		gp_Ax3 ax3(origin,normal,refDir);
 		//this will throw an exception if the direction is 0
-		return new Geom_Plane(origin, normal);
+		return new Geom_Plane(ax3);
 	}
 	catch (const Standard_Failure& sf)
 	{
 		LogStandardFailure(sf);
 		return Handle(Geom_Plane)();
+	}
+}
+
+Handle(Geom_CylindricalSurface) NSurfaceFactory::BuildCylindricalSurface(double radius)
+{
+	try
+	{
+		return new Geom_CylindricalSurface(gp::XOY(), radius);
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+		return Handle(Geom_CylindricalSurface)();
 	}
 }
 

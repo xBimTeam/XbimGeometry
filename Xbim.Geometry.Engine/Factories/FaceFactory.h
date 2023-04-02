@@ -35,7 +35,7 @@ namespace Xbim
 				TopoDS_Face BuildPlanarFace(IXPlane^ planeDef);
 				TopoDS_Face BuildAdvancedFace(IIfcAdvancedFace^ advancedFace, TopTools_DataMapOfIntegerShape& edgeCurves, TopTools_DataMapOfIntegerShape& vertices);
 				TopoDS_Face BuildFace(const Handle(Geom_Surface)& surface);
-				TopoDS_Face BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops);
+				//TopoDS_Face BuildFace(const Handle(Geom_Surface)& surface, const TopoDS_Wire& outerLoop, const TopTools_SequenceOfShape& innerLoops);
 
 #pragma endregion
 			};

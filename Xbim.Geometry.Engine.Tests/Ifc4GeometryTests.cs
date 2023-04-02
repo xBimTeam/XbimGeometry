@@ -41,7 +41,7 @@ namespace Xbim.Geometry.Engine.Tests
                 if (engineVersion == XGeometryEngineVersion.V5) model.AddRevitWorkArounds();
                 advancedBrep.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
-                var solid = geomEngine.CreateSolid(advancedBrep, _logger);
+                var solid = geomEngine.Create(advancedBrep, _logger) as IXbimSolid;
 
                 solid.Volume.Should().BeApproximately(102264692.6969, 1e-4);
                 solid.Faces.Count.Should().Be(14);
@@ -299,7 +299,7 @@ namespace Xbim.Geometry.Engine.Tests
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
-                var geom = geomEngine.CreateSolid(shape, _logger);
+                var geom = geomEngine.Create(shape, _logger) as IXbimSolid;
                 Math.Abs(geom.Volume - 72767).Should().BeLessThan(1);
             }
         }
@@ -314,7 +314,7 @@ namespace Xbim.Geometry.Engine.Tests
                 var shape = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 shape.Should().NotBeNull();
                 var geomEngine = factory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
-                var geom = geomEngine.CreateSolid(shape, _logger);
+                var geom = geomEngine.Create(shape, _logger) as IXbimSolid;
                 geom.Volume.Should().BeApproximately(0.83333333333333282, 1e-7);
 
             }
@@ -622,7 +622,7 @@ namespace Xbim.Geometry.Engine.Tests
                 foreach (var brep in model.Instances.OfType<IIfcAdvancedBrep>())
                 {
 
-                    var geom = geomEngine.CreateSolid(brep, _logger);
+                    var geom = geomEngine.Create(brep, _logger) as IXbimSolid;
 
                     foreach (var face in geom.Faces)
                     {
@@ -632,7 +632,7 @@ namespace Xbim.Geometry.Engine.Tests
                     geom.Volume.Should().BeGreaterThan(0);
                     solids.Add(geom);
                 }
-                solids.Sum(s => s.Volume).Should().BeApproximately(338122748.71573657, 1e-5);
+                solids.Sum(s => s.Volume).Should().BeApproximately(338123607, 1);
             }
         }
         [Fact]

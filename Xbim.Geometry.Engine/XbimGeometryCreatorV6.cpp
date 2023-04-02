@@ -103,18 +103,6 @@ namespace Xbim
 						throw RaiseGeometryServiceException("IfcSolidModel returned incorrect shape result", geomRep);
 
 				}
-				else if (dynamic_cast<IIfcManifoldSolidBrep^>(geomRep))
-				{
-					XbimCompound^ comp = gcnew XbimCompound((IIfcManifoldSolidBrep^)geomRep, Logger(), this);
-					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;
-				}
-				else if (dynamic_cast<IIfcSweptDiskSolid^>(geomRep))
-				{
-					XbimSolid^ solid = (XbimSolid^)CreateSolid((IIfcSweptDiskSolid^)geomRep, Logger());
-					if (objectLocation != nullptr) solid->Move(objectLocation);
-					return solid;
-				}
 				else if (dynamic_cast<IIfcBooleanClippingResult^>(geomRep))
 				{
 					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanClippingResult^)geomRep, Logger(), this);
@@ -516,9 +504,11 @@ namespace Xbim
 		{
 			return gcnew XbimSolid(ifcSolid, Logger(), this);
 		}
+
+		[[deprecated("Replaced by Create as Advanced Breps can return multiple solids")]]
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcAdvancedBrep^ ifcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildAdvancedBrep(ifcSolid), this);
+			throw RaiseGeometryServiceException("CreateSolid to an IfcAdvancedBrep is obsolete, use the Create method");
 		}
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid, ILogger^)
 		{
