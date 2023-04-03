@@ -28,6 +28,7 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
 				TopoDS_Wire BuildProfileWire(IIfcRoundedRectangleProfileDef^ roundedRectangleProfile);
 				TopoDS_Wire BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcTShapeProfileDef^ tShapedProfile);
 				void BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires);
 				
 				TopLoc_Location BuildParameterizedProfilePosition(IIfcAxis2Placement^ position);

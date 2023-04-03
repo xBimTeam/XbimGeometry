@@ -300,7 +300,14 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTShapeProfileDef^ ifcTShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcTShapeProfileDef);
+				auto wire = BuildProfileWire(ifcTShapeProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcTShapeProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcTShapeProfileDef);
+				else
+					return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{

@@ -19,6 +19,7 @@
 
 #include <ShapeFix_Face.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
+#include <IntAna2d_AnaIntersection.hxx>
 
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
@@ -524,6 +525,110 @@ TopoDS_Wire NProfileFactory::BuildIShape(double overallWidth, double overallDept
 	return TopoDS_Wire();
 }
 
+TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, double flangeThickness, double webThickness, 
+	double flangeSlope, double webSlope, double flangeEdgeRadius, double filletRadius, double webEdgeRadius,
+	const TopLoc_Location& location,double angleToRadians, bool detailed)
+{
+	try
+	{
+		
+		double dX = flangeWidth / 2;
+		double dY = depth / 2;
+		double tF = flangeThickness;
+		double tW = webThickness;
+
+		gp_Pnt p1(-dX, dY, 0);
+		gp_Pnt p2(dX, dY, 0);
+		gp_Pnt p3(dX, dY - tF, 0);
+		gp_Pnt p4(tW / 2, dY - tF, 0);
+		gp_Pnt p5(tW / 2, -dY, 0);
+		gp_Pnt p6(-tW / 2, -dY, 0);
+		gp_Pnt p7(-tW / 2, dY - tF, 0);
+		gp_Pnt p8(-dX, dY - tF, 0);
+		
+		if (detailed && (!double::IsNaN(flangeSlope) || !double::IsNaN(webSlope)))
+		{
+			double fSlope = 0;
+			if (!double::IsNaN(flangeSlope)) fSlope = flangeSlope;
+			double wSlope = 0;
+			if (!double::IsNaN(webSlope)) wSlope = webSlope;
+			double bDiv4 = flangeWidth / 4;
+
+			p3.SetY(p3.Y() + (bDiv4 * System::Math::Tan(fSlope * angleToRadians)));
+			p8.SetY(p8.Y() + (bDiv4 * System::Math::Tan(fSlope * angleToRadians)));
+
+
+			gp_Lin2d flangeLine(gp_Pnt2d(bDiv4, dY - tF), gp_Dir2d(1, System::Math::Tan(fSlope * angleToRadians)));
+			gp_Lin2d webLine(gp_Pnt2d(tW / 2.0, 0), gp_Dir2d(System::Math::Tan(wSlope * angleToRadians), 1));
+			IntAna2d_AnaIntersection intersector(flangeLine, webLine);
+			const IntAna2d_IntPoint& intersectPoint = intersector.Point(1);
+			gp_Pnt2d p2d = intersectPoint.Value();
+
+			p4.SetX(p2d.X());
+			p4.SetY(p2d.Y());
+			p7.SetX(-p2d.X());
+			p7.SetY(p2d.Y());
+
+			p5.SetX(p5.X() - (dY * System::Math::Tan(wSlope * angleToRadians)));
+			p6.SetX(p6.X() + (dY * System::Math::Tan(wSlope * angleToRadians)));
+		}
+
+		BRepBuilderAPI_MakeWire wireMaker;
+
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p1));
+		TopoDS_Wire wire = wireMaker.Wire();
+		if (detailed && (!double::IsNaN(flangeEdgeRadius) || !double::IsNaN(filletRadius) || !double::IsNaN(webEdgeRadius))) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if ((i == 3 || i == 8) && !double::IsNaN(flangeEdgeRadius))
+					filleter.AddFillet(exp.CurrentVertex(), flangeEdgeRadius);
+				else if ((i == 4 || i == 7) && !double::IsNaN(filletRadius))
+					filleter.AddFillet(exp.CurrentVertex(), filletRadius);
+				else if ((i == 5 || i == 6) && !double::IsNaN(webEdgeRadius))
+					filleter.AddFillet(exp.CurrentVertex(), webEdgeRadius);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		if (!location.IsIdentity())
+			wire.Move(location);
+		//removed in Ifc4
+		/*if (profile->CentreOfGravityInY.HasValue)
+		{
+			gp_Vec v( 0, profile->CentreOfGravityInY.Value, 0);
+			gp_Trsf t;
+			t.SetTranslation(v);
+			wire.Move(t);
+		}*/
+		return wire;
+
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
 //TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision)
 //{
 //	try
