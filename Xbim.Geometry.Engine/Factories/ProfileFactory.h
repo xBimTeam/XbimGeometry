@@ -25,9 +25,11 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile);
 				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcEllipseProfileDef^ ellipseProfileDef);
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
 				TopoDS_Wire BuildProfileWire(IIfcRoundedRectangleProfileDef^ roundedRectangleProfile);
 				TopoDS_Wire BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcLShapeProfileDef^ iShapedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcTShapeProfileDef^ tShapedProfile);
 				void BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires);
 				

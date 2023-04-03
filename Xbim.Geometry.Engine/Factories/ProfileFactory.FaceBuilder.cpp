@@ -114,7 +114,7 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcAsymmetricIShapeProfileDef^ asymmetricIShapeProfile)
 			{
-				return TopoDS_Face();
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
@@ -259,23 +259,37 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTrapeziumProfileDef^ trapeziumProfile)
 			{
-				return TopoDS_Face();
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcLShapeProfileDef^ ifcLShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcLShapeProfileDef);
+				auto wire = BuildProfileWire(ifcLShapeProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcLShapeProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcLShapeProfileDef);
+				else
+					return face;
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcMirroredProfileDef^ mirroredProfile)
 			{
-				return TopoDS_Face();
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcUShapeProfileDef^ ifcUShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcUShapeProfileDef);
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcEllipseProfileDef^ ifcEllipseProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcEllipseProfileDef);
+				auto wire = BuildProfileWire(ifcEllipseProfileDef);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile wire", ifcEllipseProfileDef);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(wire);
+				if (face.IsNull())
+					throw RaiseGeometryFactoryException("Failed to create profile face", ifcEllipseProfileDef);
+				else
+					return face;
 			}
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcIShapeProfileDef^ ifcIShapeProfileDef)
@@ -292,11 +306,11 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcZShapeProfileDef^ ifcZShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcZShapeProfileDef);
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCShapeProfileDef^ ifcCShapeProfileDef)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcCShapeProfileDef);
+				throw gcnew NotImplementedException("Failed to create Profile");
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcTShapeProfileDef^ ifcTShapeProfileDef)
 			{
@@ -311,8 +325,7 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{
-
-				throw RaiseGeometryFactoryException("Failed to create Profile", ifcArbitraryOpenProfileDef);
+				throw RaiseGeometryFactoryException("Cannot build a face from an IfcArbitraryOpenProfileDef", ifcArbitraryOpenProfileDef);
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcCenterLineProfileDef^ ifcCenterLineProfileDef)
 			{
@@ -326,8 +339,8 @@ namespace Xbim
 			}
 			TopoDS_Face ProfileFactory::BuildProfileFace(double x, double y, double tolerance, bool centre)
 			{
-				throw RaiseGeometryFactoryException("Failed to create Profile");
-				return TopoDS_Face();
+				throw gcnew NotImplementedException("Failed to create Profile");
+				
 			}
 		}
 	}

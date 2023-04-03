@@ -36,5 +36,6 @@ public:
 	TopoDS_Wire BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision);
 	TopoDS_Wire BuildIShape(double overallWidth, double overallDepth, double flangeThickness, double webThickness, double filletRadius, const TopLoc_Location& location, double precision, bool detailed);
 	TopoDS_Wire BuildTShape(double flangeWidth, double depth, double flangeThickness, double webThickness, double flangeSlope, double webSlope, double flangeEdgeRadius, double filletRadius, double webEdgeRadius, const TopLoc_Location& location, double angleToRadians, bool detailed);
+	TopoDS_Wire BuildLShape(double depth, double width, double thickness, double legSlope, double edgeRadius, double filletRadius, const TopLoc_Location& location, double angleToRadians, bool detailed);
 };
 

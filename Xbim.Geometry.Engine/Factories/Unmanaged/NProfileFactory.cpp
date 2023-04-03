@@ -629,6 +629,89 @@ TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, doubl
 	}
 	return TopoDS_Wire();
 }
+
+TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thickness, double legSlope,double edgeRadius, double filletRadius,  const TopLoc_Location& location, double angleToRadians, bool detailed)
+{
+	try
+	{
+		double dY = depth / 2;
+		double dX;
+		if (!double::IsNaN(width))
+			dX = width / 2;
+		else
+			dX = dY;
+		double tF = thickness;
+		gp_Pnt p1(-dX, dY, 0);
+		gp_Pnt p2(-dX + tF, dY, 0);
+		gp_Pnt p3(-dX + tF, -dY + tF, 0);
+		if (detailed && !double::IsNaN(legSlope))
+		{
+			
+			p3.SetX(p3.X() + (((dY * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
+			p3.SetY(p3.Y() + (((dX * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
+		}
+		gp_Pnt p4(dX, -dY + tF, 0);
+		gp_Pnt p5(dX, -dY, 0);
+		gp_Pnt p6(-dX, -dY, 0);
+
+		BRepBuilderAPI_MakeWire wireMaker;
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p1));
+		TopoDS_Wire wire = wireMaker.Wire();
+		wire.Closed(Standard_True);
+		if (detailed && (!double::IsNaN(edgeRadius) || !double::IsNaN(filletRadius))) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if ((i == 2 || i == 4) && !double::IsNaN(edgeRadius))
+					filleter.AddFillet(exp.CurrentVertex(), edgeRadius);
+				else if (i == 3 && !double::IsNaN(filletRadius))
+					filleter.AddFillet(exp.CurrentVertex(), filletRadius);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		if (!location.IsIdentity())
+			wire.Move(location);
+		//removed not in Ifc4
+		/*if (profile->CentreOfGravityInX.HasValue || profile->CentreOfGravityInY.HasValue)
+		{
+			double transX = 0;
+			double transY = 0;
+			if (profile->CentreOfGravityInX.HasValue) transX = profile->CentreOfGravityInX.Value;
+			if (profile->CentreOfGravityInY.HasValue) transY = profile->CentreOfGravityInY.Value;
+			gp_Vec v(transX, transY, 0);
+			gp_Trsf t;
+			t.SetTranslation(v);
+			wire.Move(t);
+		}*/
+		return wire;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+
+
 //TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision)
 //{
 //	try
