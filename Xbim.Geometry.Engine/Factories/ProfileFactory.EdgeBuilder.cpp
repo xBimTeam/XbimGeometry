@@ -96,39 +96,39 @@ namespace Xbim
 
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcRectangleProfileDef^ ifcRectangleProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcRoundedRectangleProfileDef^ ifcRoundedRectangleProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcLShapeProfileDef^ ifcLShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcUShapeProfileDef^ ifcUShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcEllipseProfileDef^ ifcEllipseProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcIShapeProfileDef^ ifcIShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcZShapeProfileDef^ ifcZShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcCShapeProfileDef^ ifcCShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcTShapeProfileDef^ ifcTShapeProfileDef)
 			{
-				return TopoDS_Edge();
+				throw gcnew NotImplementedException();
 			}
 			TopoDS_Edge ProfileFactory::BuildProfileEdge(IIfcArbitraryOpenProfileDef^ ifcArbitraryOpenProfileDef)
 			{

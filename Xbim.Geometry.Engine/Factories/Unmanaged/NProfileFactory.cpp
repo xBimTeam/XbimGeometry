@@ -20,6 +20,7 @@
 #include <ShapeFix_Face.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
@@ -30,7 +31,6 @@ TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const 
 	builder.Add(compound, shape2);
 	return compound;
 }
-
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 {
 	try
@@ -71,7 +71,6 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 	pLoggingService->LogError("Failed to build face");
 	return TopoDS_Face();
 }
-
 TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt& start, const gp_Pnt& end)
 {
 	try
@@ -89,7 +88,6 @@ TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt& start, const gp_Pnt& end)
 	}
 	return TopoDS_Edge();
 }
-
 TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt2d& start, const gp_Pnt2d& end)
 {
 	try
@@ -107,8 +105,6 @@ TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt2d& start, const gp_Pnt2d& end
 	}
 	return TopoDS_Edge();
 }
-
-
 TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom_Curve)& hCurve)
 {
 	try
@@ -127,7 +123,6 @@ TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom_Curve)& hCurve)
 	}
 	return TopoDS_Edge();
 }
-
 TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom2d_Curve)& hCurve2d)
 {
 	try
@@ -150,7 +145,6 @@ TopoDS_Edge NProfileFactory::MakeEdge(const Handle(Geom2d_Curve)& hCurve2d)
 	}
 	return TopoDS_Edge();
 }
-
 TopoDS_Wire NProfileFactory::MakeWire(const TopoDS_Edge& edge)
 {
 	try
@@ -167,7 +161,6 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopoDS_Edge& edge)
 		return TopoDS_Wire();
 	}
 }
-
 TopoDS_Wire NProfileFactory::MakeWire(const TopTools_ListOfShape& edges)
 {
 	try
@@ -186,25 +179,22 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopTools_ListOfShape& edges)
 	}
 	return TopoDS_Wire();
 }
-
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner)
 {
 	TopTools_SequenceOfShape inners;
 	inners.Append(inner);
 	return MakeFace(outer, inners);
 }
-
 //This function will check the orientation of the inner loops to ensure they are reverse of the outer bound
-
 TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops)
 {
 	try
 	{
 
 		BRepBuilderAPI_MakeFace faceMaker(_xyPlane, wire, true);
-		
+
 		for (auto&& inner : innerLoops)
-		{		
+		{
 			faceMaker.Add(TopoDS::Wire(inner));
 		}
 		if (faceMaker.IsDone())
@@ -277,7 +267,6 @@ TopoDS_Wire NProfileFactory::BuildRectangle(double dimX, double dimY, const TopL
 	}
 	return TopoDS_Wire();
 }
-
 TopoDS_Face NProfileFactory::BuildRectangleHollowProfileDef(const TopLoc_Location& location, double xDim, double yDim, double wallThickness, double outerFilletRadius, double innerFilletRadius, double precision)
 {
 	try
@@ -365,12 +354,13 @@ TopoDS_Face NProfileFactory::BuildRectangleHollowProfileDef(const TopLoc_Locatio
 		innerWire.Reverse();
 		innerWire.Closed(Standard_True);
 		faceMaker.Add(innerWire);
-		if(!faceMaker.IsDone())
+		if (!faceMaker.IsDone())
 			Standard_Failure::Raise("Failed to build profile as a face");
 		auto face = faceMaker.Face();
 		//apply the position transformation
-		if(!location.IsIdentity()) 
-			face.Move(location);
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
 		return face;
 	}
 	catch (const Standard_Failure& sf)
@@ -379,7 +369,6 @@ TopoDS_Face NProfileFactory::BuildRectangleHollowProfileDef(const TopLoc_Locatio
 	}
 	return TopoDS_Face();
 }
-
 TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision)
 {
 	try
@@ -405,7 +394,7 @@ TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, dou
 		builder.Add(wire, BRepBuilderAPI_MakeEdge(vbr, vtr));
 		builder.Add(wire, BRepBuilderAPI_MakeEdge(vtr, vtl));
 		builder.Add(wire, BRepBuilderAPI_MakeEdge(vtl, vbl));
-		
+
 		if (roundingRadius > 0) //consider fillets
 		{
 			BRepBuilderAPI_MakeFace faceMaker(wire, true);
@@ -427,9 +416,208 @@ TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, dou
 		}
 
 		//apply the position transformation
+		wire.Closed(true);
 		if (!location.IsIdentity())
 			wire.Move(location);
 		return wire;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+
+TopoDS_Wire NProfileFactory::BuildAsymmetricIShape(double bottomFlangeWidth, double overallDepth, double webThickness, double bottomFlangeThickness,
+	double bottomFlangeFilletRadius, double topFlangeWidth, double topFlangeThickness, double topFlangeFilletRadius,
+	double bottomFlangeEdgeRadius, double bottomFlangeSlope, double topFlangeEdgeRadius, double topFlangeSlope,
+	const TopLoc_Location& location, double precision, bool detailed)
+{
+	try
+	{
+		double dXTop = topFlangeWidth / 2;
+		double dXBottom = bottomFlangeWidth / 2;
+		double dY = overallDepth / 2;
+		double tFTop = topFlangeThickness;
+		double tFBottom = bottomFlangeThickness;
+		double tW = webThickness;
+
+		gp_Pnt p1(-dXTop, dY, 0);
+		gp_Pnt p2(dXTop, dY, 0);
+		gp_Pnt p3(dXTop, dY - tFTop, 0);
+		gp_Pnt p4(tW / 2, dY - tFTop, 0);
+		gp_Pnt p5(tW / 2, -dY + tFBottom, 0);
+		gp_Pnt p6(dXBottom, -dY + tFBottom, 0);
+		gp_Pnt p7(dXBottom, -dY, 0);
+		gp_Pnt p8(-dXBottom, -dY, 0);
+		gp_Pnt p9(-dXBottom, -dY + tFBottom, 0);
+		gp_Pnt p10(-tW / 2, -dY + tFBottom, 0);
+		gp_Pnt p11(-tW / 2, dY - tFTop, 0);
+		gp_Pnt p12(-dXTop, dY - tFTop, 0);
+
+		TopoDS_Vertex v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12;
+		BRep_Builder b;
+		double t = precision;
+		b.MakeVertex(v1, p1, t);
+		b.MakeVertex(v2, p2, t);
+		b.MakeVertex(v3, p3, t);
+		b.MakeVertex(v4, p4, t);
+		b.MakeVertex(v5, p5, t);
+		b.MakeVertex(v6, p6, t);
+		b.MakeVertex(v7, p7, t);
+		b.MakeVertex(v8, p8, t);
+		b.MakeVertex(v9, p9, t);
+		b.MakeVertex(v10, p10, t);
+		b.MakeVertex(v11, p11, t);
+		b.MakeVertex(v12, p12, t);
+
+		BRepBuilderAPI_MakePolygon polyMaker;
+		polyMaker.Add(v1);
+		polyMaker.Add(v2);
+		polyMaker.Add(v3);
+		polyMaker.Add(v4);
+		polyMaker.Add(v5);
+		polyMaker.Add(v6);
+		polyMaker.Add(v7);
+		polyMaker.Add(v8);
+		polyMaker.Add(v9);
+		polyMaker.Add(v10);
+		polyMaker.Add(v11);
+		polyMaker.Add(v12);
+		polyMaker.Close();
+		TopoDS_Wire wire = polyMaker.Wire();
+		if (!polyMaker.IsDone())
+			Standard_Failure::Raise("Failed to build asymetric I Shaped profile");
+		//need to consider higher detail with sloping flange and end fillet radius
+		if (detailed && (!double::IsNaN(topFlangeFilletRadius) || !double::IsNaN(bottomFlangeFilletRadius)))
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if (!double::IsNaN(topFlangeFilletRadius) && (i == 4 || i == 5))
+					filleter.AddFillet(exp.CurrentVertex(), topFlangeFilletRadius);
+				if (!double::IsNaN(bottomFlangeFilletRadius) && (i == 10 || i == 11))
+					filleter.AddFillet(exp.CurrentVertex(), bottomFlangeFilletRadius);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
+		return wire;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+TopoDS_Wire NProfileFactory::BuildCShape(double width, double depth, double girth, double wallThickness, double internalFilletRadius, const TopLoc_Location& location, bool detailed)
+{
+	try
+	{
+
+		double dX = width / 2;
+		double dY = depth / 2;
+		double dG = girth;
+		double tW = wallThickness;
+
+		BRepBuilderAPI_MakeWire wireMaker;
+		if (dG > 0)
+		{
+			gp_Pnt p1(-dX, dY, 0);
+			gp_Pnt p2(dX, dY, 0);
+			gp_Pnt p3(dX, dY - dG, 0);
+			gp_Pnt p4(dX - tW, dY - dG, 0);
+			gp_Pnt p5(dX - tW, dY - tW, 0);
+			gp_Pnt p6(-dX + tW, dY - tW, 0);
+			gp_Pnt p7(-dX + tW, -dY + tW, 0);
+			gp_Pnt p8(dX - tW, -dY + tW, 0);
+			gp_Pnt p9(dX - tW, -dY + dG, 0);
+			gp_Pnt p10(dX, -dY + dG, 0);
+			gp_Pnt p11(dX, -dY, 0);
+			gp_Pnt p12(-dX, -dY, 0);
+
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p9));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+		}
+		else
+		{
+			gp_Pnt p1(-dX, dY, 0);
+			gp_Pnt p2(dX, dY, 0);
+			gp_Pnt p5(dX, dY - tW, 0);
+			gp_Pnt p6(-dX + tW, dY - tW, 0);
+			gp_Pnt p7(-dX + tW, -dY + tW, 0);
+			gp_Pnt p8(dX, -dY + tW, 0);
+			gp_Pnt p11(dX, -dY, 0);
+			gp_Pnt p12(-dX, -dY, 0);
+
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p5));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p11));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+			wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+		}
+
+		TopoDS_Wire wire = wireMaker.Wire();
+
+		if (detailed && !double::IsNaN(internalFilletRadius)) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+			double iRad = internalFilletRadius;
+			double oRad = iRad + tW;
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if (i == 1 || i == 2 || i == 11 || i == 12)
+					filleter.AddFillet(exp.CurrentVertex(), oRad);
+				else if (i == 5 || i == 6 || i == 7 || i == 8)
+					filleter.AddFillet(exp.CurrentVertex(), iRad);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
+		return wire;
+
 	}
 	catch (const Standard_Failure& sf)
 	{
@@ -490,14 +678,14 @@ TopoDS_Wire NProfileFactory::BuildIShape(double overallWidth, double overallDept
 		polyMaker.Add(v12);
 		polyMaker.Close();
 		TopoDS_Wire wire = polyMaker.Wire();
-		if(!polyMaker.IsDone())
+		if (!polyMaker.IsDone())
 			Standard_Failure::Raise("Failed to build I Shaped profile");
 		//need to consider higher detail with soping flange and end fillet radius
 		if (detailed && filletRadius > 0)
 		{
 			BRepBuilderAPI_MakeFace faceMaker(wire, true);
 			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
-			
+
 			int i = 1;
 			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
 			{
@@ -516,6 +704,9 @@ TopoDS_Wire NProfileFactory::BuildIShape(double overallWidth, double overallDept
 				}
 			}
 		}
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
 		return wire;
 	}
 	catch (const Standard_Failure& sf)
@@ -524,14 +715,95 @@ TopoDS_Wire NProfileFactory::BuildIShape(double overallWidth, double overallDept
 	}
 	return TopoDS_Wire();
 }
-
-TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, double flangeThickness, double webThickness, 
-	double flangeSlope, double webSlope, double flangeEdgeRadius, double filletRadius, double webEdgeRadius,
-	const TopLoc_Location& location,double angleToRadians, bool detailed)
+TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thickness, double legSlope, double edgeRadius, double filletRadius, const TopLoc_Location& location, double angleToRadians, bool detailed)
 {
 	try
 	{
+		double dY = depth / 2;
+		double dX;
+		if (!double::IsNaN(width))
+			dX = width / 2;
+		else
+			dX = dY;
+		double tF = thickness;
+		gp_Pnt p1(-dX, dY, 0);
+		gp_Pnt p2(-dX + tF, dY, 0);
+		gp_Pnt p3(-dX + tF, -dY + tF, 0);
+		if (detailed && !double::IsNaN(legSlope))
+		{
+
+			p3.SetX(p3.X() + (((dY * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
+			p3.SetY(p3.Y() + (((dX * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
+		}
+		gp_Pnt p4(dX, -dY + tF, 0);
+		gp_Pnt p5(dX, -dY, 0);
+		gp_Pnt p6(-dX, -dY, 0);
+
+		BRepBuilderAPI_MakeWire wireMaker;
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p1));
+		TopoDS_Wire wire = wireMaker.Wire();
+		wire.Closed(Standard_True);
+		if (detailed && (!double::IsNaN(edgeRadius) || !double::IsNaN(filletRadius))) //consider fillets
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if ((i == 2 || i == 4) && !double::IsNaN(edgeRadius))
+					filleter.AddFillet(exp.CurrentVertex(), edgeRadius);
+				else if (i == 3 && !double::IsNaN(filletRadius))
+					filleter.AddFillet(exp.CurrentVertex(), filletRadius);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
 		
+		//removed not in Ifc4
+		/*if (profile->CentreOfGravityInX.HasValue || profile->CentreOfGravityInY.HasValue)
+		{
+			double transX = 0;
+			double transY = 0;
+			if (profile->CentreOfGravityInX.HasValue) transX = profile->CentreOfGravityInX.Value;
+			if (profile->CentreOfGravityInY.HasValue) transY = profile->CentreOfGravityInY.Value;
+			gp_Vec v(transX, transY, 0);
+			gp_Trsf t;
+			t.SetTranslation(v);
+			wire.Move(t);
+		}*/
+		return wire;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, double flangeThickness, double webThickness,
+	double flangeSlope, double webSlope, double flangeEdgeRadius, double filletRadius, double webEdgeRadius,
+	const TopLoc_Location& location, double angleToRadians, bool detailed)
+{
+	try
+	{
+
 		double dX = flangeWidth / 2;
 		double dY = depth / 2;
 		double tF = flangeThickness;
@@ -545,7 +817,7 @@ TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, doubl
 		gp_Pnt p6(-tW / 2, -dY, 0);
 		gp_Pnt p7(-tW / 2, dY - tF, 0);
 		gp_Pnt p8(-dX, dY - tF, 0);
-		
+
 		if (detailed && (!double::IsNaN(flangeSlope) || !double::IsNaN(webSlope)))
 		{
 			double fSlope = 0;
@@ -610,6 +882,7 @@ TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, doubl
 				}
 			}
 		}
+		wire.Closed(true);
 		if (!location.IsIdentity())
 			wire.Move(location);
 		//removed in Ifc4
@@ -629,30 +902,64 @@ TopoDS_Wire NProfileFactory::BuildTShape(double flangeWidth, double depth, doubl
 	}
 	return TopoDS_Wire();
 }
-
-TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thickness, double legSlope,double edgeRadius, double filletRadius,  const TopLoc_Location& location, double angleToRadians, bool detailed)
+TopoDS_Wire NProfileFactory::BuildTrapezium(double bottomDimX, double topDimX, double dimY,double topOffsetX, const TopLoc_Location& location)
 {
 	try
 	{
+		double xOffTopLeft = -((bottomDimX / 2) + topOffsetX);
+		double xOffTopRight = topDimX;
+		double xOffBottomLeft = -(bottomDimX / 2);
+		double xOffBottomRight = (bottomDimX / 2);
+		double yOff = dimY / 2;
+		gp_Pnt bl(xOffBottomLeft, -yOff, 0);
+		gp_Pnt br(xOffBottomRight, -yOff, 0);
+		gp_Pnt tr(xOffTopRight, yOff, 0);
+		gp_Pnt tl(xOffTopLeft, yOff, 0);
+		Handle(Geom_TrimmedCurve) aSeg1 = GC_MakeSegment(bl, br);
+		Handle(Geom_TrimmedCurve) aSeg2 = GC_MakeSegment(br, tr);
+		Handle(Geom_TrimmedCurve) aSeg3 = GC_MakeSegment(tr, tl);
+		Handle(Geom_TrimmedCurve) aSeg4 = GC_MakeSegment(tl, bl);
+		TopoDS_Edge e1 = BRepBuilderAPI_MakeEdge(aSeg1);
+		TopoDS_Edge e2 = BRepBuilderAPI_MakeEdge(aSeg2);
+		TopoDS_Edge e3 = BRepBuilderAPI_MakeEdge(aSeg3);
+		TopoDS_Edge e4 = BRepBuilderAPI_MakeEdge(aSeg4);
+		TopoDS_Wire wire = BRepBuilderAPI_MakeWire(e1, e2, e3, e4);
+		wire.Closed(true);
+		wire.Checked(true);
+		//apply the position transformation
+		if (!location.IsIdentity()) wire.Move(location);
+		return wire;
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+TopoDS_Wire NProfileFactory::BuildUShape(double flangeWidth, double depth, double flangeThickness, double webThickness, double flangeSlope, double edgeRadius, double filletRadius, const TopLoc_Location& location, double radianFactor, bool detailed)
+{
+	try
+	{
+		double dX = flangeWidth / 2;
 		double dY = depth / 2;
-		double dX;
-		if (!double::IsNaN(width))
-			dX = width / 2;
-		else
-			dX = dY;
-		double tF = thickness;
+		double tF = flangeThickness;
+		double tW = webThickness;
+
 		gp_Pnt p1(-dX, dY, 0);
-		gp_Pnt p2(-dX + tF, dY, 0);
-		gp_Pnt p3(-dX + tF, -dY + tF, 0);
-		if (detailed && !double::IsNaN(legSlope))
+		gp_Pnt p2(dX, dY, 0);
+		gp_Pnt p3(dX, dY - tF, 0);
+		gp_Pnt p4(-dX + tW, dY - tF, 0);
+
+		gp_Pnt p5(-dX + tW, -dY + tF, 0);
+		gp_Pnt p6(dX, -dY + tF, 0);
+		gp_Pnt p7(dX, -dY, 0);
+		gp_Pnt p8(-dX, -dY, 0);
+
+		if (detailed && !double::IsNaN(flangeSlope))
 		{
-			
-			p3.SetX(p3.X() + (((dY * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
-			p3.SetY(p3.Y() + (((dX * 2) - tF) * System::Math::Tan(legSlope * angleToRadians)));
+			p4.SetY(p4.Y() - (((dX * 2) - tW) * System::Math::Tan(flangeSlope * radianFactor)));
+			p5.SetY(p5.Y() + (((dX * 2) - tW) * System::Math::Tan(flangeSlope * radianFactor)));
 		}
-		gp_Pnt p4(dX, -dY + tF, 0);
-		gp_Pnt p5(dX, -dY, 0);
-		gp_Pnt p6(-dX, -dY, 0);
 
 		BRepBuilderAPI_MakeWire wireMaker;
 		wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
@@ -660,9 +967,12 @@ TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thic
 		wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
 		wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
 		wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
-		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p1));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p1));
 		TopoDS_Wire wire = wireMaker.Wire();
 		wire.Closed(Standard_True);
+
 		if (detailed && (!double::IsNaN(edgeRadius) || !double::IsNaN(filletRadius))) //consider fillets
 		{
 			BRepBuilderAPI_MakeFace faceMaker(wire, true);
@@ -671,9 +981,9 @@ TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thic
 			int i = 1;
 			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
 			{
-				if ((i == 2 || i == 4) && !double::IsNaN(edgeRadius))
+				if ((i == 3 || i == 6) && !double::IsNaN(edgeRadius))
 					filleter.AddFillet(exp.CurrentVertex(), edgeRadius);
-				else if (i == 3 && !double::IsNaN(filletRadius))
+				else if ((i == 4 || i == 5) && !double::IsNaN(filletRadius))
 					filleter.AddFillet(exp.CurrentVertex(), filletRadius);
 				i++;
 			}
@@ -688,21 +998,19 @@ TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thic
 				}
 			}
 		}
+		wire.Closed(true);
 		if (!location.IsIdentity())
 			wire.Move(location);
-		//removed not in Ifc4
-		/*if (profile->CentreOfGravityInX.HasValue || profile->CentreOfGravityInY.HasValue)
+		//removed in Ifc4
+		/*if (profile->CentreOfGravityInX.HasValue)
 		{
-			double transX = 0;
-			double transY = 0;
-			if (profile->CentreOfGravityInX.HasValue) transX = profile->CentreOfGravityInX.Value;
-			if (profile->CentreOfGravityInY.HasValue) transY = profile->CentreOfGravityInY.Value;
-			gp_Vec v(transX, transY, 0);
+			gp_Vec v(profile->CentreOfGravityInX.Value, 0, 0);
 			gp_Trsf t;
 			t.SetTranslation(v);
 			wire.Move(t);
 		}*/
 		return wire;
+
 	}
 	catch (const Standard_Failure& sf)
 	{
@@ -710,17 +1018,96 @@ TopoDS_Wire NProfileFactory::BuildLShape(double depth, double width, double thic
 	}
 	return TopoDS_Wire();
 }
+TopoDS_Wire NProfileFactory::BuildZShape(double flangeWidth, double depth, double flangeThickness, double webThickness, double edgeRadius, double filletRadius, const TopLoc_Location& location, bool detailed)
+{
+	try
+	{
+
+		double dX = flangeWidth;
+		double dY = depth / 2;
+		double tF = flangeThickness;
+		double tW = webThickness;
 
 
-//TopoDS_Wire NProfileFactory::BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision)
-//{
-//	try
-//	{
-//
-//	}
-//	catch (const Standard_Failure& sf)
-//	{
-//		LogStandardFailure(sf);
-//	}
-//	return TopoDS_Wire();
-//}
+		gp_Pnt p1(-dX + (tW / 2), dY, 0);
+		gp_Pnt p2(tW / 2, dY, 0);
+		gp_Pnt p3(tW / 2, -dY + tF, 0);
+		gp_Pnt p4(dX - tW / 2, -dY + tF, 0);
+		gp_Pnt p5(dX - tW / 2, -dY, 0);
+		gp_Pnt p6(-tW / 2, -dY, 0);
+		gp_Pnt p7(-tW / 2, dY - tF, 0);
+		gp_Pnt p8(-dX + (tW / 2), dY - tF, 0);
+
+
+		BRepBuilderAPI_MakeWire wireMaker;
+
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+		wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p1));
+
+		TopoDS_Wire wire = wireMaker.Wire();
+
+		if (detailed && (!double::IsNaN(filletRadius) || !double::IsNaN(edgeRadius)))
+		{
+			BRepBuilderAPI_MakeFace faceMaker(wire, true);
+			BRepFilletAPI_MakeFillet2d filleter(faceMaker.Face());
+			int i = 1;
+			for (BRepTools_WireExplorer exp(wire); exp.More(); exp.Next())
+			{
+				if ((i == 3 || i == 7) && !double::IsNaN(filletRadius))
+					filleter.AddFillet(exp.CurrentVertex(), filletRadius);
+				else if ((i == 4 || i == 8) && !double::IsNaN(edgeRadius))
+					filleter.AddFillet(exp.CurrentVertex(), edgeRadius);
+				i++;
+			}
+			filleter.Build();
+			if (filleter.IsDone())
+			{
+				TopoDS_Shape shape = filleter.Shape();
+				for (TopExp_Explorer exp(shape, TopAbs_WIRE); exp.More(); ) //just take the first wire
+				{
+					wire = TopoDS::Wire(exp.Current());
+					break;
+				}
+			}
+		}
+		wire.Closed(true);
+		if (!location.IsIdentity())
+			wire.Move(location);
+		return wire;
+
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Wire();
+}
+TopoDS_Face NProfileFactory::BuildMirrored(const TopoDS_Face& parentFace)
+{
+	try
+	{
+		//we need to mirror about the Y axis
+		gp_Pnt origin(0, 0, 0);
+		gp_Dir xDir(0, 1, 0);
+		gp_Ax1 mirrorAxis(origin, xDir);
+		gp_Trsf aTrsf;
+		aTrsf.SetMirror(mirrorAxis);
+		BRepBuilderAPI_Transform aBrepTrsf(parentFace, aTrsf);
+		if (!aBrepTrsf.IsDone())
+			Standard_Failure::Raise("Could not mirror profile face");
+		return TopoDS::Face(aBrepTrsf.Shape().Reversed());
+	}
+	catch (const Standard_Failure& sf)
+	{
+		LogStandardFailure(sf);
+	}
+	return TopoDS_Face();
+}
+
+

@@ -38,36 +38,33 @@ namespace Xbim
 
 				if (!Enum::TryParse<XProfileDefType>(profileDef->ExpressType->ExpressName, profileType))
 					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
-				TopoDS_Wire wire;
+
 				switch (profileType)
 				{
 				case XProfileDefType::IfcArbitraryProfileDefWithVoids:
-					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcArbitraryProfileDefWithVoids, use BuildFace", profileDef);
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcArbitraryProfileDefWithVoids, use BuildProfileFace", profileDef);
 				case XProfileDefType::IfcArbitraryClosedProfileDef:
-					wire = BuildProfileWire((static_cast<IIfcArbitraryClosedProfileDef^>(profileDef)));
-					break;
+					return BuildProfileWire((static_cast<IIfcArbitraryClosedProfileDef^>(profileDef)));
 				case XProfileDefType::IfcArbitraryOpenProfileDef:
-					wire = BuildProfileWire((static_cast<IIfcArbitraryOpenProfileDef^>(profileDef)));
-					break;
+					return BuildProfileWire((static_cast<IIfcArbitraryOpenProfileDef^>(profileDef)));
 				case XProfileDefType::IfcCenterLineProfileDef:
-					wire = BuildProfileWire(static_cast<IIfcCenterLineProfileDef^>(profileDef));
-					break;
+					return BuildProfileWire(static_cast<IIfcCenterLineProfileDef^>(profileDef));
 				case XProfileDefType::IfcCompositeProfileDef:
-					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCompositeProfileDef", profileDef);
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCompositeProfileDef, use BuildProfileFace", profileDef);
 				case XProfileDefType::IfcDerivedProfileDef:
-					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcDerivedProfileDef", profileDef);
-					/*case XProfileDefType::IfcMirroredProfileDef:
-						return BuildProfileFace(static_cast<IIfcMirroredProfileDef^>(profileDef));
-					case XProfileDefType::IfcAsymmetricIShapeProfileDef:
-						return BuildProfileFace(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
-					case XProfileDefType::IfcCShapeProfileDef:
-						return BuildProfileFace(static_cast<IIfcCShapeProfileDef^>(profileDef));*/
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcDerivedProfileDef, use BuildProfileFace", profileDef);
+				case XProfileDefType::IfcMirroredProfileDef:
+					throw RaiseGeometryFactoryException("A single wire cannot always be built from an IfcMirroredProfileDef, use BuildProfileFace", profileDef);
+				case XProfileDefType::IfcAsymmetricIShapeProfileDef:
+					return BuildProfileWire(static_cast<IIfcAsymmetricIShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcCShapeProfileDef:
+					return BuildProfileWire(static_cast<IIfcCShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcCircleHollowProfileDef:
-					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCircleHollowProfileDef, use BuildFace", profileDef);
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcCircleHollowProfileDef,, use BuildProfileFace", profileDef);
 				case XProfileDefType::IfcRectangleProfileDef:
 					return BuildProfileWire(static_cast<IIfcRectangleProfileDef^>(profileDef));
 				case XProfileDefType::IfcRectangleHollowProfileDef:
-					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcRectangleProfileDef, use BuildFace", profileDef);
+					throw RaiseGeometryFactoryException("A single wire cannot be built from an IfcRectangleProfileDef, , use BuildProfileFace", profileDef);
 				case XProfileDefType::IfcCircleProfileDef:
 					return BuildProfileWire(static_cast<IIfcCircleProfileDef^>(profileDef));
 				case XProfileDefType::IfcEllipseProfileDef:
@@ -76,24 +73,20 @@ namespace Xbim
 					return BuildProfileWire(static_cast<IIfcIShapeProfileDef^>(profileDef));
 				case XProfileDefType::IfcLShapeProfileDef:
 					return BuildProfileWire(static_cast<IIfcLShapeProfileDef^>(profileDef));
-
-
 				case XProfileDefType::IfcRoundedRectangleProfileDef:
 					return BuildProfileWire(static_cast<IIfcRoundedRectangleProfileDef^>(profileDef));
 				case XProfileDefType::IfcTShapeProfileDef:
 					return BuildProfileWire(static_cast<IIfcTShapeProfileDef^>(profileDef));
-					/*	case XProfileDefType::IfcTrapeziumProfileDef:
-							return BuildProfileFace(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
-						case XProfileDefType::IfcUShapeProfileDef:
-							return BuildProfileFace(static_cast<IIfcUShapeProfileDef^>(profileDef));
-						case XProfileDefType::IfcZShapeProfileDef:
-							return BuildProfileFace(static_cast<IIfcZShapeProfileDef^>(profileDef));*/
+				case XProfileDefType::IfcTrapeziumProfileDef:
+					return BuildProfileWire(static_cast<IIfcTrapeziumProfileDef^>(profileDef));
+				case XProfileDefType::IfcUShapeProfileDef:
+					return BuildProfileWire(static_cast<IIfcUShapeProfileDef^>(profileDef));
+				case XProfileDefType::IfcZShapeProfileDef:
+					return BuildProfileWire(static_cast<IIfcZShapeProfileDef^>(profileDef));
 				default:
 					throw RaiseGeometryFactoryException("Profile Type is not implemented", profileDef);
 				}
-				if (wire.IsNull())
-					throw RaiseGeometryFactoryException("ProfileDef could not be built as a wire", profileDef);
-				return wire;
+				
 			}
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
 			{
@@ -125,7 +118,23 @@ namespace Xbim
 			}
 
 
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCShapeProfileDef^ cShapeProfileDef)
+			{
+				if (cShapeProfileDef->Depth <= 0 || cShapeProfileDef->Girth <= 0 || cShapeProfileDef->WallThickness <= 0 || cShapeProfileDef->Width <= 0)
+					throw RaiseGeometryFactoryException("Invalid C Shaped profile with at least one zero or less dimension", cShapeProfileDef);
 
+				if (!(cShapeProfileDef->Girth < cShapeProfileDef->Depth / 2))
+					throw RaiseGeometryFactoryException("Invalid C Shaped profile flange thickness must be less than the depth/2", cShapeProfileDef);
+				if (!(cShapeProfileDef->WallThickness < cShapeProfileDef->Depth / 2 && cShapeProfileDef->WallThickness < cShapeProfileDef->Width / 2))
+					throw RaiseGeometryFactoryException("Invalid T Shaped profile web thickness  must be less than the flange width", cShapeProfileDef);
+				TopLoc_Location location = BuildParameterizedProfilePosition(cShapeProfileDef->Position);
+				auto wire = EXEC_NATIVE->BuildCShape(cShapeProfileDef->Width, cShapeProfileDef->Depth, cShapeProfileDef->Girth, cShapeProfileDef->WallThickness,
+					NULLABLE_TO_DOUBLE(cShapeProfileDef->InternalFilletRadius), location, true);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", cShapeProfileDef);
+				else
+					return wire;
+			}
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ circleProfileDef)
 			{
 				auto edge = BuildProfileEdge(circleProfileDef); //throws an exception
@@ -168,7 +177,22 @@ namespace Xbim
 				else
 					return wire;
 			}
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcAsymmetricIShapeProfileDef^ asymmetricIShapedProfile)
+			{
+				if (asymmetricIShapedProfile->BottomFlangeWidth <= 0 || asymmetricIShapedProfile->OverallDepth <= 0 || asymmetricIShapedProfile->WebThickness <= 0
+					|| asymmetricIShapedProfile->BottomFlangeThickness || asymmetricIShapedProfile->TopFlangeWidth <= 0)
+					throw RaiseGeometryFactoryException("Invalid I Shaped profile with at least one zero or less dimension", asymmetricIShapedProfile);
 
+				TopLoc_Location location = BuildParameterizedProfilePosition(asymmetricIShapedProfile->Position);
+				auto wire = EXEC_NATIVE->BuildAsymmetricIShape(asymmetricIShapedProfile->BottomFlangeWidth, asymmetricIShapedProfile->OverallDepth, asymmetricIShapedProfile->WebThickness, asymmetricIShapedProfile->BottomFlangeThickness,
+					NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->BottomFlangeFilletRadius), asymmetricIShapedProfile->TopFlangeWidth, NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->TopFlangeThickness),
+					NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->TopFlangeFilletRadius), NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->BottomFlangeEdgeRadius), NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->BottomFlangeSlope),
+					NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->TopFlangeEdgeRadius), NULLABLE_TO_DOUBLE(asymmetricIShapedProfile->TopFlangeSlope), location, ModelGeometryService->Precision, true);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", asymmetricIShapedProfile);
+				else
+					return wire;
+			}
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile)
 			{
 				if (iShapedProfile->OverallWidth <= 0 || iShapedProfile->OverallDepth <= 0)
@@ -210,6 +234,52 @@ namespace Xbim
 					NULLABLE_TO_DOUBLE(tShapedProfile->WebEdgeRadius), location, ModelGeometryService->RadianFactor, true);
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("Profile wire cound not be built", tShapedProfile);
+				else
+					return wire;
+			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcUShapeProfileDef^ uShapedProfile)
+			{
+				if (uShapedProfile->Depth <= 0 || uShapedProfile->FlangeWidth <= 0 || uShapedProfile->FlangeThickness <= 0 || uShapedProfile->WebThickness <= 0)
+					throw RaiseGeometryFactoryException("Invalid U Shaped profile with at least one zero or less dimension", uShapedProfile);
+				if (!(uShapedProfile->FlangeThickness < uShapedProfile->Depth / 2))
+					throw RaiseGeometryFactoryException("Invalid U Shaped profile flange thickness must be less than the depth", uShapedProfile);
+				if (!(uShapedProfile->WebThickness < uShapedProfile->FlangeWidth))
+					throw RaiseGeometryFactoryException("Invalid U Shaped profile web thickness  must be less than the flange width", uShapedProfile);
+				TopLoc_Location location = BuildParameterizedProfilePosition(uShapedProfile->Position);
+				auto wire = EXEC_NATIVE->BuildUShape(uShapedProfile->FlangeWidth, uShapedProfile->Depth, uShapedProfile->FlangeThickness, uShapedProfile->WebThickness,
+					NULLABLE_TO_DOUBLE(uShapedProfile->FlangeSlope), NULLABLE_TO_DOUBLE(uShapedProfile->EdgeRadius), NULLABLE_TO_DOUBLE(uShapedProfile->FilletRadius), location, ModelGeometryService->RadianFactor, true);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", uShapedProfile);
+				else
+					return wire;
+			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcZShapeProfileDef^ zShapedProfile)
+			{
+				if (zShapedProfile->Depth <= 0 || zShapedProfile->FlangeWidth <= 0 || zShapedProfile->FlangeThickness <= 0 || zShapedProfile->WebThickness <= 0)
+					throw RaiseGeometryFactoryException("Invalid U Shaped profile with at least one zero or less dimension", zShapedProfile);
+				if (!(zShapedProfile->FlangeThickness < zShapedProfile->Depth / 2))
+					throw RaiseGeometryFactoryException("Invalid U Shaped profile flange thickness must be less than the depth", zShapedProfile);
+
+				TopLoc_Location location = BuildParameterizedProfilePosition(zShapedProfile->Position);
+				auto wire = EXEC_NATIVE->BuildZShape(zShapedProfile->FlangeWidth, zShapedProfile->Depth, zShapedProfile->FlangeThickness, zShapedProfile->WebThickness,
+					NULLABLE_TO_DOUBLE(zShapedProfile->EdgeRadius), NULLABLE_TO_DOUBLE(zShapedProfile->FilletRadius), location, true);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", zShapedProfile);
+				else
+					return wire;
+			}
+
+			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcTrapeziumProfileDef^ trapeziumShapedProfile)
+			{
+				if (trapeziumShapedProfile->BottomXDim <= 0 || trapeziumShapedProfile->YDim <= 0 || trapeziumShapedProfile->TopXDim <= 0)
+					throw RaiseGeometryFactoryException("Invalid Trapezium Shaped profile with at least one zero or less dimension", trapeziumShapedProfile);
+
+				TopLoc_Location location = BuildParameterizedProfilePosition(trapeziumShapedProfile->Position);
+				auto wire = EXEC_NATIVE->BuildTrapezium(trapeziumShapedProfile->BottomXDim, trapeziumShapedProfile->TopXDim, trapeziumShapedProfile->YDim, trapeziumShapedProfile->TopXOffset, location);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("Profile wire cound not be built", trapeziumShapedProfile);
 				else
 					return wire;
 			}

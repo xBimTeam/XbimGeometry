@@ -24,6 +24,8 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcProfileDef^ profileDef, XProfileDefType& profileType);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile);
+				TopoDS_Wire BuildProfileWire(IIfcAsymmetricIShapeProfileDef^ asymmetricIShapeProfileDef);
+				TopoDS_Wire BuildProfileWire(IIfcCShapeProfileDef^ cShapeProfileDef);
 				TopoDS_Wire BuildProfileWire(IIfcCircleProfileDef^ arbitraryClosedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcEllipseProfileDef^ ellipseProfileDef);
 				TopoDS_Wire BuildProfileWire(IIfcRectangleProfileDef^ rectangleProfile);
@@ -31,6 +33,9 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcLShapeProfileDef^ iShapedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcTShapeProfileDef^ tShapedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcUShapeProfileDef^ uShapedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcZShapeProfileDef^ zShapedProfile);
+				TopoDS_Wire BuildProfileWire(IIfcTrapeziumProfileDef^ trapeziumShapedProfile);
 				void BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires);
 				
 				TopLoc_Location BuildParameterizedProfilePosition(IIfcAxis2Placement^ position);
