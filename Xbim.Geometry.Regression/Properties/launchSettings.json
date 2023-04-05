@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\Regression Testing Models\\Continous Geometry Improvement\\BIM Logo.ifc\"",
+      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\Regression Testing Models\\Continous Geometry Improvement\\BIM Logo.ifc\" /MaxThreads 1",
       "nativeDebugging": true
     }
   }

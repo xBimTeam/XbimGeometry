@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using NReco.Logging.File;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +13,7 @@ using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
-
+using Xbim.Geometry.Engine.Interop.Extensions;
 namespace XbimRegression
 {
     /// <summary>
@@ -54,7 +54,10 @@ namespace XbimRegression
                fileLoggerOpts.MinLevel = LogLevel.Trace;
            }));
             _logger = _loggerFactory.CreateLogger<BatchProcessor>();
-            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddLoggerFactory(_loggerFactory)));
+            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddLoggerFactory(_loggerFactory))
+                    .AddXbimGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))
+            
+            );
         }
 
         public Params Params
@@ -64,8 +67,8 @@ namespace XbimRegression
 
         public void Run()
         {
-            FileInfo f = new FileInfo(Params.ResultsFile);
-            Console.WriteLine($"Reporting to \"{f.FullName}\"");
+            FileInfo csvFileInfo = new FileInfo(Params.ResultsFile);
+            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");
 
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
@@ -86,6 +89,7 @@ namespace XbimRegression
                 _currentLogFileName = "BatchProcessor.log";
 
                 _logger.LogInformation($"Processing run results from log file {runLogFileName}");
+               
                 var txt = File.ReadAllText(runLogFileName);
                 
                 if (string.IsNullOrEmpty(txt))
@@ -112,7 +116,7 @@ namespace XbimRegression
                 }
                 result.FileName = file.Name;
                 writer.WriteLine(result.ToCsv());
-                _logger.LogInformation($"Writing run results to {file.Name}");
+                _logger.LogInformation($"Writing run results to {csvFileInfo.FullName}");
                 writer.Flush();
             }
 

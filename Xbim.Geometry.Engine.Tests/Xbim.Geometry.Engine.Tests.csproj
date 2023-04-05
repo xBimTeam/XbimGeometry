@@ -106,6 +106,9 @@
 		<None Update="TestFiles\IfcExamples\beam-standard-case.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\IfcExamples\csg-primitive.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\SurfaceCurveSweptAreaSolid_5.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
