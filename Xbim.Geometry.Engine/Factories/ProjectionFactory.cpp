@@ -24,7 +24,10 @@ namespace Xbim
 		{
 			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape)
 			{
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+				if (!shape->IsValidShape())
+					throw RaiseGeometryFactoryException("Footprinting error: invalid shape");
+
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
 				bool isMetric = false;
 				double oneMillimeter = _modelService->OneMillimeter;
@@ -40,21 +43,32 @@ namespace Xbim
 
 			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection)
 			{
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+
+				if (!shape->IsValidShape())
+					throw RaiseGeometryFactoryException("Footprinting error: invalid shape");
+
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
 				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref());
 				return footprint;
 			}
 			IXCompound^ ProjectionFactory::GetOutline(IXShape^ shape)
 			{
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+				if (!shape->IsValidShape())
+					throw RaiseGeometryFactoryException("Get outline error: invalid shape");
+
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				TopoDS_Compound outline = EXEC_NATIVE->GetOutline(topoShape);
 				return  (IXCompound^)XShape::GetXbimShape(outline);
 			}
 
 			IEnumerable<IXFace^>^ ProjectionFactory::CreateSection(IXShape^ shape, IXPlane^ cutPlane)
 			{
-				const TopoDS_Shape& topoShape = TOPO_SHAPE(shape);
+
+				if (!shape->IsValidShape())
+					throw RaiseGeometryFactoryException("Create section error: invalid shape");
+
+				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				XPlane^ plane = dynamic_cast<XPlane^>(cutPlane);
 				if (plane == nullptr)
 					throw gcnew InvalidCastException("Unsupported native plane object");
@@ -62,7 +76,7 @@ namespace Xbim
 				
 				bool success = EXEC_NATIVE->CreateSection(topoShape, plane->Ref(), _modelService->Precision, faces);
 				if (!success) 
-					throw gcnew XbimGeometryServiceException("Failed to create section");
+					throw RaiseGeometryFactoryException("Failed to create section");
 				List<IXFace^>^ faceList = gcnew List<IXFace^>(faces.Size());
 				for (auto& faceIt = faces.cbegin(); faceIt != faces.cend(); faceIt++)
 					faceList->Add(gcnew XFace(TopoDS::Face(*faceIt)));
