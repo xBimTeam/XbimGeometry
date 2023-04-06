@@ -49,6 +49,9 @@ array<System::Byte>^ Xbim::Geometry::Factories::WexBimMeshFactory::createWexBimM
 array<System::Byte>^ Xbim::Geometry::Factories::WexBimMeshFactory::createWexBimMesh
 	(IXShape^ shape, double tolerance, double linearDeflection, double angularDeflection, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves, bool checkEdges, bool cleanBefore, bool cleanAfter)
 { 
+	if (!shape->IsValidShape())
+		throw RaiseGeometryFactoryException("WexBim meshing error: invalid shape");
+
 	TopoDS_Shape topoShape = static_cast<XShape^>(shape)->GetTopoShape();
 
 	auto mesh = EXEC_NATIVE->CreateMesh(topoShape, tolerance, linearDeflection, angularDeflection, scale);
