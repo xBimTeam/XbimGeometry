@@ -21,6 +21,7 @@
 #include "../Factories/BimAuthoringToolWorkArounds.h"
 #include "../Factories/MaterialFactory.h"
 #include "../Factories/ProjectionFactory.h"
+#include "../Factories/WexBimMeshFactory.h"
 
 using namespace System::Collections::Generic;
 using namespace System::Linq;
@@ -220,6 +221,11 @@ namespace Xbim
 				if (_projectionFactory == nullptr) _projectionFactory = gcnew Xbim::Geometry::Factories::ProjectionFactory(this);
 				return _projectionFactory;
 			}
+			WexBimMeshFactory^ ModelGeometryService::GetWexBimMeshFactory()
+			{
+				if (_wexBimMeshFactory == nullptr) _wexBimMeshFactory = gcnew Xbim::Geometry::Factories::WexBimMeshFactory(this);
+				return _wexBimMeshFactory;
+			}
 			Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ ModelGeometryService::GetBimAuthoringToolWorkArounds()
 			{
 				if (_bimAuthoringToolWorkArounds == nullptr) _bimAuthoringToolWorkArounds = gcnew Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds(this);
@@ -247,6 +253,7 @@ namespace Xbim
 			IXProfileFactory^ ModelGeometryService::ProfileFactory::get() { return GetProfileFactory(); }
 			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
 			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
+			IXWexBimMeshFactory^ ModelGeometryService::WexBimMeshFactory::get() { return GetWexBimMeshFactory(); }
 			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return GetBRepDocumentManager(); }
 		}
 

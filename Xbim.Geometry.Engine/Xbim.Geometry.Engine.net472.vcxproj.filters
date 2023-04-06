@@ -447,6 +447,18 @@
     <ClInclude Include="BRep\XMatrix.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NLoopSegment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\Unmanaged\PackedNormal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\WexBimMeshFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Factories\Unmanaged\NWexBimMeshFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BRep\Unmanaged\NFootprint.cpp">
@@ -801,6 +813,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\ProfileFactory.WireBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\Unmanaged\PackedNormal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\Unmanaged\NWexBimMeshFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Factories\WexBimMeshFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

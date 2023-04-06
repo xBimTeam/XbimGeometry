@@ -261,7 +261,9 @@
     <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NWexBimMeshFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
+    <ClInclude Include="Factories\WexBimMeshFactory.h" />
     <ClInclude Include="Factories\WireFactory.h" />
     <ClInclude Include="Factories\FactoryBase.h" />
     <ClInclude Include="Factories\Unmanaged\NFactoryBase.h" />
@@ -393,7 +395,9 @@
     <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NSurfaceFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NWexBimMeshFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp" />
+    <ClCompile Include="Factories\WexBimMeshFactory.cpp" />
     <ClCompile Include="Factories\WireFactory.cpp" />
     <ClCompile Include="Factories\FactoryBase.cpp" />
     <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp" />
@@ -501,7 +505,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.297-develop</Version>
+      <Version>6.2.306</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

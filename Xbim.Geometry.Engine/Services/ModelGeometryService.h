@@ -43,6 +43,7 @@ namespace Xbim
 			ref class BIMAuthoringToolWorkArounds;
 			ref class MaterialFactory;
 			ref class ProjectionFactory;
+			ref class WexBimMeshFactory;
 		}
 		namespace Storage
 		{
@@ -90,6 +91,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ _bimAuthoringToolWorkArounds;
 				Xbim::Geometry::Factories::MaterialFactory^ _materialFactory;
 				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
+				Xbim::Geometry::Factories::WexBimMeshFactory^ _wexBimMeshFactory;
 				Xbim::Geometry::Storage::BRepDocumentManager^ _bRepDocumentManager;
 			internal:
 				//Factories
@@ -109,6 +111,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ GetBimAuthoringToolWorkArounds();
 				Xbim::Geometry::Factories::MaterialFactory^ GetMaterialFactory();
 				Xbim::Geometry::Factories::ProjectionFactory^ GetProjectionFactory();
+				Xbim::Geometry::Factories::WexBimMeshFactory^ GetWexBimMeshFactory();
 				Xbim::Geometry::Storage::BRepDocumentManager^ GetBRepDocumentManager();
 			public:
 
@@ -155,6 +158,7 @@ namespace Xbim
 				virtual property IXProfileFactory^ ProfileFactory {IXProfileFactory^ get(); }
 				virtual property IXMaterialFactory^ MaterialFactory {IXMaterialFactory^ get(); }
 				virtual property IXProjectionFactory^ ProjectionFactory {IXProjectionFactory^ get(); }
+				virtual property IXWexBimMeshFactory^ WexBimMeshFactory {IXWexBimMeshFactory^ get(); }
 				virtual property IXBRepDocumentManager^ BRepDocumentManager {IXBRepDocumentManager^ get(); }
 
 #pragma region Logging and Exceptions
