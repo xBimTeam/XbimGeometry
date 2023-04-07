@@ -1,5 +1,4 @@
 #include "NWexBimMesh.h"
-
 #include <BRep_Tool.hxx>
 #include <Geom_Plane.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
@@ -15,8 +14,6 @@ int NWexBimMesh::TriangleCount()
 	}
 	return triangleCount;
 }
-
-
 
 void NWexBimMesh::WriteToStream(std::ostream& oStream)
 {
@@ -76,42 +73,7 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 		}
 	}
 }
-NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale)
-{
-	return CreateMesh(shape, tolerance, linearDeflection, angularDeflection, scale, false, true, true);
-}
 
-NWexBimMesh NWexBimMesh::CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale, bool checkEdges, bool cleanBefore, bool cleanAfter)
-{
-	NWexBimMesh mesh(tolerance, scale);
-	try
-	{
-		if (cleanBefore) BRepTools::Clean(shape); //remove triangulation
-		BRepMesh_IncrementalMesh incrementalMesh(shape, linearDeflection, Standard_False, angularDeflection); //triangulate the first time	
-
-		for (NFaceMeshIterator aFaceIter(shape, checkEdges); aFaceIter.More(); aFaceIter.Next())
-		{
-			if (aFaceIter.IsEmptyMesh())
-				continue;
-			if (!mesh.HasCurves) mesh.HasCurves = aFaceIter.HasCurves;
-
-			mesh.saveIndicesAndNormals(aFaceIter);
-
-		}
-		if (cleanAfter) BRepTools::Clean(shape); //remove triangulation
-
-	}
-	catch (const Standard_Failure&)
-	{
-
-	}
-	return mesh;
-}
-
-// =======================================================================
-// function : saveNodes
-// purpose  :
-// =======================================================================
 void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, std::vector<int>& nodeIndexes)
 {
 	const Standard_Integer aNodeUpper = theFaceIter.NodeUpper();
@@ -125,12 +87,7 @@ void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, std::vector<in
 	}
 }
 
-
-// =======================================================================
-// function : saveIndices
-// purpose  :
-// =======================================================================
-void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
+void NWexBimMesh::SaveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 {
 	const Standard_Integer anElemLower = theFaceIter.ElemLower();
 	const Standard_Integer anElemUpper = theFaceIter.ElemUpper();
@@ -172,8 +129,6 @@ void NWexBimMesh::saveIndicesAndNormals(NFaceMeshIterator& theFaceIter)
 	AddTriangleIndices(triangleIndices);
 	AddNormals(normals);
 }
-
-
 
 void NWexBimMesh::WriteTriangleIndicesWithNormals(
 	std::ostream& oStream,
@@ -239,7 +194,6 @@ void NWexBimMesh::WriteTriangleIndices(std::ostream& oStream, NCollection_Vec3<i
 	else
 		oStream.write((const char*)triangle.GetData(), sizeof(triangle));
 }
-
 
 int NWexBimMesh::AddPoint(gp_XYZ point)
 {

@@ -231,7 +231,6 @@ namespace Xbim
 			virtual void WriteTriangulation(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
 			virtual void WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle);
-			array<System::Byte>^ WriteTriangulation(IXShape^ shape, double tolerance, double deflection, double angle, Bnd_Box& bounds);
 		};
 	}
 }

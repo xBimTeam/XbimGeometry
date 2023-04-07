@@ -42,7 +42,7 @@ namespace Xbim
 				//				{
 				//				}
 				//				return ok;
-				return !OccHandle().IsNull();
+				return !IsInvalid && !OccHandle().IsNull();
 			}
 			bool XShape::IsEqual(IXShape^ iXShape)
 			{

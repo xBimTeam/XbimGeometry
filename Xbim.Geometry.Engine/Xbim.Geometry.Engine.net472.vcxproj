@@ -1,163 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<ItemGroup Label="ProjectConfigurations">
-		<ProjectConfiguration Include="Debug|Win32">
-			<Configuration>Debug</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|Win32">
-			<Configuration>Release</Configuration>
-			<Platform>Win32</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Debug|x64">
-			<Configuration>Debug</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-		<ProjectConfiguration Include="Release|x64">
-			<Configuration>Release</Configuration>
-			<Platform>x64</Platform>
-		</ProjectConfiguration>
-	</ItemGroup>
-	<PropertyGroup Label="Globals">
-		<VCProjectVersion>17.0</VCProjectVersion>
-		<ProjectGuid>{102F1B85-48BD-4598-A556-E05E385048CC}</ProjectGuid>
-		<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-		<Keyword>ManagedCProj</Keyword>
-		<RootNamespace>XbimGeometryEnginenet472</RootNamespace>
-		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-		<EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
-	</PropertyGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-		<ConfigurationType>DynamicLibrary</ConfigurationType>
-		<UseDebugLibraries>true</UseDebugLibraries>
-		<PlatformToolset>v143</PlatformToolset>
-		<CLRSupport>true</CLRSupport>
-		<CharacterSet>Unicode</CharacterSet>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-		<ConfigurationType>DynamicLibrary</ConfigurationType>
-		<UseDebugLibraries>false</UseDebugLibraries>
-		<PlatformToolset>v143</PlatformToolset>
-		<CLRSupport>true</CLRSupport>
-		<CharacterSet>Unicode</CharacterSet>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-		<ConfigurationType>DynamicLibrary</ConfigurationType>
-		<UseDebugLibraries>true</UseDebugLibraries>
-		<PlatformToolset>v143</PlatformToolset>
-		<CLRSupport>true</CLRSupport>
-		<CharacterSet>Unicode</CharacterSet>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-		<ConfigurationType>DynamicLibrary</ConfigurationType>
-		<UseDebugLibraries>false</UseDebugLibraries>
-		<PlatformToolset>v143</PlatformToolset>
-		<CLRSupport>true</CLRSupport>
-		<CharacterSet>Unicode</CharacterSet>
-	</PropertyGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-	<ImportGroup Label="ExtensionSettings">
-	</ImportGroup>
-	<ImportGroup Label="Shared">
-	</ImportGroup>
-	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	</ImportGroup>
-	<PropertyGroup Label="UserMacros" />
-	<PropertyGroup />
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies />
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies />
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies />
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies />
-		</Link>
-	</ItemDefinitionGroup>
-	<ItemGroup>
-		<ClInclude Include="pch.h" />
-	</ItemGroup>
-	<PropertyGroup Condition="'$(Platform)'=='Win32'">
-		<OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x86\</OutDir>
-		<IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x86\</IntDir>
-		<PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x86\</PackagesDir>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Platform)'=='x64'">
-		<OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x64\</OutDir>
-		<IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x64\</IntDir>
-		<PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x64\</PackagesDir>
-	</PropertyGroup>
-	<ItemGroup>
-		<Reference Include="Microsoft.Extensions.Logging.Abstractions">
-			<HintPath>$(PackagesDir)Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-			<HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Core" />
-		<Reference Include="Xbim.Ifc4">
-			<HintPath>$(PackagesDir)Xbim.Ifc4.dll</HintPath>
-		</Reference>
-		<Reference Include="Xbim.Ifc2x3">
-			<HintPath>$(PackagesDir)Xbim.Ifc2x3.dll</HintPath>
-		</Reference>
-		<Reference Include="Xbim.IO.MemoryModel">
-			<HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
-		</Reference>
-		<Reference Include="Xbim.Tessellator">
-			<HintPath>$(PackagesDir)Xbim.Tessellator.dll</HintPath>
-		</Reference>
-		<Reference Include="Xbim.Common">
-			<HintPath>$(PackagesDir)Xbim.Common.dll</HintPath>
-		</Reference>
-		<Reference Include="Xbim.Geometry.Abstractions">
-			<HintPath>$(PackagesDir)Xbim.Geometry.Abstractions.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup>
-		<Reference Include="System" />
-		<Reference Include="System.Data" />
-		<Reference Include="System.Xml" />
-	</ItemGroup>
-	<!--Insert here-->
-	<!--<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{102F1B85-48BD-4598-A556-E05E385048CC}</ProjectGuid>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <Keyword>ManagedCProj</Keyword>
+    <RootNamespace>XbimGeometryEnginenet472</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <EnableManagedPackageReferenceSupport>true</EnableManagedPackageReferenceSupport>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CLRSupport>true</CLRSupport>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Factories\Unmanaged\NWexBimMeshFactory.h" />
+    <ClInclude Include="Factories\WexBimMeshFactory.h" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x86\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x86\</PackagesDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x64\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x64\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x64\</PackagesDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+      <HintPath>$(PackagesDir)Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="Xbim.Ifc4">
+      <HintPath>$(PackagesDir)Xbim.Ifc4.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Ifc2x3">
+      <HintPath>$(PackagesDir)Xbim.Ifc2x3.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.IO.MemoryModel">
+      <HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Tessellator">
+      <HintPath>$(PackagesDir)Xbim.Tessellator.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Common">
+      <HintPath>$(PackagesDir)Xbim.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Xbim.Geometry.Abstractions">
+      <HintPath>$(PackagesDir)Xbim.Geometry.Abstractions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <!--Insert here-->
+  <!--<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
 	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>
@@ -170,420 +172,422 @@
 	<ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
 	</ImportGroup>-->
-	<PropertyGroup Label="UserMacros" />
-	<PropertyGroup>
-		<LinkIncremental>false</LinkIncremental>
-		<TargetName>Xbim.Geometry.Engine</TargetName>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-		<RunCodeAnalysis>false</RunCodeAnalysis>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-		<RunCodeAnalysis>false</RunCodeAnalysis>
-		<GenerateManifest>false</GenerateManifest>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-		<RunCodeAnalysis>false</RunCodeAnalysis>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
-		<RunCodeAnalysis>false</RunCodeAnalysis>
-		<GenerateManifest>false</GenerateManifest>
-	</PropertyGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>OCCT_NO_PLUGINS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-			<LanguageStandard>stdcpp17</LanguageStandard>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
-			<IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-			<IgnoreSpecificDefaultLibraries>
-			</IgnoreSpecificDefaultLibraries>
-			<AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
-			<Profile>true</Profile>
-		</Link>
-		<ResourceCompile>
-			<Culture>0x0809</Culture>
-		</ResourceCompile>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-			<LanguageStandard>stdcpp17</LanguageStandard>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
-			<IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-			<IgnoreSpecificDefaultLibraries>
-			</IgnoreSpecificDefaultLibraries>
-			<AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
-			<Profile>true</Profile>
-		</Link>
-		<ResourceCompile>
-			<Culture>0x0809</Culture>
-		</ResourceCompile>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<EnablePREfast>false</EnablePREfast>
-			<DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-			<LanguageStandard>stdcpp17</LanguageStandard>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
-			<GenerateDebugInformation>false</GenerateDebugInformation>
-			<IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-			<AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
-			<Profile>true</Profile>
-		</Link>
-		<ResourceCompile>
-			<Culture>0x0809</Culture>
-		</ResourceCompile>
-	</ItemDefinitionGroup>
-	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<ClCompile>
-			<WarningLevel>Level3</WarningLevel>
-			<PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-			<AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
-			<GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
-			<DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-			<LanguageStandard>stdcpp17</LanguageStandard>
-		</ClCompile>
-		<Link>
-			<AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
-			<GenerateDebugInformation>false</GenerateDebugInformation>
-			<IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-			<AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
-			<Profile>true</Profile>
-		</Link>
-		<ResourceCompile>
-			<Culture>0x0809</Culture>
-		</ResourceCompile>
-	</ItemDefinitionGroup>
-	<ItemGroup>
-		<ClInclude Include="BRep\Unmanaged\NFootprint.h" />
-		<ClInclude Include="BRep\XCylindricalSurface.h" />
-		<ClInclude Include="BRep\XDirection.h" />
-		<ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
-		<ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
-		<ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
-		<ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h" />
-		<ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
-		<ClInclude Include="BRep\OccExtensions\KeyedPnt.h" />
-		<ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
-		<ClInclude Include="BRep\OccExtensions\LineSegment2d.h" />
-		<ClInclude Include="BRep\X2dDirection.h" />
-		<ClInclude Include="BRep\X2dPoint.h" />
-		<ClInclude Include="BRep\X2dVector.h" />
-		<ClInclude Include="BRep\XAxis1Placement.h" />
-		<ClInclude Include="BRep\XAxis2Placement3d.h" />
-		<ClInclude Include="BRep\XAxisAlignedBox.h" />
-		<ClInclude Include="BRep\XAxisPlacement2d.h" />
-		<ClInclude Include="BRep\XBSplineCurve.h" />
-		<ClInclude Include="BRep\XCircle.h" />
-		<ClInclude Include="BRep\XCircle2d.h" />
-		<ClInclude Include="BRep\XCompound.h" />
-		<ClInclude Include="BRep\XConicalSurface.h" />
-		<ClInclude Include="BRep\XCurve.h" />
-		<ClInclude Include="BRep\XCurve2d.h" />
-		<ClInclude Include="BRep\XEdge.h" />
-		<ClInclude Include="BRep\XEllipse.h" />
-		<ClInclude Include="BRep\XEllipse2d.h" />
-		<ClInclude Include="BRep\XFace.h" />
-		<ClInclude Include="BRep\XFootprint.h" />
-		<ClInclude Include="BRep\XLine.h" />
-		<ClInclude Include="BRep\XLine2d.h" />
-		<ClInclude Include="BRep\XLocation.h" />
-		<ClInclude Include="BRep\XPlane.h" />
-		<ClInclude Include="BRep\XPoint.h" />
-		<ClInclude Include="BRep\XPolyLoop2d.h" />
-		<ClInclude Include="BRep\XQuaternion.h" />
-		<ClInclude Include="BRep\XShape.h" />
-		<ClInclude Include="BRep\XShell.h" />
-		<ClInclude Include="BRep\XSolid.h" />
-		<ClInclude Include="BRep\XSphericalSurface.h" />
-		<ClInclude Include="BRep\XSurface.h" />
-		<ClInclude Include="BRep\XTrimmedCurve.h" />
-		<ClInclude Include="BRep\XTrimmedCurve2d.h" />
-		<ClInclude Include="BRep\XVector.h" />
-		<ClInclude Include="BRep\XVertex.h" />
-		<ClInclude Include="BRep\XWire.h" />
-		<ClInclude Include="Factories\CheckClosedStatus.h" />
-		<ClInclude Include="Factories\BooleanFactory.h" />
-		<ClInclude Include="Factories\CompoundFactory.h" />
-		<ClInclude Include="Factories\CurveFactory.h" />
-		<ClInclude Include="Factories\EdgeFactory.h" />
-		<ClInclude Include="Factories\FaceFactory.h" />
-		<ClInclude Include="Factories\GeometryFactory.h" />
-		<ClInclude Include="Factories\ProfileFactory.h" />
-		<ClInclude Include="Factories\ShapeFactory.h" />
-		<ClInclude Include="Factories\ShellFactory.h" />
-		<ClInclude Include="Factories\SolidFactory.h" />
-		<ClInclude Include="Factories\SurfaceFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NBooleanFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NCompoundFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NGeometryFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NLoopSegment.h" />
-		<ClInclude Include="Factories\Unmanaged\NProfileFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NShapeFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
-		<ClInclude Include="Factories\WireFactory.h" />
-		<ClInclude Include="Factories\FactoryBase.h" />
-		<ClInclude Include="Factories\Unmanaged\NFactoryBase.h" />
-		<ClInclude Include="Factories\GeometryConverterFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NVertexFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
-		<ClInclude Include="Factories\MaterialFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
-		<ClInclude Include="Services\Unmanaged\PackedNormal.h" />
-		<ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
-		<ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
-		<ClInclude Include="Services\Unmanaged\NShapeProximityUtils.h" />
-		<ClInclude Include="Services\Unmanaged\NShapeService.h" />
-		<ClInclude Include="Primitives\GeometryPrimitives.h" />
-		<ClInclude Include="Services\LoggingService.h" />
-		<ClInclude Include="Services\MeshFactors.h" />
-		<ClInclude Include="Services\ModelGeometryService.h" />
-		<ClInclude Include="Factories\ProjectionFactory.h" />
-		<ClInclude Include="Services\ServiceCollectionExtensions.h" />
-		<ClInclude Include="Services\Unmanaged\NLoggingService.h" />
-		<ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
-		<ClInclude Include="Factories\VertexFactory.h" />
-		<ClInclude Include="Factories\Unmanaged\NProjectionFactory.h" />
-		<ClInclude Include="Services\ShapeService.h" />
-		<ClInclude Include="Services\Unmanaged\NWexBimMesh.h" />
-		<ClInclude Include="Services\Unmanaged\PointInspector.h" />
-		<ClInclude Include="Storage\BRepDocument.h" />
-		<ClInclude Include="Storage\BRepDocumentManager.h" />
-		<ClInclude Include="Storage\BRepDocumentItem.h" />
-		<ClInclude Include="Storage\Unmanaged\FlexApp_Application.h" />
-		<ClInclude Include="Storage\Unmanaged\FlexDrivers.h" />
-		<ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h" />
-		<ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.h" />
-		<ClInclude Include="Storage\Unmanaged\FlexShape.h" />
-		<ClInclude Include="Storage\Unmanaged\NBRepDocument.h" />
-		<ClInclude Include="Visual\ColourRGB.h" />
-		<ClInclude Include="Visual\VisualMaterial.h" />
-		<ClInclude Include="Visual\XbimShapeColour.h" />
-		<ClInclude Include="XbimCompound.h" />
-		<ClInclude Include="XbimConstraints.h" />
-		<ClInclude Include="XbimConvert.h" />
-		<ClInclude Include="XbimCurve.h" />
-		<ClInclude Include="XbimCurve2D.h" />
-		<ClInclude Include="XbimEdge.h" />
-		<ClInclude Include="XbimEdgeSet.h" />
-		<ClInclude Include="XbimFace.h" />
-		<ClInclude Include="XbimFaceSet.h" />
-		<ClInclude Include="XbimGeometryCreator.h" />
-		<ClInclude Include="XbimGeometryCreatorV6.h" />
-		<ClInclude Include="XbimGeometryObject.h" />
-		<ClInclude Include="XbimGeometryObjectSet.h" />
-		<ClInclude Include="XbimHandle.h" />
-		<ClInclude Include="XbimMesh.h" />
-		<ClInclude Include="XbimNativeApi.h" />
-		<ClInclude Include="XbimOccShape.h" />
-		<ClInclude Include="XbimOccWriter.h" />
-		<ClInclude Include="XbimPoint3DWithTolerance.h" />
-		<ClInclude Include="XbimProgressMonitor.h" />
-		<ClInclude Include="XbimShell.h" />
-		<ClInclude Include="XbimShellSet.h" />
-		<ClInclude Include="XbimSolid.h" />
-		<ClInclude Include="XbimSolidSet.h" />
-		<ClInclude Include="XbimVertex.h" />
-		<ClInclude Include="XbimVertexSet.h" />
-		<ClInclude Include="XbimWire.h" />
-		<ClInclude Include="XbimWireSet.h" />
-		<ClInclude Include="stdafx.h" />
-		<ClInclude Include="BRep\XSurfaceOfRevolution.h" />
-		<ClInclude Include="BRep\XBSplineSurface.h" />
-		<ClInclude Include="BRep\XBoundedSurface.h" />
-		<ClInclude Include="BRep\XRectangleTrimmedSurface.h" />
-		<ClInclude Include="BRep\XSurfaceOfLinearExtrusion.h" />
-		<ClInclude Include="BRep\XMatrix.h" />
-	</ItemGroup>
-	<ItemGroup>
-		<ClCompile Include="BRep\Unmanaged\NFootprint.cpp" />
-		<ClCompile Include="BRep\XEllipse.cpp" />
-		<ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp" />
-		<ClCompile Include="BRep\XAxisAlignedBox.cpp" />
-		<ClCompile Include="BRep\XBSplineCurve.cpp" />
-		<ClCompile Include="BRep\XCircle.cpp" />
-		<ClCompile Include="BRep\XCircle2d.cpp" />
-		<ClCompile Include="BRep\XCompound.cpp" />
-		<ClCompile Include="BRep\XCurve.cpp" />
-		<ClCompile Include="BRep\XCurve2d.cpp" />
-		<ClCompile Include="BRep\XEdge.cpp" />
-		<ClCompile Include="BRep\XEllipse2d.cpp" />
-		<ClCompile Include="BRep\XFace.cpp" />
-		<ClCompile Include="BRep\XFootprint.cpp" />
-		<ClCompile Include="BRep\XLine.cpp" />
-		<ClCompile Include="BRep\XLine2d.cpp" />
-		<ClCompile Include="BRep\XLocation.cpp" />
-		<ClCompile Include="BRep\XPlane.cpp" />
-		<ClCompile Include="BRep\XPolyLoop2d.cpp" />
-		<ClCompile Include="BRep\XQuaternion.cpp" />
-		<ClCompile Include="BRep\XShape.cpp" />
-		<ClCompile Include="BRep\XShell.cpp" />
-		<ClCompile Include="BRep\XSolid.cpp" />
-		<ClCompile Include="BRep\XSurface.cpp" />
-		<ClCompile Include="BRep\XTrimmedCurve.cpp" />
-		<ClCompile Include="BRep\XTrimmedCurve2d.cpp" />
-		<ClCompile Include="BRep\XVertex.cpp" />
-		<ClCompile Include="BRep\XWire.cpp" />
-		<ClCompile Include="Factories\BooleanFactory.cpp" />
-		<ClCompile Include="Factories\CompoundFactory.cpp" />
-		<ClCompile Include="Factories\CurveFactory.cpp" />
-		<ClCompile Include="Factories\EdgeFactory.cpp" />
-		<ClCompile Include="Factories\FaceFactory.cpp" />
-		<ClCompile Include="Factories\GeometryFactory.cpp" />
-		<ClCompile Include="Factories\ProfileFactory.cpp" />
-		<ClCompile Include="Factories\ProfileFactory.CurveBuilder.cpp" />
-		<ClCompile Include="Factories\ProfileFactory.EdgeBuilder.cpp" />
-		<ClCompile Include="Factories\ProfileFactory.FaceBuilder.cpp" />
-		<ClCompile Include="Factories\ProfileFactory.WireBuilder.cpp" />
-		<ClCompile Include="Factories\ShapeFactory.cpp" />
-		<ClCompile Include="Factories\ShellFactory.cpp" />
-		<ClCompile Include="Factories\SolidFactory.cpp" />
-		<ClCompile Include="Factories\SurfaceFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NBooleanFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NCompoundFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NGeometryFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NProfileFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NShapeFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NShellFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NSurfaceFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NWireFactory.cpp" />
-		<ClCompile Include="Factories\WireFactory.cpp" />
-		<ClCompile Include="Factories\FactoryBase.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp" />
-		<ClCompile Include="Factories\GeometryConverterFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NVertexFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
-		<ClCompile Include="Factories\MaterialFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
-		<ClCompile Include="Services\Unmanaged\PackedNormal.cpp" />
-		<ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
-		<ClCompile Include="Services\Unmanaged\NShapeProximityUtils.cpp" />
-		<ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
-		<ClCompile Include="Primitives\GeometryPrimitives.cpp" />
-		<ClCompile Include="Services\LoggingService.cpp" />
-		<ClCompile Include="Services\MeshFactors.cpp" />
-		<ClCompile Include="Services\ModelGeometryService.cpp" />
-		<ClCompile Include="Factories\ProjectionFactory.cpp" />
-		<ClCompile Include="Services\ServiceCollectionExtensions.cpp" />
-		<ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
-		<ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
-		<ClCompile Include="Factories\VertexFactory.cpp" />
-		<ClCompile Include="Factories\Unmanaged\NProjectionFactory.cpp" />
-		<ClCompile Include="Services\ShapeService.cpp" />
-		<ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
-		<ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
-		<ClCompile Include="Storage\BRepDocument.cpp" />
-		<ClCompile Include="Storage\BRepDocumentManager.cpp" />
-		<ClCompile Include="Storage\BRepDocumentItem.cpp" />
-		<ClCompile Include="Storage\Unmanaged\FlexApp_Application.cpp" />
-		<ClCompile Include="Storage\Unmanaged\FlexDrivers.cpp" />
-		<ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.cpp" />
-		<ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp" />
-		<ClCompile Include="Storage\Unmanaged\FlexShape.cpp" />
-		<ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp" />
-		<ClCompile Include="Visual\ColourRGB.cpp" />
-		<ClCompile Include="Visual\VisualMaterial.cpp" />
-		<ClCompile Include="Visual\XbimShapeColour.cpp" />
-		<ClCompile Include="XbimCompound.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimConvert.cpp" />
-		<ClCompile Include="XbimCurve.cpp" />
-		<ClCompile Include="XbimCurve2D.cpp" />
-		<ClCompile Include="XbimEdge.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimEdgeSet.cpp" />
-		<ClCompile Include="XbimFace.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimFaceSet.cpp" />
-		<ClCompile Include="XbimGeometryCreator.cpp" />
-		<ClCompile Include="XbimGeometryCreatorV6.cpp" />
-		<ClCompile Include="XbimGeometryObject.cpp" />
-		<ClCompile Include="XbimGeometryObjectSet.cpp" />
-		<ClCompile Include="XbimMesh.cpp" />
-		<ClCompile Include="XbimNativeApi.cpp" />
-		<ClCompile Include="XbimOccShape.cpp" />
-		<ClCompile Include="XbimOccWriter.cpp" />
-		<ClCompile Include="XbimPoint3DWithTolerance.cpp" />
-		<ClCompile Include="XbimProgressMonitor.cpp" />
-		<ClCompile Include="XbimShell.cpp" />
-		<ClCompile Include="XbimShellSet.cpp" />
-		<ClCompile Include="XbimSolid.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimSolidSet.cpp" />
-		<ClCompile Include="XbimVertex.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimVertexSet.cpp" />
-		<ClCompile Include="XbimWire.cpp">
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
-			<ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
-		</ClCompile>
-		<ClCompile Include="XbimWireSet.cpp" />
-		<ClCompile Include="BRep\XMatrix.cpp" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="cpp.hint" />
-		<None Include="packages.config" />
-	</ItemGroup>
-	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-	<ImportGroup Label="OcctLibraries">
-		<Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
-	</ImportGroup>
-	<Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
-		<Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
-		<MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />
-	</Target>
-	<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-		<PropertyGroup>
-			<ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-		</PropertyGroup>
-		<Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets'))" />
-	</Target>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>Xbim.Geometry.Engine</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <GenerateManifest>false</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>OCCT_NO_PLUGINS;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
+    </Link>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
+    </Link>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnablePREfast>false</EnablePREfast>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
+    </Link>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.\OCC\inc</AdditionalIncludeDirectories>
+      <GenerateXMLDocumentationFiles>false</GenerateXMLDocumentationFiles>
+      <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
+      <Profile>true</Profile>
+    </Link>
+    <ResourceCompile>
+      <Culture>0x0809</Culture>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
+    <ClInclude Include="BRep\XCylindricalSurface.h" />
+    <ClInclude Include="BRep\XDirection.h" />
+    <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
+    <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
+    <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\OccExtensions\Geom_EllipseWithSemiAxes.h" />
+    <ClInclude Include="BRep\OccExtensions\Geom_LineWithMagnitude.h" />
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt.h" />
+    <ClInclude Include="BRep\OccExtensions\KeyedPnt2d.h" />
+    <ClInclude Include="BRep\OccExtensions\LineSegment2d.h" />
+    <ClInclude Include="BRep\X2dDirection.h" />
+    <ClInclude Include="BRep\X2dPoint.h" />
+    <ClInclude Include="BRep\X2dVector.h" />
+    <ClInclude Include="BRep\XAxis1Placement.h" />
+    <ClInclude Include="BRep\XAxis2Placement3d.h" />
+    <ClInclude Include="BRep\XAxisAlignedBox.h" />
+    <ClInclude Include="BRep\XAxisPlacement2d.h" />
+    <ClInclude Include="BRep\XBSplineCurve.h" />
+    <ClInclude Include="BRep\XCircle.h" />
+    <ClInclude Include="BRep\XCircle2d.h" />
+    <ClInclude Include="BRep\XCompound.h" />
+    <ClInclude Include="BRep\XConicalSurface.h" />
+    <ClInclude Include="BRep\XCurve.h" />
+    <ClInclude Include="BRep\XCurve2d.h" />
+    <ClInclude Include="BRep\XEdge.h" />
+    <ClInclude Include="BRep\XEllipse.h" />
+    <ClInclude Include="BRep\XEllipse2d.h" />
+    <ClInclude Include="BRep\XFace.h" />
+    <ClInclude Include="BRep\XFootprint.h" />
+    <ClInclude Include="BRep\XLine.h" />
+    <ClInclude Include="BRep\XLine2d.h" />
+    <ClInclude Include="BRep\XLocation.h" />
+    <ClInclude Include="BRep\XPlane.h" />
+    <ClInclude Include="BRep\XPoint.h" />
+    <ClInclude Include="BRep\XPolyLoop2d.h" />
+    <ClInclude Include="BRep\XQuaternion.h" />
+    <ClInclude Include="BRep\XShape.h" />
+    <ClInclude Include="BRep\XShell.h" />
+    <ClInclude Include="BRep\XSolid.h" />
+    <ClInclude Include="BRep\XSphericalSurface.h" />
+    <ClInclude Include="BRep\XSurface.h" />
+    <ClInclude Include="BRep\XTrimmedCurve.h" />
+    <ClInclude Include="BRep\XTrimmedCurve2d.h" />
+    <ClInclude Include="BRep\XVector.h" />
+    <ClInclude Include="BRep\XVertex.h" />
+    <ClInclude Include="BRep\XWire.h" />
+    <ClInclude Include="Factories\CheckClosedStatus.h" />
+    <ClInclude Include="Factories\BooleanFactory.h" />
+    <ClInclude Include="Factories\CompoundFactory.h" />
+    <ClInclude Include="Factories\CurveFactory.h" />
+    <ClInclude Include="Factories\EdgeFactory.h" />
+    <ClInclude Include="Factories\FaceFactory.h" />
+    <ClInclude Include="Factories\GeometryFactory.h" />
+    <ClInclude Include="Factories\ProfileFactory.h" />
+    <ClInclude Include="Factories\ShapeFactory.h" />
+    <ClInclude Include="Factories\ShellFactory.h" />
+    <ClInclude Include="Factories\SolidFactory.h" />
+    <ClInclude Include="Factories\SurfaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NBooleanFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NCompoundFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NCurveFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NEdgeFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NFaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NGeometryFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NLoopSegment.h" />
+    <ClInclude Include="Factories\Unmanaged\NProfileFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NShapeFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NShellFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NSolidFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NSurfaceFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NWireFactory.h" />
+    <ClInclude Include="Factories\WireFactory.h" />
+    <ClInclude Include="Factories\FactoryBase.h" />
+    <ClInclude Include="Factories\Unmanaged\NFactoryBase.h" />
+    <ClInclude Include="Factories\GeometryConverterFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NVertexFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
+    <ClInclude Include="Factories\MaterialFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
+    <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
+    <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
+    <ClInclude Include="Services\Unmanaged\NShapeProximityUtils.h" />
+    <ClInclude Include="Services\Unmanaged\NShapeService.h" />
+    <ClInclude Include="Primitives\GeometryPrimitives.h" />
+    <ClInclude Include="Services\LoggingService.h" />
+    <ClInclude Include="Services\MeshFactors.h" />
+    <ClInclude Include="Services\ModelGeometryService.h" />
+    <ClInclude Include="Factories\ProjectionFactory.h" />
+    <ClInclude Include="Services\ServiceCollectionExtensions.h" />
+    <ClInclude Include="Services\Unmanaged\NLoggingService.h" />
+    <ClInclude Include="Services\Unmanaged\NProgressMonitor.h" />
+    <ClInclude Include="Factories\VertexFactory.h" />
+    <ClInclude Include="Factories\Unmanaged\NProjectionFactory.h" />
+    <ClInclude Include="Services\ShapeService.h" />
+    <ClInclude Include="Services\Unmanaged\NWexBimMesh.h" />
+    <ClInclude Include="Services\Unmanaged\PointInspector.h" />
+    <ClInclude Include="Storage\BRepDocument.h" />
+    <ClInclude Include="Storage\BRepDocumentManager.h" />
+    <ClInclude Include="Storage\BRepDocumentItem.h" />
+    <ClInclude Include="Storage\Unmanaged\FlexApp_Application.h" />
+    <ClInclude Include="Storage\Unmanaged\FlexDrivers.h" />
+    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h" />
+    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.h" />
+    <ClInclude Include="Storage\Unmanaged\FlexShape.h" />
+    <ClInclude Include="Storage\Unmanaged\NBRepDocument.h" />
+    <ClInclude Include="Visual\ColourRGB.h" />
+    <ClInclude Include="Visual\VisualMaterial.h" />
+    <ClInclude Include="Visual\XbimShapeColour.h" />
+    <ClInclude Include="XbimCompound.h" />
+    <ClInclude Include="XbimConstraints.h" />
+    <ClInclude Include="XbimConvert.h" />
+    <ClInclude Include="XbimCurve.h" />
+    <ClInclude Include="XbimCurve2D.h" />
+    <ClInclude Include="XbimEdge.h" />
+    <ClInclude Include="XbimEdgeSet.h" />
+    <ClInclude Include="XbimFace.h" />
+    <ClInclude Include="XbimFaceSet.h" />
+    <ClInclude Include="XbimGeometryCreator.h" />
+    <ClInclude Include="XbimGeometryCreatorV6.h" />
+    <ClInclude Include="XbimGeometryObject.h" />
+    <ClInclude Include="XbimGeometryObjectSet.h" />
+    <ClInclude Include="XbimHandle.h" />
+    <ClInclude Include="XbimMesh.h" />
+    <ClInclude Include="XbimNativeApi.h" />
+    <ClInclude Include="XbimOccShape.h" />
+    <ClInclude Include="XbimOccWriter.h" />
+    <ClInclude Include="XbimPoint3DWithTolerance.h" />
+    <ClInclude Include="XbimProgressMonitor.h" />
+    <ClInclude Include="XbimShell.h" />
+    <ClInclude Include="XbimShellSet.h" />
+    <ClInclude Include="XbimSolid.h" />
+    <ClInclude Include="XbimSolidSet.h" />
+    <ClInclude Include="XbimVertex.h" />
+    <ClInclude Include="XbimVertexSet.h" />
+    <ClInclude Include="XbimWire.h" />
+    <ClInclude Include="XbimWireSet.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="BRep\XSurfaceOfRevolution.h" />
+    <ClInclude Include="BRep\XBSplineSurface.h" />
+    <ClInclude Include="BRep\XBoundedSurface.h" />
+    <ClInclude Include="BRep\XRectangleTrimmedSurface.h" />
+    <ClInclude Include="BRep\XSurfaceOfLinearExtrusion.h" />
+    <ClInclude Include="BRep\XMatrix.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BRep\Unmanaged\NFootprint.cpp" />
+    <ClCompile Include="BRep\XEllipse.cpp" />
+    <ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp" />
+    <ClCompile Include="BRep\XAxisAlignedBox.cpp" />
+    <ClCompile Include="BRep\XBSplineCurve.cpp" />
+    <ClCompile Include="BRep\XCircle.cpp" />
+    <ClCompile Include="BRep\XCircle2d.cpp" />
+    <ClCompile Include="BRep\XCompound.cpp" />
+    <ClCompile Include="BRep\XCurve.cpp" />
+    <ClCompile Include="BRep\XCurve2d.cpp" />
+    <ClCompile Include="BRep\XEdge.cpp" />
+    <ClCompile Include="BRep\XEllipse2d.cpp" />
+    <ClCompile Include="BRep\XFace.cpp" />
+    <ClCompile Include="BRep\XFootprint.cpp" />
+    <ClCompile Include="BRep\XLine.cpp" />
+    <ClCompile Include="BRep\XLine2d.cpp" />
+    <ClCompile Include="BRep\XLocation.cpp" />
+    <ClCompile Include="BRep\XPlane.cpp" />
+    <ClCompile Include="BRep\XPolyLoop2d.cpp" />
+    <ClCompile Include="BRep\XQuaternion.cpp" />
+    <ClCompile Include="BRep\XShape.cpp" />
+    <ClCompile Include="BRep\XShell.cpp" />
+    <ClCompile Include="BRep\XSolid.cpp" />
+    <ClCompile Include="BRep\XSurface.cpp" />
+    <ClCompile Include="BRep\XTrimmedCurve.cpp" />
+    <ClCompile Include="BRep\XTrimmedCurve2d.cpp" />
+    <ClCompile Include="BRep\XVertex.cpp" />
+    <ClCompile Include="BRep\XWire.cpp" />
+    <ClCompile Include="Factories\BooleanFactory.cpp" />
+    <ClCompile Include="Factories\CompoundFactory.cpp" />
+    <ClCompile Include="Factories\CurveFactory.cpp" />
+    <ClCompile Include="Factories\EdgeFactory.cpp" />
+    <ClCompile Include="Factories\FaceFactory.cpp" />
+    <ClCompile Include="Factories\GeometryFactory.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.CurveBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.EdgeBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.FaceBuilder.cpp" />
+    <ClCompile Include="Factories\ProfileFactory.WireBuilder.cpp" />
+    <ClCompile Include="Factories\ShapeFactory.cpp" />
+    <ClCompile Include="Factories\ShellFactory.cpp" />
+    <ClCompile Include="Factories\SolidFactory.cpp" />
+    <ClCompile Include="Factories\SurfaceFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NBooleanFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NCompoundFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NCurveFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NEdgeFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NFaceFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NGeometryFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NProfileFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NShapeFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NShellFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NSolidFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NSurfaceFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NWexBimMeshFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NWireFactory.cpp" />
+    <ClCompile Include="Factories\WexBimMeshFactory.cpp" />
+    <ClCompile Include="Factories\WireFactory.cpp" />
+    <ClCompile Include="Factories\FactoryBase.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NFactoryBase.cpp" />
+    <ClCompile Include="Factories\GeometryConverterFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NVertexFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
+    <ClCompile Include="Factories\MaterialFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
+    <ClCompile Include="Services\Unmanaged\PackedNormal.cpp" />
+    <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
+    <ClCompile Include="Services\Unmanaged\NShapeProximityUtils.cpp" />
+    <ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
+    <ClCompile Include="Primitives\GeometryPrimitives.cpp" />
+    <ClCompile Include="Services\LoggingService.cpp" />
+    <ClCompile Include="Services\MeshFactors.cpp" />
+    <ClCompile Include="Services\ModelGeometryService.cpp" />
+    <ClCompile Include="Factories\ProjectionFactory.cpp" />
+    <ClCompile Include="Services\ServiceCollectionExtensions.cpp" />
+    <ClCompile Include="Services\Unmanaged\NLoggingService.cpp" />
+    <ClCompile Include="Services\Unmanaged\NProgressMonitor.cpp" />
+    <ClCompile Include="Factories\VertexFactory.cpp" />
+    <ClCompile Include="Factories\Unmanaged\NProjectionFactory.cpp" />
+    <ClCompile Include="Services\ShapeService.cpp" />
+    <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
+    <ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
+    <ClCompile Include="Storage\BRepDocument.cpp" />
+    <ClCompile Include="Storage\BRepDocumentManager.cpp" />
+    <ClCompile Include="Storage\BRepDocumentItem.cpp" />
+    <ClCompile Include="Storage\Unmanaged\FlexApp_Application.cpp" />
+    <ClCompile Include="Storage\Unmanaged\FlexDrivers.cpp" />
+    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.cpp" />
+    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp" />
+    <ClCompile Include="Storage\Unmanaged\FlexShape.cpp" />
+    <ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp" />
+    <ClCompile Include="Visual\ColourRGB.cpp" />
+    <ClCompile Include="Visual\VisualMaterial.cpp" />
+    <ClCompile Include="Visual\XbimShapeColour.cpp" />
+    <ClCompile Include="XbimCompound.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimConvert.cpp" />
+    <ClCompile Include="XbimCurve.cpp" />
+    <ClCompile Include="XbimCurve2D.cpp" />
+    <ClCompile Include="XbimEdge.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimEdgeSet.cpp" />
+    <ClCompile Include="XbimFace.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimFaceSet.cpp" />
+    <ClCompile Include="XbimGeometryCreator.cpp" />
+    <ClCompile Include="XbimGeometryCreatorV6.cpp" />
+    <ClCompile Include="XbimGeometryObject.cpp" />
+    <ClCompile Include="XbimGeometryObjectSet.cpp" />
+    <ClCompile Include="XbimMesh.cpp" />
+    <ClCompile Include="XbimNativeApi.cpp" />
+    <ClCompile Include="XbimOccShape.cpp" />
+    <ClCompile Include="XbimOccWriter.cpp" />
+    <ClCompile Include="XbimPoint3DWithTolerance.cpp" />
+    <ClCompile Include="XbimProgressMonitor.cpp" />
+    <ClCompile Include="XbimShell.cpp" />
+    <ClCompile Include="XbimShellSet.cpp" />
+    <ClCompile Include="XbimSolid.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimSolidSet.cpp" />
+    <ClCompile Include="XbimVertex.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimVertexSet.cpp" />
+    <ClCompile Include="XbimWire.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="XbimWireSet.cpp" />
+    <ClCompile Include="BRep\XMatrix.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="OcctLibraries">
+    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
+  </ImportGroup>
+  <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
+    <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
+    <MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform=x64;  Configuration=$(Configuration);" RunEachTargetSeparately="true" />
+  </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets'))" />
+  </Target>
 </Project>

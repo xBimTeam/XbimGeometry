@@ -13,6 +13,7 @@
 #include "./Factories/FaceFactory.h"
 #include "./Factories/WireFactory.h"
 #include "./Factories/BooleanFactory.h"
+#include "./Factories/WexBimMeshFactory.h"
 #include <BRep_Builder.hxx>
 #include <Geom_Plane.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
@@ -783,31 +784,11 @@ namespace Xbim
 		void XbimGeometryCreatorV6::WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
 			auto xShape = (XShape^)XbimGeometryObject::ToXShape(shape);
-			Bnd_Box bounds;
-			array<System::Byte>^ bytes = WriteTriangulation(xShape, tolerance, deflection, angle, bounds);
+			IXAxisAlignedBoundingBox^ bounds;
+			array<System::Byte>^ bytes = WexBimMeshFactory->CreateWexBimMesh(xShape, tolerance, deflection, angle, 1, bounds);
 			bw->Write(bytes);
 		}
-
-		array<System::Byte>^ XbimGeometryCreatorV6::WriteTriangulation(IXShape^ shape, double tolerance, double deflection, double angle, Bnd_Box& bounds)
-		{
-			const TopoDS_Shape& topoShape = ((XShape^)shape)->GetTopoShape();
-			auto mesh = NWexBimMesh::CreateMesh(topoShape, tolerance, deflection, angle, /*scale*/ 1.0);
-			auto bMin = mesh.BndBox.CornerMin();
-			auto bMax = mesh.BndBox.CornerMax();
-			bounds = Bnd_Box(gp_Pnt(bMin[0], bMin[1], bMin[2]), gp_Pnt(bMax[0], bMax[1], bMax[2]));
-			std::stringstream output;
-			mesh.WriteToStream(output);
-
-			int size = (int)output.str().length();
-			auto buffer = std::make_unique<char[]>(size);
-			output.seekg(0);
-			output.read(buffer.get(), size);
-			cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
-			System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
-
-			return byteArray;
-		}
-
+		  
 
 		XbimShapeGeometry^ XbimGeometryCreatorV6::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ /*logger*/)
 		{
@@ -834,11 +815,11 @@ namespace Xbim
 			{
 				xShape = static_cast<XShape^>(XbimGeometryObject::ToXShape(geometryObject));
 			}
-			Bnd_Box bounds;
-			((IXbimShapeGeometryData^)shapeGeom)->ShapeData = WriteTriangulation(xShape, precision, deflection, angle, bounds);
-			const gp_Pnt& cMin = bounds.CornerMin();
-			const gp_Pnt& cMax = bounds.CornerMax();
-			((XbimShapeGeometry^)shapeGeom)->BoundingBox = XbimRect3D(cMin.X(), cMin.Y(), cMin.Z(), cMax.X() - cMin.X(), cMax.Y() - cMin.Y(), cMax.Z() - cMin.Z());
+			IXAxisAlignedBoundingBox^ bounds;
+			((IXbimShapeGeometryData^)shapeGeom)->ShapeData = WexBimMeshFactory->CreateWexBimMesh(xShape, precision, deflection, angle, 1, bounds);
+			IXPoint^ cMin = bounds->CornerMin;
+			IXPoint^ cMax = bounds->CornerMax;
+			((XbimShapeGeometry^)shapeGeom)->BoundingBox = XbimRect3D(cMin->X, cMin->Y, cMin->Z, cMax->X - cMin->X, cMax->Y - cMin->Y, cMax->Z - cMin->Z);
 			((XbimShapeGeometry^)shapeGeom)->LOD = XbimLOD::LOD_Unspecified;
 			((XbimShapeGeometry^)shapeGeom)->Format = storageType;
 			return shapeGeom;

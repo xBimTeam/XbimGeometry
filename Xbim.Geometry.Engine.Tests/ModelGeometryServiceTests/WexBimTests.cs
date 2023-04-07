@@ -1,15 +1,11 @@
 ﻿
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Linq;
+using System.Diagnostics;
 using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.Common.XbimExtensions;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Engine.Tests;
 using Xbim.Geometry.WexBim;
-using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
@@ -19,7 +15,6 @@ namespace Xbim.Geometry.Engine.Tests
 {
     public class WexBimTests
     {
-        private readonly IXShapeService _shapeService;
         private readonly IXGeometryConverterFactory _geomConverterFactory;
         private readonly ILoggerFactory _loggerFactory;
         readonly IXModelGeometryService _modelSvc;
@@ -27,7 +22,6 @@ namespace Xbim.Geometry.Engine.Tests
 
         public WexBimTests(IXShapeService shapeService, IXGeometryConverterFactory geomConverterFactory, ILoggerFactory loggerFactory)
         {
-            _shapeService = shapeService;
             _geomConverterFactory = geomConverterFactory;
             _loggerFactory = loggerFactory;
             var dummyModel = new MemoryModel(new EntityFactoryIfc4());
@@ -45,7 +39,7 @@ namespace Xbim.Geometry.Engine.Tests
             var meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Normal);
 
             IXAxisAlignedBoundingBox bounds;
-            byte[] bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
+            byte[] bytes = geomEngineV6.WexBimMeshFactory.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
 
             var wexBimMesh = new WexBimMesh(bytes);
             wexBimMesh.Vertices.Count().Should().Be(8);
@@ -65,7 +59,7 @@ namespace Xbim.Geometry.Engine.Tests
 
 
             var meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Fine);
-            byte[] bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
+            byte[] bytes = geomEngineV6.WexBimMeshFactory.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
 
             var wexBimMesh = new WexBimMesh(bytes);
             wexBimMesh.TriangleCount.Should().Be(1224);
@@ -73,13 +67,13 @@ namespace Xbim.Geometry.Engine.Tests
 
             //normal granularity
             meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Normal);
-            bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
+            bytes = geomEngineV6.WexBimMeshFactory.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
             wexBimMesh = new WexBimMesh(bytes);
             var normalCount = wexBimMesh.TriangleCount;
 
             //course granularity
             meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Course);
-            bytes = _shapeService.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
+            bytes = geomEngineV6.WexBimMeshFactory.CreateWexBimMesh(solid, meshFactors, 0.001, out bounds);
             wexBimMesh = new WexBimMesh(bytes);
             var courseCount = wexBimMesh.TriangleCount;
             fineCount.Should().BeGreaterThan(normalCount);
@@ -95,7 +89,7 @@ namespace Xbim.Geometry.Engine.Tests
             var ifcFacetedBrep = mm.Instances[32] as IIfcFacetedBrep;
             var facetedBrepV6 = geomEngineV6.Build(ifcFacetedBrep);
             var meshFactors = geomEngineV6.MeshFactors.SetGranularity(MeshGranularity.Fine);
-            var bytesV6 = _shapeService.CreateWexBimMesh(facetedBrepV6, meshFactors, 1 / mm.ModelFactors.OneMeter, out IXAxisAlignedBoundingBox bounds);
+            var bytesV6 = geomEngineV6.WexBimMeshFactory.CreateWexBimMesh(facetedBrepV6, out IXAxisAlignedBoundingBox bounds); 
             var wexBimV6 = new WexBimMesh(bytesV6);
             var facetedBrepV5 = geomEngineV5.Create(ifcFacetedBrep);
             var shapeGeom = geomEngineV5.CreateShapeGeometry(mm.ModelFactors.OneMilliMeter, facetedBrepV5, mm.ModelFactors.Precision, null);
@@ -134,6 +128,7 @@ namespace Xbim.Geometry.Engine.Tests
                 i++;
             }
         }
+
         [Fact]
         public void Can_Create_Correct_Mesh_For_Block()
         {

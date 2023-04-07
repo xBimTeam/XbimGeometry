@@ -2,7 +2,6 @@
 #include "Unmanaged/NWexBimMesh.h"
 #include "Unmanaged/NShapeProximityUtils.h"
 #include "Unmanaged/NShapeService.h"
-#include "ModelGeometryService.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Builder.hxx>
@@ -11,7 +10,6 @@
 #include <TopoDS.hxx>
 
 #include "../Extensions/ToGTransform.h"
-
 #include "../BRep/XShape.h"
 #include "../BRep/XCompound.h"
 #include "../BRep/XFace.h"
@@ -260,35 +258,7 @@ namespace Xbim
 							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
 			}
 
-			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves)
-			{
-				return CreateWexBimMesh(shape, meshFactors, scale, bounds, hasCurves,false,true,true);
-			}
-
-			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds)
-			{
-				bool hasCurves;
-				return CreateWexBimMesh(shape, meshFactors, scale, bounds, hasCurves);
-			}
-
-			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, IXMeshFactors^ meshFactors, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves, bool checkEdges, bool cleanBefore, bool cleanAfter)
-			{
-				const TopoDS_Shape& topoShape = static_cast<XShape^>(shape)->GetTopoShape();
-				auto mesh = NWexBimMesh::CreateMesh(topoShape, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection, scale);
-				auto bMin = mesh.BndBox.CornerMin();
-				auto bMax = mesh.BndBox.CornerMax();
-				bounds = gcnew XAxisAlignedBox(Bnd_Box(gp_Pnt(bMin[0], bMin[1], bMin[2]), gp_Pnt(bMax[0], bMax[1], bMax[2])));
-				std::stringstream output;
-				mesh.WriteToStream(output);
-				int size = (int)output.str().length();
-				auto buffer = std::make_unique<char[]>(size);
-				output.seekg(0);
-				output.read(buffer.get(), size);
-				cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
-				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
-				return byteArray;
-			}
-
+			
 		}
 	}
 }
