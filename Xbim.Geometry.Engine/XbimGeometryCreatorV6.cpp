@@ -711,7 +711,9 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcFaceBasedSurfaceModel^ IIfcSurface, ILogger^)
 		{
-			return gcnew XbimCompound(IIfcSurface, Logger(), this);
+			bool isFixed;
+			TopoDS_Shape shape = GetShellFactory()->BuildFaceBaseSurfaceModel(IIfcSurface, isFixed);
+			return gcnew XbimCompound(shape, this);
 		};
 
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcTessellatedFaceSet^ faceSet, ILogger^)

@@ -202,21 +202,22 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 			gp_Vec wireNormal;
 			if (WireFactory.GetNormal(outerBound, wireNormal)) //no normal then unlikely to be a face, most likely co-linear edges
 			{
-				BRepBuilderAPI_FindPlane planeFinder(outerBound, tol);
+				BRepBuilderAPI_FindPlane planeFinder(outerBound, tolerance);
 				Handle(Geom_Plane) plane;
 				TopoDS_Face theFace;
 				if (planeFinder.Found()) //the wire is planar
 				{
 					plane = planeFinder.Plane();
-					builder.MakeFace(theFace, plane, tol);
+					builder.MakeFace(theFace, plane, tolerance);
 				}
 				else //the wire is not planar and will most likely result in more than one face, this happens in some faceted models
 				{
 					gp_Pnt baryCentre;
 					BRepFeat::Barycenter(outerBound, baryCentre);
 					plane = new Geom_Plane(baryCentre, wireNormal);
-					builder.MakeFace(theFace, plane, tol);
+					builder.MakeFace(theFace, plane, tolerance);
 					needsFixing = true;
+					//BRepTools::Write(outerBound, "/tmp/2.brep");
 				}
 				
 				builder.Add(theFace, outerBound);

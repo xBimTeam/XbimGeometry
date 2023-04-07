@@ -6,12 +6,12 @@ void NFactoryBase::LogStandardFailure(const Standard_Failure& e, char* additiona
 	std::stringstream strm;
 	strm << additionalMessage << std::endl;
 	e.Print(strm);
-	pLoggingService->LogError(strm.str().c_str());
+	pLoggingService->LogWarning(strm.str().c_str());
 }
 
 void NFactoryBase::LogStandardFailure(const Standard_Failure& e)
 {
 	std::stringstream strm;
 	e.Print(strm);
-	pLoggingService->LogError(strm.str().c_str());
+	pLoggingService->LogWarning(strm.str().c_str());
 }

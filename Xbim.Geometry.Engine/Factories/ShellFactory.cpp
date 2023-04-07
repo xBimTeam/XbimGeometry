@@ -36,7 +36,7 @@ namespace Xbim
 						{
 							const TopoDS_Shell& shell = TopoDS::Shell(childIterator.Value());
 							if (shell.NbChildren() < 4)
-								LogInformation(closedShell, "A Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
+								LogDebug(closedShell, "A Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
 							else
 								b.Add(solidCompound, sfs.SolidFromShell(shell));
 						}
@@ -47,7 +47,7 @@ namespace Xbim
 					const TopoDS_Shell& shell = TopoDS::Shell(shape);
 					if (shell.NbChildren() < 4)
 					{
-						LogInformation(closedShell, "Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
+						LogDebug(closedShell, "Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
 						return TopoDS_Solid();
 					}
 					else return sfs.SolidFromShell(shell);
@@ -66,7 +66,7 @@ namespace Xbim
 				{
 					auto plane = dynamic_cast<IIfcPlane^>(faceSurface->FaceSurface);
 					if (plane == nullptr)
-						LogWarning(faceSet, "IfcFaceSurface treated as a planar IfcFace, but the surface is not a plane");
+						LogDebug(faceSet, "IfcFaceSurface treated as a planar IfcFace, but the surface is not a plane");
 				}
 				//build as IfcFace set
 				if (!dynamic_cast<IIfcFace^>(Enumerable::First(faceSet->CfsFaces)))
@@ -105,7 +105,7 @@ namespace Xbim
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
 				if (needsFixing)
-					LogInformation(faceSet, "Attempting to fix errors in faceset definition");
+					LogDebug(faceSet, "Attempting to fix errors in faceset definition");
 				return FixShell(shell, faceSet, isFixed);
 
 
@@ -198,9 +198,23 @@ namespace Xbim
 				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build PolygonalFaceSet", faceSet);
-				if (needsFixing) LogInformation(faceSet, "Attempting to fix errors in faceset definition");
+				if (needsFixing) 
+					LogDebug(faceSet, "Attempting to fix errors in faceset definition");
 				return FixShell(shell, faceSet, isFixed);
 
+			}
+			TopoDS_Shape ShellFactory::BuildFaceBaseSurfaceModel(IIfcFaceBasedSurfaceModel^ fbsm, bool& isFixed)
+			{
+				BRep_Builder b;
+				TopoDS_Compound  faceSetShape;
+				b.MakeCompound(faceSetShape);
+				for each (auto faceSet in fbsm->FbsmFaces)
+				{
+					auto shape = BuildConnectedFaceSet(faceSet, isFixed);
+					if (!shape.IsNull())
+						b.Add(faceSetShape, shape);
+				}
+				return faceSetShape;
 			}
 		}
 	}

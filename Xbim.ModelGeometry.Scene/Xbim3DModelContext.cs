@@ -9,6 +9,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+#if NET6_0
+using System.Runtime.Intrinsics.X86;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
@@ -17,6 +20,7 @@ using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Clustering;
 using Xbim.ModelGeometry.Scene.Extensions;
@@ -51,7 +55,7 @@ namespace Xbim.ModelGeometry.Scene
             private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
-            
+
 
             public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
             {
@@ -579,7 +583,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="contextType"></param>
         /// <param name="requiredContextIdentifier"></param>
         public Xbim3DModelContext(IModel model, ILoggerFactory loggerFactory, XGeometryEngineVersion engineVersion, string contextType = "model", string requiredContextIdentifier = null)
-            :this(model, contextType, requiredContextIdentifier, loggerFactory.CreateLogger<Xbim3DModelContext>(), engineVersion, loggerFactory)
+            : this(model, contextType, requiredContextIdentifier, loggerFactory.CreateLogger<Xbim3DModelContext>(), engineVersion, loggerFactory)
         {
 
         }
@@ -601,16 +605,16 @@ namespace Xbim.ModelGeometry.Scene
             var xbimServices = XbimServices.Current;
             var services = xbimServices.ServiceProvider;
             var factory = services.GetService<IXbimGeometryServicesFactory>();
-            if(factory == null)
+            if (factory == null)
             {
                 throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found\n\nEnsure you have registered the GeometryEngine with services.AddXbimGeometryEngine()");
             }
-            
+
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
             _model = model;
-            if(loggerFactory==null) loggerFactory = xbimServices.GetLoggerFactory();
+            if (loggerFactory == null) loggerFactory = xbimServices.GetLoggerFactory();
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
-            
+
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
 
             model.AddRevitWorkArounds();
@@ -1142,7 +1146,7 @@ namespace Xbim.ModelGeometry.Scene
 
             if (r.ContextOfItems == null)
             {
-                if(contexts.Count == 1) // Malformed but assume everything is in the context when there is only single
+                if (contexts.Count == 1) // Malformed but assume everything is in the context when there is only single
                 {
                     LogWarning(r, "Inferring default context for this representation");
                     return true;
@@ -1457,7 +1461,7 @@ namespace Xbim.ModelGeometry.Scene
                     // Console.WriteLine(shape.GetType().Name);
                     XbimShapeGeometry shapeGeom = null;
                     IXbimGeometryObject geomModel = null;
-                    if (!isGeometryV6 && !isFeatureElementShape && !isVoidedProductShape &&  xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
+                    if (!isGeometryV6 && !isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
                     {
                         shapeGeom = xbimTessellator.Mesh(shape);
                     }
@@ -1476,6 +1480,21 @@ namespace Xbim.ModelGeometry.Scene
                             //just mesh the big shape as we have no idea what we shoudl have               
                             shapeGeom = xbimTessellator.Mesh((IIfcRepresentationItem)Model.Instances[faceSetEntityLabel]);
                         }
+                        catch (XbimGeometryServiceException)
+                        {
+                            //this is a handled geoemtry excpetion where no shape geoemtry is returned,
+                            //the issues will have been logged, carry on to the next one
+                            _logger.LogWarning("Failed to build geometry for #{0}=({1})", shape.EntityLabel, shape.GetType().Name.ToUpper());
+
+                        }
+                        catch (XbimGeometryFactoryException )
+                        {
+                            //this is a handled geoemtry excpetion where no shape geoemtry is returned,
+                            //the issues will have been logged, carry on to the next one
+                            _logger.LogWarning("Failed to build geometry for #{0}=({1})", shape.EntityLabel, shape.GetType().Name.ToUpper());
+
+                        }
+
                         if (geomModel != null && geomModel.IsValid)
                         {
                             shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
