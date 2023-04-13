@@ -14,6 +14,7 @@
 #include "../BRep/XPlane.h"
 #include <TopoDS.hxx>
 using namespace System;
+using namespace System::Linq;
 using namespace Xbim::Geometry::BRep;
 
 namespace Xbim
@@ -37,7 +38,12 @@ namespace Xbim
 				};
 				double deflection = isMetric ? oneMillimeter * 25 : oneMillimeter * 25.4;	
 				double angularDeflection = M_PI / 6;
-				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				// Ibrahim:
+				// For complex polyhedrons we use polygonal hidden-line removal algorithm
+				// instead of the exact b-rep hlr algorithm
+				// Complexity is measured by number of faces of a shape. 
+				bool useHlrPolyAlgo = System::Linq::Enumerable::Count(shape->AllFaces()) > 100;
+				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref(), useHlrPolyAlgo);
 				return footprint;
 			}
 

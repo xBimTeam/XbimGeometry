@@ -16,7 +16,9 @@
 
 #include <algorithm>
 #include <HLRAlgo_Projector.hxx>
+#include <BRepMesh_IncrementalMesh.hxx>
 #include <HLRBRep_Algo.hxx>
+#include <HLRBRep_PolyAlgo.hxx>
 #include <IMeshTools_Parameters.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 #include "NShapeFactory.h"
@@ -31,6 +33,7 @@
 #include "NLoopSegment.h"
 #include <unordered_set>
 #include <BRepTools.hxx>
+#include <HLRBRep_PolyHLRToShape.hxx>
 
 int NProjectionFactory::GetOrAddVertex(
 	BRepMesh_VertexInspector& anInspector,
@@ -233,10 +236,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 
 }
 
-
-
-
-void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint)
+void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint, bool useHlrPolyAlgo)
 {
 
 	const double halfPi = std::_Pi / 2;
@@ -256,40 +256,73 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 	{
 		//process each 
 		HLRAlgo_Projector aProjector; //create an axonometric projector with 0 focus and a plane it the XY plane at height srZmin
-
-		Handle(HLRBRep_Algo) aHlrBrepAlgo = new HLRBRep_Algo();
-		//project the shape onto plane Z==0
-
-		aHlrBrepAlgo->Add(shape);
-		aHlrBrepAlgo->Projector(aProjector);
-		aHlrBrepAlgo->Update();
-		aHlrBrepAlgo->Hide();
-
-		HLRBRep_HLRToShape aBrepHlr2Shape(aHlrBrepAlgo);
-
-		//get the visible and outline line segments
-
-
+		TopTools_SequenceOfShape visibleEdges;
+		TopTools_SequenceOfShape outlineEdges;
+		 
 		IMeshTools_Parameters meshParams;
 		meshParams.Deflection = linearDeflection;
 		meshParams.Angle = angularDeflection;
 
-		TopTools_SequenceOfShape visibleEdges;
+		 
+		if (useHlrPolyAlgo) {
 
-		for (TopExp_Explorer e(aBrepHlr2Shape.CompoundOfEdges(HLRBRep_TypeOfResultingEdge::HLRBRep_Sharp, true, false), TopAbs_EDGE); e.More(); e.Next())
-		{
-			//triangulate the edge to get the polygon we want to represent it
-			NShapeFactory::Triangulate(e.Current(), meshParams);
-			visibleEdges.Append(e.Current());
+			Handle(HLRBRep_PolyAlgo) myPolyAlgo = new HLRBRep_PolyAlgo();
+
+			// clean cached triangulation
+			BRepTools::Clean(shape);
+			
+			BRepMesh_IncrementalMesh aMesh1(shape, linearDeflection, Standard_False, angularDeflection);
+
+			myPolyAlgo->Load(shape);
+			myPolyAlgo->Projector(aProjector);
+			myPolyAlgo->Update();
+
+			HLRBRep_PolyHLRToShape aBrepHlr2Shape;
+			aBrepHlr2Shape.Update(myPolyAlgo);
+
+			//get the visible and outline line segments 
+			for (TopExp_Explorer e(aBrepHlr2Shape.VCompound(), TopAbs_EDGE); e.More(); e.Next())
+			{
+				//triangulate the edge to get the polygon we want to represent it
+				NShapeFactory::Triangulate(e.Current(), meshParams);
+				visibleEdges.Append(e.Current());
+			}
+
+			//sometimes outline curves can intersect, split the curves and check for intersection as a bound of a shape cannot have intersecting edges
+			for (TopExp_Explorer e(aBrepHlr2Shape.OutLineVCompound(), TopAbs_EDGE); e.More(); e.Next())
+			{
+				//triangulate the edge to get the polygon we want to represent it
+				NShapeFactory::Triangulate(e.Current(), meshParams);
+				outlineEdges.Append(e.Current());
+			}
 		}
+		else {
 
-		//sometimes outline curves can intersect, split the curves and check for intersection as a bound of a shape cannot have intersecting edges
-		TopTools_SequenceOfShape outlineEdges;
-		for (TopExp_Explorer e(aBrepHlr2Shape.CompoundOfEdges(HLRBRep_TypeOfResultingEdge::HLRBRep_OutLine, true, false), TopAbs_EDGE); e.More(); e.Next())
-		{
-			//triangulate the edge to get the polygon we want to represent it
-			NShapeFactory::Triangulate(e.Current(), meshParams);
-			outlineEdges.Append(e.Current());
+			Handle(HLRBRep_Algo) aHlrBrepAlgo = new HLRBRep_Algo();
+			//project the shape onto plane Z==0
+
+			aHlrBrepAlgo->Add(shape);
+			aHlrBrepAlgo->Projector(aProjector);
+			aHlrBrepAlgo->Update();
+			aHlrBrepAlgo->Hide();
+
+			HLRBRep_HLRToShape aBrepHlr2Shape(aHlrBrepAlgo);
+
+			//get the visible and outline line segments
+			for (TopExp_Explorer e(aBrepHlr2Shape.CompoundOfEdges(HLRBRep_TypeOfResultingEdge::HLRBRep_Sharp, true, false), TopAbs_EDGE); e.More(); e.Next())
+			{
+				//triangulate the edge to get the polygon we want to represent it
+				NShapeFactory::Triangulate(e.Current(), meshParams);
+				visibleEdges.Append(e.Current());
+			}
+
+			//sometimes outline curves can intersect, split the curves and check for intersection as a bound of a shape cannot have intersecting edges
+			for (TopExp_Explorer e(aBrepHlr2Shape.CompoundOfEdges(HLRBRep_TypeOfResultingEdge::HLRBRep_OutLine, true, false), TopAbs_EDGE); e.More(); e.Next())
+			{
+				//triangulate the edge to get the polygon we want to represent it
+				NShapeFactory::Triangulate(e.Current(), meshParams);
+				outlineEdges.Append(e.Current());
+			}
 		}
 
 		//transform all the edge into linear segments
@@ -383,7 +416,6 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		}
 
 
-
 		if (segments.Size() == 0)
 		{
 			const char* msg = "No lines segments found to build Footprint";
@@ -446,6 +478,12 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 		footprint.MinZ = srZmin;
 		footprint.MaxZ = srZmax;
 	}
+	finally 
+	{
+		// clean cached triangulation
+		if(useHlrPolyAlgo)
+			BRepTools::Clean(shape);
+	}
 
 }
 
@@ -491,7 +529,6 @@ bool NProjectionFactory::BuildSegment(gp_XYZ pointA, gp_XYZ pointB, double toler
 	segment = new Geom2d_TrimmedCurve(segLine, 0, dir.Magnitude());
 	return true;
 }
-
 
 TopoDS_Compound NProjectionFactory::GetOutline(const TopoDS_Shape& shape)
 {
