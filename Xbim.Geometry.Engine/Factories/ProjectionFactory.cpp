@@ -42,7 +42,7 @@ namespace Xbim
 				// For complex polyhedrons we use polygonal hidden-line removal algorithm
 				// instead of the exact b-rep hlr algorithm
 				// Complexity is measured by number of faces of a shape. 
-				bool useHlrPolyAlgo = System::Linq::Enumerable::Count(shape->AllFaces()) > 100;
+				bool useHlrPolyAlgo = System::Linq::Enumerable::Count(shape->AllFaces()) > 1000;
 				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref(), useHlrPolyAlgo);
 				return footprint;
 			}
