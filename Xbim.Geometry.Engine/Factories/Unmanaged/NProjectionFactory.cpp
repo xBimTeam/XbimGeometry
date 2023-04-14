@@ -489,33 +489,42 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 
 void NProjectionFactory::ConvertToLinearSegments(const TopoDS_Edge& edge, TColGeom2d_SequenceOfCurve& segments, double tolerance)
 {
-	TopLoc_Location location;
+	try
+	{
+		TopLoc_Location location;
 
-	Handle(Poly_Polygon3D) polygon3d = BRep_Tool::Polygon3D(edge, location);
-	if (polygon3d->NbNodes() == 0) return; // nothing here	
-	bool isIdentity = location.IsIdentity();
-	gp_Trsf matrix;
-	//this should be unnecessary and never happen, as with projection code it is always identity; protective measure in case OCC code changes in the future
-	if (!isIdentity) matrix = location.Transformation();
-	auto&& segIt = polygon3d->Nodes().cbegin(); //grab the first point
-	gp_XYZ pointA = segIt->XYZ();
-	if (!isIdentity) matrix.Transforms(pointA);
-	gp_XYZ firstPoint = pointA;
-	segIt++; //move to next point
-	for (; segIt != polygon3d->Nodes().cend(); segIt++)
-	{
-		gp_XYZ pointB = segIt->XYZ();
-		if (!isIdentity) matrix.Transforms(pointB);
-		Handle(Geom2d_TrimmedCurve) segment;
-		if (BuildSegment(pointA, pointB, tolerance, segment))
-			segments.Append(segment);
-		pointA = pointB;
+		Handle(Poly_Polygon3D) polygon3d = BRep_Tool::Polygon3D(edge, location);
+		if (polygon3d->NbNodes() == 0) return; // nothing here	
+		bool isIdentity = location.IsIdentity();
+		gp_Trsf matrix;
+		//this should be unnecessary and never happen, as with projection code it is always identity; protective measure in case OCC code changes in the future
+		if (!isIdentity) matrix = location.Transformation();
+		auto&& segIt = polygon3d->Nodes().cbegin(); //grab the first point
+		gp_XYZ pointA = segIt->XYZ();
+		if (!isIdentity) matrix.Transforms(pointA);
+		gp_XYZ firstPoint = pointA;
+		segIt++; //move to next point
+		for (; segIt != polygon3d->Nodes().cend(); segIt++)
+		{
+			gp_XYZ pointB = segIt->XYZ();
+			if (!isIdentity) matrix.Transforms(pointB);
+			Handle(Geom2d_TrimmedCurve) segment;
+			if (BuildSegment(pointA, pointB, tolerance, segment))
+				segments.Append(segment);
+			pointA = pointB;
+		}
+		if (edge.Closed()) //for a closed segment like a circle or elipse, we need to repeat the last segment
+		{
+			Handle(Geom2d_TrimmedCurve) segment;
+			if (BuildSegment(pointA, firstPoint, tolerance, segment))
+				segments.Append(segment);
+		}
 	}
-	if (edge.Closed()) //for a closed segment like a circle or elipse, we need to repeat the last segment
+	catch (const Standard_Failure& sf)
 	{
-		Handle(Geom2d_TrimmedCurve) segment;
-		if (BuildSegment(pointA, firstPoint, tolerance, segment))
-			segments.Append(segment);
+		std::stringstream strm;
+		sf.Print(strm);
+		pLoggingService->LogError(strm.str().c_str());
 	}
 }
 
