@@ -18,8 +18,8 @@ namespace Xbim
 			public:
 				ProjectionFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NProjectionFactory()){}
 				
-				virtual IXFootprint^ CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection);
-				virtual IXFootprint^ CreateFootprint(IXShape^ shape);
+				virtual IXFootprint^ CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection, bool createExactFootprint);
+				virtual IXFootprint^ CreateFootprint(IXShape^ shape, bool createExactFootprint);
 				virtual IXCompound^ GetOutline(IXShape^ shape);
 				virtual IEnumerable<IXFace^>^ CreateSection(IXShape^ shape, IXPlane^ cutPlane); 
 			};

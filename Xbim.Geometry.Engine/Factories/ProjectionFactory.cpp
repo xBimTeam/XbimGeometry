@@ -23,7 +23,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape)
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, bool createExactFootprint)
 			{
 				if (!shape->IsValidShape())
 					throw RaiseGeometryFactoryException("Footprinting error: invalid shape");
@@ -38,16 +38,11 @@ namespace Xbim
 				};
 				double deflection = isMetric ? oneMillimeter * 25 : oneMillimeter * 25.4;	
 				double angularDeflection = M_PI / 6;
-				// Ibrahim:
-				// For complex polyhedrons we use polygonal hidden-line removal algorithm
-				// instead of the exact b-rep hlr algorithm
-				// Complexity is measured by number of faces of a shape. 
-				bool useHlrPolyAlgo = System::Linq::Enumerable::Count(shape->AllFaces()) > 1000;
-				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref(), useHlrPolyAlgo);
+				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref(), !createExactFootprint);
 				return footprint;
 			}
-
-			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection)
+			 
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection, bool createExactFootprint)
 			{
 
 				if (!shape->IsValidShape())
@@ -55,9 +50,10 @@ namespace Xbim
 
 				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
-				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref(), !createExactFootprint);
 				return footprint;
 			}
+
 			IXCompound^ ProjectionFactory::GetOutline(IXShape^ shape)
 			{
 				if (!shape->IsValidShape())
