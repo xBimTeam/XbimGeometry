@@ -1,11 +1,13 @@
 #include "ShellFactory.h"
 #include "FaceFactory.h"
+#include "SurfaceFactory.h"
 #include "GeometryFactory.h"
 #include <vector>
 #include <unordered_map>
 #include <ShapeFix_Shape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Iterator.hxx>
+#include <TColgp_SequenceOfAx1.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::Linq;
@@ -56,29 +58,42 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Failed to build closed shell", closedShell);
 			}
 
+			/// <summary>
+			/// Builds a connected face set where each face is planar, use BuildConnectedAdvancedFaceSet for advanced faces
+			/// </summary>
+			/// <param name="faceSet"></param>
+			/// <param name="isFixed"></param>
+			/// <returns></returns>
 			TopoDS_Shape ShellFactory::BuildConnectedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed)
 			{
 				if (faceSet->CfsFaces->Count == 0) return TopoDS_Shell();
 				if (dynamic_cast<IIfcAdvancedFace^>(Enumerable::First(faceSet->CfsFaces)))
 					return ShellFactory::BuildConnectedAdvancedFaceSet(faceSet, isFixed);
-				auto faceSurface = dynamic_cast<IIfcFaceSurface^>(Enumerable::First(faceSet->CfsFaces));
-				if (faceSurface != nullptr)
-				{
-					auto plane = dynamic_cast<IIfcPlane^>(faceSurface->FaceSurface);
-					if (plane == nullptr)
-						LogDebug(faceSet, "IfcFaceSurface treated as a planar IfcFace, but the surface is not a plane");
-				}
+
 				//build as IfcFace set
 				if (!dynamic_cast<IIfcFace^>(Enumerable::First(faceSet->CfsFaces)))
 					throw RaiseGeometryFactoryException("IfcConnectedFaceSet must comprises faces of either IfcFace, IfcFaceSurface or IfcAdvancedFace", faceSet);
 				//process into native structure
 				std::vector<std::vector<std::vector<int>>> faceMesh;
 				std::unordered_map<int, gp_XYZ> points;
-
+				TColgp_SequenceOfAx1 planAxes;
+				std::vector<int> planeIndices; planeIndices.reserve(faceSet->CfsFaces->Count);
 				for each (IIfcFace ^ face in  faceSet->CfsFaces)
 				{
 					std::vector<std::vector<int>> faceLoops;
-
+					auto faceSurface = dynamic_cast<IIfcFaceSurface^>(face);
+					int planeIndex = 0;
+					if (faceSurface != nullptr)
+					{
+						auto facePlane = dynamic_cast<IIfcPlane^>(faceSurface->FaceSurface);
+						if (facePlane != nullptr)
+						{
+							auto plane = SURFACE_FACTORY->BuildPlane(facePlane, false);
+							planAxes.Append(faceSurface->SameSense ? plane->Axis() : plane->Axis().Reversed());
+							planeIndex = planAxes.Size();
+						}
+					}
+					planeIndices.push_back(planeIndex);
 					for each (IIfcFaceBound ^ bound in face->Bounds) //build all the loops
 					{
 						IIfcPolyLoop^ polyloop = dynamic_cast<IIfcPolyLoop^>(bound->Bound);
@@ -101,7 +116,7 @@ namespace Xbim
 					faceMesh.push_back(faceLoops);
 				}
 				bool needsFixing;
-				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
+				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, planeIndices, planAxes, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
 				if (needsFixing)
@@ -167,9 +182,11 @@ namespace Xbim
 				{
 					points[i++] = gp_XYZ(coords[0], coords[1], coords[2]);
 				}
-
+				TColgp_SequenceOfAx1 planAxes;
+				std::vector<int> planeIndices; planeIndices.reserve(faceSet->Faces->Count);
 				for each (auto face in faceSet->Faces)
 				{
+					planeIndices.push_back(0);
 					std::vector<std::vector<int>> faceLoops;
 
 					std::vector<int> outerLoop;
@@ -195,10 +212,10 @@ namespace Xbim
 					faceMesh.push_back(faceLoops);
 				}
 				bool needsFixing;
-				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
+				TopoDS_Shell shell = EXEC_NATIVE->BuildConnectedFaceSet(faceMesh, points, planeIndices, planAxes, ModelGeometryService->Precision, ModelGeometryService->MinimumGap, needsFixing);
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build PolygonalFaceSet", faceSet);
-				if (needsFixing) 
+				if (needsFixing)
 					LogDebug(faceSet, "Attempting to fix errors in faceset definition");
 				return FixShell(shell, faceSet, isFixed);
 

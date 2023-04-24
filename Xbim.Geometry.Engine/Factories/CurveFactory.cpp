@@ -18,7 +18,7 @@
 #include "TColgp_Array1OfPnt2d.hxx"
 #include "TColStd_Array1OfReal.hxx"
 #include "TColStd_Array1OfInteger.hxx"
- 
+
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 #include <NCollection_Vector.hxx>
@@ -183,8 +183,14 @@ namespace Xbim
 			void CurveFactory::BuildCompositeCurveSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments)
 			{
 				segments.Clear();
+
+				int lastLabel = -1;
 				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
 				{
+					//a bug in some archicad models writes each segment out twice, ignore if we get the same segment as the previous one, using the IFC label, this never makes sense
+					if (lastLabel == segment->EntityLabel)
+						continue;
+					lastLabel = segment->EntityLabel;
 					IIfcReparametrisedCompositeCurveSegment^ reparameterisedSegment = dynamic_cast<IIfcReparametrisedCompositeCurveSegment^>(segment);
 					if (reparameterisedSegment != nullptr && (double)reparameterisedSegment->ParamLength != 1.)
 						throw RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
@@ -532,7 +538,7 @@ namespace Xbim
 					bool isConic = (dynamic_cast<IIfcConic^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isLine = (dynamic_cast<IIfcLine^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
-					
+
 					bool sense = ifcTrimmedCurve->SenseAgreement;
 					//get the parametric values
 					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
@@ -564,7 +570,7 @@ namespace Xbim
 							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve", ifcTrimmedCurve);
 						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
 							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve", ifcTrimmedCurve);
-						
+
 					}
 					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
 						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)", ifcTrimmedCurve);
@@ -580,7 +586,7 @@ namespace Xbim
 
 					if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //sanity check in case the logic has missed a situtation
 						throw RaiseGeometryFactoryException("Error converting Ifc Trim Points", ifcTrimmedCurve);
-					
+
 					if (Math::Abs(u1 - u2) < Precision::Confusion()) //if the parameters are the same trimming will fail if not a conic curve
 					{
 						if (isConic)
@@ -1282,10 +1288,10 @@ namespace Xbim
 						/*if (!segment->SameSense)
 							boundedCurve->Reverse();*/
 						segments.Append(boundedCurve);
-					} 
+					}
 				}
 			}
-			 
+
 			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildLinearSegment(const gp_Pnt2d& start, const gp_Pnt2d& end)
 			{
 				auto segment = EXEC_NATIVE->BuildTrimmedLine2d(start, end);

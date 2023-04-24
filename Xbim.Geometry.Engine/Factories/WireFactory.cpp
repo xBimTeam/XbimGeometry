@@ -330,6 +330,7 @@ namespace Xbim
 				{
 					if ((int)ifcCompositeCurve->Dim == 2)
 					{
+						int e = ifcCompositeCurve->EntityLabel;
 						TColGeom2d_SequenceOfBoundedCurve segments;
 						CURVE_FACTORY->BuildCompositeCurveSegments2d(ifcCompositeCurve, segments);
 						TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
