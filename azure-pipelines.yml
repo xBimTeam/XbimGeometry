@@ -108,6 +108,7 @@ jobs:
       restoreSolution: 'Xbim.Geometry.Engine.sln'
       feedsToUse: config
       nugetConfigPath: nuget.config
+
   - task: NuGetCommand@2
     displayName: 'NuGet restore packages.config'
     inputs:

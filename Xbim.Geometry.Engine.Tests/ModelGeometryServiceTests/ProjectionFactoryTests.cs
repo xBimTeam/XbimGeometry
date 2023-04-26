@@ -31,9 +31,9 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
 
-        [Theory(/*Skip = "CreateFootprint stuck with some infinite loop."*/)]
+        [Theory()]
         [InlineData("TestFiles/Brep/Flow Terminal.brep")]
-        public void Can_project_shape(string shapePath)
+        public void Can_create_footprint_with_exact_alg(string shapePath)
         {
             var projectionFactory = _modelSvc.ProjectionFactory;
             var shapeFactory = _modelSvc.ShapeFactory;
@@ -43,6 +43,22 @@ namespace Xbim.Geometry.Engine.Tests
             shape.Should().NotBeNull();
 
             var footprint = projectionFactory.CreateFootprint(shape);
+
+            footprint.Should().NotBeNull();
+        }
+
+        [Theory()]
+        [InlineData("TestFiles/Brep/Flow Terminal.brep")]
+        public void Can_create_footprint_with_polyhedral_simplification_alg(string shapePath)
+        {
+            var projectionFactory = _modelSvc.ProjectionFactory;
+            var shapeFactory = _modelSvc.ShapeFactory;
+            string brep = File.ReadAllText(shapePath);
+            var shape = shapeFactory.Convert(brep);
+
+            shape.Should().NotBeNull();
+
+            var footprint = projectionFactory.CreateFootprint(shape, false);
 
             footprint.Should().NotBeNull();
         }

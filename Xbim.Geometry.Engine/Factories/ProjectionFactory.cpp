@@ -14,6 +14,7 @@
 #include "../BRep/XPlane.h"
 #include <TopoDS.hxx>
 using namespace System;
+using namespace System::Linq;
 using namespace Xbim::Geometry::BRep;
 
 namespace Xbim
@@ -22,7 +23,7 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape)
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, bool createExactFootprint)
 			{
 				if (!shape->IsValidShape())
 					throw RaiseGeometryFactoryException("Footprinting error: invalid shape");
@@ -37,11 +38,11 @@ namespace Xbim
 				};
 				double deflection = isMetric ? oneMillimeter * 25 : oneMillimeter * 25.4;	
 				double angularDeflection = M_PI / 6;
-				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				EXEC_NATIVE->CreateFootPrint(topoShape, deflection, angularDeflection, _modelService->Precision, footprint->Ref(), !createExactFootprint);
 				return footprint;
 			}
-
-			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection)
+			 
+			IXFootprint^ ProjectionFactory::CreateFootprint(IXShape^ shape, double linearDeflection, double angularDeflection, bool createExactFootprint)
 			{
 
 				if (!shape->IsValidShape())
@@ -49,9 +50,10 @@ namespace Xbim
 
 				TopoDS_Shape topoShape = TOPO_SHAPE(shape);
 				XFootprint^ footprint = gcnew XFootprint();
-				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref());
+				EXEC_NATIVE->CreateFootPrint(topoShape, linearDeflection, angularDeflection, _modelService->Precision, footprint->Ref(), !createExactFootprint);
 				return footprint;
 			}
+
 			IXCompound^ ProjectionFactory::GetOutline(IXShape^ shape)
 			{
 				if (!shape->IsValidShape())

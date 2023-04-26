@@ -23,7 +23,7 @@ class NProjectionFactory : public NFactoryBase
 
 public:
 	
-	void CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint);
+	void CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint, bool useHlrPolyAlgo = false);
 	TopoDS_Compound GetOutline(const TopoDS_Shape& shape);
 	bool CreateSection(const TopoDS_Shape& shape, const Handle(Geom_Surface)& cutSurface, double tolerance, TopTools_ListOfShape& result);
 
