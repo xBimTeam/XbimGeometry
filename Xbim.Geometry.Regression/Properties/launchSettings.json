@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Steve\\Downloads\\Dormitory-ALL-IFC\\ELE-FIR-PLU-HVAC-CON-SEC-ARC.ifc\" /MaxThreads 4",
+      "commandLineArgs": "\"C:\\Users\\Steve\\Downloads\\Dormitory-ALL-IFC\\ELE-FIR-PLU-HVAC-CON-SEC-ARC.ifc\" /MaxThreads 8",
       "nativeDebugging": true
     }
   }

@@ -67,7 +67,7 @@ namespace Xbim
 					//break;
 				}
 				if (hasWarnings)
-					LogWarning(boolResult, "Boolean Result of {0} issued warnings. See logs", boolResult->Operator.ToString());
+					LogDebug(boolResult, "Boolean Result of {0} issued warnings. See logs", boolResult->Operator.ToString());
 				if (result.IsNull())
 					throw RaiseGeometryFactoryException("Boolean Result returned an empty shape", boolResult);
 				else
@@ -107,9 +107,9 @@ namespace Xbim
 				bool hasWarnings = false;
 				TopoDS_Shape result = EXEC_NATIVE->PerformBoolean(arguments, tools, tolerance, BOPAlgo_CUT, hasWarnings);
 				if (hasWarnings)
-					LogWarning("Boolean cut operation has raised warnings. See logs");
+					LogDebug("Boolean cut operation has raised warnings. See logs");
 				if (result.IsNull())
-					throw RaiseGeometryFactoryException("Boolean intersect returned an empty result");
+					throw RaiseGeometryFactoryException("Boolean cut returned an empty result");
 				else
 					return result;
 			}

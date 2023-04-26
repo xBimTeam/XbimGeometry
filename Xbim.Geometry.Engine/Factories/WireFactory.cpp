@@ -174,7 +174,7 @@ namespace Xbim
 						if (wire.IsNull())
 							throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 						if (hasInfo)
-							LogInformation(ifcPolyline, "Polyline has been corrected. See logs");
+							LogDebug(ifcPolyline, "Polyline has been corrected. See logs");
 						return wire;
 					}
 					else
@@ -189,7 +189,7 @@ namespace Xbim
 						bool hasInfo;
 						TopoDS_Wire wire = EXEC_NATIVE->BuildPolyline3d(points, ModelGeometryService->MinimumGap, hasInfo);
 						if (hasInfo)
-							LogInformation(ifcPolyline, "Polyline has been corrected. See logs");
+							LogDebug(ifcPolyline, "Polyline has been corrected. See logs");
 						if (wire.IsNull())
 							throw RaiseGeometryFactoryException("IIfcPolyline could not be built as a wire", ifcPolyline);
 						return wire;
@@ -330,7 +330,6 @@ namespace Xbim
 				{
 					if ((int)ifcCompositeCurve->Dim == 2)
 					{
-						int e = ifcCompositeCurve->EntityLabel;
 						TColGeom2d_SequenceOfBoundedCurve segments;
 						CURVE_FACTORY->BuildCompositeCurveSegments2d(ifcCompositeCurve, segments);
 						TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);

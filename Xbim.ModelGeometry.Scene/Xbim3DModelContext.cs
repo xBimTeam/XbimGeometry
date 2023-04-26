@@ -616,7 +616,10 @@ namespace Xbim.ModelGeometry.Scene
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
 
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
-
+            if(engineVersion == XGeometryEngineVersion.V6) 
+                _modelServices = ((IXGeometryEngineV6)_engine).ModelGeometryService; 
+            else 
+                _modelServices = factory.CreateModelGeometryService(model,loggerFactory);
             model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context
@@ -840,6 +843,7 @@ namespace Xbim.ModelGeometry.Scene
         /// Default properties can set in the Model.Modelfactors if the same deflection applies to all elements.
         /// </summary>
         public MeshingBehaviourSetter CustomMeshingBehaviour;
+        private IXModelGeometryService _modelServices;
 
         /// <summary>
         /// Computes and writes to the DB all shapes of products considering their features (openings and extensions).
@@ -885,7 +889,7 @@ namespace Xbim.ModelGeometry.Scene
                 int styleId = 0; //take the style of any part of the main shape
                 var element = elementToFeatureGroup.Key;
                 using var _ = _logger.BeginScope("WriteProductsWithFeatures {entityLabel}", element.EntityLabel);
-                _logger.LogTrace("Processing features for {0}", element.EntityLabel);
+               // _logger.LogTrace("Processing features for {0}", element.EntityLabel);
 
                 // here is where the feature's geometry are calculated
                 //
@@ -975,7 +979,7 @@ namespace Xbim.ModelGeometry.Scene
                     // make the finished shape
                     if (behaviour.HasFlag(MeshingBehaviourResult.PerformAdditions) && openingAndProjectionOp.ProjectGeometries.Any())
                     {
-                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, precision, _logger);
+                        var nextGeom = elementGeom.Union(openingAndProjectionOp.ProjectGeometries, _modelServices.MinimumGap, _logger);
                         if (nextGeom.IsValid)
                         {
                             if (nextGeom.First != null && nextGeom.First.IsValid)
@@ -994,7 +998,8 @@ namespace Xbim.ModelGeometry.Scene
                         try
                         {
                             //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
-                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, precision, _logger);
+
+                            nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, _modelServices.MinimumGap, _logger);
                             if (nextGeom.IsValid)
                             {
                                 if (nextGeom.First != null && nextGeom.First.IsValid)

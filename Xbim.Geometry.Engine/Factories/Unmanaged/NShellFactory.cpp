@@ -143,7 +143,7 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 			}
 			if (hasDefinedPlane)
 			{
-				auto ax1 = planes.Value(faceIndex);
+				auto ax1 = planes.Value(faceIndex+1);
 				auto thePlane = new Geom_Plane(ax1.Location(), ax1.Direction());
 				planarSurfaces.Append(thePlane);
 			}

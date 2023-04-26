@@ -155,11 +155,11 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData("advanced_brep_1", 1, 1,2445135, 2445135/*, DisplayName = "Self Intersection unorientable shape"*/)]
         [InlineData("advanced_brep_2", 1, 1,828514, 828514 /*, DisplayName = "Curved edges with varying orientation"*/)]
         [InlineData("advanced_brep_3", 1, 1,2466953, 2077748/*, DisplayName = "Badly formed wire orders and missing faces and holes, accurate in V6 but still bad definition"*/)]
-        [InlineData("advanced_brep_4", 2, 1,864225, 830475/*, DisplayName = "Two solids from one advanced brep, errors in holes"*/)]
+        [InlineData("advanced_brep_4", 2, 2,864225, 864320/*, DisplayName = "Two solids from one advanced brep, errors in holes"*/)]
         [InlineData("advanced_brep_5", 1, 1, 114, 114/*, DisplayName = "Example of arc and circle having centre displaced twice RevitIncorrectArcCentreSweptCurve"*/)]
         [InlineData("advanced_brep_6", 1, 1, 3246676, 8192511/*, DisplayName = "The top face of the sink does not have a hole defined in it, fault model. V6 is truer"*/)]
-        [InlineData("advanced_brep_7", 2, 1, 1821558, 1819075/*, DisplayName = "Pipe unit built as 2 pieces in V5, V6 correctly build to one piece"*/)]
-        [InlineData("advanced_brep_8", 2, 1, 53286, 52249/*, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve, V6 corrects dual solids"*/)]
+        [InlineData("advanced_brep_7", 2, 2, 1821558, 1821558/*, DisplayName = "Pipe unit built as 2 pieces in V5, V6 correctly build to one piece"*/)]
+        [InlineData("advanced_brep_8", 2, 2, 53286, 53337/*, DisplayName = "BSpline with displacement applied twice, example of RevitIncorrectBsplineSweptCurve, V6 corrects dual solids"*/)]
         public void Advanced_brep_tests(string brepFileName, int v5SolidCount, int v6SolidCount, double volumeV5, double volumeV6)
         {
 

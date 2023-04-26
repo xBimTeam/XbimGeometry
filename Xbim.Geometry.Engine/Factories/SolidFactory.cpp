@@ -508,7 +508,7 @@ namespace Xbim
 			{
 				bool isFixed;
 				TopoDS_Shape shape = SHELL_FACTORY->BuildClosedShell(ifcAdvancedBrep->Outer, isFixed);
-				if (shape.IsNull() || shape.ShapeType() != TopAbs_SOLID)
+				if (shape.IsNull() )
 					throw RaiseGeometryFactoryException("Error creating solid from advanced brep", ifcAdvancedBrep);
 				return shape;
 			}

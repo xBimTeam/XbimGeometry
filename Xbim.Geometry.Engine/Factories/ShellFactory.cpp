@@ -2,12 +2,15 @@
 #include "FaceFactory.h"
 #include "SurfaceFactory.h"
 #include "GeometryFactory.h"
+#include "BooleanFactory.h"
 #include <vector>
 #include <unordered_map>
 #include <ShapeFix_Shape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TColgp_SequenceOfAx1.hxx>
+#include <BRepCheck_Analyzer.hxx>
+#include <TopExp_Explorer.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::Linq;
@@ -21,7 +24,11 @@ namespace Xbim
 			TopoDS_Shape ShellFactory::BuildClosedShell(IIfcClosedShell^ closedShell, bool& isFixed)
 			{
 				TopoDS_Shape shape = BuildConnectedFaceSet(closedShell, isFixed);
-
+				if (shape.IsNull())
+				{
+					LogDebug(closedShell, "Closed shell is empty");
+					return shape;
+				}
 				//since we have planar faces only then any valid solid must have at least 4 faces (pyramid), we will dispose of any shells that have less than four planar faces
 				//upgrade to solids
 				//if a compound is returned we have more than one shell
@@ -48,11 +55,40 @@ namespace Xbim
 				{
 					const TopoDS_Shell& shell = TopoDS::Shell(shape);
 					if (shell.NbChildren() < 4)
-					{
 						LogDebug(closedShell, "Closed shell is not a solid, it has less than 4 valid faces and has been ignored");
-						return TopoDS_Solid();
+					//it could be a shell of many solids as IFC permits this
+					//only check topology as geometry should be correct
+					if (ModelGeometryService->UpgradeFaceSets) //this allows better performance if set to false
+					{
+						BRepCheck_Analyzer topologyChecker(shell, false, false, false);
+						if (topologyChecker.IsValid())
+							return sfs.SolidFromShell(shell);
+						else //most likely it is a collection of solids inside a shell
+						{
+							ShapeFix_Shape shapeFixer(shell);
+							if (shapeFixer.Perform())
+							{
+								//ensure that each separate shell is a solid
+								BRep_Builder b;
+								TopoDS_Compound solidCompound;
+								b.MakeCompound(solidCompound);
+								for (TopoDS_Iterator exp(shapeFixer.Shape()); exp.More(); exp.Next())
+								{
+									if (exp.Value().ShapeType() == TopAbs_SHELL)
+										b.Add(solidCompound, sfs.SolidFromShell(TopoDS::Shell(exp.Value())));
+									else if (exp.Value().ShapeType() == TopAbs_SOLID)
+										b.Add(solidCompound, TopoDS::Solid(exp.Value()));
+								}
+								if (solidCompound.NbChildren() == 1) //trim off the compound if we ony have one solid
+								{
+									return BOOLEAN_FACTORY->EXEC_NATIVE->TrimTopology(solidCompound);
+								}
+								else
+									return solidCompound;
+							}
+						}
 					}
-					else return sfs.SolidFromShell(shell);
+					return sfs.SolidFromShell(shell);
 				}
 				else
 					throw RaiseGeometryFactoryException("Failed to build closed shell", closedShell);
@@ -120,10 +156,11 @@ namespace Xbim
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build connected face set", faceSet);
 				if (needsFixing)
+				{
 					LogDebug(faceSet, "Attempting to fix errors in faceset definition");
-				return FixShell(shell, faceSet, isFixed);
-
-
+					return FixShell(shell, faceSet, isFixed);
+				}
+				return shell;
 			}
 
 			TopoDS_Shape ShellFactory::FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed)

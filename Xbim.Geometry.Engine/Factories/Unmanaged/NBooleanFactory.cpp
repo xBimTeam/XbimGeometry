@@ -3,7 +3,10 @@
 #include <TopoDS.hxx>
 #include <TopExp_Explorer.hxx>
 #include "../../XbimProgressMonitor.h"
-
+#include <BOPAlgo_PaveFiller.hxx>
+#include <Standard_Type.hxx>
+#include <BOPAlgo_Alerts.hxx>
+#include <ShapeFix_Shape.hxx>
 bool NBooleanFactory::IsEmpty(const TopoDS_Shape& shape)
 {
 	return shape.IsNull() || shape.NbChildren() == 0;
@@ -92,7 +95,7 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 	try
 	{
 		hasWarnings = false;
-		BRepAlgoAPI_BooleanOperation bop;	
+		BRepAlgoAPI_BooleanOperation bop;
 		bop.SetArguments(arguments);
 		bop.SetTools(tools);
 		bop.SetOperation(operation);
@@ -101,31 +104,45 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 		bop.SetNonDestructive(true);
 		bop.SetFuzzyValue(fuzzyTolerance);
 		//bop.SetGlue(BOPAlgo_GlueShift);
-		
+
 		XbimProgressMonitor pi(Timout);
 		bop.Build(pi);
-		if (bop.HasWarnings())
-		{
-			hasWarnings = true;
-			std::ostringstream msg;
-			bop.DumpWarnings(msg);
-			pLoggingService->LogWarning(msg.str().c_str());
-		}
-		if (bop.HasErrors())
-		{
-			std::ostringstream msg;
-			bop.DumpErrors(msg);
-			Standard_Failure::Raise(msg.str().c_str());
-		}
 		if (pi.UserBreak())
 		{
 			Standard_Failure::Raise("Boolean operation timed out");
 		}
+		
+
+		//if (bop.HasWarnings())
+		//{
+		//	hasWarnings = true;
+		//	std::ostringstream msg;
+		//	//bop.DumpWarnings(msg);
+		//	auto report = bop.GetReport();
+		//	report->Dump(msg);
+		//	pLoggingService->LogDebug(msg.str().c_str());
+		//}
+		if (bop.HasErrors())
+		{
+			std::ostringstream msg;
+			//bop.DumpErrors(msg);
+			auto& report = bop.GetReport();
+			report->Dump(msg);
+			Standard_Failure::Raise(msg.str().c_str());
+		}
+
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
-			
-			bop.SimplifyResult(true,true, Precision::Angular());
+			bop.SimplifyResult(true, true, Precision::Angular());
+			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)))
+			{
+				ShapeFix_Shape shapeFixer(bop.Shape());
+				if (!shapeFixer.Perform())
+					pLoggingService->LogDebug("Boolean Operation has resulted in self-intersection of some sub-shapes in the output result");
+				else
+					return TrimTopology(shapeFixer.Shape());
+			}
 			return TrimTopology(bop.Shape());
 		}
 
