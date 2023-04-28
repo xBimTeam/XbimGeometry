@@ -168,9 +168,16 @@ namespace Xbim.Geometry.Engine.Tests
             {
                 er.Entity.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
+                geomEngine.ModelService.UpgradeFaceSets = true;
                 var solids = geomEngine.CreateSolidSet(er.Entity, _logger);
                 solids.Count.Should().Be(4, "Should return 4 solids");
-
+                
+                //repeat without upgradingFaceset false. This will create a solid with four shells that are exactly the same as the solids previously generated
+                //in essence the topology is now incorrect but visually and mathmatically everything is the same
+                geomEngine.ModelService.UpgradeFaceSets = false;
+                var compoundSolid = geomEngine.CreateSolidSet(er.Entity, _logger);
+                compoundSolid.Count.Should().Be(1, "Should return 1 solid");
+                solids.Sum(s => s.Volume).Should().BeApproximately(compoundSolid.Sum(s=>s.Volume),1e-5);
             }
 
         }

@@ -1,5 +1,6 @@
 #include "NSurfaceFactory.h"
 #include <BRep_Tool.hxx>
+#include <GeomPlate_BuildAveragePlane.hxx>
 Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, double originZ, double normalX, double normalY, double normalZ)
 {
 	try
@@ -26,6 +27,15 @@ Handle(Geom_Plane) NSurfaceFactory::BuildPlane(const gp_Pnt& origin, const gp_Di
 		LogStandardFailure(sf);
 		return Handle(Geom_Plane)();
 	}
+}
+
+Handle(Geom_Plane) NSurfaceFactory::FindBestFitPlane(const Handle(TColgp_HArray1OfPnt)& points, const double tolerance)
+{
+	GeomPlate_BuildAveragePlane averagePlaneBuilder(points, points->Size(), tolerance, 2, 2);
+	if (averagePlaneBuilder.IsPlane())
+		return averagePlaneBuilder.Plane();
+	else 
+		return Handle(Geom_Plane)();
 }
 
 Handle(Geom_CylindricalSurface) NSurfaceFactory::BuildCylindricalSurface(double radius)

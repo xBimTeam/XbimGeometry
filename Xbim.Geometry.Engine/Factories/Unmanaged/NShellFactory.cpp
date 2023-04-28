@@ -30,8 +30,13 @@
 #include <BRepBuilderAPI_FindPlane.hxx>
 #include <ShapeFix_Face.hxx>
 #include <ShapeFix_Shape.hxx>
+#include <ShapeFix_Edge.hxx>
 #include <BRepCheck_Face.hxx>
 #include <BRepCheck_Analyzer.hxx>
+#include <GProp_PGProps.hxx>
+#include <BRepGProp.hxx>
+#include <GeomPlate_BuildAveragePlane.hxx>
+#include <TColGeom_SequenceOfSurface.hxx>
 struct EdgeId
 {
 public:
@@ -70,7 +75,7 @@ struct EdgeIdEqual {
 /// </summary>
 /// <param name="loops"></param>
 /// <returns></returns>
-TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, double tolerance, double minGap, bool& needsFixing)
+TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, const std::vector<int>& planeIndices, const TColgp_SequenceOfAx1& planes, double tolerance, double minGap, bool& needsFixing)
 {
 	static int counter = 0;
 	needsFixing = false;
@@ -87,11 +92,18 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 		//collect unique set of vertices
 		TopTools_SequenceOfShape vertices;
 		std::vector<std::vector<std::vector<int>>> faces;
-
+		TColGeom_SequenceOfSurface planarSurfaces;
+		int faceIndex = 0;
 		for (const std::vector<std::vector<int>>& face : faceData)
 		{
+			bool hasDefinedPlane = planeIndices[faceIndex] > 0;
 			faces.push_back(std::vector<std::vector<int>>());
 			std::vector<std::vector<int>>& faceBounds = faces.back();
+			int numPointsOnFace = 0;
+			for (const std::vector<int>& bounds : face)
+				numPointsOnFace += (int)bounds.size();
+			int pointIndex = 1;
+			Handle(TColgp_HArray1OfPnt) pointsOnFace = new TColgp_HArray1OfPnt(1, numPointsOnFace);
 			for (const std::vector<int>& bounds : face)
 			{
 				faceBounds.push_back(std::vector<int>());
@@ -101,6 +113,8 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 					int idx = bounds[i];
 					auto found = points.find(idx);
 					gp_XYZ coord = found->second;
+					if (!hasDefinedPlane)
+						pointsOnFace->SetValue(pointIndex++, gp_Pnt(coord));
 					inspector.ClearResList();
 					inspector.SetCurrent(coord);
 					vertexCellFilter.Inspect(coord, inspector);
@@ -127,22 +141,38 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 
 				}
 			}
+			if (hasDefinedPlane)
+			{
+				auto ax1 = planes.Value(faceIndex+1);
+				auto thePlane = new Geom_Plane(ax1.Location(), ax1.Direction());
+				planarSurfaces.Append(thePlane);
+			}
+			else
+			{
+				//we have all the points on the face get a plane to fit them
+				GeomPlate_BuildAveragePlane averagePlaneBuilder(pointsOnFace, pointsOnFace->Size(), tolerance, 1, 2);
+				if (!averagePlaneBuilder.IsPlane())
+					planarSurfaces.Append(Handle(Geom_Plane)());
+				else
+					planarSurfaces.Append(averagePlaneBuilder.Plane());
+			}
+			faceIndex++;
 		}
 
 		//collect unique set of edges
 		std::unordered_map<EdgeId, int, EdgeIdHash, EdgeIdEqual> uniqueEdges;
 		TopTools_SequenceOfShape edges;
 
-
 		int faceCount = 0;
+		int facePlaneIndex = 1;
+		
 		for (const std::vector<std::vector<int>>& face : faces)
 		{
-			TopoDS_Wire outerBound;
-			std::vector<TopoDS_Wire> topoWires;
-			std::vector<gp_Dir> topoWireNornals;
-			double largestArea = 0;
+			TopoDS_Face theFace;
+			auto thePlane = Handle(Geom_Plane)::DownCast(planarSurfaces.Value(facePlaneIndex++));
+			builder.MakeFace(theFace, thePlane, tolerance);
 			//get the bounds for the face
-			for (const std::vector<int>& bound : face)
+			for (auto&& bound : face)
 			{
 				if (bound.empty())
 					continue;
@@ -181,82 +211,107 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 								builder.Add(topoWire, edge.Reversed());
 						}
 					}
-					//else //we can safely ignore this as it it is not an edge it is a point
-					//{
-					//	pLoggingService->LogDebug("Zero length edge ignored"); //we can safely just ignore this data as it is an edge between two identical points
-					//}
 					aVert = bVert;
 					a = b;
 				}
-				double area = std::abs(WireFactory.Area(topoWire));
-				topoWires.push_back(topoWire);
-				if (area > largestArea)
-				{
-					largestArea = area;
-					outerBound = topoWire;
-				}
-
+				//add the edge if it has an area (more than 2 edges)
+				if (topoWire.NbChildren() > 2)
+					builder.Add(theFace, topoWire);
 			}
 
-			//build the face
-			gp_Vec wireNormal;
-			if (WireFactory.GetNormal(outerBound, wireNormal)) //no normal then unlikely to be a face, most likely co-linear edges
+			if (theFace.NbChildren() == 0)
+				continue; //nothing to do
+			//find the outer bound
+			auto outerBound = BRepTools::OuterWire(theFace);
+			//make sure the outer bound is within tolerance of the face
+			ShapeFix_Wire wireFixer(outerBound, theFace, tolerance);
+			wireFixer.ClearModes();
+			wireFixer.FixVertexToleranceMode() = true;
+			wireFixer.Perform();
+			//it is possible the average plane builder may have built the plane reversed, ensure the puter bound is counter clock wise winding
+			//if not reverse the plane to comply with the topology
+			for (TopExp_Explorer exp(theFace,TopAbs_WIRE);exp.More();exp.Next())
 			{
-				BRepBuilderAPI_FindPlane planeFinder(outerBound, tolerance);
-				Handle(Geom_Plane) plane;
-				TopoDS_Face theFace;
-				if (planeFinder.Found()) //the wire is planar
+				auto&& wire = TopoDS::Wire(exp.Current());
+				if (wire.IsEqual(outerBound))
 				{
-					plane = planeFinder.Plane();
-					builder.MakeFace(theFace, plane, tolerance);
-				}
-				else //the wire is not planar and will most likely result in more than one face, this happens in some faceted models
-				{
-					gp_Pnt baryCentre;
-					BRepFeat::Barycenter(outerBound, baryCentre);
-					plane = new Geom_Plane(baryCentre, wireNormal);
-					builder.MakeFace(theFace, plane, tolerance);
-					needsFixing = true;
-					//BRepTools::Write(outerBound, "/tmp/2.brep");
-				}
-				
-				builder.Add(theFace, outerBound);
-				gp_Vec faceNormal = FaceFactory.Normal(theFace);
-				bool isOpposite = faceNormal.IsOpposite(wireNormal, 0.1);//srl. some models are quite out of tolerance, we don't need a very precise definition of opposite ~5 degrees is fine
-				if (isOpposite)
-					theFace.Reverse(); //this should never happen
-
-				//add any inner loops
-				if (topoWires.size() > 1) //if we have any inner bounds
-				{
-
-					for (auto& wireIt = topoWires.cbegin(); wireIt != topoWires.cend(); wireIt++)
+					TopoDS_Face tmpFace;
+					builder.MakeFace(tmpFace, thePlane, tolerance);
+					builder.Add(tmpFace, wire);
+					GProp_GProps gProps;
+					BRepGProp::SurfaceProperties(tmpFace, gProps, tolerance);
+					double area = gProps.Mass();
+					if (std::abs(area) < Precision::Confusion())
 					{
-						if (wireIt->IsNotEqual(outerBound))
+						theFace.EmptyCopy(); //no valid outer wire, maybe just a line
+						break;
+					}
+					bool isCounterClockwise = area > 0;
+					if (!isCounterClockwise)
+						thePlane->SetAxis(thePlane->Axis().Reversed());
+					break;
+				}
+			}
+			if (theFace.NbChildren() == 0)
+				continue; //nothing to do
+			if (theFace.NbChildren() > 1)
+			{
+				bool faceNeedsToBeRebuilt = false;
+				TopoDS_ListOfShape innerWires;
+				//if there are inner loops ensure they are clockwise oreinted to maintain correct topology
+				for (TopExp_Explorer exp(theFace, TopAbs_WIRE); exp.More(); exp.Next())
+				{
+					const TopoDS_Shape& wire = exp.Current();
+					if (!wire.IsEqual(outerBound))
+					{
+						//fix the tolerance
+						wireFixer.Init(TopoDS::Wire(wire), theFace, tolerance);
+						wireFixer.Perform();
+						TopoDS_Face tmpFace;
+						builder.MakeFace(tmpFace, thePlane, tolerance);
+						builder.Add(tmpFace, wire);
+						GProp_GProps gProps;
+						BRepGProp::SurfaceProperties(tmpFace, gProps, tolerance);
+						double area = gProps.Mass();
+						if (std::abs(area) < Precision::Confusion())
+							continue;
+						bool isCounterClockwise = area > 0;
+						if (isCounterClockwise)
 						{
-							TopoDS_Wire hole = *wireIt;
-							gp_Vec holeNormal;
-							if (WireFactory.GetNormal(hole, holeNormal)) //ignore if invalid hole, they have no normal
-							{
-								bool isOppositeHole = wireNormal.IsOpposite(holeNormal, 0.1); //srl. we are going to fit this to the plane anyway so we don't need a very precise definition of opposite ~5 degrees is fine								
-								if (!isOppositeHole) hole.Reverse();
-								//adjust the tolerances of the vertices of the edges to align with the face, Revit often has vertices out of tolerance of the face, fixes pcurves etc							
-								ShapeFix_Wire wireFixer(hole, theFace, tolerance);
-								bool fixed = wireFixer.FixEdgeCurves();
-								builder.Add(theFace, hole);
-							}
+							innerWires.Append(wire.Reversed()); 
+							faceNeedsToBeRebuilt = true;
 						}
+						else
+							innerWires.Append(wire);					
 					}
 				}
-				//add it to the shell
-
-				faceCount++;
-				builder.Add(shell, theFace);
+				if (faceNeedsToBeRebuilt)
+				{
+					//Rebuld the face with the modified wires
+					theFace.EmptyCopy();
+					builder.Add(theFace, outerBound);
+					for (auto&& innerWire: innerWires)
+						builder.Add(theFace, innerWire);
+				}
 			}
-			//else //don't both warning about this it is always a line and/or a face with 0 area
+			//BRepBuilderAPI_FindPlane planeFinder1(outerBound, tol / 10);
+			//if (!planeFinder1.Found()) //the wire is planar
 			//{
-			//	pLoggingService->LogDebug("Null area face ignored");
+			//	int r = 1;
+			//	TopoDS_Face tmpFace;
+			//	builder.MakeFace(tmpFace, thePlane, tolerance);
+			//	builder.Add(tmpFace, outerBound);
+			//	GProp_GProps gProps;
+			//	BRepGProp::SurfaceProperties(tmpFace, gProps, tolerance);
+			//	double area = gProps.Mass();
+			//	BRepTools::Write(theFace, "/tmp/2.brep");
+			//	r++;
 			//}
+
+
+			//build the face	
+			faceCount++;
+			builder.Add(shell, theFace);
 		}
 		return shell;
 	}
