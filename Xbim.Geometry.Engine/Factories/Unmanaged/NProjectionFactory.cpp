@@ -133,7 +133,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 			{
 				//consider possibility that the first point has size of 1
 				if(outerBound.size()==0)
-					Standard_Failure::Raise("Footprint is an invalid, boundary cannot be determined");
+					Standard_Failure::Raise("Footprint boundary cannot be determined.");
 				currentPointId = previousPointId;
 				currentPoint = previousPoint;
 				currentDir = previousDir;
@@ -183,7 +183,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 			//if we do't have a next valid point throw exception
 			if (nextPointId == 0 || nextPointId == currentPointId)
 			{
-				Standard_Failure::Raise("Footprint is an invalid, boundary cannot be determined");
+				Standard_Failure::Raise("Footprint boundary cannot be determined.");
 			}
 			else
 			{
@@ -247,7 +247,7 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 	Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 	if (box.IsVoid())
 	{
-		pLoggingService->LogWarning("Cannot build Footprint shape is empty");
+		pLoggingService->LogWarning("Cannot build Footprint. Shape is empty.");
 		return; //untouched footprint
 	}
 	box.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
@@ -460,7 +460,8 @@ void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linea
 	}
 	catch (const Standard_Failure& sf)
 	{
-		std::stringstream strm;
+		std::stringstream strm("Shape footprinting failure, falling back to bounding-box footprint: ",
+			std::ios_base::app | std::ios_base::out);
 		sf.Print(strm);
 		pLoggingService->LogError(strm.str().c_str());
 		//return the bounding box
