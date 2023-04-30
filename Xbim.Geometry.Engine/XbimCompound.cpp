@@ -1545,7 +1545,8 @@ namespace Xbim
 				{
 					bool isValidNormal;
 					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop, isValidNormal); //this can throw an exception if the wire is nonsense (line) and should just be dropped
-					if (!isValidNormal) Standard_Failure::Raise("Outer bound has invalid normal");
+					if (!isValidNormal) 
+						Standard_Failure::Raise("Outer bound has invalid normal");
 					TopoDS_Vertex v1, v2;
 					TopExp::Vertices(outerLoop, v1, v2);
 					gp_Pln thePlane(BRep_Tool::Pnt(v1), outerNormal);

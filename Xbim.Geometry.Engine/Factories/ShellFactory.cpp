@@ -257,6 +257,7 @@ namespace Xbim
 				return FixShell(shell, faceSet, isFixed);
 
 			}
+
 			TopoDS_Shape ShellFactory::BuildFaceBaseSurfaceModel(IIfcFaceBasedSurfaceModel^ fbsm, bool& isFixed)
 			{
 				BRep_Builder b;
@@ -269,6 +270,32 @@ namespace Xbim
 						b.Add(faceSetShape, shape);
 				}
 				return faceSetShape;
+			}
+
+			TopoDS_Shape ShellFactory::BuildShellBaseSurfaceModel(IIfcShellBasedSurfaceModel^ sbsm, bool& isFixed)
+			{
+				BRep_Builder b;
+				TopoDS_Compound  faceSetShape;
+				b.MakeCompound(faceSetShape);
+				for each (auto ifcShell in sbsm->SbsmBoundary)
+				{
+					IIfcClosedShell^ closedShell = dynamic_cast<IIfcClosedShell^>(ifcShell);
+					IIfcOpenShell^ openShell = dynamic_cast<IIfcOpenShell^>(ifcShell);
+					bool isFixed;
+					if (openShell != nullptr)
+					{
+						auto shell = BuildConnectedFaceSet(openShell, isFixed);
+						if (!shell.IsNull())
+							b.Add(faceSetShape, shell);
+					}
+					else if (closedShell != nullptr)
+					{
+						auto shell = BuildConnectedFaceSet(closedShell, isFixed);
+						if (!shell.IsNull())
+							b.Add(faceSetShape, shell);
+					}
+				}
+				return EXEC_NATIVE->TrimTopology(faceSetShape);
 			}
 		}
 	}

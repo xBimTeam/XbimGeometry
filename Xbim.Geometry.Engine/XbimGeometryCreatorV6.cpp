@@ -124,9 +124,20 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcShellBasedSurfaceModel^>(geomRep))
 				{
-					XbimCompound^ comp = (XbimCompound^)CreateSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, Logger());
-					if (objectLocation != nullptr) comp->Move(objectLocation);
-					return comp;
+					bool needsFixing;
+					auto shape = GetShellFactory()->BuildShellBaseSurfaceModel((IIfcShellBasedSurfaceModel^)geomRep, needsFixing);
+					if (!location.IsIdentity()) shape.Move(location);
+					if (shape.ShapeType() == TopAbs_COMPOUND)
+						return gcnew XbimCompound(shape, this);
+					else if (shape.ShapeType() == TopAbs_SOLID)
+						return gcnew XbimSolid(TopoDS::Solid(shape), this);
+					else if (shape.ShapeType() == TopAbs_SHELL)
+						return gcnew XbimShell(TopoDS::Shell(shape), this);
+					else if (shape.ShapeType() == TopAbs_FACE)
+						return gcnew XbimFace(TopoDS::Face(shape), this);
+					else
+						throw RaiseGeometryServiceException("IfcShellBasedSurfaceModel returned incorrect shape result", geomRep);
+					
 				}
 				else if (dynamic_cast<IIfcTriangulatedFaceSet^>(geomRep))
 				{

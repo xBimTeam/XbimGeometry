@@ -26,6 +26,7 @@ namespace Xbim
 				TopoDS_Shape BuildConnectedAdvancedFaceSet(IIfcConnectedFaceSet^ faceSet, bool& isFixed);
 				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ faceSet, bool& isFixed);
 				TopoDS_Shape BuildFaceBaseSurfaceModel(IIfcFaceBasedSurfaceModel^ fbsm, bool& isFixed);
+				TopoDS_Shape BuildShellBaseSurfaceModel(IIfcShellBasedSurfaceModel^ sbsm, bool& isFixed);
 			};
 		}
 	}

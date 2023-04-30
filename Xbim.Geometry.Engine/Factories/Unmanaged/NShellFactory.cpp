@@ -143,7 +143,7 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 			}
 			if (hasDefinedPlane)
 			{
-				auto ax1 = planes.Value(faceIndex+1);
+				auto& ax1 = planes.Value(faceIndex+1);
 				auto thePlane = new Geom_Plane(ax1.Location(), ax1.Direction());
 				planarSurfaces.Append(thePlane);
 			}
@@ -152,7 +152,13 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 				//we have all the points on the face get a plane to fit them
 				GeomPlate_BuildAveragePlane averagePlaneBuilder(pointsOnFace, pointsOnFace->Size(), tolerance, 1, 2);
 				if (!averagePlaneBuilder.IsPlane())
+				{
 					planarSurfaces.Append(Handle(Geom_Plane)());
+					if(averagePlaneBuilder.IsLine())
+						pLoggingService->LogDebug("Face is a line not a plane,  skipped");
+					else
+						pLoggingService->LogDebug("Non-Planar face,  skipped");
+				}
 				else
 					planarSurfaces.Append(averagePlaneBuilder.Plane());
 			}
@@ -170,6 +176,10 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 		{
 			TopoDS_Face theFace;
 			auto thePlane = Handle(Geom_Plane)::DownCast(planarSurfaces.Value(facePlaneIndex++));
+			if (thePlane.IsNull()) //this set of points does not sit on a plane, could be a line or extremely non-planar
+			{
+				continue; //warning has already been given when plane was not found
+			}
 			builder.MakeFace(theFace, thePlane, tolerance);
 			//get the bounds for the face
 			for (auto&& bound : face)
@@ -321,4 +331,17 @@ TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<
 
 	}
 	return TopoDS_Shell();
+}
+
+/// <summary>
+/// Reduces the shape to its highest level topology, i.e. if a compound contains one solid the solid is returned, only trims compounds
+/// </summary>
+/// <param name="shape"></param>
+/// <returns></returns>
+TopoDS_Shape NShellFactory::TrimTopology(const TopoDS_Shape& shape)
+{
+	if (shape.ShapeType() != TopAbs_COMPOUND || shape.NbChildren() != 1) return shape;//more than one top level shape cannot be simplified
+	TopoDS_Iterator exp(shape);
+	auto child = exp.Value();
+	return TrimTopology(child);
 }
