@@ -18,15 +18,14 @@
 #include "TColgp_Array1OfPnt2d.hxx"
 #include "TColStd_Array1OfReal.hxx"
 #include "TColStd_Array1OfInteger.hxx"
-#include "ElCLib.hxx"
+
 #include <ShapeConstruct_ProjectCurveOnSurface.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 #include <NCollection_Vector.hxx>
 #include "../BRep/OccExtensions/KeyedPnt.h"
 #include "../BRep/OccExtensions/KeyedPnt2d.h"
 #include <Geom2dAPI_InterCurveCurve.hxx>
-
-
+#include <GeomAPI_ProjectPointOnCurve.hxx>
 /*
 The approach of the curve factory is to build all curves as IXCurve using the build method.
 This will ensure correct dimensionality of the curves is maintained
@@ -247,30 +246,7 @@ namespace Xbim
 				XCurveType curveType;
 				Handle(Geom2d_Curve) curve = BuildCurve2d(ifcCurve, curveType);
 				if (curve.IsNull()) return curve;
-				////the IFC rules override any trimmed values on the basis curve
-				////If SameSense is false, the point with highest parameter value is taken as the first point of the segment. If ture the lowest parameter value is taken as the first point of the segment
-				double u1 = curve->FirstParameter();
-				double u2 = curve->LastParameter();
-				//auto trimmedCurve = Handle(Geom2d_TrimmedCurve)::DownCast(curve);
-				//if (trimmedCurve.IsNull())
-				//{
-				//	if (curve->IsPeriodic())
-				//		ElCLib::AdjustPeriodic(u1, u2, Precision::PConfusion(), u1, u2);
-				//}
-				//else
-				//{
-				//	//flatten any trimmed curve nesting
-				//	while (trimmedCurve->BasisCurve()->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
-				//		trimmedCurve = Handle(Geom2d_TrimmedCurve)::DownCast(trimmedCurve->BasisCurve());
-				//	if (trimmedCurve->BasisCurve()->IsPeriodic())
-				//		ElCLib::AdjustPeriodic(u1, u2, Precision::PConfusion(), u1, u2);
-				//}
-				/*if ((sameSense && u1 > u2) || (!sameSense && u2 < u1)) 
-					curve->Reverse();*/
-				auto p1 = curve->Value(u1);
-				auto p2 = curve->Value(u2);
-				
-				if(!sameSense) curve->Reverse();
+				if (!sameSense) curve->Reverse();
 				return curve;
 			}
 
@@ -953,7 +929,6 @@ namespace Xbim
 							throw RaiseGeometryFactoryException("Trim Point1 is not on the basis curve");
 						if (!GeomLib_Tool::Parameter(basisCurve, p2, ModelGeometryService->MinimumGap, u2))
 							throw RaiseGeometryFactoryException("Trim Point2 is not on the basis curve");
-						
 					}
 					else if (double::IsNegativeInfinity(u1) || double::IsPositiveInfinity(u2)) //non-compliant
 						throw RaiseGeometryFactoryException("Ifc Formal Proposition: TrimValuesConsistent. Either a single value is specified for Trim, or the two trimming values are of different type (point and parameter)");

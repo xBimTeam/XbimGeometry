@@ -570,6 +570,7 @@ namespace Xbim.Geometry.Engine.Tests
                 var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
                 var compositeCurve =geomEngine.WireFactory.Build(cc);
                 compositeCurve.Should().NotBeNull();
+                compositeCurve.Length.Should().BeApproximately(4.8668290187582635, 1e-5);
                 
             }
         }
