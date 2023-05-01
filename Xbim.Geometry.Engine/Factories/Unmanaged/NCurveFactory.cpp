@@ -328,7 +328,7 @@ Handle(Geom_TrimmedCurve) NCurveFactory::BuildTrimmedCurve3d(const Handle(Geom_C
 			u2 = line->ConvertIfcTrimParameter(u2);
 			return new Geom_TrimmedCurve(basisCurve, u1, u2, sense, true);
 		}
-		
+
 #ifdef _DEBUG
 		if (!Handle(Geom_Circle)::DownCast(basisCurve).IsNull() || !Handle(Geom_Ellipse)::DownCast(basisCurve).IsNull() || !Handle(Geom_Line)::DownCast(basisCurve).IsNull())
 		{
@@ -449,13 +449,18 @@ int NCurveFactory::Get2dLinearSegments(const TColgp_Array1OfPnt2d& points, doubl
 	{
 		const gp_Pnt2d& start = points.Value(lastPointIdx);
 		const gp_Pnt2d& end = points.Value(i + 1);
-		if (!start.IsEqual(end, tolerance)) //ignore very small segments
+		double dist = std::abs(start.Distance(end));
+		if (dist > tolerance) //ignore very small segments
 		{
 			Handle(Geom2d_TrimmedCurve) lineSeg = BuildTrimmedLine2d(start, end);
 			//move the lastIndex on
 			lastPointIdx++;
 			segments.Append(lineSeg);
-		} //else if we skip a segment because it is small lastPointIdx remains the same
+		}
+		else // we skip a segment because it is small lastPointIdx remains the same
+		{
+			pLoggingService->LogDebug("A segment with a length less than the model tolerance has been ignored");
+		}
 	}
 	return lastPointIdx - 1;
 }

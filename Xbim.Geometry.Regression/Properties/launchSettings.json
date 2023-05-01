@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\0400 Under NDA\\PoolarServer\\xbim-problem-5.ifc\" /MaxThreads 4",
+      "commandLineArgs": "\"C:\\Users\\Steve\\XBIM\\Models - Documents\\0400 Under NDA\\PoolarServer\\xbim-problem-5.ifc\" /MaxThreads 0",
       "nativeDebugging": true
     }
   }

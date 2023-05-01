@@ -573,7 +573,20 @@ namespace Xbim.ModelGeometry.Scene
 
             }
         }
+        internal void LogDebug(object entity, string format, params object[] args)
+        {
+            if (_logger != null)
+            {
+                var msg = String.Format(format, args);
+                if (entity is IPersistEntity ifcEntity)
+                    _logger.LogDebug("GeomScene: #{entityLabel}={entityType} [{message}]",
+                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
+                else
+                    _logger.LogDebug("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
+            }
+        }
 
+       
         /// <summary>
         /// Initialises a model context from the model
         /// </summary>
@@ -1520,7 +1533,7 @@ namespace Xbim.ModelGeometry.Scene
                     }
 
                     if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
-                        LogInfo(_model.Instances[shapeId], "Is an empty shape");
+                        LogDebug(_model.Instances[shapeId], "Is an empty shape");
                     else
                     {
                         shapeGeom.IfcShapeLabel = shapeId;

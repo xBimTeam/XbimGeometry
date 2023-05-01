@@ -1,5 +1,6 @@
 
 
+using Castle.Core.Logging;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System;
@@ -8,8 +9,10 @@ using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xunit;
+using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -557,6 +560,19 @@ namespace Xbim.Geometry.Engine.Tests
             (totalParametricLength - 20).Should().BeApproximately(cc.LastParameter - cc.FirstParameter, _modelSvc.Precision); //parametric length of this curve is 90 degrees
         }
 
+        [Fact]
+        public void Can_convert_ifc_composite_curve_with_cartesian_preferred_trim()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\composite_curve_with_cartesian_preferred_trim.ifc"))
+            {
+                var cc = model.Instances.OfType<IIfcCompositeCurve>().FirstOrDefault();
+                cc.Should().NotBeNull();
+                var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+                var compositeCurve =geomEngine.WireFactory.Build(cc);
+                compositeCurve.Should().NotBeNull();
+                
+            }
+        }
         #endregion
     }
 }

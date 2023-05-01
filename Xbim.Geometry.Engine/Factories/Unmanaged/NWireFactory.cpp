@@ -713,12 +713,11 @@ TopoDS_Wire NWireFactory::BuildWire(const TColGeom2d_SequenceOfBoundedCurve& seg
 		int nbSegments = segments.Length();
 		int currentSegment = 0;
 		bool isClosed = false;
-
-		for (auto&& segIt : segments)
+		
+		for (auto&& segment : segments)
 		{
 			bool tolerancesAdjusted = false;
-			Handle(Geom2d_Curve) segment = segIt;
-
+			
 			if (edges.Length() == 0) //just add the first one
 			{
 				BRepBuilderAPI_MakeEdge2d edgeMaker(segment);
