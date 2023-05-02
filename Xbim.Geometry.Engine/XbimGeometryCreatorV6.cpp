@@ -106,9 +106,15 @@ namespace Xbim
 				}
 				else if (dynamic_cast<IIfcBooleanClippingResult^>(geomRep))
 				{
-					XbimSolidSet^ solidSet = gcnew XbimSolidSet((IIfcBooleanClippingResult^)geomRep, Logger(), this);
-					if (objectLocation != nullptr) solidSet->Move(objectLocation);
-					return Trim(solidSet);
+					IIfcBooleanClippingResult^ clippingResult = dynamic_cast<IIfcBooleanClippingResult^>(geomRep);
+					auto shape = GetBooleanFactory()->BuildBooleanResult(clippingResult);
+					if (!location.IsIdentity()) shape.Move(location);
+					if (shape.ShapeType() == TopAbs_COMPOUND)
+						return gcnew XbimSolidSet(shape, this);
+					else if (shape.ShapeType() == TopAbs_SOLID)
+						return gcnew XbimSolid(TopoDS::Solid(shape), this);
+					else
+						throw RaiseGeometryServiceException("IfcBooleanClippingResult returned incorrect shape result", geomRep);
 				}
 				else if (dynamic_cast<IIfcBooleanResult^>(geomRep))
 				{
@@ -466,7 +472,7 @@ namespace Xbim
 			auto shape = GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid);
 			if (shape.ShapeType() != TopAbs_SOLID)
 				throw RaiseGeometryServiceException("An IfcExtrudedAreaSolid has returned multiple solids, mostly likely as the result of a IfcCompositeProfileDef for the swept area");
-			return gcnew XbimSolid(TopoDS::Solid(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid)), this);
+			return gcnew XbimSolid(TopoDS::Solid(shape), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)

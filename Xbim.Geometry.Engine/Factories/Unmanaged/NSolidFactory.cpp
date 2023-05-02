@@ -513,17 +513,17 @@ TopoDS_Solid NSolidFactory::BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& s
 		gp_Pnt startPointOnSurface;
 		gp_Vec tangentAtDirectrixStart;
 		gp_Vec normalAtDirectrixStart;
-		
+
 		cc.D1(cc.FirstParameter(), directrixWireStart, tangentAtDirectrixStart);
 
 		ShapeAnalysis_Surface surfaceAnalyser(refSurface);
 		gp_Pnt2d uv = surfaceAnalyser.ValueOfUV(directrixWireStart, precision);
-		
-		GeomLProp_SLProps props(refSurface,uv.X(), uv.Y(), 1 /* max 1 derivation */, precision);
-		if(!props.IsNormalDefined())
+
+		GeomLProp_SLProps props(refSurface, uv.X(), uv.Y(), 1 /* max 1 derivation */, precision);
+		if (!props.IsNormalDefined())
 			Standard_Failure::Raise("Error building surface. Most likely the U and V directions of the surface are incorrectly defined and are parallel");
 		normalAtDirectrixStart = props.Normal();
-		
+
 		tangentAtDirectrixStart.Normalize();
 		normalAtDirectrixStart.Normalize();
 
@@ -532,7 +532,7 @@ TopoDS_Solid NSolidFactory::BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& s
 		gp_Trsf sweptAreaTransform;
 		sweptAreaTransform.SetTransformation(toAx3, fromAx3);
 
-		
+
 		TopoDS_Face sweptAreaRepostioned = TopoDS::Face(BRepBuilderAPI_Transform(sweptArea, sweptAreaTransform));
 		TopoDS_Wire sweptAreaBound = ShapeAnalysis::OuterWire(sweptAreaRepostioned);
 		/*BRepTools::Write(sweptAreaRepostioned, "/tmp/sweptAreaRepostioned.brep");
@@ -546,11 +546,11 @@ TopoDS_Solid NSolidFactory::BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& s
 			}
 		}
 		BRepOffsetAPI_MakePipeShell pipeMaker(directrixWire);
-		
+
 		pipeMaker.SetTransitionMode(transitionMode);
-		
+
 		pipeMaker.SetMode(referenceFace);
-		
+
 		TopoDS_Edge firstEdge;
 		double uOnEdge;
 		cc.Edge(cc.FirstParameter(), firstEdge, uOnEdge);
@@ -666,52 +666,52 @@ TopoDS_Shape NSolidFactory::BuildExtrudedAreaSolidTapered(const TopoDS_Face& swe
 		gp_Trsf t;
 		t.SetTranslation(vec);
 		TopoDS_Face placedEndSweptArea = TopoDS::Face(endSweptArea.Moved(t));
-		
-			BRepOffsetAPI_ThruSections pipeMaker(Standard_True, Standard_True, precision);
-			TopoDS_Wire outerBoundStart =  BRepTools::OuterWire(sweptArea);
-			TopoDS_Wire outerBoundEnd = BRepTools::OuterWire(placedEndSweptArea);
-			pipeMaker.AddWire(outerBoundStart);
-			pipeMaker.AddWire(outerBoundEnd);
-			TopExp_Explorer startExplorer(sweptArea, TopAbs_WIRE);
-			TopExp_Explorer endExplorer(placedEndSweptArea, TopAbs_WIRE);
-			pipeMaker.Build();
-			if (!pipeMaker.IsDone())
-				Standard_Failure::Raise("Failed to extrude tapered solid body");
-			auto taperedOuterBody = pipeMaker.Shape();
-			taperedOuterBody.Closed(Standard_True);
-			TopTools_ListOfShape voids;
 
-			//it is required that the faces must be the same type and have the same number of inner wires, if not this will blow and throw an exception
-			//each pair is built as a separate solid which will become a void in the final solid
-			for (; startExplorer.More() && endExplorer.More(); startExplorer.Next(), endExplorer.Next())
-			{
-				if (!startExplorer.Current().IsEqual(outerBoundStart))
-				{
-					BRepOffsetAPI_ThruSections voidPipeMaker(Standard_True, Standard_True, precision);
-					voidPipeMaker.AddWire(TopoDS::Wire(startExplorer.Current().Reversed()));
-					voidPipeMaker.AddWire(TopoDS::Wire(endExplorer.Current().Reversed()));
-					voidPipeMaker.Build();
-					if (!voidPipeMaker.IsDone())
-						Standard_Failure::Raise("Failed to extrude tapered solid void");
-					voids.Append(voidPipeMaker.Shape());
-				}
-			}
-			if (voids.Size() > 0)
-			{
-				//cut each void
-				NBooleanFactory booleanFactory(pLoggingService->GetLogger());
-				for (auto&& aVoid : voids)
-				{
-					bool hasWarnings;
-					taperedOuterBody = booleanFactory.Cut(taperedOuterBody, aVoid, precision, hasWarnings);
-					if (hasWarnings)
-						pLoggingService->LogInformation("Cutting a void in an ExtrudedAreaSolidTapered issued warnings");
+		BRepOffsetAPI_ThruSections pipeMaker(Standard_True, Standard_True, precision);
+		TopoDS_Wire outerBoundStart = BRepTools::OuterWire(sweptArea);
+		TopoDS_Wire outerBoundEnd = BRepTools::OuterWire(placedEndSweptArea);
+		pipeMaker.AddWire(outerBoundStart);
+		pipeMaker.AddWire(outerBoundEnd);
+		TopExp_Explorer startExplorer(sweptArea, TopAbs_WIRE);
+		TopExp_Explorer endExplorer(placedEndSweptArea, TopAbs_WIRE);
+		pipeMaker.Build();
+		if (!pipeMaker.IsDone())
+			Standard_Failure::Raise("Failed to extrude tapered solid body");
+		auto taperedOuterBody = pipeMaker.Shape();
+		taperedOuterBody.Closed(Standard_True);
+		TopTools_ListOfShape voids;
 
-				}
+		//it is required that the faces must be the same type and have the same number of inner wires, if not this will blow and throw an exception
+		//each pair is built as a separate solid which will become a void in the final solid
+		for (; startExplorer.More() && endExplorer.More(); startExplorer.Next(), endExplorer.Next())
+		{
+			if (!startExplorer.Current().IsEqual(outerBoundStart))
+			{
+				BRepOffsetAPI_ThruSections voidPipeMaker(Standard_True, Standard_True, precision);
+				voidPipeMaker.AddWire(TopoDS::Wire(startExplorer.Current().Reversed()));
+				voidPipeMaker.AddWire(TopoDS::Wire(endExplorer.Current().Reversed()));
+				voidPipeMaker.Build();
+				if (!voidPipeMaker.IsDone())
+					Standard_Failure::Raise("Failed to extrude tapered solid void");
+				voids.Append(voidPipeMaker.Shape());
 			}
-			if (!location.IsIdentity())
-				taperedOuterBody.Move(location);
-			return taperedOuterBody;
+		}
+		if (voids.Size() > 0)
+		{
+			//cut each void
+			NBooleanFactory booleanFactory(pLoggingService->GetLogger());
+			for (auto&& aVoid : voids)
+			{
+				bool hasWarnings;
+				taperedOuterBody = booleanFactory.Cut(taperedOuterBody, aVoid, precision, hasWarnings);
+				if (hasWarnings)
+					pLoggingService->LogInformation("Cutting a void in an ExtrudedAreaSolidTapered issued warnings");
+
+			}
+		}
+		if (!location.IsIdentity())
+			taperedOuterBody.Move(location);
+		return taperedOuterBody;
 	}
 	catch (const Standard_Failure& e)
 	{

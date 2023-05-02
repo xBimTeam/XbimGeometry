@@ -47,6 +47,7 @@ namespace Xbim
 			{
 				TopoDS_Shape firstSolid = BuildOperand(boolResult->FirstOperand);
 				TopoDS_Shape secondSolid = BuildOperand(boolResult->SecondOperand);
+				if (secondSolid.IsNull()) return firstSolid; //it has been found that often models have half spaces that are null or previous booleans return null
 				/*auto fstr = firstSolid.IsNull() ? "" : XShape::GetXbimShape(firstSolid)->BrepString();
 				auto sstr = secondSolid.IsNull() ? "" : XShape::GetXbimShape(secondSolid)->BrepString();*/
 				bool hasWarnings;

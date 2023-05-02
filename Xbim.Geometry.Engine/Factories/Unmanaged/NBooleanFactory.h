@@ -29,5 +29,7 @@ public:
 	/*TopoDS_Shape Union(const TopTools_ListOfShape& shapes, double fuzzyTolerance);*/
 	TopoDS_Shape TrimTopology(const TopoDS_Shape& shape);
 	TopoDS_Shape PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings);
+private:
+	TopoDS_Shape PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings, bool attemptingFix);
 };
 

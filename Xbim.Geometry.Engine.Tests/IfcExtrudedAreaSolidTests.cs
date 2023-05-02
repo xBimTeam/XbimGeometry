@@ -10,7 +10,7 @@ using Xbim.IO.Memory;
 using Xunit;
 namespace Xbim.Geometry.Engine.Tests
 {
-   
+
     // [DeploymentItem("TestFiles")]
     public class IfcExtrudedAreaSolidTests
     {
@@ -53,12 +53,12 @@ namespace Xbim.Geometry.Engine.Tests
             using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(IfcExtrudedAreaSolidInvalidPlacementTest)))
             {
                 var v6GeomEngine = _geomConverterFactory.CreateGeometryEngineV6(er.Entity.Model, _loggerFactory);
-                var error = Assert.Throws<XbimGeometryServiceException>(()=> v6GeomEngine.Build(er.Entity));
+                var error = Assert.Throws<XbimGeometryServiceException>(() => v6GeomEngine.Build(er.Entity));
                 error.Message.Should().Be("Error building geometry shape");
 
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 er.Entity.Should().NotBeNull();
-               
+
                 var v5Error = Assert.Throws<XbimGeometryFactoryException>(() => geomEngine.CreateSolid(er.Entity, _logger));
                 v5Error.Message.Should().Be("Error badly defined axis");
             }
@@ -73,7 +73,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Theory]
         [InlineData("SweptDiskSolid_1", 7725.7280894170744/*, DisplayName = "Directrix is polyline"*/)] //trim was not working correctly, it is now and the volume has been reduced
         [InlineData("SweptDiskSolid_2", 5552149.0343576306/*, DisplayName = "Directrix is trimmed"*/)]
-       /// [InlineData("SweptDiskSolid_3", 129879.77474359272/*, DisplayName = "Directrix is indexed polyline"*/)] srl duplicate of the reference test below but with a sign error, pointless test to run
+        /// [InlineData("SweptDiskSolid_3", 129879.77474359272/*, DisplayName = "Directrix is indexed polyline"*/)] srl duplicate of the reference test below but with a sign error, pointless test to run
         [InlineData("SweptDiskSolid_4", 129879.77474359272/*, DisplayName = "Ifc reference test"*/)]
         public void SweptDiskSolidTest(string fileName, double requiredVolume)
         {
@@ -90,7 +90,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-       
+
         [Theory]
         [InlineData("SweptDiskSolidPolygonal_1", 83575.33307798137/*, DisplayName = "IFC SweptDiskSolidPolygonal reference test"*/)]
         public void SweptDiskSolidPolygonalTest(string fileName, double requiredVolume)
@@ -105,6 +105,19 @@ namespace Xbim.Geometry.Engine.Tests
                 sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
         }
-
+        [Fact]
+        public void can_build_empty_rectangle_profile_extrusion()
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\empty_rectangle_profile_extrusion.ifc"))
+            {
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
+                var sweptSolid = model.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault();
+                sweptSolid.Should().NotBeNull();
+                
+                var error = Assert.Throws<XbimGeometryServiceException>(() => geomEngine.Create(sweptSolid, _logger));
+                error.Message.Should().Be("Error building geometry shape");
+                error.InnerException.Message.Should().Be("Invalid rectangle profile with at least one zero or less dimension");
+            }
+        }
     }
 }

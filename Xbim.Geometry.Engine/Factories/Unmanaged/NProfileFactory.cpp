@@ -21,6 +21,9 @@
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
@@ -70,6 +73,38 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 	}
 	pLoggingService->LogError("Failed to build face");
 	return TopoDS_Face();
+}
+TopoDS_Wire NProfileFactory::ValidateAndFixProfileWire(const TopoDS_Wire& wire)
+{
+	if (wire.NbChildren() > 4) return wire; //needs a few more edges to get any intersections through draughting errors
+	auto tmpFace = MakeFace(wire);
+	ShapeFix_Shape faceFixer(tmpFace);
+	if (faceFixer.Perform())
+	{
+		if (faceFixer.Shape().ShapeType() == TopAbs_COMPOUND || faceFixer.Shape().ShapeType() == TopAbs_SHELL)
+		{
+			TopoDS_Face fixed;
+			//take the wire with the larget area
+			double area = 0;
+			for (TopExp_Explorer shellExp(faceFixer.Shape(), TopAbs_FACE); shellExp.More(); shellExp.Next())
+			{
+				GProp_GProps gProps;
+				auto&& currentFace = TopoDS::Face(shellExp.Current());
+				BRepGProp::SurfaceProperties(currentFace, gProps);
+				if(gProps.Mass()>area)
+				{
+					area = gProps.Mass();
+					fixed = currentFace;
+				}
+			}
+			return TopoDS::Wire(TopoDS_Iterator(fixed).Value());
+		}
+		else if (faceFixer.Shape().ShapeType() == TopAbs_FACE)
+			return TopoDS::Wire(TopoDS_Iterator(faceFixer.Shape()).Value());
+		else
+			Standard_Failure::Raise("Error fixing profile wire");
+	}
+	return wire;
 }
 TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt& start, const gp_Pnt& end)
 {

@@ -24,6 +24,8 @@ public:
 	TopoDS_Solid BuildSurfaceCurveSweptAreaSolid(const TopoDS_Face& sweptArea, const Handle(Geom_Surface)& refSurface, const TopoDS_Wire& directrixWire, bool isPlanarReferenceSurface, double precision);
 	TopoDS_Solid BuildExtrudedAreaSolid(const TopoDS_Face& face, gp_Dir extrudeDirection, double depth, const TopLoc_Location& location);
 
+
+
 	TopoDS_Solid MakeSolid(const TopoDS_Shell& faceSet);
 	/// <summary>
 	/// Casts a shape to a solid, any error are trapped and logged, empty solid is returned if failure
@@ -34,7 +36,6 @@ public:
 	TopoDS_Solid MakeSweptSolid(const TopoDS_Face& face, const gp_Vec& direction);
 	TopoDS_Shape BuildExtrudedAreaSolidTapered(const TopoDS_Face& sweptArea, const TopoDS_Face& endSweptArea, const gp_Dir& extrudeDirection, double depth, const TopLoc_Location& location, double precision);
 	bool TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape);
-
 
 };
 

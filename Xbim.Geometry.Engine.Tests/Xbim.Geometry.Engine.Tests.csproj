@@ -67,6 +67,9 @@
 		<None Update="TestFiles\BooleanClippingWithHalfSpace.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\boolean_clipping_result_with_halfspace.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\boolean_cut_failure.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -94,6 +97,9 @@
 		<None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\empty_rectangle_profile_extrusion.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\ExtrudedAreaSolidFailsOnExtrusion.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -111,6 +117,9 @@
 		</None>
 		<None Update="TestFiles\IfcExamples\csg-primitive.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\polyline_with_very_close_points.ifc">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\SurfaceCurveSweptAreaSolid_5.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

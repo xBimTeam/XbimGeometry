@@ -575,5 +575,23 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
         #endregion
+
+        #region Polylines
+        [Fact]
+        public void Can_convert_polyline_with_very_close_points()
+        {
+            using (var model = MemoryModel.OpenRead(@"TestFiles\polyline_with_very_close_points.ifc"))
+            {
+                var ifcPolyline = model.Instances.OfType<IIfcPolyline>().FirstOrDefault();
+                ifcPolyline.Should().NotBeNull();
+                var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+                var polyline = geomEngine.WireFactory.Build(ifcPolyline);
+                polyline.Should().NotBeNull();
+                polyline.EdgeLoop.Length.Should().Be(ifcPolyline.Points.Count -2); ;
+
+            }
+        }
+
+        #endregion
     }
 }

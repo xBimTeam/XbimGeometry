@@ -17,6 +17,8 @@
 #include "../BRep/XCurve.h"
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <TopExp_Explorer.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Ifc4::Interfaces;
@@ -100,7 +102,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
 
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
-				return wire;
+				return EXEC_NATIVE->ValidateAndFixProfileWire(wire);			
 			}
 
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile)

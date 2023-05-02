@@ -69,8 +69,10 @@ namespace Xbim
 
 			IXSolid^ SolidFactory::Build(IIfcHalfSpaceSolid^ ifcHalfSpaceSolid)
 			{
-				throw gcnew System::NotImplementedException();
-				// TODO: insert return statement here
+				auto halfSpaceSolid = BuildHalfSpace(ifcHalfSpaceSolid);
+				if (halfSpaceSolid.IsNull() || halfSpaceSolid.ShapeType() != TopAbs_SOLID) return nullptr;
+				else
+					return gcnew XSolid(halfSpaceSolid);
 			}
 
 			IXShape^ SolidFactory::Build(IIfcShellBasedSurfaceModel^ ifcSurfaceModel)
@@ -115,9 +117,9 @@ namespace Xbim
 					gp_Vec normalDir = plane->Axis().Direction();
 					if (ifcHalfSpaceSolid->AgreementFlag) normalDir.Reverse();
 					pointInMaterial = plane->Location().Translated(normalDir * _modelService->OneMeter);
-					//face = BRepBuilderAPI_MakeFace(plane, _modelService->MinimumGap);
+					
 					BRep_Builder b;
-					b.MakeFace(face, plane, _modelService->MinimumGap);
+					b.MakeFace(face, plane, _modelService->Precision);
 				}
 				else if (cylindricalSurface != nullptr)
 				{
@@ -132,7 +134,7 @@ namespace Xbim
 						pointInMaterial = surface->Location().Translated(displace);
 					}
 
-					face = BRepBuilderAPI_MakeFace(surface, _modelService->MinimumGap);
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
 
 				}
 				else if (sphericalSurface != nullptr)
@@ -147,7 +149,7 @@ namespace Xbim
 						displace *= sphericalSurface->Radius * 2;
 						pointInMaterial = surface->Location().Translated(displace);
 					}
-					face = BRepBuilderAPI_MakeFace(surface, _modelService->MinimumGap);
+					face = BRepBuilderAPI_MakeFace(surface, _modelService->Precision);
 				}
 				else if (toroidalSurface != nullptr)
 				{
@@ -167,22 +169,24 @@ namespace Xbim
 					auto wire = WIRE_FACTORY->BuildWire(polygonalBoundedHalfSpace->PolygonalBoundary, false); //it will have a 2d bound
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcPolygonalBoundedHalfSpace polygonal boundary could not be built", ifcHalfSpaceSolid);
-					auto face = FACE_FACTORY->EXEC_NATIVE->BuildProfileDef(gp_Pln(), wire);
+					auto polyBoundFace = FACE_FACTORY->EXEC_NATIVE->BuildProfileDef(gp_Pln(), wire);
 					TopLoc_Location location;
 					if (polygonalBoundedHalfSpace->Position != nullptr)
 						location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(polygonalBoundedHalfSpace->Position);
-					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(face, gp_Vec(0, 0, 1e8));
+					double shiftDistance = 100 * ModelGeometryService->OneMeter;//seems big enough for most models
+					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(polyBoundFace, gp_Vec(0, 0, shiftDistance));
 					gp_Trsf shift;
-					shift.SetTranslation(gp_Vec(0, 0, -1e8 / 2));
+					shift.SetTranslation(gp_Vec(0, 0, -shiftDistance / 2));
 					substractionBody.Move(shift);
 					substractionBody.Move(location);
 					bool hasWarnings;
-					TopoDS_Shape shape = BOOLEAN_FACTORY->EXEC_NATIVE->Intersect(halfSpace, substractionBody, ModelGeometryService->MinimumGap, hasWarnings);
+					
+					TopoDS_Shape shape = BOOLEAN_FACTORY->EXEC_NATIVE->Intersect(halfSpace, substractionBody, ModelGeometryService->Precision, hasWarnings);				
 					if (hasWarnings)
 						LogWarning(polygonalBoundedHalfSpace, "Warnings generated building half space solid. See logs");
-					halfSpace = EXEC_NATIVE->CastToSolid(shape);
+					halfSpace = EXEC_NATIVE->CastToSolid(shape); //not a solid, then normally empty compound
 					if (halfSpace.IsNull())
-						throw RaiseGeometryFactoryException("Failure building IfcPolygonBoundedHalfSpaceSolid", polygonalBoundedHalfSpace);
+						LogDebug(polygonalBoundedHalfSpace, "Empty IfcPolygonBoundedHalfSpaceSolid has been ignored");
 					else
 						return halfSpace;
 				}
@@ -293,7 +297,6 @@ namespace Xbim
 				auto directrixWire = WIRE_FACTORY->BuildDirectrixWire(ifcSurfaceCurveSweptAreaSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSurfaceCurveSweptAreaSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSurfaceCurveSweptAreaSolid->EndParam));
 				if (directrixWire.IsNull())
 					throw RaiseGeometryFactoryException("Directrix is invalid", ifcSurfaceCurveSweptAreaSolid->Directrix);
-				auto dstr = (gcnew XWire(directrixWire))->BrepString();
 				
 				auto solid = EXEC_NATIVE->BuildSurfaceCurveSweptAreaSolid(sweptArea, refSurface, directrixWire, isPlanarReferenceSurface, ModelGeometryService->MinimumGap);
 				if(solid.IsNull())
@@ -313,7 +316,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Inner radius is greater than outer radius", ifcSweptDiskSolidPolygonal);
 
 				auto directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSweptDiskSolidPolygonal->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->EndParam));
-				//auto w = (gcnew XWire(directrix))/*->BrepString()*/;
+				
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSweptDiskSolidPolygonal);
 
@@ -346,7 +349,7 @@ namespace Xbim
 
 					auto directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSweptDiskSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->EndParam));
 
-					//auto w = (gcnew XWire(directrix))/*->BrepString()*/;
+
 					if (directrix.IsNull())
 						throw RaiseGeometryFactoryException("Could not build directrix", ifcSweptDiskSolid);
 
@@ -392,6 +395,7 @@ namespace Xbim
 				TopLoc_Location location;
 				if (extrudedSolid->Position != nullptr)
 					location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(extrudedSolid->Position);
+				
 				TopoDS_Solid solid = EXEC_NATIVE->BuildExtrudedAreaSolid(sweptArea, extrudeDirection, extrudedSolid->Depth, location);
 				if (solid.IsNull() || solid.NbChildren() == 0)
 					throw RaiseGeometryFactoryException("Extruded Solid could not be built", extrudedSolid);

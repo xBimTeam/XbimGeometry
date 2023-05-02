@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
@@ -216,6 +217,20 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
 
+        /// <summary>
+        /// The polygonally bound half spaces are extremely small and leave holes that are less than 0.2mm
+        /// Xbim ignores holes of this size as in building terms it is an extreme level of detail and most likely a draughting error
+        /// </summary>
+        [Fact]
+        public void Can_build_boolean_clipping_result_with_halfspaces()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/boolean_clipping_result_with_halfspace.ifc");
+            var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+            var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
+            var shape = geomEngine.Create(booleanOp) as IXbimSolid;
+            shape.Should().NotBeNull();
+            shape.Volume.Should().BeApproximately(3.4498500000004735, 1e-5);
+        }
 
 #if !DEBUG
         //[Theory]

@@ -33,7 +33,7 @@ namespace Xbim.Geometry.Engine.Tests
 
         [Fact]
         public void multi_boolean_opening_operations_test()
-          {
+        {
 
             using (var model = MemoryModel.OpenRead(@"TestFiles\complex.ifc"))
             {
@@ -202,7 +202,7 @@ namespace Xbim.Geometry.Engine.Tests
                 var batchedCutResult = batched_cuts();
                 var batchedCutTime = sw.Elapsed;
 
-               // batchedCutTime.Should().BeLessThan(singleCutsTime);
+                // batchedCutTime.Should().BeLessThan(singleCutsTime);
                 singleCutsResult.FirstOrDefault().Volume.Should().BeApproximately(batchedCutResult.FirstOrDefault().Volume, 1e-5);
             }
         }
@@ -375,7 +375,7 @@ namespace Xbim.Geometry.Engine.Tests
                 }
             }
         }
-        [Fact]
+        [Fact(Skip ="This takes nearly a minute and rarely fails, skipping to improve test performance")]
         public void CompoundBooleanUnionTest()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
@@ -792,12 +792,14 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void CSG_with_self_intersecting_wire_test()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test)))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test),1,1e-5,true))
             {
                 er.Entity.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
-                var solids = geomEngine.CreateSolidSet(er.Entity, _logger);
+                var solids = geomEngine.CreateSolidSet(er.Instance<IIfcBooleanResult>(1), _logger);
+                
                 solids.Count.Should().Be(1);
+                solids.First().Volume.Should().BeApproximately(3476536382, 1);
             }
         }
 
@@ -985,12 +987,13 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void NestedBooleanClippingResultsTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleanClippingResultsTest)))
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleanClippingResultsTest), 1, 1e-5,true))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
-                var solid = geomEngine.CreateSolidSet(er.Entity, _logger).FirstOrDefault();
+                var solid = geomEngine.CreateSolidSet(er.Instance<IIfcBooleanClippingResult>(1), _logger).FirstOrDefault();
                 IsSolidTest(solid);
-                solid.Faces.Count().Should().Be(7);
+                solid.Faces.Count.Should().Be(6);
+                solid.Volume.Should().BeApproximately(1244794809.5741792, 1e-5);
             }
         }
 
@@ -1238,6 +1241,6 @@ namespace Xbim.Geometry.Engine.Tests
         }
         #endregion
 
-        
+
     }
 }

@@ -88,8 +88,11 @@ TopoDS_Shape NBooleanFactory::Intersect(const TopoDS_Shape& left, const TopoDS_S
 	tools.Append(right);
 	return PerformBoolean(arguments, tools, fuzzyTolerance, BOPAlgo_COMMON, hasWarnings);
 }
-
 TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings)
+{
+	return PerformBoolean(arguments, tools, fuzzyTolerance, operation, hasWarnings, false);
+}
+TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings, bool attemptingFix)
 {
 	//try and operate
 	try
@@ -111,7 +114,7 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 		{
 			Standard_Failure::Raise("Boolean operation timed out");
 		}
-		
+
 
 		//if (bop.HasWarnings())
 		//{
@@ -134,15 +137,34 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
+			
 			bop.SimplifyResult(true, true, Precision::Angular());
-			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)))
+			//if we have a self intersection acquired it means one of the input shapes had a self intersection, fix up the input shapes and repeat, if we have not tried to do so before
+			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)) && !attemptingFix)
 			{
-				ShapeFix_Shape shapeFixer(bop.Shape());
-				if (!shapeFixer.Perform())
-					pLoggingService->LogDebug("Boolean Operation has resulted in self-intersection of some sub-shapes in the output result");
-				else
-					return TrimTopology(shapeFixer.Shape());
+				
+				TopoDS_ListOfShape fixedArguments;
+				TopoDS_ListOfShape fixedTools;
+				for (auto&& argument : arguments)
+				{
+					ShapeFix_Shape shapeFixer(argument);
+					if (shapeFixer.Perform())
+						fixedArguments.Append(shapeFixer.Shape());
+					else
+						fixedArguments.Append(argument);
+				}
+				for (auto&& tool : tools)
+				{
+					ShapeFix_Shape shapeFixer(tool);
+					if (shapeFixer.Perform())
+						fixedTools.Append(shapeFixer.Shape());
+					else
+						fixedTools.Append(tool);
+				}
+				return PerformBoolean(fixedArguments, fixedTools, fuzzyTolerance, operation, hasWarnings, true);
 			}
+			if(attemptingFix)
+				pLoggingService->LogDebug("Self-intersection of sub-shapes in the Boolean Operations output results has been fixed.");
 			return TrimTopology(bop.Shape());
 		}
 

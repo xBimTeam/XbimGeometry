@@ -165,10 +165,6 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 				builder.UpdateVertex(kv, gp_Pnt(foundPoint.X(), foundPoint.Y(), 0), requiredTolerance); //make the found point a surrogate for both points
 				if (myLastId == aResID) //its the same as the previous point, just ignore and carry on
 				{
-					char message[128];
-					// We should really use structured logging here
-					sprintf_s(message, 128, "Polyline point ignored: #%d is a duplicate of #%d", keyedPnt.myID, meshVert.Location3d());
-					pLoggingService->LogDebug(message);
 					hasInfo = true;
 					continue;
 				}
@@ -192,7 +188,7 @@ TopoDS_Wire NWireFactory::BuildPolyline2d(const TColgp_Array1OfPnt2d& points, do
 		int actualPointCount = vertices.Size();
 		if (actualPointCount < desiredPointCount) //we have removed duplicate points
 		{
-			pLoggingService->LogDebug("Duplicate points removed from polyline");
+			//pLoggingService->LogDebug("Duplicate points removed from polyline");
 			hasInfo = true;
 		}
 		if (actualPointCount < 2)
@@ -256,9 +252,9 @@ TopoDS_Wire NWireFactory::BuildPolyline3d(
 			if (segLength < pointTolerance)
 			{
 				// We should used structured logging if we can.
-				char message[128];
+				/*char message[128];
 				sprintf_s(message, 128, "Polyline point ignored: (%f,%f,%f) is a duplicate within tolerance of previous point", end.X(), end.Y(), end.Z());
-				pLoggingService->LogDebug(message);
+				pLoggingService->LogDebug(message);*/
 				hasInfo = true;
 				//adjust the position and precision of the previous vertex
 				gp_Vec displacement = edgeVec.Divided(2);//get the vector to move to a point half way between the two
