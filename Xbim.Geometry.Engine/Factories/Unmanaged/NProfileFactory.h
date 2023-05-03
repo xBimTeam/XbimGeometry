@@ -22,16 +22,17 @@ public:
 	TopoDS_Compound MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2);
 	//Build a face and an outer bound, as profile defs are 2d  the xy plane is assumed for the surface
 	TopoDS_Face MakeFace(const TopoDS_Wire& wire);
-	TopoDS_Wire ValidateAndFixProfileWire(const TopoDS_Wire& wire);
+	TopoDS_Wire MakeValidAreaProfileWire(const TopoDS_Wire& wire, bool& isCounterClockwise);
+	
 	TopoDS_Edge MakeEdge(const gp_Pnt& start, const gp_Pnt& end);
 	TopoDS_Edge MakeEdge(const gp_Pnt2d& start, const gp_Pnt2d& end);
 	TopoDS_Edge MakeEdge(const Handle(Geom_Curve)& hCurve);
 	TopoDS_Edge MakeEdge(const Handle(Geom2d_Curve)& hCurve2d);
 	TopoDS_Wire MakeWire(const TopoDS_Edge& edge);
 	TopoDS_Wire MakeWire(const TopTools_ListOfShape& edges);
-	TopoDS_Face MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner);
+	TopoDS_Face MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner, double tolerance);
 	//Build a face and an outer bound and inner wire loops, as profile defs are 2d the xy plane is assumed for the surface
-	TopoDS_Face MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops);
+	TopoDS_Face MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops, double tolerance);
 	TopoDS_Wire BuildRectangle(double dimX, double dimY, const TopLoc_Location& location);
 	TopoDS_Face BuildRectangleHollowProfileDef(const TopLoc_Location& location, double xDim, double yDim, double wallThickness, double outerFilletRadius, double innerFilletRadius, double precision);
 	TopoDS_Wire BuildRoundedRectangle(double dimX, double dimY, double roundingRadius, const TopLoc_Location& location, double precision);
@@ -44,5 +45,7 @@ public:
 	TopoDS_Face BuildMirrored(const TopoDS_Face& parentFace);
 	TopoDS_Wire BuildAsymmetricIShape(double bottomFlangeWidth, double overallDepth, double webThickness, double bottomFlangeThickness, double bottomFlangeFilletRadius, double topFlangeWidth, double topFlangeThickness, double topFlangeFilletRadius, double bottomFlangeEdgeRadius, double bottomFlangeSlope, double topFlangeEdgeRadius, double topFlangeSlope, const TopLoc_Location& location, double precision, bool detailed);
 	TopoDS_Wire BuildCShape(double width, double depth, double girth, double wallThickness, double internalFilletRadius, const TopLoc_Location& location, bool detailed);
+private:
+	double getArea(const TopoDS_Face& face);
 };
 

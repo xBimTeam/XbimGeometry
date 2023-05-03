@@ -169,7 +169,17 @@ namespace Xbim
 					auto wire = WIRE_FACTORY->BuildWire(polygonalBoundedHalfSpace->PolygonalBoundary, false); //it will have a 2d bound
 					if (wire.IsNull())
 						throw RaiseGeometryFactoryException("IfcPolygonalBoundedHalfSpace polygonal boundary could not be built", ifcHalfSpaceSolid);
-					auto polyBoundFace = FACE_FACTORY->EXEC_NATIVE->BuildProfileDef(gp_Pln(), wire);
+					
+					
+					bool isCounterClockwise;
+					wire = PROFILE_FACTORY->EXEC_NATIVE->MakeValidAreaProfileWire(wire, isCounterClockwise);
+					if (wire.IsNull())
+					{
+						LogDebug(polygonalBoundedHalfSpace, "Empty IfcPolygonBoundedHalfSpaceSolid has been ignored");
+						return TopoDS_Solid();
+					}
+					if (!isCounterClockwise) wire.Reverse();
+					auto polyBoundFace = PROFILE_FACTORY->EXEC_NATIVE->MakeFace(wire);
 					TopLoc_Location location;
 					if (polygonalBoundedHalfSpace->Position != nullptr)
 						location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(polygonalBoundedHalfSpace->Position);
@@ -183,7 +193,7 @@ namespace Xbim
 					
 					TopoDS_Shape shape = BOOLEAN_FACTORY->EXEC_NATIVE->Intersect(halfSpace, substractionBody, ModelGeometryService->Precision, hasWarnings);				
 					if (hasWarnings)
-						LogWarning(polygonalBoundedHalfSpace, "Warnings generated building half space solid. See logs");
+						LogDebug(polygonalBoundedHalfSpace, "Warnings generated building half space solid. See logs");
 					halfSpace = EXEC_NATIVE->CastToSolid(shape); //not a solid, then normally empty compound
 					if (halfSpace.IsNull())
 						LogDebug(polygonalBoundedHalfSpace, "Empty IfcPolygonBoundedHalfSpaceSolid has been ignored");

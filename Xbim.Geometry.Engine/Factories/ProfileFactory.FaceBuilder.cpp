@@ -102,10 +102,19 @@ namespace Xbim
 					if (innerLoopIds->Add(innerWire->EntityLabel)) //only add a loop once
 					{
 						TopoDS_Wire wire = WIRE_FACTORY->BuildWire(innerWire, false); //throws exception
-						innerLoops.Append(wire);
+						bool isCounterClockWise;
+						wire = EXEC_NATIVE->MakeValidAreaProfileWire(wire, isCounterClockWise);
+						if (!wire.IsNull())
+						{
+							//ensure voids are clockwise winding as outer loop is always counter clockwise
+							if (isCounterClockWise) wire.Reverse();
+							innerLoops.Append(wire);
+						}
+						else
+							LogDebug(innerWire,"ArbritraryClosedProfileDef with an zero area void. Void ignored");
 					}
 				}
-				TopoDS_Face face = EXEC_NATIVE->MakeFace(outerProfile, innerLoops);
+				TopoDS_Face face = EXEC_NATIVE->MakeFace(outerProfile, innerLoops, ModelGeometryService->Precision);
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Failed to create IfcArbitraryProfileDefWithVoids", arbitraryClosedProfileWithVoids);
 				else
@@ -186,7 +195,7 @@ namespace Xbim
 					auto innerEdge = EDGE_FACTORY->BuildCircle(ifcCircleHollowProfileDef->Radius - ifcCircleHollowProfileDef->WallThickness, gpax2); //throws an exception
 					auto innerWire = EXEC_NATIVE->MakeWire(innerEdge);
 					innerWire.Reverse();
-					face = EXEC_NATIVE->MakeFace(outerWire, innerWire);
+					face = EXEC_NATIVE->MakeFace(outerWire, innerWire, ModelGeometryService->Precision);
 				}
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Failed to create profile face", ifcCircleHollowProfileDef);

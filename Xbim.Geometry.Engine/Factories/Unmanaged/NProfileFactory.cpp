@@ -24,6 +24,7 @@
 #include <ShapeFix_Shape.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
+#include <BRepTools.hxx>
 
 TopoDS_Compound NProfileFactory::MakeCompound(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2)
 {
@@ -74,10 +75,29 @@ TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire)
 	pLoggingService->LogError("Failed to build face");
 	return TopoDS_Face();
 }
-TopoDS_Wire NProfileFactory::ValidateAndFixProfileWire(const TopoDS_Wire& wire)
+
+/// <summary>
+/// This function checks if a wre is suitable to a valid profile area for extrusion as a solid, checks if the wire is clockwise or counterclockwise
+/// </summary>
+/// <param name="wire"></param>
+/// <returns></returns>
+TopoDS_Wire NProfileFactory::MakeValidAreaProfileWire(const TopoDS_Wire& wire, bool& isCounterClockwise)
 {
-	if (wire.NbChildren() > 4) return wire; //needs a few more edges to get any intersections through draughting errors
 	auto tmpFace = MakeFace(wire);
+	//we do not attempt to fix every wire, the main problem is typically self intersecting wires or wires with no area
+	//self intersection does not occur with 3 edges and a positive area
+	if (wire.NbChildren() < 4)
+	{
+		double thisArea = getArea(tmpFace);
+		if (std::abs(thisArea) < Precision::Approximation())
+			return TopoDS_Wire();
+		else
+		{
+			isCounterClockwise = thisArea > 0;
+			return wire;
+		}
+	}
+	
 	ShapeFix_Shape faceFixer(tmpFace);
 	if (faceFixer.Perform())
 	{
@@ -88,23 +108,53 @@ TopoDS_Wire NProfileFactory::ValidateAndFixProfileWire(const TopoDS_Wire& wire)
 			double area = 0;
 			for (TopExp_Explorer shellExp(faceFixer.Shape(), TopAbs_FACE); shellExp.More(); shellExp.Next())
 			{
-				GProp_GProps gProps;
-				auto&& currentFace = TopoDS::Face(shellExp.Current());
-				BRepGProp::SurfaceProperties(currentFace, gProps);
-				if(gProps.Mass()>area)
+				auto&& currentFace = TopoDS::Face(shellExp.Current());		
+				double thisArea = getArea(currentFace);
+				double absArea = std::abs(thisArea);
+				if(absArea > area)
 				{
-					area = gProps.Mass();
+					area = thisArea;
 					fixed = currentFace;
+					isCounterClockwise = thisArea > 0;
 				}
-			}
-			return TopoDS::Wire(TopoDS_Iterator(fixed).Value());
+			}	
+			if (area < Precision::Approximation()) 
+				return TopoDS_Wire();
+			else
+				return BRepTools::OuterWire(fixed);
 		}
 		else if (faceFixer.Shape().ShapeType() == TopAbs_FACE)
-			return TopoDS::Wire(TopoDS_Iterator(faceFixer.Shape()).Value());
+		{
+			tmpFace = TopoDS::Face(faceFixer.Shape());
+			double thisArea = getArea(tmpFace);
+			if (std::abs(thisArea) < Precision::Approximation()) 
+				return TopoDS_Wire();
+			else
+			{
+				isCounterClockwise = thisArea > 0;
+				return BRepTools::OuterWire( tmpFace); //in this test we only expect an outer, holes are not valid and ignored
+			}
+		}
+			 
 		else
 			Standard_Failure::Raise("Error fixing profile wire");
 	}
+	double thisArea = getArea(tmpFace);
+	if (std::abs(thisArea) < Precision::Approximation()) 
+		return TopoDS_Wire();
+	isCounterClockwise = thisArea > 0;
 	return wire;
+}
+
+/// <summary>
+/// Calculates the area of the wire, assumes only one wire on the face, for use on in this factory, a negative area value indicates clockwise winding
+/// </summary>
+/// <returns></returns>
+double NProfileFactory::getArea(const TopoDS_Face& face)
+{
+	GProp_GProps gProps;
+	BRepGProp::SurfaceProperties(face, gProps);
+	return gProps.Mass();
 }
 TopoDS_Edge NProfileFactory::MakeEdge(const gp_Pnt& start, const gp_Pnt& end)
 {
@@ -214,20 +264,19 @@ TopoDS_Wire NProfileFactory::MakeWire(const TopTools_ListOfShape& edges)
 	}
 	return TopoDS_Wire();
 }
-TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner)
+TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& outer, const TopoDS_Wire& inner, double tolerance)
 {
 	TopTools_SequenceOfShape inners;
 	inners.Append(inner);
-	return MakeFace(outer, inners);
+	return MakeFace(outer, inners, tolerance);
 }
 //This function will check the orientation of the inner loops to ensure they are reverse of the outer bound
-TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops)
+TopoDS_Face NProfileFactory::MakeFace(const TopoDS_Wire& wire, const TopTools_SequenceOfShape& innerLoops, double tolerance)
 {
 	try
 	{
 
 		BRepBuilderAPI_MakeFace faceMaker(_xyPlane, wire, true);
-
 		for (auto&& inner : innerLoops)
 		{
 			faceMaker.Add(TopoDS::Wire(inner));

@@ -41,6 +41,7 @@ namespace Xbim
 			std::ostringstream oss;
 			if (dynamic_cast<XbimOccShape^>(this))
 			{
+				oss << "DBRep_DrawableShape" << std::endl;
 				BRepTools::Write((XbimOccShape^)this, oss);
 				return gcnew System::String(oss.str().c_str());
 			}

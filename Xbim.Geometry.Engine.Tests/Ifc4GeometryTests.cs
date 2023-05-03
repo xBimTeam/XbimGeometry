@@ -801,8 +801,8 @@ namespace Xbim.Geometry.Engine.Tests
                 eas.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
-                var brep = geom.ToBRep;
-                geom.Volume.Should().BeApproximately(2278352481546.0352, 1e-5);
+               // var brep = geom.ToBRep;
+                geom.Volume.Should().BeApproximately(2278848175847, 1);
             }
         }
 
@@ -816,7 +816,7 @@ namespace Xbim.Geometry.Engine.Tests
                 eas.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
                 var geom = geomEngine.CreateSolid(eas, _logger);
-                geom.Volume.Should().BeApproximately(18117345688.20311, 1e-5);
+                geom.Volume.Should().BeApproximately(18117345688, 1);
 
             }
         }

@@ -102,7 +102,12 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("WR3 The outer curve shall not be of type IfcOffsetCurve2D as it should not be defined as an offset of another curve", arbitraryClosedProfile);
 
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryClosedProfile->OuterCurve, false); //throws exception
-				return EXEC_NATIVE->ValidateAndFixProfileWire(wire);			
+				bool isCounterClockwise;
+				wire = EXEC_NATIVE->MakeValidAreaProfileWire(wire, isCounterClockwise);
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcArbitraryClosedProfileDef is ignored as the outer curve has zero area", arbitraryClosedProfile);				
+				if (!isCounterClockwise) wire.Reverse();
+				return wire;
 			}
 
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryOpenProfileDef^ arbitraryOpenProfile)

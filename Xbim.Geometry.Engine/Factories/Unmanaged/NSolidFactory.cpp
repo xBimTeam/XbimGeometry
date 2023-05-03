@@ -632,13 +632,14 @@ TopoDS_Solid NSolidFactory::CastToSolid(const TopoDS_Shape& shape)
 {
 	try
 	{
-		return TopoDS::Solid(shape);
+		if (shape.ShapeType() == TopAbs_SOLID)
+			return TopoDS::Solid(shape);
 	}
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
 	}
-	pLoggingService->LogError("Could not cast to Solid");
+	pLoggingService->LogDebug("Could not cast to Solid");
 	return TopoDS_Solid();
 }
 

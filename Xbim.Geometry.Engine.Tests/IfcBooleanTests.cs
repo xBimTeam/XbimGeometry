@@ -375,7 +375,11 @@ namespace Xbim.Geometry.Engine.Tests
                 }
             }
         }
-        [Fact(Skip ="This takes nearly a minute and rarely fails, skipping to improve test performance")]
+#if DEBUG
+        [Fact(Skip = "This takes nearly a minute and rarely fails, skipping in debug only to improve test performance")]
+#else
+[Fact]
+#endif
         public void CompoundBooleanUnionTest()
         {
             using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CompoundBooleanUnionTest)))
@@ -510,6 +514,23 @@ namespace Xbim.Geometry.Engine.Tests
 
         }
 
+        /// <summary>
+        /// This test exposes lacking Curve3ds on some arbritary profile definitions that have been built as 2d only
+        /// </summary>
+        [Fact]
+        public void Can_handle_boolean_result_causing_memory_exception()
+        {
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>("boolean_result_causing_memory_exception"))
+            {
+                er.Entity.Should().NotBeNull();
+                var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
+  
+                var solids = geomEngine.CreateSolidSet(er.Entity, _logger);
+                HelperFunctions.IsValidSolid(solids.FirstOrDefault());
+
+            }
+
+        }
         [Fact]
         public void BooleanResultTimoutTest()
         {
@@ -792,12 +813,12 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void CSG_with_self_intersecting_wire_test()
         {
-            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test),1,1e-5,true))
+            using (var er = new EntityRepository<IIfcBooleanResult>(nameof(CSG_with_self_intersecting_wire_test), 1, 1e-5, true))
             {
                 er.Entity.Should().NotBeNull();
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 var solids = geomEngine.CreateSolidSet(er.Instance<IIfcBooleanResult>(1), _logger);
-                
+
                 solids.Count.Should().Be(1);
                 solids.First().Volume.Should().BeApproximately(3476536382, 1);
             }
@@ -987,7 +1008,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void NestedBooleanClippingResultsTest()
         {
-            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleanClippingResultsTest), 1, 1e-5,true))
+            using (var er = new EntityRepository<IIfcBooleanClippingResult>(nameof(NestedBooleanClippingResultsTest), 1, 1e-5, true))
             {
                 var geomEngine = new XbimGeometryEngine(er.Entity.Model, _loggerFactory);
                 var solid = geomEngine.CreateSolidSet(er.Instance<IIfcBooleanClippingResult>(1), _logger).FirstOrDefault();
