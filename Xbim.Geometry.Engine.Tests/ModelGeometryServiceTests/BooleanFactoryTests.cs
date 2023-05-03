@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
@@ -17,7 +18,7 @@ namespace Xbim.Geometry.Engine.Tests
         #region Setup
 
 
-   
+
         private readonly MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
         const double minGap = 0.2;
@@ -72,8 +73,8 @@ namespace Xbim.Geometry.Engine.Tests
         /// <param name="dispZ"></param>
         /// <param name="singleSolid"></param>
         [Theory]
-        [InlineData(-10-(minGap*1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
-        [InlineData(10+(minGap*1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
+        [InlineData(-10 - (minGap * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
+        [InlineData(10 + (minGap * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
         [InlineData(-10 - minGap, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
         [InlineData(10.0 + minGap, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
         [InlineData(0, 0, -30)] //z-2 face coincidental
@@ -146,8 +147,8 @@ namespace Xbim.Geometry.Engine.Tests
 #if DEBUG
             var def = solid.BrepString();
 #endif
-            
-            
+
+
             var box = solid.Bounds();
             if (intersects)
             {
@@ -162,11 +163,11 @@ namespace Xbim.Geometry.Engine.Tests
         [Theory]
         [InlineData(10, 5, true)] //should result in a block of length x = 5
         [InlineData(10, -5, true)] //should result in a block of length x = 5
-        [InlineData(10, 10-(minGap*0.9), false)] //technically a failure to intersect is  within tolerance  of MinumumGap
-        [InlineData(10, -10-(minGap * 0.9), false)] //technicially a failure to intersect as  within tolerance  of MinumumGap
+        [InlineData(10, 10 - (minGap * 0.9), false)] //technically a failure to intersect is  within tolerance  of MinumumGap
+        [InlineData(10, -10 - (minGap * 0.9), false)] //technicially a failure to intersect as  within tolerance  of MinumumGap
         public void Can_intersect_two_blocks(double lenX, double dispX, bool intersects)
         {
-          
+
             //by default these blocks are all lenX =10, lenY = 20, lenZ = 30
             var booleanResult = IfcMoq.IfcBooleanResultMoq(
             boolOp: Ifc4.Interfaces.IfcBooleanOperator.INTERSECTION,
@@ -187,7 +188,7 @@ namespace Xbim.Geometry.Engine.Tests
 #if DEBUG
                 var def = solid.BrepString();
 #endif
-                
+
                 var box = solid.Bounds();
                 box.LenX.Should().BeApproximately(lenX - Math.Abs(dispX), 1e-5);
             }
@@ -207,7 +208,7 @@ namespace Xbim.Geometry.Engine.Tests
         [Fact]
         public void Can_Clip_With_HalfSpace()
         {
-            using var model = MemoryModel.OpenRead("testfiles/BooleanClippingWithHalfSpace.ifc"); 
+            using var model = MemoryModel.OpenRead("testfiles/BooleanClippingWithHalfSpace.ifc");
             var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Build(booleanOp);
@@ -265,5 +266,26 @@ namespace Xbim.Geometry.Engine.Tests
 
         //}
 #endif
+
+        [Fact]
+        public void Can_build_boolean_result_with_small_solids()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/boolean_result_with_small_solids.ifc");
+            var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+            var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
+            var shape = geomEngine.Create(booleanOp) as IXbimSolid;
+            shape.Should().NotBeNull();
+            shape.Volume.Should().BeApproximately(1.832928042298613e-5, 1e-5);
+        }
+        [Fact]
+        public void Can_build_boolean_result_with_bad_polygonal_half_space_bounds()
+        {
+            using var model = MemoryModel.OpenRead("testfiles/boolean_result_with_bad_polygonal_half_space_bounds.ifc");
+            var geomEngine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+            var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
+            var shape = geomEngine.Create(booleanOp) as IXbimSolid;
+            shape.Should().NotBeNull();
+            shape.Volume.Should().BeApproximately(0.91613407890247534, 1e-5);
+        }
     }
 }

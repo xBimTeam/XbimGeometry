@@ -99,6 +99,7 @@ TopoDS_Wire NProfileFactory::MakeValidAreaProfileWire(const TopoDS_Wire& wire, b
 	}
 	
 	ShapeFix_Shape faceFixer(tmpFace);
+	
 	if (faceFixer.Perform())
 	{
 		if (faceFixer.Shape().ShapeType() == TopAbs_COMPOUND || faceFixer.Shape().ShapeType() == TopAbs_SHELL)

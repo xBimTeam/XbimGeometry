@@ -27,6 +27,7 @@
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <ShapeFix_Solid.hxx>
+#include <ShapeFix_Shape.hxx>
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 
@@ -179,12 +180,18 @@ namespace Xbim
 						return TopoDS_Solid();
 					}
 					if (!isCounterClockwise) wire.Reverse();
+					
 					auto polyBoundFace = PROFILE_FACTORY->EXEC_NATIVE->MakeFace(wire);
+					auto str = (gcnew XFace(polyBoundFace))->BrepString();
 					TopLoc_Location location;
 					if (polygonalBoundedHalfSpace->Position != nullptr)
 						location = GEOMETRY_FACTORY->BuildAxis2PlacementLocation(polygonalBoundedHalfSpace->Position);
-					double shiftDistance = 100 * ModelGeometryService->OneMeter;//seems big enough for most models
+					double shiftDistance = 200 * ModelGeometryService->OneMeter;//seems big enough for most models
 					TopoDS_Solid substractionBody = EXEC_NATIVE->MakeSweptSolid(polyBoundFace, gp_Vec(0, 0, shiftDistance));
+					ShapeFix_Shape shapeFixer(substractionBody);
+					bool fixed = shapeFixer.Perform();
+					if (fixed && shapeFixer.Shape().ShapeType()==TopAbs_SOLID)
+						substractionBody = TopoDS::Solid(shapeFixer.Shape());
 					gp_Trsf shift;
 					shift.SetTranslation(gp_Vec(0, 0, -shiftDistance / 2));
 					substractionBody.Move(shift);

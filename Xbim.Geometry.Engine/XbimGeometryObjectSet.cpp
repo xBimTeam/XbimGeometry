@@ -457,7 +457,8 @@ namespace Xbim
 		{
 			TopoDS_ListOfShape arguments;
 			TopoDS_ListOfShape tools;
-			GetShapeList(arguments);		
+			GetShapeList(arguments);	
+			if (arguments.Size() == 0) return gcnew XbimGeometryObjectSet(_modelServices);
 			for each (auto solid in solids)
 				tools.Append(static_cast<XbimSolid^>(solid));
 			if (tolerance > 0)

@@ -145,11 +145,15 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 				
 				TopoDS_ListOfShape fixedArguments;
 				TopoDS_ListOfShape fixedTools;
+				bool fixPossible = false;
 				for (auto&& argument : arguments)
 				{
 					ShapeFix_Shape shapeFixer(argument);
 					if (shapeFixer.Perform())
+					{
 						fixedArguments.Append(shapeFixer.Shape());
+						fixPossible = true;
+					}
 					else
 						fixedArguments.Append(argument);
 				}
@@ -157,11 +161,16 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 				{
 					ShapeFix_Shape shapeFixer(tool);
 					if (shapeFixer.Perform())
+					{
 						fixedTools.Append(shapeFixer.Shape());
+						fixPossible = true;
+					}
 					else
 						fixedTools.Append(tool);
 				}
-				return PerformBoolean(fixedArguments, fixedTools, fuzzyTolerance, operation, hasWarnings, true);
+				if(fixPossible)
+					return PerformBoolean(fixedArguments, fixedTools, fuzzyTolerance, operation, hasWarnings, true);
+
 			}
 			if(attemptingFix)
 				pLoggingService->LogDebug("Self-intersection of sub-shapes in the Boolean Operations output results has been fixed.");
