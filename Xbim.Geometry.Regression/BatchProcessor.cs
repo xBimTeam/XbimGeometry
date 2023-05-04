@@ -86,9 +86,10 @@ namespace XbimRegression
                 Console.WriteLine($"Processing {file}");
                 ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
                 //XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                _logger.LogInformation($"Processed {file.FullName}");
                 _currentLogFileName = "BatchProcessor.log";
-
-                _logger.LogInformation($"Processing run results from log file {runLogFileName}");
+                _logger.LogInformation($"Processing {file.FullName}");
+                Console.WriteLine($"Processing run results from log file {runLogFileName}");
                
                 var txt = File.ReadAllText(runLogFileName);
                 
@@ -165,7 +166,7 @@ namespace XbimRegression
 
         private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILoggerFactory loggerFactory)
         {
-            var logger = loggerFactory.CreateLogger<BatchProcessor>();
+            // var logger = loggerFactory.CreateLogger<BatchProcessor>();
 
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
@@ -181,7 +182,7 @@ namespace XbimRegression
                         progress = progressReport;
                     }
                     watch.Start();
-                    using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
+                    using (var model = ParseModelFile(ifcFile, Params.Caching, _logger, progress))
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
@@ -288,9 +289,9 @@ namespace XbimRegression
                                     {
                                         Xbim.Common.Geometry.IXbimGeometryObject created = null;
                                         if (ent is IIfcGeometricRepresentationItem igri)
-                                            created = engine.Create(igri, logger);
+                                            created = engine.Create(igri, _logger);
                                         if (ent is IIfcConnectedFaceSet icfs)
-                                            created = engine.CreateShell(icfs, logger);
+                                            created = engine.CreateShell(icfs, _logger);
                                         // IIfcConnectedFaceSet
                                         if (created != null)
                                         {
@@ -328,10 +329,11 @@ namespace XbimRegression
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    logger.LogError(ex, "Problem converting file: {ifcFile}", ifcFile);
+                    _logger.LogError(ex, "Problem converting file: {ifcFile}", ifcFile);
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
+                
 
                 return result;
             }
