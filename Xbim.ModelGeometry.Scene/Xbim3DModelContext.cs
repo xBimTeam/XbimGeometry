@@ -55,6 +55,7 @@ namespace Xbim.ModelGeometry.Scene
             private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
+            
 
 
             public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
@@ -895,8 +896,7 @@ namespace Xbim.ModelGeometry.Scene
             // make sure all the geometries we have cached are sewn
             // contextHelper.SewGeometries(Engine);
             Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, elementToFeatureGroup =>
-            //         foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
-            // foreach (IGrouping<IIfcElement, IIfcFeatureElement> pair in contextHelper.OpeningsAndProjections)
+               //      foreach (IGrouping<IIfcElement, IIfcFeatureElement> elementToFeatureGroup in contextHelper.OpeningsAndProjections)
             {
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
@@ -932,14 +932,18 @@ namespace Xbim.ModelGeometry.Scene
                         //
                         var isCut = feature is IIfcFeatureElementSubtraction;
                         var featureShapes = WriteProductShape(contextHelper, feature, false, txn);
+
                         foreach (var featureShape in featureShapes)
                         {
                             if (!allShapeIds.TryAdd(featureShape.ShapeGeometryLabel, true))
                                 shapeIdsUsedMoreThanOnce.TryAdd(featureShape.ShapeGeometryLabel, true);
-                            if (isCut)
-                                cutTools.Add(featureShape);
-                            else
-                                projectTools.Add(featureShape);
+                            if (featureShape.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) //skip if the geometry of the feature is for reference only
+                            {
+                                if (isCut)
+                                    cutTools.Add(featureShape);
+                                else
+                                    projectTools.Add(featureShape);
+                            }
                         }
                         processed.TryAdd(feature.EntityLabel, 0);
 
@@ -1010,8 +1014,7 @@ namespace Xbim.ModelGeometry.Scene
                         IXbimGeometryObjectSet nextGeom;
                         try
                         {
-                            //nextGeom = CutWithTimeOut(elementGeom, openingAndProjectionOp.CutGeometries, precision, BooleanTimeOutMilliSeconds);
-
+                            
                             nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, _modelServices.MinimumGap, _logger);
                             if (nextGeom.IsValid)
                             {
@@ -1207,6 +1210,7 @@ namespace Xbim.ModelGeometry.Scene
             var repType = includesOpenings
                 ? XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded
                 : XbimGeometryRepresentationType.OpeningsAndAdditionsExcluded;
+
             if (product is IIfcFeatureElement)
             {
                 //  might come in here from direct meshing or from meshing of remaining objects; either way mark as appropriate
@@ -1230,6 +1234,12 @@ namespace Xbim.ModelGeometry.Scene
                 return shapesInstances;
             }
             var contextId = rep.ContextOfItems.EntityLabel;
+            //if we are processing opens but the rep identifier is reference we should not perform any booleans operatons, set flag to avoid
+            if(repType == XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded &&
+                string.Compare( rep.RepresentationIdentifier, "reference", true) == 0)
+            {
+                repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
+            };
             foreach (var representationItem in representationItems)
             {
                 if (representationItem is IIfcMappedItem theMap)
