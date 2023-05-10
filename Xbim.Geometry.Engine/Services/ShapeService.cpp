@@ -217,6 +217,7 @@ namespace Xbim
 			bool ShapeService::IsFacingAwayFrom(IXFace^ face, IXDirection^ direction)
 			{
 				if (direction->IsNull) return false;
+				
 				gp_Vec toward(direction->X, direction->Y, direction->Z);
 				XFace^ xFace = static_cast<XFace^>(face);
 				const TopoDS_Face& topoFace = TopoDS::Face(xFace->GetTopoShape());
@@ -227,8 +228,12 @@ namespace Xbim
 				prop.Bounds(u1, u2, v1, v2);
 				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, faceNormal);
 
-				double angle = faceNormal.AngleWithRef(toward, toward);
-				return angle < M_PI_2 + 0.1;
+				if (faceNormal.Magnitude() > 0)
+				{
+					double angle = faceNormal.AngleWithRef(toward, toward);
+					return angle < M_PI_2 + 0.1;
+				}
+				return false;
 			}
 
 			IXbimGeometryObject^ ShapeService::ConvertToV5(IXShape^ shape)
