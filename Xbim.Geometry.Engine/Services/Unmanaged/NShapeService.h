@@ -3,6 +3,7 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BRepAlgoAPI_BooleanOperation.hxx>
 #include "../Unmanaged/NLoggingService.h"
+#include "NWexBimMesh.h"
 
 class NShapeService
 {
@@ -36,5 +37,6 @@ public:
 	};
 	void LogStandardFailure(const Standard_Failure& e, char* additionalMessage);
 	void LogStandardFailure(const Standard_Failure& e);
+	NWexBimMesh CreateMesh(const TopoDS_Shape& shape, double tolerance, double linearDeflection, double angularDeflection, double scale);
 };
 

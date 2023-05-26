@@ -14,7 +14,7 @@
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />

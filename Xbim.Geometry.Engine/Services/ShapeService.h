@@ -83,6 +83,8 @@ namespace Xbim
 
                 virtual bool IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors);
 
+                virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, double tolerance, double linearDeflection, double angularDeflection, double scale, IXAxisAlignedBoundingBox^% bounds);
+
             };
 		}
 	}

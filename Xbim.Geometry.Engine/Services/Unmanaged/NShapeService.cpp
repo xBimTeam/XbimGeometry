@@ -6,6 +6,8 @@
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopoDS_Iterator.hxx>
 #include "../../XbimProgressMonitor.h"
+#include "NWexBimMesh.h"
+#include <BRepMesh_IncrementalMesh.hxx>
 
  
 TopoDS_Shape NShapeService::Cut(const TopoDS_Shape& body, const TopoDS_ListOfShape& subtractions, double precision)
@@ -147,4 +149,36 @@ void NShapeService::LogStandardFailure(const Standard_Failure& e)
 	std::stringstream strm;
 	e.Print(strm);
 	pLoggingService->LogError(strm.str().c_str());
+}
+
+NWexBimMesh NShapeService::CreateMesh(const TopoDS_Shape& shape,
+	double tolerance,
+	double linearDeflection,
+	double angularDeflection,
+	double scale)
+{
+	NWexBimMesh mesh(tolerance, scale);
+	try
+	{
+		IMeshTools_Parameters meshParams;
+		meshParams.AllowQualityDecrease = true;
+		meshParams.Deflection = linearDeflection;
+		meshParams.Angle = angularDeflection;
+		meshParams.Relative = false;
+		meshParams.DeflectionInterior = linearDeflection;
+		BRepMesh_IncrementalMesh incrementalMesh(shape, meshParams); //triangulate 
+
+		for (NFaceMeshIterator aFaceIter(shape, false); aFaceIter.More(); aFaceIter.Next())
+		{
+			if (aFaceIter.IsEmptyMesh())
+				continue;
+			mesh.SaveIndicesAndNormals(aFaceIter);
+		}
+		
+	}
+	catch (const Standard_Failure& e)
+	{
+		LogStandardFailure(e, "WexBim mesh creation error.");
+	}
+	return mesh;
 }

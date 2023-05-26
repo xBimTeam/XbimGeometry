@@ -24,6 +24,7 @@
 #include <vector>
 
 
+
 using namespace Xbim::Geometry::BRep;
 
 namespace Xbim
@@ -261,6 +262,28 @@ namespace Xbim
 
 				return NShapeProximityUtils::IsOverlapping
 							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
+			}
+
+			array<System::Byte>^ ShapeService::CreateWexBimMesh(IXShape^ shape, double tolerance, double linearDeflection, double angularDeflection, double scale, IXAxisAlignedBoundingBox^% bounds)
+			{
+				TopoDS_Shape topoShape = static_cast<XShape^>(shape)->GetTopoShape();
+
+				auto mesh = Ptr()->CreateMesh(topoShape, tolerance, linearDeflection, angularDeflection, scale);
+
+				auto bMin = mesh.BndBox.CornerMin();
+				auto bMax = mesh.BndBox.CornerMax();
+
+				bounds = gcnew XAxisAlignedBox(Bnd_Box(gp_Pnt(bMin[0], bMin[1], bMin[2]), gp_Pnt(bMax[0], bMax[1], bMax[2])));
+
+				std::stringstream output;
+				mesh.WriteToStream(output);
+				int size = (int)output.str().length();
+				auto buffer = std::make_unique<char[]>(size);
+				output.seekg(0);
+				output.read(buffer.get(), size);
+				cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
+				System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+				return byteArray;
 			}
 
 			
