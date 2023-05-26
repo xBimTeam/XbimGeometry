@@ -1,7 +1,7 @@
 #pragma once
-
+#include "../Services/MeshFactors.h"
 using namespace Xbim::Geometry::Abstractions;
-
+using namespace Xbim::Geometry::Services;
  namespace Xbim
 {
 	 namespace Geometry
@@ -20,6 +20,10 @@ using namespace Xbim::Geometry::Abstractions;
 				 virtual IXAxisAlignedBoundingBox^ BuildBoundingBox();
 				 virtual IXAxisAlignedBoundingBox^ BuildBoundingBox(double x, double y, double z, double sizeX, double sizeY, double sizeZ);
 				 virtual IXAxisAlignedBoundingBox^ Moved(IXAxisAlignedBoundingBox^ box, IXLocation^ newLocation);
+				 virtual IXMeshFactors^ GetMeshFactors(MeshGranularity granularity, double oneMeter, double precision)
+				 {
+					 return gcnew MeshFactors(granularity, oneMeter, precision);
+				 };
 			 };
 
 		 }

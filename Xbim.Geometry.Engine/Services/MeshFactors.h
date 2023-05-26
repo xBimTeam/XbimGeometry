@@ -21,6 +21,10 @@ namespace Xbim
 				double _tolerance;
 
 			public:
+				MeshFactors(MeshGranularity granularity, double oneMeter, double tolerance) : _oneMeter(oneMeter), _tolerance(tolerance)
+				{
+					SetGranularity(granularity);
+				};
 				MeshFactors(double oneMeter, double tolerance) : _oneMeter(oneMeter), _tolerance(tolerance)
 				{
 					SetGranularity(MeshGranularity::Normal);
