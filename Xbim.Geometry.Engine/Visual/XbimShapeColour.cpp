@@ -73,7 +73,7 @@ namespace Xbim
 						Shininess = seVal > 1.0f ? (float)(seVal / 128.0f) : (float)seVal; //correction for BIM tools using values > 1 using SpecularExponent
 					}
 					else if (sr != nullptr)
-						Shininess = (float)sr->Value;
+						Shininess = System::Convert::ToSingle(sr->Value);
 					Transparency = rendering->Transparency.HasValue ? (float)rendering->Transparency.Value : 1.0f;
 
 					return;
