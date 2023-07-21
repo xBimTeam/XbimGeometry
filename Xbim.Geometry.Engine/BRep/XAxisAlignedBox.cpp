@@ -1,5 +1,10 @@
 #include "XAxisAlignedBox.h"
 #include "XPoint.h"
+#include "XLocation.h"
+#include "XMatrix.h"
+#include "../Extensions//ToGTransform.h"
+
+
 using namespace System;
 namespace Xbim
 {
@@ -58,12 +63,37 @@ namespace Xbim
 				otherBbox.Add(Ref());
 				return gcnew XAxisAlignedBox(otherBbox);
 			}
+
+			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Transformed(IXLocation^ location)
+			{
+				if (IsVoid) return this;
+				auto xbimLoc = dynamic_cast<XLocation^>(location);
+				if (location == nullptr || xbimLoc == nullptr || xbimLoc->IsIdentity) return this;
+				Bnd_Box bBox(gp_Pnt(CornerMin->X, CornerMin->Y, CornerMin->Z),
+					gp_Pnt(CornerMax->X, CornerMax->Y, CornerMax->Z));
+				Bnd_Box movedBox = bBox.Transformed(xbimLoc->Ref());
+				return gcnew XAxisAlignedBox(movedBox);
+			}
+
+			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Transformed(IXMatrix^ transformation)
+			{
+				if (IsVoid) return this;
+				auto xbimMat = dynamic_cast<XMatrix^>(transformation);
+				if (xbimMat == nullptr || xbimMat == nullptr || xbimMat->IsIdentity) return this;
+				Bnd_Box bBox(gp_Pnt(CornerMin->X, CornerMin->Y, CornerMin->Z),
+					gp_Pnt(CornerMax->X, CornerMax->Y, CornerMax->Z));
+				gp_Trsf transform = xbimMat->Transform();
+				Bnd_Box movedBox = bBox.Transformed(transform);
+				return gcnew XAxisAlignedBox(bBox);
+			}
+			
 			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Translated(double x, double y, double z)
 			{
 				gp_Vec translation(x, y, z);
 				Bnd_Box bBox(Ref().CornerMin().Translated(translation), Ref().CornerMax().Translated(translation));
 				return gcnew XAxisAlignedBox(bBox);		
 			}
+
 			IXAxisAlignedBoundingBox^ XAxisAlignedBox::Translated(IXPoint^ translation)
 			{
 				return Translated(translation->X, translation->Y, translation->Z);

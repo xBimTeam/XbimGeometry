@@ -30,6 +30,8 @@ namespace Xbim
 				virtual property bool IsVoid { bool get(); };
 				virtual IXAxisAlignedBoundingBox^ Union(IXAxisAlignedBoundingBox^ other);
 				virtual property IXPoint^ Centroid {IXPoint^ get(); };
+				virtual IXAxisAlignedBoundingBox^ Transformed(IXLocation^ location);
+				virtual IXAxisAlignedBoundingBox^ Transformed(IXMatrix^ transforamtion);
 				virtual IXAxisAlignedBoundingBox^ Translated(double x, double y, double z);
 				virtual IXAxisAlignedBoundingBox^ Translated(IXPoint^ translation);
 			};
