@@ -272,6 +272,7 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\ModelPlacementBuilder.h" />
     <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
     <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
@@ -406,6 +407,7 @@
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="Factories\MaterialFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
+    <ClCompile Include="Services\ModelPlacementBuilder.cpp" />
     <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
     <ClCompile Include="Services\Unmanaged\NShapeProximityUtils.cpp" />
     <ClCompile Include="Services\Unmanaged\NShapeService.cpp" />
@@ -505,7 +507,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.332</Version>
+      <Version>6.2.337</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

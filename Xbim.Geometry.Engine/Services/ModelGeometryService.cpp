@@ -1,11 +1,9 @@
 #include "ModelGeometryService.h"
+#include "ModelPlacementBuilder.h"
 #include "../Storage/BRepDocumentManager.h"
 #include "../Services/LoggingService.h"
-#include <IMeshData_Status.hxx>
-#include <IMeshTools_Parameters.hxx>
 #include <BRepTools.hxx>
 
-#include "../XbimConvert.h"
 #include "../Factories/VertexFactory.h"
 #include "../Factories/GeometryFactory.h"
 #include "../Factories/CurveFactory.h"
@@ -49,7 +47,6 @@ namespace Xbim
 				logger->BeginScope(scope);
 				_loggingService = gcnew Xbim::Geometry::Services::LoggingService(logger);
 				SetModel(model);
-				//_v5GeometryEngine = gcnew XbimGeometryCreator(model, loggerFactory);	
 			}
 
 
@@ -73,7 +70,8 @@ namespace Xbim
 			}
 
 			/// <summary>
-			/// This method can be made more aware of model variations in how contexts are specified, it could be tuned to specific vendors, most now comply with the standard, so this is largely for old models
+			/// This method can be made more aware of model variations in how contexts are specified, 
+			/// it could be tuned to specific vendors, most now comply with the standard, so this is largely for old models
 			/// </summary>
 			/// <returns></returns>
 			ISet<IIfcGeometricRepresentationContext^>^ ModelGeometryService::GetTypical3dContexts()
@@ -102,6 +100,7 @@ namespace Xbim
 				}
 				return results;
 			}
+			
 			IXLocation^ ModelGeometryService::Create(IIfcObjectPlacement^ placement)
 			{
 				throw gcnew System::NotImplementedException("Create() not available in Version 5");
@@ -109,6 +108,7 @@ namespace Xbim
 				return gcnew XbimLocation(XbimConvert::ToTransform(placement, _logger));*/
 
 			}
+			
 			IXLocation^ ModelGeometryService::CreateMappingTransform(IIfcMappedItem^ mappedItem)
 			{
 				throw gcnew System::NotImplementedException("CreateMappingTransform() not available in Version 5");
@@ -117,6 +117,7 @@ namespace Xbim
 				auto mapLocation = sourceTransform * targetTransform;
 				return gcnew XbimLocation(mapLocation);*/
 			}
+			
 			System::String^ ModelGeometryService::GetBrep(const TopoDS_Shape& shape)
 			{
 				std::ostringstream oss;
@@ -124,6 +125,7 @@ namespace Xbim
 				return gcnew System::String(oss.str().c_str());
 
 			}
+			
 			IXLoggingService^ ModelGeometryService::LoggingService::get()
 			{
 				return _loggingService;
@@ -138,11 +140,19 @@ namespace Xbim
 					return service;
 			}
 
+			ModelPlacementBuilder^ ModelGeometryService::GetModelPlacementBuilder()
+			{
+				if (_modelPlacementBuilder == nullptr)
+					_modelPlacementBuilder = gcnew Xbim::Geometry::Services::ModelPlacementBuilder(this);
+				return _modelPlacementBuilder;
+			}
+
 			VertexFactory^ ModelGeometryService::GetVertexFactory()
 			{
 				if (_vertexFactory == nullptr) _vertexFactory = gcnew Xbim::Geometry::Factories::VertexFactory(this);
 				return _vertexFactory;
 			}
+			
 			GeometryFactory^ ModelGeometryService::GetGeometryFactory()
 			{
 				if (_geometryFactory == nullptr) _geometryFactory = gcnew Xbim::Geometry::Factories::GeometryFactory(this);
@@ -161,7 +171,6 @@ namespace Xbim
 				return _surfaceFactory;
 			}
 
-
 			EdgeFactory^ ModelGeometryService::GetEdgeFactory()
 			{
 				if (_edgeFactory == nullptr) _edgeFactory = gcnew Xbim::Geometry::Factories::EdgeFactory(this);
@@ -179,21 +188,25 @@ namespace Xbim
 				if (_faceFactory == nullptr) _faceFactory = gcnew Xbim::Geometry::Factories::FaceFactory(this);
 				return _faceFactory;
 			}
+			
 			ShellFactory^ ModelGeometryService::GetShellFactory()
 			{
 				if (_shellFactory == nullptr) _shellFactory = gcnew Xbim::Geometry::Factories::ShellFactory(this);
 				return _shellFactory;
 			}
+			
 			SolidFactory^ ModelGeometryService::GetSolidFactory()
 			{
 				if (_solidFactory == nullptr) _solidFactory = gcnew Xbim::Geometry::Factories::SolidFactory(this);
 				return _solidFactory;
 			}
+			
 			CompoundFactory^ ModelGeometryService::GetCompoundFactory()
 			{
 				if (_compoundFactory == nullptr) _compoundFactory = gcnew Xbim::Geometry::Factories::CompoundFactory(this);
 				return _compoundFactory;
 			}
+			
 			BooleanFactory^ ModelGeometryService::GetBooleanFactory()
 			{
 				if (_booleanFactory == nullptr) _booleanFactory = gcnew Xbim::Geometry::Factories::BooleanFactory(this);
@@ -211,21 +224,25 @@ namespace Xbim
 				if (_profileFactory == nullptr) _profileFactory = gcnew Xbim::Geometry::Factories::ProfileFactory(this);
 				return _profileFactory;
 			}
+			
 			MaterialFactory^ ModelGeometryService::GetMaterialFactory()
 			{
 				if (_materialFactory == nullptr) _materialFactory = gcnew Xbim::Geometry::Factories::MaterialFactory(this);
 				return _materialFactory;
 			}
+			
 			ProjectionFactory^ ModelGeometryService::GetProjectionFactory()
 			{
 				if (_projectionFactory == nullptr) _projectionFactory = gcnew Xbim::Geometry::Factories::ProjectionFactory(this);
 				return _projectionFactory;
 			}
+			
 			WexBimMeshFactory^ ModelGeometryService::GetWexBimMeshFactory()
 			{
 				if (_wexBimMeshFactory == nullptr) _wexBimMeshFactory = gcnew Xbim::Geometry::Factories::WexBimMeshFactory(this);
 				return _wexBimMeshFactory;
 			}
+			
 			Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds^ ModelGeometryService::GetBimAuthoringToolWorkArounds()
 			{
 				if (_bimAuthoringToolWorkArounds == nullptr) _bimAuthoringToolWorkArounds = gcnew Xbim::Geometry::Factories::BIMAuthoringToolWorkArounds(this);
@@ -255,6 +272,7 @@ namespace Xbim
 			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
 			IXWexBimMeshFactory^ ModelGeometryService::WexBimMeshFactory::get() { return GetWexBimMeshFactory(); }
 			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return GetBRepDocumentManager(); }
+			IXModelPlacementBuilder^ ModelGeometryService::ModelPlacementBuilder::get() { return GetModelPlacementBuilder(); }
 		}
 
 

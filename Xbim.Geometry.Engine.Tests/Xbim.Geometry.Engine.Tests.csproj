@@ -481,6 +481,9 @@
 		<None Update="TestFiles\CuttingOpeningInIfcClosedShellTest.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\IfcExamples\WCSAdjustmentSample.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -510,10 +513,5 @@
 			<Visible>true</Visible>
 		</Content>
 		<!-- TODO: ARM-->
-	</ItemGroup>
-
-	
-	<ItemGroup>
-	  <Folder Include="TestFiles\IfcExamples\" />
 	</ItemGroup>
 </Project>
