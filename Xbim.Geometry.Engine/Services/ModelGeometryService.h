@@ -5,7 +5,6 @@
 #include "../XbimGeometryCreator.h"
 
 
-
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
 #define ActiveModelGeometryService(ifcEntity) ModelGeometryService::GetModelService(ifcEntity->Model)
@@ -19,6 +18,7 @@ using namespace System::Linq;
 using namespace System::Collections::Generic;
 using namespace Microsoft::Extensions::Logging;
 using namespace Microsoft::Extensions::Logging::Abstractions;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -49,14 +49,19 @@ namespace Xbim
 		{
 			ref class BRepDocumentManager;
 		}
+		namespace Services
+		{
+			ref class ModelPlacementBuilder;
+		}
 	}
 }
+
 using namespace System::Collections::Generic;
+
 namespace Xbim
 {
 	namespace Geometry
 	{
-
 		namespace Services
 		{
 
@@ -93,6 +98,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
 				Xbim::Geometry::Factories::WexBimMeshFactory^ _wexBimMeshFactory;
 				Xbim::Geometry::Storage::BRepDocumentManager^ _bRepDocumentManager;
+				Xbim::Geometry::Services::ModelPlacementBuilder^ _modelPlacementBuilder;
 			internal:
 				//Factories
 				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
@@ -112,7 +118,10 @@ namespace Xbim
 				Xbim::Geometry::Factories::MaterialFactory^ GetMaterialFactory();
 				Xbim::Geometry::Factories::ProjectionFactory^ GetProjectionFactory();
 				Xbim::Geometry::Factories::WexBimMeshFactory^ GetWexBimMeshFactory();
+
+				//Other services
 				Xbim::Geometry::Storage::BRepDocumentManager^ GetBRepDocumentManager();
+				Xbim::Geometry::Services::ModelPlacementBuilder^ ModelGeometryService::GetModelPlacementBuilder();
 			public:
 
 				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
@@ -160,6 +169,10 @@ namespace Xbim
 				virtual property IXProjectionFactory^ ProjectionFactory {IXProjectionFactory^ get(); }
 				virtual property IXWexBimMeshFactory^ WexBimMeshFactory {IXWexBimMeshFactory^ get(); }
 				virtual property IXBRepDocumentManager^ BRepDocumentManager {IXBRepDocumentManager^ get(); }
+
+				//Other services
+				virtual property IXModelPlacementBuilder^ ModelPlacementBuilder {IXModelPlacementBuilder^ get(); }
+
 
 #pragma region Logging and Exceptions
 				XbimGeometryServiceException^ RaiseGeometryServiceException(System::String^ message) { return RaiseGeometryServiceException(message, nullptr, nullptr); };

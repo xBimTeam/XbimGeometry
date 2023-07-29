@@ -459,6 +459,9 @@
     <ClInclude Include="Factories\Unmanaged\NWexBimMeshFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Services\ModelPlacementBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BRep\Unmanaged\NFootprint.cpp">
@@ -822,6 +825,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Factories\WexBimMeshFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\ModelPlacementBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
