@@ -31,7 +31,6 @@ namespace Xbim
 
 			gp_Trsf ModelPlacementBuilder::ToTransform(IIfcLocalPlacement^ localPlacement, bool adjustWcs)
 			{
-				 
 				gp_Trsf trsf;
 				// multiply the transformations up to the root
 				int rootId = adjustWcs? _rootId : -1;
