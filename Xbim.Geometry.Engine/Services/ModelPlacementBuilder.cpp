@@ -34,7 +34,7 @@ namespace Xbim
 				gp_Trsf trsf;
 				// multiply the transformations up to the root
 				int rootId = adjustWcs? _rootId : -1;
-				while (localPlacement != nullptr && localPlacement->EntityLabel != rootId) 
+				while (localPlacement != nullptr) 
 				{
 					 
 					IIfcAxis2Placement3D^ axisPlacement3D = dynamic_cast<IIfcAxis2Placement3D^>(localPlacement->RelativePlacement);
@@ -42,7 +42,9 @@ namespace Xbim
 					if (axisPlacement3D != nullptr)
 					{
 						gp_Trsf relTrsf;
-						gp_Pnt p = BuildPoint3d(axisPlacement3D->Location);
+						gp_Pnt p = localPlacement->EntityLabel == rootId ?
+														gp_Pnt(0,0,0 ) :
+														BuildPoint3d(axisPlacement3D->Location);
 						if (axisPlacement3D->RefDirection != nullptr && axisPlacement3D->Axis != nullptr)
 						{
 							gp_Vec axis, refDir;
@@ -58,6 +60,7 @@ namespace Xbim
 							gp_Ax3 ax3(p, gp_Dir(0, 0, 1), gp_Dir(1, 0, 0));
 							relTrsf.SetTransformation(ax3, gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
 						}
+						
 						trsf.PreMultiply(relTrsf);
 					}
 					else

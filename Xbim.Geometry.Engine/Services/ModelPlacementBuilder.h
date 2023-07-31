@@ -3,7 +3,7 @@
 #include "../Factories/FactoryBase.h"
 #include "../Factories/Unmanaged/NGeometryFactory.h"
 #include "ModelGeometryService.h"
-#include "../BRep/XLocation.h"
+#include "../BRep/XPoint.h"
 
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
@@ -27,16 +27,16 @@ namespace Xbim
 			public ref class ModelPlacementBuilder : public FactoryBase<NGeometryFactory>, IXModelPlacementBuilder
 			{
 			private:
-				bool _adjustWcs; 
 				Xbim::Geometry::Services::ModelGeometryService^ _modelGeometryServices;
-				IXLocation^ _wcs;
+				IXPoint^ _wcs;
+				IXLocation^ _rootTrsf;
 				int _rootId = -1;
 
 			public:
 				ModelPlacementBuilder(Xbim::Geometry::Services::ModelGeometryService^ modelGeometryService) : FactoryBase(modelGeometryService, new NGeometryFactory())
 				{
 					_modelGeometryServices = modelGeometryService;
-					_wcs = gcnew XLocation();
+					_wcs = gcnew XPoint(0, 0, 0);
 					
 					List<IIfcLocalPlacement^>^ localPlacements = Enumerable::ToList(_modelGeometryServices->Model->Instances->OfType<IIfcLocalPlacement^>());
 
@@ -59,12 +59,18 @@ namespace Xbim
 					{
 						IIfcLocalPlacement^ root = roots[0];
 						_rootId = root->EntityLabel;
-						_wcs = _modelGeometryServices->GeometryFactory->BuildLocation(root);
+						_rootTrsf = _modelGeometryServices->GeometryFactory->BuildLocation(root);
+						_wcs = _rootTrsf->Translation;
+						_rootTrsf->SetTranslation(0, 0, 0);
 					}
 				};
 
-				virtual property IXLocation^ WorldCoordinateSystem { 
-					IXLocation^ get() { return _wcs;  };
+				virtual property IXPoint^ WorldCoordinateSystem { 
+					IXPoint^ get() { return _wcs;  };
+				}
+
+				virtual property IXLocation^ RootPlacement { 
+					IXLocation^ get() { return _rootTrsf;  };
 				}
 
 				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement, bool adjustWcs);
