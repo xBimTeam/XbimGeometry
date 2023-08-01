@@ -4,6 +4,7 @@ const double PackSize = 252;
 
 typedef public struct PackedNormal {
 	unsigned char byte[2];
+	PackedNormal() : byte{ 0,0 } { }
 	PackedNormal(unsigned char u, unsigned char v) : byte{ u,v } { }
 	
 	unsigned char U() { return byte[0]; }

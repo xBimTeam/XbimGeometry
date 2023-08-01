@@ -45,6 +45,33 @@ array<System::Byte>^ Xbim::Geometry::Factories::WexBimMeshFactory::createWexBimM
 {  
 	return createWexBimMesh(shape, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection, scale, bounds, hasCurves, checkEdges, cleanBefore, cleanAfter);
 }
+
+
+array<System::Byte>^ Xbim::Geometry::Factories::WexBimMeshFactory::ReadMesh(array<System::Byte>^ meshData)
+{
+	if (meshData == nullptr || meshData->Length == 0)
+		return meshData;
+	
+	std::stringstream input;
+	int size = meshData->Length;
+	auto buffer = std::make_unique<char[]>(size);
+	System::Runtime::InteropServices::Marshal::Copy(meshData, 0, (System::IntPtr)buffer.get(), size);
+	input.write(buffer.get(), size);
+	NWexBimMesh mesh(0, 1);
+	mesh.ReadFromStream(input);
+	
+	// auto transform = location->Transform;
+	// mesh.Transform(transform);
+	// std::stringstream output;
+	// mesh.WriteToStream(output);
+	// size = (int)output.str().length();
+	// buffer = std::make_unique<char[]>(size);
+	// output.seekg(0);
+	// output.read(buffer.get(), size);
+	// cli::array<System::Byte>^ byteArray = gcnew cli::array<System::Byte>(size);
+	// System::Runtime::InteropServices::Marshal::Copy((System::IntPtr)buffer.get(), byteArray, 0, size);
+	// return byteArray;
+}
 			 
 array<System::Byte>^ Xbim::Geometry::Factories::WexBimMeshFactory::createWexBimMesh
 	(IXShape^ shape, double tolerance, double linearDeflection, double angularDeflection, double scale, IXAxisAlignedBoundingBox^% bounds, bool% hasCurves, bool checkEdges, bool cleanBefore, bool cleanAfter)

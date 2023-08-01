@@ -64,6 +64,8 @@ public:
 	int TriangleCount();
 	
 	void WriteToStream(std::ostream& oStream);
+	
+	void ReadFromStream(std::ostream& oStream);
 
 	const VectorOfTriangleNormals& NormalsPerFace() { return normalsPerFace; }
 	

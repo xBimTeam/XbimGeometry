@@ -74,6 +74,71 @@ void NWexBimMesh::WriteToStream(std::ostream& oStream)
 	}
 }
 
+void NWexBimMesh::ReadFromStream(std::istream& iStream)
+{
+	pointInspector.myPoints.Clear();
+	indicesPerFace.Clear();
+	normalsPerFace.clear();
+    unsigned int numVertices, numTriangles;
+    iStream.read((char*)&Version, sizeof(Version)); // read stream format version
+    iStream.read((char*)&numVertices, sizeof(numVertices)); // read number of vertices
+    iStream.read((char*)&numTriangles, sizeof(numTriangles)); // read number of triangles
+
+    // Read vertices
+    for (unsigned int i = 0; i < numVertices; i++)
+    {
+        Graphic3d_Vec3 vertex;
+        iStream.read((char*)vertex.GetData(), sizeof(vertex));
+        // Assuming there is a function to add vertices to the mesh
+        AddPoint(gp_XYZ(vertex.x(), vertex.y(), vertex.z()));
+    }
+
+    // Read faces
+    int faceCount;
+    iStream.read((char*)&faceCount, sizeof(faceCount)); // read face count
+
+    for (int faceIndex = 0; faceIndex < faceCount; faceIndex++)
+    {
+        int numTrianglesForFace;
+        iStream.read((char*)&numTrianglesForFace, sizeof(numTrianglesForFace));
+
+        if (numTrianglesForFace >= 0) // Planar face
+        {
+            PackedNormal packedNormal;
+            iStream.read((char*)&packedNormal, sizeof(packedNormal));
+        	normalsPerFace.push_back(std::vector<PackedNormal>());
+        	normalsPerFace.back().push_back(packedNormal);
+
+            for (int j = 0; j < numTrianglesForFace; j++)
+            {
+                unsigned int vertexIndices[3];
+                iStream.read((char*)vertexIndices, sizeof(vertexIndices));
+            	TriangleIndices triangleIndices;
+            	triangleIndices.Append(Vec3OfInt(vertexIndices[0], vertexIndices[1], vertexIndices[2]));
+            }
+        }
+        else // Non-planar face
+        {
+            numTrianglesForFace *= -1;
+
+            // Assuming there is a function to add non-planar faces to the mesh
+            // AddNonPlanarFace(numTrianglesForFace); // Implement this function to add the non-planar face to the mesh
+
+            for (int j = 0; j < numTrianglesForFace; j++)
+            {
+                PackedNormal normals[3];
+                unsigned int vertexIndices[3];
+                iStream.read((char*)normals, sizeof(normals));
+                iStream.read((char*)vertexIndices, sizeof(vertexIndices));
+
+                // Assuming there is a function to add triangle indices with normals for non-planar faces
+                // AddTriangleIndicesWithNormals(vertexIndices[0], normals[0], vertexIndices[1], normals[1], vertexIndices[2], normals[2]); // Implement this function to add triangle indices with normals
+            }
+        }
+    }
+}
+
+
 void NWexBimMesh::saveNodes(const NFaceMeshIterator& theFaceIter, std::vector<int>& nodeIndexes)
 {
 	const Standard_Integer aNodeUpper = theFaceIter.NodeUpper();
