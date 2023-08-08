@@ -1,6 +1,7 @@
 #include "GeometryPrimitives.h"
 #include "../BRep/XLocation.h"
 #include "../BRep/XMatrix.h"
+#include "../BRep/XDirection.h"
 #include "../BRep/XAxisAlignedBox.h"
 
 using namespace Xbim::Geometry::BRep;
