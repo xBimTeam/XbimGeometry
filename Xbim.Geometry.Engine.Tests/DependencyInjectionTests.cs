@@ -9,6 +9,7 @@ using Xbim.Geometry.Abstractions.Extensions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Geometry.Engine.Interop.Extensions;
+using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
@@ -32,6 +33,7 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(typeof(IXGeometryPrimitives))]
         [InlineData(typeof(IXGeometryConverterFactory))]
         [InlineData(typeof(IXbimGeometryEngine))]
+        [InlineData(typeof(XbimGeometryEngine))]
         [InlineData(typeof(IXbimManagedGeometryEngine))]
         [InlineData(typeof(IXbimGeometryServicesFactory))]
         [InlineData(typeof(XbimGeometryEngineFactory))]
@@ -42,6 +44,26 @@ namespace Xbim.Geometry.Engine.Tests
             IServiceProvider provider = BuildServices();
 
             var resolved = provider.GetRequiredService(type);
+
+            Assert.NotNull(resolved);
+
+        }
+
+        [InlineData(typeof(IXShapeService))]
+        [InlineData(typeof(ILoggerFactory))]
+        [InlineData(typeof(IXGeometryPrimitives))]
+        [InlineData(typeof(IXGeometryConverterFactory))]
+        [InlineData(typeof(IXbimGeometryEngine))]
+        [InlineData(typeof(XbimGeometryEngine))]
+        [InlineData(typeof(IXbimManagedGeometryEngine))]
+        [InlineData(typeof(IXbimGeometryServicesFactory))]
+        [InlineData(typeof(XbimGeometryEngineFactory))]
+
+        [Theory]
+        public void CanResolveTypesInternally(Type type)
+        {
+           
+            var resolved = InternalServiceProvider.Current.ServiceProvider.GetRequiredService(type);
 
             Assert.NotNull(resolved);
 
@@ -166,6 +188,20 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Fact]
+        public void CanResolveFactories()
+        {
+            // Use a scope as we want to guarantee a fresh instance
+            var serviceScope = BuildServices().CreateScope();
+            var engineFn = serviceScope.ServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>();
+            engineFn.Should().NotBeNull();
+
+            var engine = engineFn();
+
+            engine.Should().NotBeNull();
+           
+        }
+
+        [Fact]
         public void CanCreateEngineWithoutExplicitDI()
         {
             //Arrange
@@ -207,7 +243,7 @@ namespace Xbim.Geometry.Engine.Tests
                 .AddXbimToolkit(conf => conf.AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5)))
             ;
 
-            return services.BuildServiceProvider(); 
+            return services.BuildServiceProvider();
         }
     }
 }

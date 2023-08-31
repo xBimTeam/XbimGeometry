@@ -10,7 +10,7 @@ namespace Xbim.Common.Configuration
     public static class XbimConfigurationBuilderExtensions
     {
         /// <summary>
-        /// Adds xbim Geometry services to the current configuration
+        /// Adds xbim Geometry services, including the native dependencies to the current configuration
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
@@ -23,7 +23,7 @@ namespace Xbim.Common.Configuration
 
 
         /// <summary>
-        /// Adds xbim Geometry services to the current configuration with the supplied configuration
+        /// Adds xbim Geometry services, including the native dependencies to the current configuration with the supplied configuration
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="configure">Delegate configuring the xbim Geometry service</param>

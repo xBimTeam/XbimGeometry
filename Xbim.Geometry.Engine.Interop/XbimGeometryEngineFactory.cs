@@ -3,6 +3,7 @@ using System;
 using Xbim.Common;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc4.Interfaces;
 
 namespace Xbim.Geometry.Engine.Interop
@@ -18,7 +19,7 @@ namespace Xbim.Geometry.Engine.Interop
         /// Constructs a new <see cref="XbimGeometryEngineFactory"/>
         /// </summary>
         public XbimGeometryEngineFactory() : 
-            this(XbimServices.Current.ServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>())
+            this(InternalServiceProvider.GetRequiredService<Func<IXbimManagedGeometryEngine>>())
         {
             
         }

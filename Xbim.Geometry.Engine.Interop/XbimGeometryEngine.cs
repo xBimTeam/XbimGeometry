@@ -11,6 +11,7 @@ using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Abstractions.Extensions;
 using Xbim.Geometry.Engine.Interop.Configuration;
+using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Ifc;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
@@ -22,7 +23,7 @@ namespace Xbim.Geometry.Engine.Interop
     /// <summary>
     /// The xbim Geometry Engine. 
     /// </summary>
-    /// <remarks>This mananaged class provides an interoperability layer to the underlying native / "mixed-mode"
+    /// <remarks>This managed class provides an interoperability layer to the underlying native / "mixed-mode"
     /// geometry engine. As of version 6 it supports switching between different implementation of the core geometry engine  
     /// </remarks>
     public class XbimGeometryEngine : IXbimManagedGeometryEngine
@@ -106,11 +107,11 @@ namespace Xbim.Geometry.Engine.Interop
         public XbimGeometryEngine(IModel model, ILoggerFactory loggerFactory, GeometryEngineOptions options = null)
         {
             _engineOptions = options ?? new GeometryEngineOptions();
-            var services = XbimServices.Current.ServiceProvider;
-            this.factory = services.GetRequiredService<IXbimGeometryServicesFactory>();
+            
+            this.factory = InternalServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
 
-            _logger = services.GetRequiredService<ILogger<XbimGeometryEngine>>();
-            _loggerFactory = loggerFactory ?? services.GetRequiredService<ILoggerFactory>(); ;
+            _logger = InternalServiceProvider.GetRequiredService<ILogger<XbimGeometryEngine>>();
+            _loggerFactory = loggerFactory ?? InternalServiceProvider.GetRequiredService<ILoggerFactory>(); ;
 
             try
             {

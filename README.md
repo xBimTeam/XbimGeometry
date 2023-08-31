@@ -11,22 +11,40 @@ XbimGeometry is part of the [Xbim Toolkit](https://github.com/xBimTeam).
 It contains the the Geometry Engine and Scene processing, which provide geometric and topological operations 
 to enable users to visualise models in 3D models, typically as a Tesselated scene or mesh.
 
-The native Geometry Engine is built around the open source [Open Cascade 7.3 library](https://www.opencascade.com/content/overview)
+The native Geometry Engine is built around the open source [Open Cascade 7.7.0 library](https://www.opencascade.com/content/overview)
 which performs much of the boolean operations involve in generating 3D solids. 
 This technology is included under a licence which permits the use as part of a larger work, compatible with our open source CDDL licence.
 
+## Getting started
+
+Before using this library you should register the Geometry Engine with the xbim ServiceProvider.
+
+```csharp
+	// Either configure the internal Services
+	XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => 
+		conf.AddGeometryServices()
+		));
+
+	// or configure your services and register the provider with xbim:
+	
+	services.AddXbimToolkit(conf => conf.AddGeometryServices());
+	// Once the DI container is built
+	XbimServices.Current.UseExternalServiceProvider(serviceProvider);
+```
+
+
 ## Compilation
 
-**Visual Studio 2017 or 2019 is recommended.**
+**Visual Studio 2022 is recommended.**
 Prior versions of Visual Studio are unlikely to work on this solution.
 
-The [free VS 2019 Community Edition](https://visualstudio.microsoft.com/downloads/) will be fine. 
+The [free VS 2022 Community Edition](https://visualstudio.microsoft.com/downloads/) will be fine. 
 
 In order to compile this solution which includes C++ projects you'll need the following additional 
 components installed:
 
 - Visual C++ Core desktop features
-- VC++ 2017 v141 tools
+- VC++ 2022 v143 tools
 - Windows 10 SDK (10.0.17134.0) 
 
 The XBIM toolkit [uses the NuGet](https://www.nuget.org/packages/Xbim.Geometry/) for the management of our published packages.

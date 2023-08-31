@@ -20,6 +20,7 @@ using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Geometry.Engine.Interop.Internal;
 using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Clustering;
@@ -616,17 +617,17 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
             ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
         {
-            var xbimServices = XbimServices.Current;
-            var services = xbimServices.ServiceProvider;
-            var factory = services.GetService<IXbimGeometryServicesFactory>();
+
+            var factory = InternalServiceProvider.GetService<IXbimGeometryServicesFactory>();
+
             if (factory == null)
             {
-                throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found\n\nEnsure you have registered the GeometryEngine with services.AddXbimGeometryEngine()");
+                throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found.\n\nTo fix this add the following before calling any xbim functionality:\n\n XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => conf.AddGeometryServices()));");
             }
 
             isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
             _model = model;
-            if (loggerFactory == null) loggerFactory = xbimServices.GetLoggerFactory();
+            if (loggerFactory == null) loggerFactory = InternalServiceProvider.GetLoggerFactory();
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
 
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
