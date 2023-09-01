@@ -1,7 +1,9 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Xbim.Common.Model;
 using Xbim.Geometry.Abstractions;
 using Xbim.Ifc;
+using Xbim.Ifc.ViewModels;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
@@ -36,6 +38,29 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        
+
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Cutting_Issue(XGeometryEngineVersion engineVersion)
+        {
+
+            using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
+            {
+                m.LoadStep21("TestFiles\\Github\\Dormitory-ARC_Opening_444.ifc");
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                c.CreateContext(null, false);
+
+                var store = m.GeometryStore as InMemoryGeometryStore;
+
+                var geom = store.ShapeGeometries.Values.First(c => c.IfcShapeLabel == 13519);
+
+                geom.FaceCount.Should().Be(50);
+                geom.Length.Should().Be(2029);
+
+            }
+        }
+
+
     }
 }

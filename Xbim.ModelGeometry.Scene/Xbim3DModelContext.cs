@@ -938,13 +938,14 @@ namespace Xbim.ModelGeometry.Scene
                         {
                             if (!allShapeIds.TryAdd(featureShape.ShapeGeometryLabel, true))
                                 shapeIdsUsedMoreThanOnce.TryAdd(featureShape.ShapeGeometryLabel, true);
-                            if (featureShape.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) //skip if the geometry of the feature is for reference only
-                            {
-                                if (isCut)
-                                    cutTools.Add(featureShape);
-                                else
-                                    projectTools.Add(featureShape);
-                            }
+                            // Seems to break all openings. Reversed 1/9/23. Se GH #444.  One for SRL 
+                            //if (featureShape.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) //skip if the geometry of the feature is for reference only
+                            //{
+                            if (isCut)
+                                cutTools.Add(featureShape);
+                            else
+                                projectTools.Add(featureShape);
+                            //}
                         }
                         processed.TryAdd(feature.EntityLabel, 0);
 
