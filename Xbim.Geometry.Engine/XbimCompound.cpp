@@ -1522,7 +1522,7 @@ namespace Xbim
 
 				try
 				{
-					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); //this can throw an exception if the wire is nonsense (line) and should just be dropped
+					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); //this can throw a Standard_Failure exception if the wire is nonsense (line) and should just be dropped
 					TopoDS_Vertex v1, v2;
 					TopExp::Vertices(outerLoop, v1, v2);
 					gp_Pln thePlane(BRep_Tool::Pnt(v1), outerNormal);
@@ -1559,10 +1559,10 @@ namespace Xbim
 						continue;
 					}
 				}
-				catch (const std::exception&)
+				catch (const Standard_Failure& sf)
 				{
-					XbimGeometryCreator::LogDebug(logger, ifcFace, "Outer loop is not a bounded area,  face ignored");
-					continue;
+					String^ err = gcnew String(sf.GetMessageString());
+					XbimGeometryCreator::LogDebug(logger, ifcFace, "Outer loop is not a bounded area,  face ignored. " + err);
 				}
 			}
 			//check the shell
