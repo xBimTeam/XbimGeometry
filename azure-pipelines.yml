@@ -3,7 +3,6 @@ trigger:
     include:
     - master
     - develop
-    - feature/*
   paths:
     exclude:
     - README.md

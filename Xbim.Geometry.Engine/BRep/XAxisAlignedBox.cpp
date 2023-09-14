@@ -80,10 +80,54 @@ namespace Xbim
 				if (IsVoid) return this;
 				auto xbimMat = dynamic_cast<XMatrix^>(transformation);
 				if (xbimMat == nullptr || xbimMat == nullptr || xbimMat->IsIdentity) return this;
+				
 				Bnd_Box bBox(gp_Pnt(CornerMin->X, CornerMin->Y, CornerMin->Z),
 					gp_Pnt(CornerMax->X, CornerMax->Y, CornerMax->Z));
+
+
+				// the non-uniform scale part of the transformation
+				if (xbimMat->ScaleX != 1 || xbimMat->ScaleY != 1 || xbimMat->ScaleZ != 1) 
+				{ 
+					gp_Trsf displaceTrsf;
+					const gp_Pnt min = bBox.CornerMin();
+					const gp_Pnt max = bBox.CornerMax();
+					double x = (max.X() - min.X()) / 2;
+					double y = (max.Y() - min.Y()) / 2;
+					double z = (max.Z() - min.Z()) / 2;
+					displaceTrsf.SetTranslation(gp_Vec(-x, -y ,-z));
+					bBox = bBox.Transformed(displaceTrsf);
+					Bnd_Box rot = bBox.Transformed(displaceTrsf);
+					const gp_Pnt min1 = rot.CornerMin();
+					const gp_Pnt max1 = rot.CornerMax();
+					double x1 = (max1.X() - min1.X()) / 2;
+					double y1 = (max1.Y() - min1.Y()) / 2;
+					double z1 = (max1.Z() - min1.Z()) / 2;
+
+					const gp_Pnt minDisplaced = bBox.CornerMin();
+					const gp_Pnt maxDisplaced = bBox.CornerMax();
+					const gp_Pnt minScaled = gp_Pnt
+					   (minDisplaced.X() * xbimMat->ScaleX,
+						minDisplaced.Y() * xbimMat->ScaleY,
+						minDisplaced.Z() * xbimMat->ScaleZ);
+
+					const gp_Pnt maxScaled = gp_Pnt
+					   (maxDisplaced.X() * xbimMat->ScaleX,
+						maxDisplaced.Y() * xbimMat->ScaleY,
+						maxDisplaced.Z() * xbimMat->ScaleZ);
+
+
+					displaceTrsf.SetTranslationPart(gp_Vec(x, y, z));
+					bBox = Bnd_Box(minScaled, maxScaled);
+					bBox = bBox.Transformed(displaceTrsf);
+				}
+
+				// the uniform part of the transformation
 				gp_Trsf transform = xbimMat->Transform();
-				Bnd_Box movedBox = bBox.Transformed(transform);
+				if (transform.Form() != gp_Identity)
+				{
+					bBox = bBox.Transformed(transform);
+				}
+
 				return gcnew XAxisAlignedBox(bBox);
 			}
 			

@@ -20,11 +20,14 @@ namespace Xbim.Geometry.Engine.Tests
 
         private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
+        private readonly IXShapeService _shapeService;
 
-        public IfcAdvancedBrepTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
+        public IfcAdvancedBrepTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory,
+            IXShapeService shapeService)
         {
             _loggerFactory = loggerFactory;
             this.factory = factory;
+            _shapeService = shapeService;
         }
         [Fact]
         public void IfcAdvancedBrepTrimmedCurveTest()
@@ -190,6 +193,72 @@ namespace Xbim.Geometry.Engine.Tests
                     solidsV6.Should().NotBeNull("This brep should be a single solid");
                     volumeV6.Should().BeApproximately(solidsV6.Volume, 1);
                 }
+            }
+        }
+        
+         
+        [Fact]
+        public void Advanced_brep_tests_()
+        {
+
+            using (var model = MemoryModel.OpenRead($@"TestFiles\IfcClosedShellTestFiles\closed-shells.ifc"))
+            {
+                model.AddRevitWorkArounds();
+                //this model needs workarounds to be applied
+                // 531649, 531663, 531635, 531621
+
+                var breps174191 = ((model.Instances[174191] as IIfcProduct).Representation
+                    .Representations.First().Items.First() as IIfcMappedItem).MappingSource.MappedRepresentation.Items.OfType<IIfcAdvancedBrep>().ToList();
+                
+                var breps140612 = ((model.Instances[140612] as IIfcProduct).Representation
+                    .Representations.First().Items.First() as IIfcMappedItem).MappingSource.MappedRepresentation.Items.OfType<IIfcAdvancedBrep>().ToList();
+
+                
+                var geomEngineV6 = factory.CreateGeometryEngineV6(model, _loggerFactory);
+ 
+                
+                var brep11 = breps174191.FirstOrDefault(s => s.EntityLabel == 109382);
+                var brep1 = geomEngineV6.Build(brep11);
+                
+                var brep22 = breps140612.FirstOrDefault(s => s.EntityLabel == 132432);
+                using (var t = model.BeginTransaction("tes"))
+                {
+                    var c = brep22.Outer.CfsFaces.Count;
+                    int i = 0;
+                    var faces = brep22.Outer.CfsFaces.ToList();
+                    foreach (var cfsFace in  faces)
+                    {
+                        if (i >= 10)
+                        {
+                            brep22.Outer.CfsFaces.Remove(cfsFace);
+                        }
+                        i++;
+                    }
+                    
+                    var brep2 = geomEngineV6.Build(brep22);
+
+                
+                    //var combined1 = _shapeService.Combine(breps174191.Select(s => geomEngineV6.Build(s)));
+                    //var combined2 = _shapeService.Combine(breps140612.Select(s => geomEngineV6.Build(s))); 
+                    
+                    File.WriteAllText($"109382.brep", brep1.BrepString());
+                    File.WriteAllText($"132432.brep", brep2.BrepString());
+                    
+                    //foreach (var brep in breps140612)
+                    // {
+                    //     var shape = geomEngineV6.Build(brep);
+                    //     File.WriteAllText($"0/140612/{brep.EntityLabel}.brep", shape.BrepString());
+                    // }
+                    //
+                    // foreach (var brep in breps174191)
+                    // {
+                    //     var shape = geomEngineV6.Build(brep);
+                    //     File.WriteAllText($"0/174191/{brep.EntityLabel}.brep", shape.BrepString());
+                    // }
+                    t.RollBack();                
+                }
+
+
             }
         }
     }

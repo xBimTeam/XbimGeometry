@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Moq;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
@@ -46,6 +47,31 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Fact]
+        public void CanNonUniformTransformBoundingBox()
+        {
+            var solidService = _modelSvc.SolidFactory;
+            var ifcSweptDisk = IfcMoq.IfcSweptDiskSolidMoq
+                (startParam: 0, endParam: 100, radius: 30, innerRadius: 15);
+            var solid = (IXSolid)solidService.Build(ifcSweptDisk);
+            var bb = solid.Bounds();
+
+            foreach (var trsf in Transformations)
+            {
+                var transformed = bb.Transformed(trsf);
+
+                transformed.Should().NotBeNull();
+                transformed.LenX.Should().BeApproximately(bb.LenX * trsf.ScaleX, TOLERANCE);
+                transformed.LenY.Should().BeApproximately(bb.LenY * trsf.ScaleY, TOLERANCE);
+                transformed.LenZ.Should().BeApproximately(bb.LenZ * trsf.ScaleZ, TOLERANCE);
+
+
+                transformed.Centroid.X.Should().BeApproximately((bb.Centroid.X + trsf.OffsetX), TOLERANCE);
+                transformed.Centroid.Y.Should().BeApproximately((bb.Centroid.Y + trsf.OffsetY), TOLERANCE);
+                transformed.Centroid.Z.Should().BeApproximately((bb.Centroid.Z + trsf.OffsetZ), TOLERANCE);
+            }
+        }
+
 
         #region Helpers
 
@@ -71,6 +97,35 @@ namespace Xbim.Geometry.Engine.Tests
                 .BuildLocation(tx, ty, tz, sc, qw, qx, qy, qz);
             return location;
         }
+
+        public IEnumerable<IXMatrix> Transformations
+        {
+            get
+            {
+                var result = new List<IXMatrix>();
+                 
+
+                var nonUniformScaling = new double[] { 1,   0,   0,   3,
+                                                       0,   1,   0,   3,
+                                                       0,   0,   1,   3,
+                                                       0.5, 1.5, 0.1, 1 };
+                 
+
+                // For non-uniformly scaled cubes, volume reduction factor = 0.5 x 1.5 x 0.1 = 0.075
+                // as the volume has a linear relationship with the dimensions
+                result.Add(ToMatrix(nonUniformScaling));
+
+                return result;
+            }
+        }
+
+        private IXMatrix ToMatrix(double[] values)
+        {
+            var matrix = _geometryPrimitivesFactory
+                 .BuildMatrix(values);
+            return matrix;
+        }
+
 
         #endregion
     }
