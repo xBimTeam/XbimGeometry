@@ -507,7 +507,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.342</Version>
+      <Version>6.2.344-develop</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
