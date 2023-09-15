@@ -3,7 +3,7 @@ trigger:
     include:
     - master
     - develop
-    - feature/*
+    - feature/netcore
   paths:
     exclude:
     - README.md
