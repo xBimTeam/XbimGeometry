@@ -1523,6 +1523,13 @@ namespace Xbim
 				try
 				{
 					gp_Dir outerNormal = XbimWire::NormalDir(outerLoop); //this can throw a Standard_Failure exception if the wire is nonsense (line) and should just be dropped
+					// in RELEASE BUILDS outerNormal can contain NAN, no exception is thrown
+					if (isnan(outerNormal.X()))
+					{
+						XbimGeometryCreator::LogDebug(logger, ifcFace, "No outer loop built,  face ignored");
+						continue;
+					}
+
 					TopoDS_Vertex v1, v2;
 					TopExp::Vertices(outerLoop, v1, v2);
 					gp_Pln thePlane(BRep_Tool::Pnt(v1), outerNormal);
