@@ -1,8 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Xbim.Common.Geometry;
 using Xbim.Common.Model;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
@@ -13,10 +16,12 @@ namespace Xbim.Geometry.Engine.Tests
 
     {
         private readonly ILoggerFactory _loggerFactory;
+        private readonly IXbimGeometryServicesFactory _geometryfactory;
 
-        public GithubIssuesTests(ILoggerFactory loggerFactory)
+        public GithubIssuesTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory geometryfactory)
         {
             _loggerFactory = loggerFactory;
+            _geometryfactory = geometryfactory;
         }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -38,6 +43,35 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_447(XGeometryEngineVersion engineVersion)
+        {
+            // This file contains a trimmed curve based on ellipse which has semiaxis1 < semiaxis2
+            // and trimmed curve is parameterized with cartesian points.
+            // This test checks for a bug in XBimCurve geometry creation procedure when incorrect parameter values
+            // are calculated for these specific conditions described above.
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Github\Github_issue_447.ifc"))
+            {
+                var shape = model.Instances.OfType<IIfcTrimmedCurve>().FirstOrDefault();
+                shape.Should().NotBeNull();
+                var trimPoint1 = shape.Trim1.OfType<IIfcCartesianPoint>().FirstOrDefault();
+                trimPoint1.Should().NotBeNull();
+                var trimPoint2 = shape.Trim2.OfType<IIfcCartesianPoint>().FirstOrDefault();
+                trimPoint2.Should().NotBeNull();
+
+                var trimStart = new XbimPoint3D(trimPoint1.X, trimPoint1.Y, trimPoint1.Z);
+                var trimEnd = new XbimPoint3D(trimPoint2.X, trimPoint2.Y, trimPoint2.Z);
+
+                IXbimGeometryEngine geomEngine = _geometryfactory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geom = geomEngine.CreateCurve(shape);
+                geom.Should().NotBeNull();
+
+                trimStart.Should().Be(geom.Start);
+                trimEnd.Should().Be(geom.End);
+            }
+        }
 
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
