@@ -61,15 +61,15 @@ namespace Xbim.Geometry.Engine.Tests
                 var trimPoint2 = shape.Trim2.OfType<IIfcCartesianPoint>().FirstOrDefault();
                 trimPoint2.Should().NotBeNull();
 
-                var trimStart = new XbimPoint3D(trimPoint1.X, trimPoint1.Y, trimPoint1.Z);
-                var trimEnd = new XbimPoint3D(trimPoint2.X, trimPoint2.Y, trimPoint2.Z);
+                var trimStart = new XbimPoint3D(trimPoint2.X, trimPoint2.Y + 360, trimPoint2.Z);
+                var trimEnd = new XbimPoint3D(trimPoint1.X, trimPoint1.Y, trimPoint1.Z);
 
                 IXbimGeometryEngine geomEngine = _geometryfactory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
                 var geom = geomEngine.CreateCurve(shape);
                 geom.Should().NotBeNull();
 
-                trimStart.Should().Be(geom.Start);
                 trimEnd.Should().Be(geom.End);
+                trimStart.Should().Be(geom.Start);
             }
         }
 

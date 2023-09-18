@@ -539,106 +539,104 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcTrimmedCurve^ curve, ILogger^ logger)
 		{
-			//int id = curve->EntityLabel;
 			Init(curve->BasisCurve, logger);
-			if (IsValid)
+			if (!IsValid)
+				return;
+
+			//check if we have an ellipse in case we have to correct axis
+			bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);
+			bool isLine = (dynamic_cast<IIfcLine^>(curve->BasisCurve) != nullptr);
+			bool isEllipse = (dynamic_cast<IIfcEllipse^>(curve->BasisCurve) != nullptr);
+
+			double parameterFactor = isConic ? _modelServices->RadianFactor : 1;
+			double precision = _modelServices->MinimumGap;
+			bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+
+			double u1 = 0;
+			gp_Pnt p1;
+			bool u1Found = false, u2Found = false, p1Found = false, p2Found = false;
+			double u2 = 0;
+			gp_Pnt p2;
+			for each (IIfcTrimmingSelect ^ trim in curve->Trim1)
 			{
-				//check if we have an ellipse in case we have to correct axis
-
-
-				bool isConic = (dynamic_cast<IIfcConic^>(curve->BasisCurve) != nullptr);
-				bool isLine = (dynamic_cast<IIfcLine^>(curve->BasisCurve) != nullptr);
-				bool isEllipse = (dynamic_cast<IIfcEllipse^>(curve->BasisCurve) != nullptr);
-
-				double parameterFactor = isConic ? _modelServices->RadianFactor : 1;
-				double precision = _modelServices->MinimumGap;
-				bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
-
-				double u1 = 0;
-				gp_Pnt p1;
-				bool u1Found = false, u2Found = false, p1Found = false, p2Found = false;
-				double u2 = 0;
-				gp_Pnt p2;
-				for each (IIfcTrimmingSelect ^ trim in curve->Trim1)
+				if (dynamic_cast<IIfcCartesianPoint^>(trim))
 				{
-					if (dynamic_cast<IIfcCartesianPoint^>(trim))
-					{
-						p1 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
-						p1Found = true;
-					}
-					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
-					{
-						u1 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
-						if (isConic) u1 *= parameterFactor; //correct to radians
-						else if (isLine) u1 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
-						u1Found = true;
-					}
+					p1 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
+					p1Found = true;
 				}
-				for each (IIfcTrimmingSelect ^ trim in curve->Trim2)
+				else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
 				{
-					if (dynamic_cast<IIfcCartesianPoint^>(trim))
-					{
-						p2 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
-						p2Found = true;
-					}
-					else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
-					{
-						u2 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
-						if (isConic) u2 *= parameterFactor; //correct to radians
-						else if (isLine) u2 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
-						u2Found = true;
-					}
+					u1 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
+					if (isConic) u1 *= parameterFactor; //correct to radians
+					else if (isLine) u1 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
+					u1Found = true;
 				}
-
-
-				if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
-				{
-					if (isLine && !p1.IsEqual(p2, precision)) //just make a line of the two points
-					{
-						GC_MakeLine maker(p1, p2);
-						delete pCurve;
-						pCurve = new Handle(Geom_Curve)(maker.Value());
-					}
-
-					double u;
-					if (p1Found)
-						if (GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u))
-							u1 = u;
-					if (p2Found)
-						if (GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u))
-							u2 = u;
-
-				}
-				else //if we prefer parameters or don't care, use u1 nad u2 unless we don't have them
-				{
-					if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u1);
-					if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
-				}
-				if (System::Math::Abs(u1 - u2) < Precision::Confusion())
-				{
-					pCurve->Nullify();
-					pCurve = nullptr;
-					XbimGeometryCreator::LogWarning(logger, curve, "The trimming points either result in a zero length curve or do not intersect the curve");
-					return;// zero length curve;
-				}
-				if (isEllipse)
-				{
-					IIfcEllipse^ ellipse = (IIfcEllipse^)curve->BasisCurve;
-					if (ellipse->SemiAxis1 < ellipse->SemiAxis2)
-					{
-						u1 -= System::Math::PI / 2;
-						u2 -= System::Math::PI / 2;
-					}
-				}
-				if (isConic)
-				{
-					if (abs(u2 - 0) <= Precision::Confusion()) //the end parameter is zero, make it 360 to ensure correct direction
-						u2 = 2 * System::Math::PI;
-				}
-				//now just go with
-				bool sameSense = curve->SenseAgreement;
-				*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);
 			}
+			for each (IIfcTrimmingSelect ^ trim in curve->Trim2)
+			{
+				if (dynamic_cast<IIfcCartesianPoint^>(trim))
+				{
+					p2 = XbimConvert::GetPoint3d((IIfcCartesianPoint^)trim);
+					p2Found = true;
+				}
+				else if (dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(trim))
+				{
+					u2 = (Xbim::Ifc4::MeasureResource::IfcParameterValue)trim;
+					if (isConic) u2 *= parameterFactor; //correct to radians
+					else if (isLine) u2 *= ((IIfcLine^)curve->BasisCurve)->Dir->Magnitude;
+					u2Found = true;
+				}
+			}
+
+
+			if (trim_cartesian) //if we prefer cartesian and we have the points override the parameters
+			{
+				if (isLine && !p1.IsEqual(p2, precision)) //just make a line of the two points
+				{
+					GC_MakeLine maker(p1, p2);
+					delete pCurve;
+					pCurve = new Handle(Geom_Curve)(maker.Value());
+				}
+
+				double u;
+				if (p1Found)
+					if (GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u))
+						u1 = u;
+				if (p2Found)
+					if (GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u))
+						u2 = u;
+
+			}
+			else //if we prefer parameters or don't care, use u1 nad u2 unless we don't have them
+			{
+				if (!u1Found)  GeomLib_Tool::Parameter(*pCurve, p1, precision * 10, u1);
+				if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
+			}
+			if (System::Math::Abs(u1 - u2) < Precision::Confusion())
+			{
+				pCurve->Nullify();
+				pCurve = nullptr;
+				XbimGeometryCreator::LogWarning(logger, curve, "The trimming points either result in a zero length curve or do not intersect the curve");
+				return;// zero length curve;
+			}
+			if (isEllipse)
+			{
+				IIfcEllipse^ ellipse = (IIfcEllipse^)curve->BasisCurve;
+				if (ellipse->SemiAxis1 < ellipse->SemiAxis2)
+				{
+					u1 -= System::Math::PI / 2;
+					u2 -= System::Math::PI / 2;
+				}
+			}
+			if (isConic)
+			{
+				if (abs(u2 - 0) <= Precision::Confusion()) //the end parameter is zero, make it 360 to ensure correct direction
+					u2 = 2 * System::Math::PI;
+			}
+			//now just go with
+			bool sameSense = curve->SenseAgreement;
+			*pCurve = new Geom_TrimmedCurve(*pCurve, sameSense ? u1 : u2, sameSense ? u2 : u1);
+
 		}
 
 #pragma endregion
