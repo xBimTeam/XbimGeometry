@@ -1,4 +1,6 @@
 #pragma once
+#include <BOPAlgo_BOP.hxx>
+
 #include "NFactoryBase.h"
 
 #include <TopoDS_Shell.hxx>
@@ -20,7 +22,6 @@
 class NShapeFactory : public NFactoryBase
 {
 private:
-	
 	double _timeout;
 	
 public:
@@ -29,16 +30,17 @@ public:
 			
 	}
 	static bool Triangulate(const TopoDS_Shape& aShape, const IMeshTools_Parameters& meshParams);
-	
+
 	TopoDS_Shape UnifyDomain(const TopoDS_Shape& toFix, double linearTolerance, double angularTolerance);
 	TopoDS_Solid UnifyDomain(const TopoDS_Solid& toFix, double linearTolerance, double angularTolerance);
 	TopoDS_Shape Convert(const char* brepString);
 	const char* Convert(TopoDS_Shape shape);
 
-	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double minumGap);
-	TopoDS_Shape Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double minumGap);
-	TopoDS_Shape Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double minumGap);
-	TopoDS_Shape Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double minumGap);
+	std::pair<bool, TopoDS_Shape> Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double minumGap);
+	std::pair<bool, TopoDS_Shape> Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double minumGap);
+	std::pair<bool, TopoDS_Shape> Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double minumGap);
+	std::pair<bool, TopoDS_Shape> Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double minumGap);
 	ShapeExtend_Status FixFace(const TopoDS_Face& face, TopTools_ListOfShape& result);
-	
+private:
+	static void CheckSelfIntersection(const BOPAlgo_BOP& booleanOperation);
 };
