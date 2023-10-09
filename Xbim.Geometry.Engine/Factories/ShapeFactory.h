@@ -19,7 +19,7 @@ namespace Xbim
 			{
 			private:				
 				TopoDS_Shape Transform(TopoDS_Shape& shape, XbimMatrix3D matrix);
-
+				int max_retry_attempts = 2;
 				
 				
 			public:

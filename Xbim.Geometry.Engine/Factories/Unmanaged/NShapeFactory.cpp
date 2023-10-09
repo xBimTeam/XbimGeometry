@@ -10,6 +10,8 @@
 #include <BOPAlgo_BOP.hxx>
 #include "../../Services/Unmanaged/NProgressMonitor.h"
 #include <BRepTools.hxx>
+#include <Standard_Handle.hxx>
+
 
 
 
@@ -109,11 +111,26 @@ bool NShapeFactory::Triangulate(const TopoDS_Shape& aShape, const IMeshTools_Par
 	//pLoggingService->LogError("Failed triangulate shape");
 	return false;
 }
-TopoDS_Shape NShapeFactory::Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double minumGap)
+
+void NShapeFactory::CheckSelfIntersection(const BOPAlgo_BOP& booleanOperation)
+{
+	const opencascade::handle<Message_Report> & report =  booleanOperation.GetReport();
+	const Message_ListOfAlert& alerts =  report->GetAlerts(Message_Warning);
+	for (Message_ListOfAlert::Iterator it(alerts); it.More(); it.Next())
+	{
+		const Handle(Message_Alert)& alert = it.Value();
+		const TCollection_AsciiString& alertText = alert->GetMessageKey();
+		if(alertText == "BOPAlgo_AlertAcquiredSelfIntersection")
+		{
+			Standard_Failure::Raise("Self intersection detected");
+		}
+	}
+}
+
+std::pair<bool, TopoDS_Shape> NShapeFactory::Cut(const TopoDS_Shape& body, const TopTools_ListOfShape& subtractions, double minumGap)
 {
 	try
 	{
-
 		BOPAlgo_BOP aBOP;
 		aBOP.AddArgument(body);
 		aBOP.SetTools(subtractions);
@@ -139,24 +156,25 @@ TopoDS_Shape NShapeFactory::Cut(const TopoDS_Shape& body, const TopTools_ListOfS
 			warningMsg << std::endl << "Warnings cutting shape" << std::endl;
 			aBOP.DumpWarnings(warningMsg);
 			pLoggingService->LogWarning(warningMsg.str().c_str());
+			CheckSelfIntersection(aBOP);
 		}
-		return  aBOP.Shape();
-
+		return std::pair<bool, TopoDS_Shape>(true, aBOP.Shape());
 	}
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
 	}
-	return TopoDS_Shell();;
+	return std::pair<bool, TopoDS_Shape>(false, TopoDS_Shape());
 }
-TopoDS_Shape NShapeFactory::Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double minumGap)
+
+std::pair<bool, TopoDS_Shape> NShapeFactory::Cut(const TopoDS_Shape& body, const TopoDS_Shape& subtraction, double minumGap)
 {
 	TopTools_ListOfShape subtractions;
 	subtractions.Append(subtraction);
 	return Cut(body, subtractions, minumGap);
 }
 
-TopoDS_Shape NShapeFactory::Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double minumGap)
+std::pair<bool, TopoDS_Shape> NShapeFactory::Union(const TopoDS_Shape& body, const TopTools_ListOfShape& additions, double minumGap)
 {
 	try
 	{
@@ -186,13 +204,13 @@ TopoDS_Shape NShapeFactory::Union(const TopoDS_Shape& body, const TopTools_ListO
 			aBOP.DumpWarnings(warningMsg);
 			pLoggingService->LogWarning(warningMsg.str().c_str());
 		}
-		return  aBOP.Shape();
+		return std::pair<bool, TopoDS_Shape>(true, aBOP.Shape());
 	}
 	catch (const Standard_Failure& e)
 	{
 		LogStandardFailure(e);
 	}
-	return TopoDS_Shape();
+	return std::pair<bool, TopoDS_Shape>(false, TopoDS_Shape());
 }
 
 ShapeExtend_Status NShapeFactory::FixFace(const TopoDS_Face& face, TopTools_ListOfShape& result)
@@ -228,9 +246,7 @@ ShapeExtend_Status NShapeFactory::FixFace(const TopoDS_Face& face, TopTools_List
 	return status;
 }
 
-
-
-TopoDS_Shape NShapeFactory::Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double minumGap)
+std::pair<bool, TopoDS_Shape> NShapeFactory::Union(const TopoDS_Shape& body, const TopoDS_Shape& addition, double minumGap)
 {
 	TopTools_ListOfShape additions;
 	additions.Append(addition);

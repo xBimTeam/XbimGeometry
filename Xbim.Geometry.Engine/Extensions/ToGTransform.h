@@ -1,3 +1,4 @@
+#pragma once
 #include <gp_GTrsf.hxx>
 
 using namespace Xbim::Geometry::Abstractions;
