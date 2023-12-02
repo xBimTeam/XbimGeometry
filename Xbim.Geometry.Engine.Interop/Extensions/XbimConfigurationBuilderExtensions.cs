@@ -1,6 +1,6 @@
 ﻿using System;
 using Xbim.Geometry.Engine.Interop.Configuration;
-using Xbim.Geometry.Engine.Interop.Extensions;
+
 
 namespace Xbim.Common.Configuration
 {

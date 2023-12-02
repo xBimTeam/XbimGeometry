@@ -4,10 +4,12 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 using System.Reflection;
+using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Engine.Interop.Configuration;
 using Xbim.Ifc4.Interfaces;
 
-namespace Xbim.Geometry.Engine.Interop.Extensions
+namespace Xbim.Common.Configuration
 {
     /// <summary>
     /// ServiceCollection Extensions for xbim Geometry
@@ -47,8 +49,7 @@ namespace Xbim.Geometry.Engine.Interop.Extensions
             services.TryAddSingleton<XbimGeometryEngineFactory>();
             services.AddNativeGeometryServices();
             
-            
-            services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(Abstractions.XGeometryEngineVersion.V6)));
+            services.TryAddEnumerable(ServiceDescriptor.Singleton((IConfigureOptions<GeometryEngineOptions>)new DefaultGeometryEngineConfigurationOptions(XGeometryEngineVersion.V6)));
             configure(new GeometryEngineBuilder(services));
             return services;
         }

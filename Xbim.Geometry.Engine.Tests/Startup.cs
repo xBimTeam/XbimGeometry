@@ -1,9 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Engine.Interop.Extensions;
 using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 namespace Xbim.Geometry.Engine.Tests

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,7 +12,7 @@ using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
-using Xbim.Geometry.Engine.Interop.Extensions;
+
 namespace XbimRegression
 {
     /// <summary>

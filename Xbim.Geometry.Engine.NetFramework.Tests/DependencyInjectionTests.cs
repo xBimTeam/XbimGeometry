@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
-using Xbim.Geometry.Engine.Interop.Extensions;
 using Xbim.Ifc4.Interfaces;
 using Xunit;
 

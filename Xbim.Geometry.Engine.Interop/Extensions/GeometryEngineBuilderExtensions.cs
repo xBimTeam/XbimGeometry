@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop.Configuration;
 
 
-namespace Xbim.Geometry.Engine.Interop.Extensions
+namespace Xbim.Common.Configuration
 {
     /// <summary>
     /// Extension methods for <see cref="IGeometryEngineBuilder"/>
