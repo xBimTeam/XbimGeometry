@@ -354,6 +354,7 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Services\ModelPlacementBuilder.h" />
     <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
@@ -574,6 +575,12 @@
     </ClCompile>
     <ClCompile Include="XbimWireSet.cpp" />
     <ClCompile Include="BRep\XMatrix.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="app.net472.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="app.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
