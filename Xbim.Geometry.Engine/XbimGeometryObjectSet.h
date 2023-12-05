@@ -27,7 +27,7 @@ namespace Xbim
 			
 			void GetShapeList(TopTools_ListOfShape& shapes);
 
-			static bool ParseGeometry(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
+			bool ParseGeometry(System::Collections::Generic::IEnumerable<IXbimGeometryObject^>^ geomObjects, TopTools_ListOfShape& toBeCut, Bnd_Array1OfBox& aBoxes,
 				TopoDS_Shell& facesToIgnore, double tolerance);
 			
 			void InstanceCleanup()

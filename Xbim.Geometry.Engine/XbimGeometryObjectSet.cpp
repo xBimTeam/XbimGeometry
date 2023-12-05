@@ -26,7 +26,9 @@
 
 #include "./BRep/XCompound.h"
 #include "./Factories/BooleanFactory.h"
+using namespace System;
 using namespace System::ComponentModel;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -148,7 +150,7 @@ namespace Xbim
 				else if (occObject != nullptr)
 					occObject->Mesh(mesh, precision, deflection, angle);
 				else
-					throw gcnew System::Exception("Unsupported geometry type cannot be meshed");
+					throw gcnew System::Exception("Unsupported geometry type cannot be meshed: " + geometryObject->GetType()->Name);
 			}
 		}
 
@@ -330,7 +332,7 @@ namespace Xbim
 				else if (wire != nullptr) shapes.Append(wire);
 				else if (edge != nullptr) shapes.Append(edge);
 				else
-					_modelServices->LogInformation("Unknown shape type in XbimGeometryObjectSet");
+					_modelServices->LogWarning("Unknown shape type in XbimGeometryObjectSet: {geomType} - {geom}", geom->GetType()->Name, geom);
 			}
 		}
 
@@ -414,8 +416,8 @@ namespace Xbim
 				std::string errMsg;
 				if (!XbimNativeApi::SewShape(shape, tolerance, XbimGeometryCreator::BooleanTimeOut, errMsg))
 				{
-					/*String^ err = gcnew String(errMsg.c_str());
-					XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to sew shape: " + err);*/
+					String^ err = gcnew String(errMsg.c_str());
+					_modelServices->LogWarning("Failed to sew shape: {error}", err);
 				}
 				FTol.LimitTolerance(shape, tolerance);
 				toBeProcessed.Append(shape);
