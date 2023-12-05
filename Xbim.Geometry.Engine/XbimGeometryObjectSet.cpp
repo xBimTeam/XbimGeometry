@@ -319,6 +319,7 @@ namespace Xbim
 			{
 				XbimCompound^ compound = dynamic_cast<XbimCompound^>(geom);
 				XbimSolid^ solid = dynamic_cast<XbimSolid^>(geom);
+				XbimSolidSet^ solidSet = dynamic_cast<XbimSolidSet^>(geom);	// AW: SRL can you check?
 				XbimShell^ shell = dynamic_cast<XbimShell^>(geom);
 				XbimGeometryObjectSet^ geomSet = dynamic_cast<XbimGeometryObjectSet^>(geom);
 				XbimFace^ face = dynamic_cast<XbimFace^>(geom);
@@ -326,13 +327,14 @@ namespace Xbim
 				XbimEdge^ edge = dynamic_cast<XbimEdge^>(geom);
 				if (compound != nullptr) shapes.Append(compound);
 				else if (solid != nullptr) shapes.Append(solid);
+				else if (solidSet != nullptr) shapes.Append(solidSet);
 				else if (shell != nullptr) shapes.Append(shell);
 				else if (geomSet != nullptr) geomSet->GetShapeList(shapes);
 				else if (face != nullptr) shapes.Append(face); 
 				else if (wire != nullptr) shapes.Append(wire);
 				else if (edge != nullptr) shapes.Append(edge);
 				else
-					_modelServices->LogWarning("Unknown shape type in XbimGeometryObjectSet: {geomType} - {geom}", geom->GetType()->Name, geom);
+					_modelServices->LogWarning("Unknown shape type in XbimGeometryObjectSet: {0}", geom->GetType()->Name);
 			}
 		}
 
