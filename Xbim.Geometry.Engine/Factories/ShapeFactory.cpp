@@ -211,7 +211,7 @@ namespace Xbim
                 const TopoDS_Shape& topoBody = TOPO_SHAPE(body);
                 const TopoDS_Shape& topoAddition = TOPO_SHAPE(addition);
                 double minGap = _modelService->MinimumGap;
-                for  (size_t attempt{0}; attempt < max_retry_attempts; ++attempt)
+                for  (int attempt{0}; attempt < max_retry_attempts; ++attempt)
                 {
                     auto [isSuccess, shape] = OccHandle().Union(topoBody, topoAddition, minGap);
                     if (isSuccess) return GetXbimShape(shape);
@@ -228,7 +228,7 @@ namespace Xbim
                 const TopoDS_Shape& topoBody = TOPO_SHAPE(body);
                 const TopoDS_Shape& topoSubstraction = TOPO_SHAPE(substraction);
                 double minGap = _modelService->MinimumGap;
-                for (size_t attempt{0}; attempt < max_retry_attempts; ++attempt)
+                for (int attempt{0}; attempt < max_retry_attempts; ++attempt)
                 {
                     auto [isSuccess, shape] = OccHandle().Cut(topoBody, topoSubstraction, minGap);
                     if (isSuccess) return GetXbimShape(shape);
@@ -251,7 +251,7 @@ namespace Xbim
                     additions.Append(topoAddition);
                 }
                 double minGap = _modelService->MinimumGap;
-                for (size_t attempt{0}; attempt < max_retry_attempts; ++attempt)
+                for (int attempt{0}; attempt < max_retry_attempts; ++attempt)
                 {
                     auto [isSuccess, shape]= OccHandle().Union(topoBody, additions, minGap);
                     if (isSuccess) return GetXbimShape(shape);
@@ -273,7 +273,7 @@ namespace Xbim
                     substractions.Append(topoSubstraction);
                 }
                 double minGap = _modelService->MinimumGap;
-                for (size_t attempt{0}; attempt < max_retry_attempts; ++attempt)
+                for (int attempt{0}; attempt < max_retry_attempts; ++attempt)
                 {
                     auto [isSuccess, shape] = OccHandle().Cut(topoBody, substractions, minGap);
                     if (isSuccess) return GetXbimShape(shape);
