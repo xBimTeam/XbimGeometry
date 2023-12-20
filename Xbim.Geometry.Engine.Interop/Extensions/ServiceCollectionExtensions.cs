@@ -20,22 +20,44 @@ namespace Xbim.Common.Configuration
         /// <summary>
         /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
         /// </summary>
-        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
         /// <param name="services"></param>
         /// <returns></returns>
+        [Obsolete("Prefer services.AddXbimToolkit(c => c.AddGeometryServices()) instead")]
         public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services)
         {
-            return services.AddXbimGeometryServices(delegate { });
+            return services.AddXbimGeometryServicesInternal(delegate { });
         }
 
         /// <summary>
         /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
         /// </summary>
-        /// <remarks>Prefer <see cref="IGeometryEngineBuilder"/>.AddGeometryServices() builder extension</remarks>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        internal static IServiceCollection AddXbimGeometryServicesInternal(this IServiceCollection services)
+        {
+            return services.AddXbimGeometryServicesInternal(delegate { });
+        }
+
+
+        /// <summary>
+        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
+        /// </summary>
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
+        [Obsolete("Prefer services.AddXbimToolkit(c => c.AddGeometryServices()) instead")]
         public static IServiceCollection AddXbimGeometryServices(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
+        {
+            return AddXbimGeometryServicesInternal(services, configure);
+        }
+
+        /// <summary>
+        /// Adds xbim geometry services to the specified <see cref="IServiceCollection"/>
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configure"></param>
+        /// <returns>The <see cref="IServiceCollection"/> so additional calls can be chained</returns>
+        internal static IServiceCollection AddXbimGeometryServicesInternal(this IServiceCollection services, Action<IGeometryEngineBuilder> configure)
         {
             services.AddOptions();
 

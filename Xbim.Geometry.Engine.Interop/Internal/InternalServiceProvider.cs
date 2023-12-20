@@ -11,9 +11,9 @@ namespace Xbim.Geometry.Engine.Interop.Internal
     /// <summary>
     /// An Internal Service provider wrapping the <see cref="XbimServices"/> which supports fall back to a minimal services implementation when the consuming application
     /// does not explicitly register the xbim services on <see cref="XbimServices"/>. The fallback services provides a safe baseline but provides no Logging capability.
-    /// XBIM INTERNAL USE ONLY. Prefer 
+    /// XBIM INTERNAL USE ONLY. Prefer <see cref="XbimServices"/>
     /// </summary>
-    public class InternalServiceProvider
+    internal class InternalServiceProvider
     {
         /// <summary>
         /// Gets the internal ServiceProvider
@@ -30,7 +30,11 @@ namespace Xbim.Geometry.Engine.Interop.Internal
             services.AddXbimToolkit(opt => opt.AddGeometryServices());
             ServiceProvider = services.BuildServiceProvider();
 
-            var warning = $"NOTE: The xbim InternalServices are being. This fallback service provider has no logging support. Ensure you register the {typeof(XbimServices).FullName} at startup to get diagnostics and full control of the xbim systems.";
+            var warning = @$"NOTE: The xbim InternalServices are being used. This fallback service provider has no logging support. To see xbim logs logging ensure you provide a LoggerFactory to {typeof(XbimServices).FullName} at startup - or provide an existing ServiceProvider to the XbimServices. e.g.
+
+XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(c => c.AddLoggerFactory(loggerFactory)));
+// or
+XbimServices.Current.UseExternalServiceProvider(serviceProvider);";
 
             Debug.WriteLine(warning);
             Console.Error.WriteLine(warning);

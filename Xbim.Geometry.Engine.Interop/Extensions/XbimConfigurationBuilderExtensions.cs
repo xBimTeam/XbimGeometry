@@ -16,7 +16,7 @@ namespace Xbim.Common.Configuration
         /// <returns></returns>
         public static IXbimConfigurationBuilder AddGeometryServices(this IXbimConfigurationBuilder builder)
         {
-            builder.Services.AddXbimGeometryServices();
+            builder.Services.AddXbimGeometryServicesInternal();
            
             return builder;
         }
@@ -30,7 +30,7 @@ namespace Xbim.Common.Configuration
         /// <returns></returns>
         public static IXbimConfigurationBuilder AddGeometryServices(this IXbimConfigurationBuilder builder, Action<IGeometryEngineBuilder> configure)
         {
-            builder.Services.AddXbimGeometryServices(configure);
+            builder.Services.AddXbimGeometryServicesInternal(configure);
 
             return builder;
         }

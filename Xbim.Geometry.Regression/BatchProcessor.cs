@@ -29,34 +29,38 @@ namespace XbimRegression
         public BatchProcessor(Params arguments)
         {
             _params = arguments;
-            _loggerFactory = LoggerFactory.Create(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Trace)
-           .AddFile("{0}", fileLoggerOpts =>
-           {
-               fileLoggerOpts.FormatLogFileName = fName =>
-               {
-                   return String.Format(fName, _currentLogFileName);
-               };
-               fileLoggerOpts.FormatLogEntry = (msg) =>
-               {
-                   var sb = new System.Text.StringBuilder();
-                   StringWriter sw = new StringWriter(sb);
-                   var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                   jsonWriter.WriteStartArray();
-                   jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                   jsonWriter.WriteValue(msg.LogLevel.ToString());
-                   jsonWriter.WriteValue(msg.EventId.Id);
-                   jsonWriter.WriteValue(msg.Message);
-                   jsonWriter.WriteValue(msg.Exception?.ToString());
-                   jsonWriter.WriteEndArray();
-                   return sb.ToString();
-               };
-               fileLoggerOpts.MinLevel = LogLevel.Trace;
-           }));
-            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
-            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddLoggerFactory(_loggerFactory))
-                    .AddXbimGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))
+            _loggerFactory = LoggerFactory.Create(builder => builder
+                .AddConsole().SetMinimumLevel(LogLevel.Trace)
+                .AddFile("{0}", fileLoggerOpts =>
+                {
+                    fileLoggerOpts.FormatLogFileName = fName =>
+                    {
+                        return String.Format(fName, _currentLogFileName);
+                    };
+                    fileLoggerOpts.FormatLogEntry = (msg) =>
+                    {
+                        var sb = new System.Text.StringBuilder();
+                        StringWriter sw = new StringWriter(sb);
+                        var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                        jsonWriter.WriteStartArray();
+                        jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                        jsonWriter.WriteValue(msg.LogLevel.ToString());
+                        jsonWriter.WriteValue(msg.EventId.Id);
+                        jsonWriter.WriteValue(msg.Message);
+                        jsonWriter.WriteValue(msg.Exception?.ToString());
+                        jsonWriter.WriteEndArray();
+                        return sb.ToString();
+                    };
+                    fileLoggerOpts.MinLevel = LogLevel.Trace;
+                }));
+            // Configure xbim services / logging & geometry
+            XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    // .AddHeuristicModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
             
-            );
+            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
         public Params Params
@@ -84,7 +88,7 @@ namespace XbimRegression
                 if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
                 Console.WriteLine($"Processing {file}");
                 ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
-                //XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                
                 _logger.LogInformation($"Processed {file.FullName}");
                 _currentLogFileName = "BatchProcessor.log";
                 _logger.LogInformation($"Processing {file.FullName}");

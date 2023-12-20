@@ -16,7 +16,6 @@ namespace XbimRegression
             // ContextTesting.Run();
             // return;
             
-            //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(opt => opt.AddHeuristicModel()));
             var arguments = new Params(args);
             if (!arguments.IsValid)
                 return;

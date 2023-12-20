@@ -10,16 +10,6 @@ namespace Xbim.Geometry.Engine.Interop
     /// </summary>
     public class XbimGeometryServicesFactory : IXbimGeometryServicesFactory
     {
-        //static XbimGeometryServicesFactory()
-        //{
-
-        //    //// We need to wire in a custom assembly resolver since Xbim.Geometry.Engine is 
-        //    //// not located using standard probing rules (due to way we deploy processor specific binaries)
-        //    //AppDomain currentDomain = AppDomain.CurrentDomain;
-        //    //currentDomain.AssemblyResolve += XbimCustomAssemblyResolver.ResolverHandler;
-
-
-        //}
 
         /// <inheritdoc/>
         public IXGeometryConverterFactory GeometryConverterFactory { get; }
