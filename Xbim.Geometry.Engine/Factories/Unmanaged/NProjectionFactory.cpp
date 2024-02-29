@@ -91,7 +91,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 {
 
 	if (arcs.size() == 0) return;
-	const double twoPi = std::_Pi * 2;
+	const double twoPi = M_PI * 2;
 
 
 	//start at the lowest, leftist point and proceed anticlockwise around the perimeter
@@ -168,7 +168,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 				gp_XY nextCandidatePoint = anInspector.GetVertex(pntId).Coord();
 
 				gp_Vec2d nextDir = nextCandidatePoint - currentPoint;
-				double angle = currentDir.Angle(nextDir);// +std::_Pi; //range is 0 to <2Pi in radians
+				double angle = currentDir.Angle(nextDir);// +M_PI; //range is 0 to <2Pi in radians
 				if (angle <= 0) //adjust to range 0 -> 2Pi
 					angle = twoPi + angle;
 
@@ -239,7 +239,7 @@ void NProjectionFactory::FindOuterLoops(BRepMesh_VertexInspector& anInspector, s
 void NProjectionFactory::CreateFootPrint(const TopoDS_Shape& shape, double linearDeflection, double angularDeflection, double tolerance, NFootprint& footprint, bool useHlrPolyAlgo)
 {
 
-	const double halfPi = std::_Pi / 2;
+	const double halfPi = M_PI / 2;
 	//find the bounds
 	Bnd_Box box;
 
@@ -656,7 +656,7 @@ int NProjectionFactory::FindNextNearestOuterPoint(int currentPointIndex, int pre
 	const std::map<int, std::set<int>>& arcs)
 {
 
-	double twoPi = std::_Pi * 2;
+	double twoPi = M_PI * 2;
 	double minAngle = twoPi;
 	double minDistance = 10000;
 	int nextOuterPoint = 0;
@@ -668,7 +668,7 @@ int NProjectionFactory::FindNextNearestOuterPoint(int currentPointIndex, int pre
 		{
 			gp_XY point = anInspector.GetVertex(pointId).Coord();
 			gp_Vec2d nextDir = point - currentPoint;
-			double angle = currentDir.Angle(nextDir);// +std::_Pi; //range is 0 to <2Pi in radians
+			double angle = currentDir.Angle(nextDir);// +M_PI; //range is 0 to <2Pi in radians
 			if (angle < 0) //adjust to range 0 -> 2Pi
 				angle = twoPi + angle;
 			if (angle <= minAngle)
