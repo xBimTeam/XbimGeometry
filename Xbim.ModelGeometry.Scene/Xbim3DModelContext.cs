@@ -680,6 +680,7 @@ namespace Xbim.ModelGeometry.Scene
                         .Where(
                             c =>
                                 string.Compare(c.ContextType, "design", true) == 0 ||
+                                string.Compare(c.ContextType, "plan", true) == 0 ||
                                 string.Compare(c.ContextType, "model", true) == 0).ToList();
                 if (contexts.Any())
                 {
