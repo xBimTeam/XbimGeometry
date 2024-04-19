@@ -345,7 +345,7 @@ namespace Xbim
 			//catch ()
 			catch (...)
 			{
-				throw gcnew System::Exception(System::String::Format("General Error Creating {ifcType}, #{ifcEntityLabel}", geomRep->GetType()->Name, geomRep->EntityLabel));
+				throw gcnew System::Exception(System::String::Format("General Error Creating {0}, #{1}", geomRep->GetType()->Name, geomRep->EntityLabel));
 			}
 			LogError(_logger, geomRep, "Geometry Representation of Type {ifcType} is not implemented", geomRep->GetType()->Name);
 			return gcnew XbimGeometryObjectSet(_modelService);
