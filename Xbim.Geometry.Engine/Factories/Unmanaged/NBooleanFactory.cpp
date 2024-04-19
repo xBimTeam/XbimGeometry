@@ -137,8 +137,7 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
-			
-			bop.SimplifyResult(true, true, Precision::Angular());
+			//bop.SimplifyResult(true, true, Precision::Angular());
 			//if we have a self intersection acquired it means one of the input shapes had a self intersection, fix up the input shapes and repeat, if we have not tried to do so before
 			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)) && !attemptingFix)
 			{
