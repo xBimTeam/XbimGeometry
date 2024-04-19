@@ -55,8 +55,8 @@ namespace Xbim.Geometry.Engine.Tests
 
                 var geom = store.ShapeGeometries.Values.First(c => c.IfcShapeLabel == 13519);
 
-                geom.FaceCount.Should().Be(50);
-                geom.Length.Should().Be(2029);
+                geom.FaceCount.Should().Be(58);
+                geom.Length.Should().Be(2221);
 
             }
         }

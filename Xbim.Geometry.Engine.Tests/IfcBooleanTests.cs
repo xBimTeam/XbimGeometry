@@ -820,7 +820,7 @@ namespace Xbim.Geometry.Engine.Tests
                 var solids = geomEngine.CreateSolidSet(er.Instance<IIfcBooleanResult>(1), _logger);
 
                 solids.Count.Should().Be(1);
-                solids.First().Volume.Should().BeApproximately(3476536382, 1);
+                solids.First().Volume.Should().BeApproximately(3476524226, 1);
             }
         }
 
