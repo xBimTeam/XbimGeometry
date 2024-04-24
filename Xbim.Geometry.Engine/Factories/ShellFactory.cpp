@@ -10,7 +10,7 @@
 #include <TopoDS_Iterator.hxx>
 #include <TColgp_SequenceOfAx1.hxx>
 #include <BRepCheck_Analyzer.hxx>
-#include <TopExp_Explorer.hxx>
+#include <BRepCheck_Shell.hxx>
 
 using namespace System::Collections::Generic;
 using namespace System::Linq;
@@ -165,6 +165,14 @@ namespace Xbim
 
 			TopoDS_Shape ShellFactory::FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed)
 			{
+				BRepCheck_Shell checker(shell);
+				const BRepCheck_Status shellStatus = checker.Orientation();
+				if (shellStatus == BRepCheck_Status::BRepCheck_NoError)
+				{
+					isFixed = true;
+					return shell;
+				}
+				
 				isFixed = false;
 				ShapeFix_Shell shapeFixer(shell);
 				bool fixed = shapeFixer.Perform();
@@ -253,8 +261,11 @@ namespace Xbim
 				if (shell.IsNull())
 					throw RaiseGeometryFactoryException("Failed to build PolygonalFaceSet", faceSet);
 				if (needsFixing)
+				{
 					LogDebug(faceSet, "Attempting to fix errors in faceset definition");
-				return FixShell(shell, faceSet, isFixed);
+					return FixShell(shell, faceSet, isFixed);
+				}
+				return shell;
 
 			}
 
