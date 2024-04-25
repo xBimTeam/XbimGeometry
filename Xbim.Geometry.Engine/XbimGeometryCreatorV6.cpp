@@ -240,7 +240,6 @@ namespace Xbim
 #pragma endregion
 
 #pragma region Point creation
-		
 		IXbimPoint^ XbimGeometryCreatorV6::CreatePoint(double x, double y, double z, double tolerance)
 		{
 			return gcnew XbimPoint3DWithTolerance(x, y, z, tolerance);
@@ -272,68 +271,80 @@ namespace Xbim
 			else if (dynamic_cast<IIfcPointOnCurve^>(pt)) return CreatePoint((IIfcPointOnCurve^)pt);
 			else if (dynamic_cast<IIfcPointOnSurface^>(pt)) return CreatePoint((IIfcPointOnSurface^)pt);
 			else throw RaiseGeometryServiceException("Geometry Representation Type is not implemented", pt);
+
 		}
-		
 #pragma endregion
 
 #pragma region Curve Creation
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcCurve^ curve, ILogger^)
 		{
-			return gcnew XbimCurve(GetCurveFactory()->BuildCurve(curve), this);
+			//if (Is3D(curve))
+			return gcnew XbimCurve(curve, Logger(), this);
+			//else
+			//	return gcnew XbimCurve2D(curve, Logger());
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcPolyline^ curve, ILogger^)
 		{
 			if (Is3D(curve))
-				return gcnew XbimCurve(GetCurveFactory()->BuildCurve(curve), this);
-			return gcnew XbimCurve2D(GetCurveFactory()->BuildCurve2d(curve),  this);
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcCircle^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcEllipse^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcLine^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcTrimmedCurve^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcRationalBSplineCurveWithKnots^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcBSplineCurveWithKnots^ curve, ILogger^)
 		{
-			return CreateCurve(curve, Logger());
+			if (Is3D(curve))
+				return gcnew XbimCurve(curve, Logger(), this);
+			else
+				return gcnew XbimCurve2D(curve, Logger(), this);
 		}
 
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcOffsetCurve3D^ curve, ILogger^)
 		{
-			return gcnew XbimCurve(GetCurveFactory()->BuildCurve(curve), this);
+			return gcnew XbimCurve(curve, Logger(), this);
 		}
 
 		IXbimCurve^ XbimGeometryCreatorV6::CreateCurve(IIfcOffsetCurve2D^ curve, ILogger^)
 		{
-			return gcnew XbimCurve2D(GetCurveFactory()->BuildCurve2d(curve), this);
+			return gcnew XbimCurve2D(curve, Logger(), this);
 		}
-		
 #pragma endregion
 
 #pragma region Wire Creation
-		
 		IXbimWire^ XbimGeometryCreatorV6::CreateWire(IIfcCurve^ curve, ILogger^)
 		{
 			IIfcPolyline^ pline = dynamic_cast<IIfcPolyline^>(curve);
@@ -353,7 +364,6 @@ namespace Xbim
 		{
 			return gcnew XbimWire(compCurveSeg, Logger(), this);
 		}
-		
 #pragma endregion
 
 #pragma region Face creation
@@ -371,6 +381,7 @@ namespace Xbim
 
 		IXbimFace^ XbimGeometryCreatorV6::CreateFace(IIfcCompositeCurve^ cCurve, ILogger^)
 		{
+
 			//nb this is not a very sensible function and should be deprecated
 			//there are too many uncertainties, the composite curve may not be closed, it might not fit on a surface, it may be 2 or 3d
 			//this has been implemented but has the same restrictions as the V5 interface and should be avoided in future work
@@ -459,21 +470,23 @@ namespace Xbim
 			return gcnew XbimSolid(TopoDS::Solid(shape), this);
 		};
 
-		[[deprecated("IfcPolygonalFaceSet is not support to create a single solid, use CreateSurfaceModel() method")]]
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalFaceSet^ shell, ILogger^)
-		{ 
+		{
+
+			/*if (shell->Closed.HasValue && shell->Closed.Value)
+				return gcnew XbimSolid(GetSolidFactory()->BuildPolygonalFaceSet(shell), this);
+			else*/
 			throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not support to create a single solid, use CreateSurfaceModel() method");
 		}
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcSweptDiskSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildSweptDiskSolid(IIfcSolid), this);
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcBoundingBox^ IIfcSolid, ILogger^)
@@ -481,33 +494,27 @@ namespace Xbim
 			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
-		[[deprecated("Please use CreateSolidSet or Create. IIfcSurfaceCurveSweptAreaSolid may return a set of solids.")]]
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^)
 		{
-			throw RaiseGeometryServiceException("CreateSolid to an IIfcSurfaceCurveSweptAreaSolid is obsolete, use the CreateSolidSet or Create method");
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
 		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcBooleanResult^ IIfcSolid, ILogger^)
 		{
-			XbimSolidSet^ ss = gcnew XbimSolidSet(GetBooleanFactory()->BuildBooleanResult(IIfcSolid), this);
+			XbimSolidSet^ ss = gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 			return Enumerable::FirstOrDefault(ss);
 		};
-		
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcSweptDiskSolidPolygonal^ ifcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolid(ifcSolid, Logger(), this);
 		}
-
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcRevolvedAreaSolidTapered^ ifcSolid, ILogger^)
 		{
 			return gcnew XbimSolid(ifcSolid, Logger(), this);
 		}
-		
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcFixedReferenceSweptAreaSolid^ ifcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolid(ifcSolid, Logger(), this);
 		}
 
@@ -516,10 +523,8 @@ namespace Xbim
 		{
 			throw RaiseGeometryServiceException("CreateSolid to an IfcAdvancedBrep is obsolete, use the Create method");
 		}
-		
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcAdvancedBrepWithVoids^ ifcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			XbimCompound^ comp = gcnew XbimCompound((IIfcAdvancedBrepWithVoids^)ifcSolid, Logger(), this);
 			if (comp->Solids->Count > 0)
 				return comp->Solids->First;
@@ -531,40 +536,46 @@ namespace Xbim
 			return gcnew XbimSolid(ifcSolid, Logger(), this);
 		}
 
+
 		[[deprecated("Please use CreateSolidSet")]]
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcBooleanClippingResult^ IIfcSolid, ILogger^)
 		{
-			return Enumerable::FirstOrDefault(gcnew XbimSolidSet(GetBooleanFactory()->BuildBooleanResult(IIfcSolid), this));
+			return Enumerable::FirstOrDefault(gcnew XbimSolidSet(IIfcSolid, Logger(), this));
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanClippingResult^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetBooleanFactory()->BuildBooleanResult(IIfcSolid), this);
+			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		};
+
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcHalfSpaceSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildHalfSpace(IIfcSolid), this);
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
+
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcBoxedHalfSpace^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildHalfSpace(IIfcSolid), this);
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcPolygonalBoundedHalfSpace^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildHalfSpace(IIfcSolid), this);
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
+
+
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcCsgPrimitive3D^ IIfcSolid, ILogger^)
 		{
 			return gcnew XbimSolid(GetSolidFactory()->BuildCsgPrimitive3D(IIfcSolid), this);
 		};
 
+
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcSphere^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolid(GetSolidFactory()->BuildSphere(IIfcSolid), this);
+			return gcnew XbimSolid(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolid^ XbimGeometryCreatorV6::CreateSolid(IIfcBlock^ IIfcSolid, ILogger^)
@@ -591,6 +602,8 @@ namespace Xbim
 
 #pragma region Solid Set Creation
 
+
+
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet() {
 			return gcnew XbimSolidSet(this);
 		};
@@ -606,7 +619,6 @@ namespace Xbim
 			throw gcnew System::NotImplementedException(System::String::Format("Swept Solid of Type {0} in entity #{1} is not implemented", IIfcSolid->GetType()->Name, IIfcSolid->EntityLabel));
 
 		};
-		
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcExtrudedAreaSolid^ IIfcSolid, ILogger^)
 		{
 			return gcnew XbimSolidSet(GetSolidFactory()->BuildExtrudedAreaSolid(IIfcSolid), this);
@@ -614,50 +626,65 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcRevolvedAreaSolid^ IIfcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetSolidFactory()->BuildSurfaceCurveSweptAreaSolid(IIfcSolid), this);
+			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		}
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcTriangulatedFaceSet^ shell, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolidSet(shell, Logger(), this);
 		}
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcPolygonalFaceSet^ shell, ILogger^)
 		{
 			if (shell->Closed.HasValue && shell->Closed.Value)
-				return gcnew XbimSolidSet(GetSolidFactory()->BuildPolygonalFaceSet(shell), this);
-			throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");
+				return gcnew XbimSolidSet(shell, Logger(), this);
+			else
+				throw RaiseGeometryServiceException("IfcPolygonalFaceSet is not closed, use CreateSurfaceModel() method");
 		}
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcShellBasedSurfaceModel^ ifcSurface, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolidSet(ifcSurface, Logger(), this);
 		}
-		
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFaceBasedSurfaceModel^ ifcSurface, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetSolidFactory()->BuildFaceBasedSurfaceModel(ifcSurface), this);
+			return gcnew XbimSolidSet(ifcSurface, Logger(), this);
 		}
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanResult^ boolRes, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetBooleanFactory()->BuildBooleanResult(boolRes), this);
+			const TopoDS_Shape& shape = GetBooleanFactory()->BuildBooleanResult(boolRes);
+			return gcnew XbimSolidSet(shape, this);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcBooleanOperand^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetBooleanFactory()->BuildOperand(IIfcSolid), this);
+			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
+			//ensure operands get treated correctly
+			//if (dynamic_cast<IIfcBooleanClippingResult^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcBooleanClippingResult^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcBooleanResult^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcBooleanResult^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcCsgSolid^>(IIfcSolid))
+			//	return gcnew XbimSolidSet((IIfcCsgSolid^)IIfcSolid, Logger());
+			//else if (dynamic_cast<IIfcManifoldSolidBrep^>(IIfcSolid)) //these must be single volume solid
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcManifoldSolidBrep^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcSweptAreaSolid^>(IIfcSolid)) //these must be single volume solid
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptAreaSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcSweptDiskSolid^>(IIfcSolid))
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcSweptDiskSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcHalfSpaceSolid^>(IIfcSolid))
+			//	return gcnew  XbimSolidSet(gcnew XbimSolid((IIfcHalfSpaceSolid^)IIfcSolid, Logger()));
+			//else if (dynamic_cast<IIfcCsgPrimitive3D^>(IIfcSolid))
+			//	return gcnew XbimSolidSet(gcnew XbimSolid((IIfcCsgPrimitive3D^)IIfcSolid, Logger()));
+			//throw gcnew System::Exception(System::String::Format("Boolean Operand with Type {0} is not implemented", IIfcSolid->GetType()->Name));
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcManifoldSolidBrep^ IIfcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		};
 
@@ -668,14 +695,13 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcFacetedBrepWithVoids^ IIfcSolid, ILogger^)
 		{
-			//TODO: use v6 once implemented
 			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		};
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcClosedShell^ IIfcSolid, ILogger^)
 		{
 			bool isFixed;
-			const TopoDS_Shape& shape = GetShellFactory()->BuildClosedShell(IIfcSolid, isFixed);
+			TopoDS_Shape shape = GetShellFactory()->BuildClosedShell(IIfcSolid, isFixed);
 			//for backward compatibility, a shell is just made into a solid and a warning is issued, fixed in V6
 			if (shape.IsNull() || shape.ShapeType() != TopAbs_SOLID)
 				this->LogWarning("IfcClosedShell definition has not defined a shell that is closed", IIfcSolid);
@@ -685,24 +711,22 @@ namespace Xbim
 
 		IXbimSolidSet^ XbimGeometryCreatorV6::CreateSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^)
 		{
-			return gcnew XbimSolidSet(GetSolidFactory()->BuildCsgSolid(IIfcSolid), this);
+			return gcnew XbimSolidSet(IIfcSolid, Logger(), this);
 		};
-		
 #pragma endregion
 
 #pragma region Surface Model Creation
-		
 		//Surface Models containing one or more shells or solids
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcShellBasedSurfaceModel^ IIfcSurface, ILogger^)
 		{
-			bool isFixed;
-			return gcnew XbimCompound(GetShellFactory()->BuildShellBaseSurfaceModel(IIfcSurface, isFixed),this);
+			return gcnew XbimCompound(IIfcSurface, Logger(), this);
 		};
 
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcFaceBasedSurfaceModel^ IIfcSurface, ILogger^)
 		{
 			bool isFixed;
-			return gcnew XbimCompound(GetShellFactory()->BuildFaceBaseSurfaceModel(IIfcSurface, isFixed), this);
+			TopoDS_Shape shape = GetShellFactory()->BuildFaceBaseSurfaceModel(IIfcSurface, isFixed);
+			return gcnew XbimCompound(shape, this);
 		};
 
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcTessellatedFaceSet^ faceSet, ILogger^)
@@ -712,7 +736,8 @@ namespace Xbim
 			IIfcPolygonalFaceSet^ pfs = dynamic_cast<IIfcPolygonalFaceSet^>(faceSet);
 			if (pfs != nullptr)
 			{
-				return gcnew XbimCompound(GetSolidFactory()->BuildPolygonalFaceSet(pfs), this);
+
+				return gcnew XbimCompound(pfs, Logger(), this);
 			}
 			throw gcnew System::Exception(System::String::Format("IIfcTessellatedFaceSet of Type {0} is not implemented", faceSet->GetType()->Name));
 		}
@@ -724,7 +749,6 @@ namespace Xbim
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateGeometryObjectSet() {
 			return gcnew XbimGeometryObjectSet(this);
 		};
-		
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateGeometricSet(IIfcGeometricSet^ geomSet, ILogger^)
 		{
 			XbimGeometryObjectSet^ result = gcnew XbimGeometryObjectSet(Enumerable::Count(geomSet->Elements), this);
@@ -736,7 +760,6 @@ namespace Xbim
 			}
 			return result;
 		}
-		
 #pragma endregion
 
 #pragma region Write Triangulation Functions
@@ -755,6 +778,7 @@ namespace Xbim
 
 		void XbimGeometryCreatorV6::WriteTriangulation(IXbimMeshReceiver^ mesh, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
+
 			XbimOccShape^ xShape = dynamic_cast<XbimOccShape^>(shape);
 			if (xShape != nullptr)
 			{
@@ -763,12 +787,12 @@ namespace Xbim
 			}
 
 		}
-		
 		void XbimGeometryCreatorV6::WriteTriangulation(TextWriter^ tw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
+
 			throw gcnew System::NotSupportedException("WriteTriangulation to a textWroter is no longer supported");
+
 		}
-		
 		void XbimGeometryCreatorV6::WriteTriangulation(BinaryWriter^ bw, IXbimGeometryObject^ shape, double tolerance, double deflection, double angle)
 		{
 			auto xShape = (XShape^)XbimGeometryObject::ToXShape(shape);
@@ -776,6 +800,7 @@ namespace Xbim
 			array<System::Byte>^ bytes = WexBimMeshFactory->CreateWexBimMesh(xShape, tolerance, deflection, angle, 1, bounds);
 			bw->Write(bytes);
 		}
+		  
 
 		XbimShapeGeometry^ XbimGeometryCreatorV6::CreateShapeGeometry(IXbimGeometryObject^ geometryObject, double precision, double deflection, double angle, XbimGeometryType storageType, ILogger^ /*logger*/)
 		{
@@ -815,7 +840,6 @@ namespace Xbim
 #pragma endregion
 
 #pragma region Sundry Methods
-		
 		XbimMatrix3D XbimGeometryCreatorV6::ToMatrix3D(IIfcObjectPlacement^ objPlacement, ILogger^)
 		{
 			return XbimConvert::ConvertMatrix3D(objPlacement, Logger(), this);
@@ -1090,6 +1114,8 @@ namespace Xbim
 			}
 		}
 
+
+
 		System::String^ XbimGeometryCreatorV6::ToBrep(IXbimGeometryObject^ geometryObject)
 		{
 			XbimGeometryObject^ geom = dynamic_cast<XbimGeometryObject^>(geometryObject);
@@ -1115,7 +1141,6 @@ namespace Xbim
 		{
 			return geometryObject->Trim();
 		}
-		
 #pragma endregion
 
 #pragma region BRep Read and Write
