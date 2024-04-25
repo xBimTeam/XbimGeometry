@@ -70,12 +70,18 @@ struct EdgeIdEqual {
 		return lhs.Equals(rhs);
 	}
 };
+
 /// <summary>
 /// the loops are a list of faces, which are described as a list of loops (inner and outer bounds) as a list of XYZ attributes
 /// </summary>
-/// <param name="loops"></param>
-/// <returns></returns>
-TopoDS_Shell NShellFactory::BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, const std::vector<int>& planeIndices, const TColgp_SequenceOfAx1& planes, double tolerance, double minGap, bool& needsFixing)
+TopoDS_Shell NShellFactory::BuildConnectedFaceSet
+				(const std::vector<std::vector<std::vector<int>>>& faceData,
+				 const std::unordered_map<int, gp_XYZ>& points,
+				 const std::vector<int>& planeIndices,
+				 const TColgp_SequenceOfAx1& planes,
+				 double tolerance,
+				 double minGap,
+				 bool& needsFixing)
 {
 	static int counter = 0;
 	needsFixing = false;

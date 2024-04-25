@@ -44,11 +44,7 @@ namespace Xbim
 				virtual IXShape^ Build(IIfcSectionedSpine^ ifcSectionedSpine);
 
 				TopoDS_Shape BuildSolidModel(IIfcSolidModel^ ifcSolid);
-
 				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid);
-
-
-
 				TopoDS_Solid BuildSweptDiskSolidPolygonal(IIfcSweptDiskSolidPolygonal^ ifcSweptDiskSolidPolygonal);
 
 #pragma region CSG solids		
@@ -70,15 +66,13 @@ namespace Xbim
 				TopoDS_Solid BuildSweptDiskSolid(IIfcSweptDiskSolid^ ifcSolid);
 				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid);
 				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid);
-				TopoDS_Shape BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef);
+				TopoDS_Solid BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef);
 #pragma endregion
+				
 				TopoDS_Shape BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep);
-
 				TopoDS_Shape BuildFacetedBrep(IIfcFacetedBrep^ facetedBrep);
 				TopoDS_Shape BuildFaceBasedSurfaceModel(IIfcFaceBasedSurfaceModel^ faceBasedSurfaceModel);
 				TopoDS_Shape BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet);
-
-
 
 				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef);
 				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid, IIfcProfileDef^ profileDef, IIfcProfileDef^ endProfileDef);

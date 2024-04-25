@@ -10,11 +10,12 @@ class NBooleanFactory : public NFactoryBase
 {
 	
 public:
-	double Timout = 20; //seconds
-	NBooleanFactory():NFactoryBase()
+	double _timeout;
+	
+	NBooleanFactory(double timout) : _timeout(timout)
 	{
-			
 	}
+	
 	NBooleanFactory(WriteLog lFunc) : NFactoryBase(lFunc)
 	{
 

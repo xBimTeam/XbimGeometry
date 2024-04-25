@@ -249,12 +249,11 @@ namespace Xbim
 					return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
 				case XSolidModelType::IfcAdvancedBrep:
 					return BuildAdvancedBrep(static_cast<IIfcAdvancedBrep^>(ifcSolid));
-					//srl the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
+				//TODO: SRL: the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
 				case XSolidModelType::IfcAdvancedBrepWithVoids:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcFacetedBrepWithVoids:
 					return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
-				
 				case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
 					return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
 				case XSolidModelType::IfcRevolvedAreaSolid:
@@ -267,7 +266,6 @@ namespace Xbim
 				}
 				throw RaiseGeometryFactoryException("Not implemented. SolidModel type", ifcSolid);
 			}
-
 			
 			TopoDS_Shape SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid)
 			{
@@ -285,15 +283,16 @@ namespace Xbim
 					return shape;
 				}
 				else 
-					return BuildSurfaceCurveSweptAreaSolid(ifcSurfaceCurveSweptAreaSolid,ifcSurfaceCurveSweptAreaSolid->SweptArea );
+					return BuildSurfaceCurveSweptAreaSolid(ifcSurfaceCurveSweptAreaSolid, ifcSurfaceCurveSweptAreaSolid->SweptArea);
 			}
+			
 			/// <summary>
 			/// Private method that allows the profil def to be overriden to support building composite profile definitions
 			/// </summary>
 			/// <param name="ifcSurfaceCurveSweptAreaSolid"></param>
 			/// <param name="profileDef"></param>
 			/// <returns></returns>
-			TopoDS_Shape SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef)
+			TopoDS_Solid SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid, IIfcProfileDef^ profileDef)
 			{
 				if (profileDef == nullptr) profileDef = ifcSurfaceCurveSweptAreaSolid->SweptArea; //this is a work around to allow backward compatibility with V5 to allow V5 to use the new code
 				//build the swept area

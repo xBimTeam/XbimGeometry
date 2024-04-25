@@ -7,6 +7,7 @@
 #include <Standard_Type.hxx>
 #include <BOPAlgo_Alerts.hxx>
 #include <ShapeFix_Shape.hxx>
+
 bool NBooleanFactory::IsEmpty(const TopoDS_Shape& shape)
 {
 	return shape.IsNull() || shape.NbChildren() == 0;
@@ -107,14 +108,7 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 		bop.SetNonDestructive(true);
 		bop.SetFuzzyValue(fuzzyTolerance);
 		//bop.SetGlue(BOPAlgo_GlueShift);
-
-		XbimProgressMonitor pi(Timout);
-		bop.Build(pi);
-		if (pi.UserBreak())
-		{
-			Standard_Failure::Raise("Boolean operation timed out");
-		}
-
+		bop.Build();
 
 		//if (bop.HasWarnings())
 		//{
@@ -133,7 +127,6 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 			report->Dump(msg);
 			Standard_Failure::Raise(msg.str().c_str());
 		}
-
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
@@ -175,7 +168,6 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 				pLoggingService->LogDebug("Self-intersection of sub-shapes in the Boolean Operations output results has been fixed.");
 			return TrimTopology(bop.Shape());
 		}
-
 	}
 	catch (const Standard_Failure& e)
 	{
@@ -184,6 +176,7 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 	pLoggingService->LogError("Failed to perform boolean");
 	return TopoDS_Shape(); //return empty so we fire a managed exception
 }
+
 /// <summary>
 /// Reduces the shape to its highest level topology, i.e. if a compound contains one solid the solid is returned, only trims compounds
 /// </summary>
