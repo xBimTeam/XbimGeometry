@@ -83,8 +83,8 @@ TopoDS_Shape NShapeService::PerformBoolean(const TopoDS_ListOfShape& arguments, 
 		bop.SetNonDestructive(true);
 		bop.SetFuzzyValue(fuzzyTolerance);
 
-		XbimProgressMonitor pi(_timeout);
-		bop.Build(pi);
+		bop.Build();
+		
 		if (bop.HasWarnings())
 		{
 			hasWarnings = true;
@@ -92,15 +92,12 @@ TopoDS_Shape NShapeService::PerformBoolean(const TopoDS_ListOfShape& arguments, 
 			bop.DumpWarnings(msg);
 			pLoggingService->LogWarning(msg.str().c_str());
 		}
+		
 		if (bop.HasErrors())
 		{
 			std::ostringstream msg;
 			bop.DumpErrors(msg);
 			Standard_Failure::Raise(msg.str().c_str());
-		}
-		if (pi.UserBreak())
-		{
-			Standard_Failure::Raise("Boolean operation timed out");
 		}
 
 		if (bop.IsDone()) //work out what to do in this situation

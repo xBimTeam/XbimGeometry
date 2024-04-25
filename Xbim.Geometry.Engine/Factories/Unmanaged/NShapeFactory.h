@@ -27,8 +27,8 @@ private:
 public:
 	NShapeFactory(double timout) : _timeout(timout)
 	{
-			
 	}
+	
 	static bool Triangulate(const TopoDS_Shape& aShape, const IMeshTools_Parameters& meshParams);
 
 	TopoDS_Shape UnifyDomain(const TopoDS_Shape& toFix, double linearTolerance, double angularTolerance);

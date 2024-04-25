@@ -61,7 +61,6 @@ namespace Xbim
 		XbimSolidSet::XbimSolidSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService) : XbimSetObject(modelService)
 		{
 			InitSolidsFromShape(shape);
-
 		}
 
 		void XbimSolidSet::InitSolidsFromShape(const TopoDS_Shape& shape)

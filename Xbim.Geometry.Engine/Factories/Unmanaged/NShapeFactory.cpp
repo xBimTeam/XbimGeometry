@@ -139,10 +139,8 @@ std::pair<bool, TopoDS_Shape> NShapeFactory::Cut(const TopoDS_Shape& body, const
 		//aBOP.SetCheckInverted(false);
 		aBOP.SetNonDestructive(true);
 		aBOP.SetFuzzyValue(minumGap);
-		NProgressMonitor pi(_timeout);
 		//aBOP.SetGlue(BOPAlgo_GlueEnum::BOPAlgo_GlueFull);
-		TopoDS_Shape aR;
-		aBOP.Perform(pi);
+		aBOP.Perform();
 		if (aBOP.HasErrors())
 		{
 			std::stringstream errMsg;
@@ -186,10 +184,7 @@ std::pair<bool, TopoDS_Shape> NShapeFactory::Union(const TopoDS_Shape& body, con
 		//aBOP.SetCheckInverted(true);
 		aBOP.SetNonDestructive(true);
 		aBOP.SetFuzzyValue(minumGap);
-		NProgressMonitor pi(_timeout);
-
-		TopoDS_Shape aR;
-		aBOP.Perform(pi);
+		aBOP.Perform();
 		if (aBOP.HasErrors())
 		{
 			std::stringstream errMsg;
