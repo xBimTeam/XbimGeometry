@@ -124,6 +124,9 @@
 		<None Update="TestFiles\Github\Github_issue_281_minimal.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\Github\Github_issue_473_minimal.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\IfcExamples\beam-standard-case.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

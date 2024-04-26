@@ -1,15 +1,14 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using Xbim.Common.Model;
 using Xbim.Geometry.Abstractions;
-using Xbim.Ifc;
-using Xbim.Ifc.ViewModels;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
 namespace Xbim.Geometry.Engine.Tests
 {
-  
+
     public class GithubIssuesTests
 
     {
@@ -31,12 +30,38 @@ namespace Xbim.Geometry.Engine.Tests
             using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
             {
                 m.LoadStep21("TestFiles\\Github\\Github_issue_281_minimal.ifc");
+                
                 var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
-                c.CreateContext(null, false);
+                var result = c.CreateContext(null, false);
 
-                // todo: 2021: add checks so that the expected openings are correctly computed.
+                result.Should().Be(true);
             }
         }
+
+
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue473(XGeometryEngineVersion engineVersion)
+        {
+            // Performance of v6 engine very slow for complex BREPs, but much faster using the xbim Tesselator and skipping OCC.
+            using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
+            {
+                m.LoadStep21(@"TestFiles\Github\Github_issue_473_minimal.ifc");
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                var timer = new Stopwatch();
+                timer.Start();
+                var result = c.CreateContext(null, false, false);
+                timer.Stop();
+
+                result.Should().Be(true);
+                c.ShapeInstances().Should().HaveCount(4);
+                c.ShapeGeometries().Should().HaveCount(4);
+
+                timer.ElapsedMilliseconds.Should().BeLessThan(10000);
+            }
+        }
+
 
 
         [Theory]

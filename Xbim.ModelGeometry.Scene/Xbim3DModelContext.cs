@@ -213,6 +213,7 @@ namespace Xbim.ModelGeometry.Scene
             internal int Total { get; private set; }
             internal int PercentageParsed { get; set; }
             internal int Tally { get; set; }
+            internal bool GenerateFullGeometry { get; private set;}
             internal Dictionary<int, int> SurfaceStyles { get; private set; }
 
             internal Dictionary<IIfcRepresentationContext, ConcurrentQueue<XbimBBoxClusterElement>> Clusters
@@ -248,7 +249,13 @@ namespace Xbim.ModelGeometry.Scene
                 return null;
             }
 
-            internal bool Initialise(bool adjustWcs)
+            /// <summary>
+            /// Initialise the <see cref="XbimCreateContextHelper"/>
+            /// </summary>
+            /// <param name="adjustWcs"></param>
+            /// <param name="generateFullGeometry"><c>true</c> if full BREPS required, <c>false</c> just to Tesselate</param>
+            /// <returns></returns>
+            internal bool Initialise(bool adjustWcs, bool generateFullGeometry = false)
             {
                 try
                 {
@@ -275,6 +282,7 @@ namespace Xbim.ModelGeometry.Scene
                     Tally = 0;
                     PercentageParsed = 0;
                     InitialiseError = "";
+                    GenerateFullGeometry = generateFullGeometry;
                     return true;
                 }
                 catch (Exception e)
@@ -490,6 +498,7 @@ namespace Xbim.ModelGeometry.Scene
 
 
         private readonly ILogger _logger;
+
         /// <summary>
         /// Defines the duration milliseconds that Boolean operations will be allowed to run for.
         /// </summary>
@@ -497,7 +506,7 @@ namespace Xbim.ModelGeometry.Scene
         static public int BooleanTimeOutMilliSeconds;
         private readonly IfcRepresentationContextCollection _contexts;
         private readonly IXbimGeometryEngine _engine;
-        private bool isGeometryV6 = false;
+        private readonly XGeometryEngineVersion engineVersion;
 
         private IXbimGeometryEngine Engine => _engine;
 
@@ -625,11 +634,10 @@ namespace Xbim.ModelGeometry.Scene
                 throw new InvalidOperationException("An implementation of IXbimGeometryServicesFactory could not be found.\n\nTo fix this add the following before calling any xbim functionality:\n\n XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => conf.AddGeometryServices()));");
             }
 
-            isGeometryV6 = engineVersion == XGeometryEngineVersion.V6;
             _model = model;
             if (loggerFactory == null) loggerFactory = InternalServiceProvider.GetLoggerFactory();
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
-
+            this.engineVersion = engineVersion;
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
             if(engineVersion == XGeometryEngineVersion.V6) 
                 _modelServices = ((IXGeometryEngineV6)_engine).ModelGeometryService; 
@@ -736,11 +744,22 @@ namespace Xbim.ModelGeometry.Scene
             get { return _model; }
         }
 
-
-        /// <param name="progDelegate"></param>
-        /// <param name="adjustWcs"></param>       
+        /// <summary>Creates a 3D graphical representation of the model using the Geometry Engine</summary>
+        /// <param name="progDelegate">A progress delegate</param>
+        /// <param name="adjustWcs">When <c>true</c> adjusts for World Coordinate System placement</param>
         /// <returns></returns>
         public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true)
+        {
+            return CreateContext(progDelegate, adjustWcs, generateBREPs: false);
+        }
+
+        /// <summary>Creates a 3D graphical representation of the model using the Geometry Engine</summary>
+        /// <remarks>Note: Brep generation is only supported with <see cref="XGeometryEngineVersion.V6"/> engine mode.</remarks>
+        /// <param name="progDelegate">A progress delegate</param>
+        /// <param name="adjustWcs">When <c>true</c> adjusts for World Coordinate System placement</param>
+        /// <param name="generateBREPs">When <c>true</c> meshing is based off BREPs (slower) otherwise <c>false</c> indicates we just want a mesh, without interim BREPs (faster)</param>
+        /// <returns></returns>
+        public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true, bool generateBREPs = false)
         {
             _logger.LogTrace("Starting creation of model scene");
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
@@ -770,7 +789,9 @@ namespace Xbim.ModelGeometry.Scene
                 {
                     contextHelper.CustomMeshBehaviour = CustomMeshingBehaviour;
                     progDelegate?.Invoke(-1, "Initialise");
-                    if (!contextHelper.Initialise(adjustWcs))
+                    // Creation of full BREP representation is an optional V6 only feature
+                    var createFullGeometry = engineVersion == XGeometryEngineVersion.V6 && generateBREPs == true;
+                    if (!contextHelper.Initialise(adjustWcs, createFullGeometry))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
                     progDelegate?.Invoke(101, "Initialise");
 
@@ -1484,14 +1505,14 @@ namespace Xbim.ModelGeometry.Scene
                         LogError(errmsg);
                         return;
                     }
-                    var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
-                    var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
-
+                    var shapeMetaData = new ShapeContext(shape, contextHelper);
+                    // var isFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shapeId);
+                    // var isVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shapeId);
 
                     // Console.WriteLine(shape.GetType().Name);
                     XbimShapeGeometry shapeGeom = null;
                     IXbimGeometryObject geomModel = null;
-                    if (!isGeometryV6 && !isFeatureElementShape && !isVoidedProductShape && xbimTessellator.CanMesh(shape)) // if we can mesh the shape directly just do it
+                    if (contextHelper.GenerateFullGeometry == false && ShouldTesselateShapeDirectly(shapeMetaData, xbimTessellator)) // if we can mesh the shape directly just do it
                     {
                         shapeGeom = xbimTessellator.Mesh(shape);
                     }
@@ -1517,7 +1538,7 @@ namespace Xbim.ModelGeometry.Scene
                             _logger.LogWarning("Failed to build geometry for #{0}=({1})", shape.EntityLabel, shape.GetType().Name.ToUpper());
 
                         }
-                        catch (XbimGeometryFactoryException )
+                        catch (XbimGeometryFactoryException)
                         {
                             //this is a handled geoemtry excpetion where no shape geoemtry is returned,
                             //the issues will have been logged, carry on to the next one
@@ -1528,7 +1549,7 @@ namespace Xbim.ModelGeometry.Scene
                         if (geomModel != null && geomModel.IsValid)
                         {
                             shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
-                            if (isFeatureElementShape)
+                            if (shapeMetaData.IsFeatureElementShape)
                             {
                                 if (geomModel is IXbimGeometryObjectSet geomSet)
                                 {
@@ -1539,7 +1560,7 @@ namespace Xbim.ModelGeometry.Scene
                                 //we need for boolean operations later, add the polyhedron if the face is planar
                                 else contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                             }
-                            else if (isVoidedProductShape)
+                            else if (shapeMetaData.IsVoidedProductShape)
                                 contextHelper.CachedGeometries.TryAdd(shapeId, geomModel);
                         }
                     }
@@ -1571,8 +1592,9 @@ namespace Xbim.ModelGeometry.Scene
 
                         //   shapeGeometries.Add(shapeGeom);
                     }
-                    if (geomModel != null && geomModel.IsValid && !isFeatureElementShape && !isVoidedProductShape)
+                    if (geomModel != null && geomModel.IsValid && !shapeMetaData.IsFeatureElementShape && !shapeMetaData.IsVoidedProductShape)
                     {
+                        // TODO: Why don't we dispose of the engine for Voids / subtractions? 
                         geomModel.Dispose();
                     }
                     if (progDelegate != null)
@@ -1607,6 +1629,11 @@ namespace Xbim.ModelGeometry.Scene
             contextHelper.Tally = localTally;
             Debug.Assert(contextHelper.ProductShapeIds.Count == processed.Count);
             progDelegate?.Invoke(101, "WriteShapeGeometries, (" + localTally + " written)");
+        }
+
+        private bool ShouldTesselateShapeDirectly(ShapeContext shapeMeta, XbimTessellator xbimTessellator)
+        {
+            return !shapeMeta.IsFeatureElementShape && !shapeMeta.IsVoidedProductShape && xbimTessellator.CanMesh(shapeMeta.Shape);
         }
 
         //private IXbimGeometryObject CallWithTimeout(IIfcGeometricRepresentationItem shape, ILogger logger, int booleanTimeOutMilliSeconds)
@@ -1936,6 +1963,20 @@ namespace Xbim.ModelGeometry.Scene
             mg.Add(sg.ShapeData, shapeInstance.IfcTypeId, shapeInstance.IfcProductLabel,
                 shapeInstance.InstanceLabel, shapeInstance.Transformation, (short)_model.UserDefinedId);
             return mg;
+        }
+
+        private class ShapeContext
+        {
+            public ShapeContext(IIfcGeometricRepresentationItem shape, XbimCreateContextHelper contextHelper)
+            {
+                IsVoidedProductShape = contextHelper.VoidedShapeIds.Contains(shape.EntityLabel);
+                IsFeatureElementShape = contextHelper.FeatureElementShapeIds.Contains(shape.EntityLabel);
+                Shape = shape;
+            }
+
+            public IIfcGeometricRepresentationItem Shape { get; }
+            public bool IsVoidedProductShape { get; }
+            public bool IsFeatureElementShape { get; }
         }
     }
 }
