@@ -1,6 +1,8 @@
 ﻿#region Directives
 
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
@@ -36,7 +38,8 @@ namespace Xbim.ModelGeometry.Scene
         ///     If there is a single root displacement, this is removed from the tree and added to the World
         ///     Coordinate System. Useful for models where the site has been located into a geographical context
         /// </param>
-        public XbimPlacementTree(IModel model, bool adjustWcs = true)
+        /// <param name="logger">optional logging target</param>
+        public XbimPlacementTree(IModel model, bool adjustWcs = true, ILogger logger = null)
         {
             var rootNodes = new List<XbimPlacementNode>();
             var localPlacements = model.Instances.OfType<IIfcLocalPlacement>(true).ToList();
@@ -48,9 +51,17 @@ namespace Xbim.ModelGeometry.Scene
                 if (localPlacement.PlacementRelTo != null) //resolve parent
                 {
                     var xbimPlacement = Nodes[localPlacement.EntityLabel];
-                    var xbimPlacementParent = Nodes[localPlacement.PlacementRelTo.EntityLabel];
-                    xbimPlacement.Parent = xbimPlacementParent;
-                    xbimPlacementParent.Children.Add(xbimPlacement);
+                    if (Nodes.TryGetValue(localPlacement.PlacementRelTo.EntityLabel, out var relTo))
+                    {
+                        var xbimPlacementParent = relTo;
+                        xbimPlacement.Parent = xbimPlacementParent;
+                        xbimPlacementParent.Children.Add(xbimPlacement);
+                    }
+                    else
+                    {
+                        logger?.LogError("PlacementRelTo entity #{RelToEntityLabel} not found; adding #{PlacedEntity} as root node.", localPlacement.PlacementRelTo.EntityLabel, localPlacement.EntityLabel);
+                        rootNodes.Add(Nodes[localPlacement.EntityLabel]);
+                    }
                 }
                 else
                     rootNodes.Add(Nodes[localPlacement.EntityLabel]);
