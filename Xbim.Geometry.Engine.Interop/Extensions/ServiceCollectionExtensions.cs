@@ -120,7 +120,8 @@ namespace Xbim.Common.Configuration
 #if NETFRAMEWORK
             var codepath = new Uri(assembly.CodeBase);
 #else
-            var codepath = new Uri(assembly.Location);
+            var location = assembly.Location;
+            var codepath = new Uri(String.IsNullOrEmpty(location) ? AppContext.BaseDirectory : location);
 #endif
             return LoadDll(codepath.LocalPath);
         });
