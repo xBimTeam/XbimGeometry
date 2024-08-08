@@ -32,7 +32,7 @@ namespace Xbim.Geometry.Engine.Tests
                 m.LoadStep21("TestFiles\\Github\\Github_issue_281_minimal.ifc");
                 
                 var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
-                var result = c.CreateContext();
+                var result = c.CreateContext(null, false);
 
                 result.Should().Be(true);
             }
