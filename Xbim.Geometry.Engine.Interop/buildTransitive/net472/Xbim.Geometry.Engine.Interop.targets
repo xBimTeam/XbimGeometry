@@ -6,14 +6,14 @@ https://github.com/Azure/azure-functions-vs-build-sdk/issues/298
 -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Condition="'$(OS)' == 'Windows_NT' ">
-    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-x86\native\*.dll; $(MSBuildThisFileDirectory)..\..\lib\net472\win10-x86\Xbim.Geometry.Engine.pdb; $(MSBuildThisFileDirectory)..\..\lib\net472\win10-x86\Xbim.Geometry.Engine.dll">
-      <Link>$(XbimCustomBinPath)win10-x86\%(Filename)%(Extension)</Link>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\*.dll; $(MSBuildThisFileDirectory)..\..\lib\net472\win-x86\Xbim.Geometry.Engine.pdb; $(MSBuildThisFileDirectory)..\..\lib\net472\win-x86\Xbim.Geometry.Engine.dll">
+      <Link>$(XbimCustomBinPath)win-x86\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>false</Pack>
       <Visible>false</Visible>
     </Content>
-    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win10-x64\native\*.dll;$(MSBuildThisFileDirectory)..\..\lib\net472\win10-x64\Xbim.Geometry.Engine.pdb;$(MSBuildThisFileDirectory)..\..\lib\net472\win10-x64\Xbim.Geometry.Engine.dll">
-      <Link>$(XbimCustomBinPath)win10-x64\%(Filename)%(Extension)</Link>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\*.dll;$(MSBuildThisFileDirectory)..\..\lib\net472\win-x64\Xbim.Geometry.Engine.pdb;$(MSBuildThisFileDirectory)..\..\lib\net472\win-x64\Xbim.Geometry.Engine.dll">
+      <Link>$(XbimCustomBinPath)win-x64\%(Filename)%(Extension)</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Pack>false</Pack>
       <Visible>false</Visible>

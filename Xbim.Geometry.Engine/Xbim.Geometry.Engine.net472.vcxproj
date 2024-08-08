@@ -118,14 +118,14 @@
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
-    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x86\</OutDir>
-    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x86\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x86\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win-x86\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win-x86\</PackagesDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win10-x64\</OutDir>
-    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win10-x64\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win10-x64\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\net472\win-x64\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\net472\win-x64\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\net472\win-x64\</PackagesDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Extensions.Logging.Abstractions">

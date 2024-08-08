@@ -16,8 +16,8 @@ namespace Xbim.Geometry.Engine.Interop
         /// </summary>
         public static string Runtime => RuntimeInformation.ProcessArchitecture switch
         {
-            Architecture.X86 => "win10-x86",
-            Architecture.X64 => "win10-x64",
+            Architecture.X86 => "win-x86",
+            Architecture.X64 => "win-x64",
             // TODO: Architecture.Arm64 etc
             _ => throw new NotImplementedException(RuntimeInformation.ProcessArchitecture.ToString())
         };

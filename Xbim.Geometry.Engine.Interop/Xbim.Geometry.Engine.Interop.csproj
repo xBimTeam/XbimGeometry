@@ -19,11 +19,11 @@
 
 	<Target Name="GetGeometryEngineFiles">
 		<ItemGroup>
-			<GeomEngine64 Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.pdb">
-				<WinPlatform>lib/$(TargetFramework)/win10-x64</WinPlatform>
+			<GeomEngine64 Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.pdb">
+				<WinPlatform>lib/$(TargetFramework)/win-x64</WinPlatform>
 			</GeomEngine64>
-			<GeomEngine86 Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.pdb">
-				<WinPlatform>lib/$(TargetFramework)/win10-x86</WinPlatform>
+			<GeomEngine86 Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.pdb">
+				<WinPlatform>lib/$(TargetFramework)/win-x86</WinPlatform>
 			</GeomEngine86>
 
 			<BuildTransitives Include="buildTransitive\$(TargetFramework)\Xbim.Geometry.Engine.Interop.targets">
@@ -40,11 +40,11 @@
 	<Target Name="GetNativeOccFiles" Condition="'$(TargetFramework)'=='net6.0'">
 		<!--only need one version net 6.0 is random choice, they are all the same-->
 		<ItemGroup>
-			<Occ64Files Include="$(GeometryEnginePath)net6.0\win10-x64\TK*.dll">
-				<WinPlatform>runtimes/win10-x64/native</WinPlatform>
+			<Occ64Files Include="$(GeometryEnginePath)net6.0\win-x64\TK*.dll">
+				<WinPlatform>runtimes/win-x64/native</WinPlatform>
 			</Occ64Files>
-			<Occ86Files Include="$(GeometryEnginePath)net6.0\win10-x86\TK*.dll">
-				<WinPlatform>runtimes/win10-x86/native</WinPlatform>
+			<Occ86Files Include="$(GeometryEnginePath)net6.0\win-x86\TK*.dll">
+				<WinPlatform>runtimes/win-x86/native</WinPlatform>
 			</Occ86Files>
 			<OccPackageFile Include="@(Occ64Files);@(Occ86Files)">
 				<PackagePath>%(WinPlatform)/@(OccPackageFile->'%(Filename)%(Extension)')</PackagePath>
@@ -55,11 +55,11 @@
 
 	<Target Name="GetIjwHostFiles" Condition="'$(TargetFramework)'!='net472' and '$(TargetFramework)'!=''">
 		<ItemGroup>
-			<IjwHost64Files Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Ijwhost.dll">
-				<WinPlatform>lib/$(TargetFramework)/win10-x64</WinPlatform>
+			<IjwHost64Files Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Ijwhost.dll">
+				<WinPlatform>lib/$(TargetFramework)/win-x64</WinPlatform>
 			</IjwHost64Files>
-			<IjwHost86Files Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Ijwhost.dll">
-				<WinPlatform>lib/$(TargetFramework)/win10-x86</WinPlatform>
+			<IjwHost86Files Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Ijwhost.dll">
+				<WinPlatform>lib/$(TargetFramework)/win-x86</WinPlatform>
 			</IjwHost86Files>
 			<IjwHostPackageFile Include="@(IjwHost64Files);@(IjwHost86Files)">
 				<PackagePath>%(WinPlatform)/@(IjwHostPackageFile->'%(Filename)%(Extension)')</PackagePath>
@@ -74,37 +74,37 @@
 		</Touch>
 	</Target>-->
 <ItemGroup>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\TK*.dll" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\TK*.dll" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\TK*.dll" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\TK*.dll" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)'!='net472'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.dll" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.dll" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.dll" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.dll" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x64\Xbim.Geometry.Engine.pdb" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.pdb" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win10-x86\Xbim.Geometry.Engine.pdb" Visible="true">
+		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.pdb" Visible="true">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
 
 	</ItemGroup>

@@ -506,14 +506,14 @@
 
 	
 	<ItemGroup Condition="'$(TargetFramework)'!=''">
-		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x86\*.*">
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win-x86\*.*">
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>false</Pack>
 			<Visible>true</Visible>
 		</Content>
-		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x64\*.*">
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win-x64\*.*">
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>false</Pack>
 			<Visible>true</Visible>
