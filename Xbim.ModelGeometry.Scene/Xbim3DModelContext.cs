@@ -745,6 +745,21 @@ namespace Xbim.ModelGeometry.Scene
         }
 
         /// <summary>Creates a 3D graphical representation of the model using the Geometry Engine</summary>
+        /// <returns></returns>
+        public bool CreateContext()
+        {
+            return CreateContext(null, true, generateBREPs: false);
+        }
+
+        /// <summary>Creates a 3D graphical representation of the model using the Geometry Engine</summary>
+        /// <param name="progDelegate">A progress delegate</param>
+        /// <returns></returns>
+        public bool CreateContext(ReportProgressDelegate progDelegate)
+        {
+            return CreateContext(progDelegate, true, generateBREPs: false);
+        }
+
+        /// <summary>Creates a 3D graphical representation of the model using the Geometry Engine</summary>
         /// <param name="progDelegate">A progress delegate</param>
         /// <param name="adjustWcs">When <c>true</c> adjusts for World Coordinate System placement</param>
         /// <returns></returns>
