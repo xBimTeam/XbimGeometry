@@ -9,6 +9,15 @@ trigger:
     - README.md
     - CHANGELOG.md
     - CONTRIBUTING.md
+
+pr:
+  branches:
+    include:
+    - master
+    - main
+    - develop
+    - feature/* 
+
 pool:
   vmImage: 'windows-2022'
   
