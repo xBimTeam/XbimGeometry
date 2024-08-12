@@ -23,22 +23,22 @@
 	</ItemGroup>
 	<!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<ItemGroup>
-			<Item Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win10-x86/*.*" />
-			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win10-x64/*.*" />
+			<Item Name="Occ86Dlls" Include="$(GeometryInteropDirectory)/win-x86/*.*" />
+			<Item Name="Occ64Dlls" Include="$(GeometryInteropDirectory)/win-x64/*.*" />
 		</ItemGroup>
-		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win10-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win10-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(Occ86Dlls)" DestinationFiles="@(Occ86Dlls->'$(OutputPath)win-x86\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+		<Copy SourceFiles="@(Occ64Dlls)" DestinationFiles="@(Occ64Dlls->'$(OutputPath)win-x64\%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
 	</Target>-->
 
 	<ItemGroup Condition="'$(TargetFramework)'!=''">
-		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x86\*.*">
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win-x86\*.*">
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>false</Pack>
 			<Visible>true</Visible>
 		</Content>
-		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win10-x64\*.*">
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+		<Content Include="$(GeometryInteropDirectory)$(TargetFramework)\win-x64\*.*">
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>false</Pack>
 			<Visible>true</Visible>
