@@ -59,14 +59,14 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='Win32'">
-    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x86\</OutDir>
-    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x86\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x86\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win-x86\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win-x86\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win-x86\</PackagesDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
-    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win10-x64\</OutDir>
-    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win10-x64\</IntDir>
-    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win10-x64\</PackagesDir>
+    <OutDir>$(ProjectDir)bin\$(Configuration)\$(TargetFramework)\win-x64\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(Configuration)\$(TargetFramework)\win-x64\</IntDir>
+    <PackagesDir>$(SolutionDir)Xbim.Geometry.Dependencies\bin\$(Configuration)\$(TargetFramework)\win-x64\</PackagesDir>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

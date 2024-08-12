@@ -35,37 +35,37 @@
 		</Touch>
 	</Target>
 	<ItemGroup>
-		<None Include="$(GeometryEnginePath)win10-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x64\TK*.dll" PackagePath="lib/$(TargetFramework)/win-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x86\TK*.dll" PackagePath="lib/$(TargetFramework)/win-x86" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x64\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x86\Ijwhost.dll" PackagePath="lib/$(TargetFramework)/win-x86" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x64\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x86\Xbim.Geometry.Engine.dll" PackagePath="lib/$(TargetFramework)/win-x86" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x64\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win10-x64" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x64\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win-x64" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x64\%(Filename)%(Extension)</Link>
+			<Link>win-x64\%(Filename)%(Extension)</Link>
 		</None>
-		<None Include="$(GeometryEnginePath)win10-x86\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win10-x86" Pack="True" Visible="false">
+		<None Include="$(GeometryEnginePath)win-x86\Xbim.Geometry.Engine.pdb" PackagePath="lib/$(TargetFramework)/win-x86" Pack="True" Visible="false">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win10-x86\%(Filename)%(Extension)</Link>
+			<Link>win-x86\%(Filename)%(Extension)</Link>
 		</None>
 
 	</ItemGroup>
