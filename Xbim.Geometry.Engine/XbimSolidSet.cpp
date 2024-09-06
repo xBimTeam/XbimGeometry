@@ -927,7 +927,7 @@ namespace Xbim
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
+					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 					if (s->IsValid)
 					{
