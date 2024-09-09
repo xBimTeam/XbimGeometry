@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
@@ -32,9 +33,8 @@ namespace Xbim.Geometry.Engine.Interop
 
             // Warn if runtime for Engine is not present, this is not necessary any more as we are net472
             //XbimPrerequisitesValidator.Validate();
-
-
-            _logger = logger ?? XbimLogging.CreateLogger<XbimGeometryEngine>();
+            
+            _logger = logger ?? XbimServices.Current.CreateLogger<XbimGeometryEngine>();
 
             var conventions = new XbimArchitectureConventions();    // understands the process we run under
             string assemblyName = $"{conventions.ModuleName}.dll";// + conventions.Suffix; dropping the use of a suffix
