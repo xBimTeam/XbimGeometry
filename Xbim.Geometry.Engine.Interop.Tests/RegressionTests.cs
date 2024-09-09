@@ -24,13 +24,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
+            XbimServices.Current.ConfigureServices(s =>
+            {
+                s.AddXbimToolkit(builder => builder.AddEsentModel());
+            });
             loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
-            XbimServices.Current.ConfigureServices(s =>
-            {
-                s.AddXbimToolkit(builder => builder.AddHeuristicModel());
-            });
         }
 
         [ClassCleanup]
