@@ -49,7 +49,6 @@ namespace XbimRegression
                 ProcessResult result;
                 using (var loggerFactory = new LoggerFactory())
                 {
-                    XbimLogging.LoggerFactory = loggerFactory;
                     loggerFactory.AddConsole(LogLevel.Error)
                         .AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
                             {
@@ -74,7 +73,6 @@ namespace XbimRegression
                     result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
 
                 }
-                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
 
                 var txt = File.ReadAllText(logFile);
                 if (string.IsNullOrEmpty(txt))
@@ -349,7 +347,7 @@ namespace XbimRegression
                     if (caching)
                         ret = IfcStore.Open(ifcFileName, null, 0, progress);
                     else
-                        ret = MemoryModel.OpenRead(ifcFileName, logger, progress);
+                        ret = MemoryModel.OpenRead(ifcFileName, progress);
                     logger.LogInformation($"Parsing ended.");
                     return ret;
                 default:

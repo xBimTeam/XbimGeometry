@@ -12,6 +12,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 using Xbim.Common.Exceptions;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
@@ -579,7 +580,7 @@ namespace Xbim.ModelGeometry.Scene
             ILogger logger = null)
         {
             _model = model;
-            _logger = logger ?? XbimLogging.CreateLogger<Xbim3DModelContext>();
+            _logger = logger ?? XbimServices.Current.CreateLogger<Xbim3DModelContext>();
             model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context

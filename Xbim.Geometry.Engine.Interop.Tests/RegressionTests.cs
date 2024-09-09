@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xbim.Common.Configuration;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
@@ -23,6 +24,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
+            XbimServices.Current.ConfigureServices(s =>
+            {
+                s.AddXbimToolkit(builder => builder.AddEsentModel());
+            });
             loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
