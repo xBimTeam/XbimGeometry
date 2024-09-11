@@ -259,8 +259,7 @@ namespace Xbim.ModelGeometry.Scene
             {
                 try
                 {
-
-                    PlacementTree = new XbimPlacementTree(Model, adjustWcs);
+                    PlacementTree = new XbimPlacementTree(Model, adjustWcs, _modelContext._logger);
                     GeometryShapeLookup = new ConcurrentDictionary<int, int>();
                     MapGeometryReferences = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
