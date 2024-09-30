@@ -88,7 +88,7 @@ namespace Xbim.Geometry.Engine.Tests
             var openProfile = model.Instances.New<IfcOpenCrossProfileDef>(profile =>
             {
                 profile.ProfileName = "OpenCrossProfile";
-
+                profile.ProfileType = Ifc4x3.ProfileResource.IfcProfileTypeEnum.CURVE;
                 profile.HorizontalWidths = horizontalWidths;
 
                 foreach (var width in widths)

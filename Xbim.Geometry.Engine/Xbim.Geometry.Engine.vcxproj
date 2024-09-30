@@ -190,6 +190,7 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BRep\TaggedPoint.h" />
     <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
     <ClInclude Include="BRep\XCylindricalSurface.h" />
     <ClInclude Include="BRep\XDirection.h" />

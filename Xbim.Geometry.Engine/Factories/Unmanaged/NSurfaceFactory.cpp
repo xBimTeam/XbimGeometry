@@ -1,6 +1,8 @@
 #include "NSurfaceFactory.h"
 #include <BRep_Tool.hxx>
 #include <GeomPlate_BuildAveragePlane.hxx>
+
+
 Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, double originZ, double normalX, double normalY, double normalZ)
 {
 	try
@@ -93,4 +95,78 @@ Handle(Geom_SurfaceOfLinearExtrusion) NSurfaceFactory::BuildSurfaceOfLinearExtru
 		LogStandardFailure(sf);
 		return Handle(Geom_SurfaceOfLinearExtrusion)();
 	}
+}
+
+
+TopoDS_Shape NSurfaceFactory::CreateSurfaceShape
+(const std::vector<std::vector<TaggedPoint>>& allPoints, const std::vector<TopLoc_Location>& locations, const std::vector<std::string>& tags)
+{
+	std::vector<TopoDS_Shape> surfaces;
+	for (size_t i = 0; i < tags.size() - 1; ++i)
+	{
+		std::string currenTag = tags[i];
+		std::string nextTag = tags[i + 1];
+		TopoDS_Wire wire1 = CreateWireFromTag(allPoints, locations, currenTag);
+		TopoDS_Wire wire2 = CreateWireFromTag(allPoints, locations, nextTag);
+		TopoDS_Shape surface = CreateSurfaceShapeFromWires(wire1, wire2);
+		surfaces.push_back(surface);
+	}
+
+	BRepBuilderAPI_Sewing sewingTool;
+	for (const auto& shape : surfaces)
+	{
+		sewingTool.Add(shape);
+	}
+
+	sewingTool.Perform();
+	return sewingTool.SewedShape();
+}
+
+
+TopoDS_Shape NSurfaceFactory::CreateSurfaceShapeFromWires(const TopoDS_Wire& wire1, const TopoDS_Wire& wire2)
+{
+
+	std::vector<TopoDS_Edge> edges1;
+	std::vector<TopoDS_Edge> edges2;
+	BRepBuilderAPI_Sewing sewingTool;
+
+	for (TopExp_Explorer explorer(wire1, TopAbs_EDGE); explorer.More(); explorer.Next()) {
+		TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
+		edges1.push_back(edge);
+	}
+
+	for (TopExp_Explorer explorer(wire2, TopAbs_EDGE); explorer.More(); explorer.Next()) {
+		TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
+		edges2.push_back(edge);
+	}
+
+	for (size_t i = 0; i < edges1.size(); ++i) {
+		TopoDS_Shape ruledSurface = BRepFill::Face(edges1[i], edges2[i]);
+		sewingTool.Add(ruledSurface);
+	}
+
+	sewingTool.Perform();
+	return sewingTool.SewedShape();
+
+}
+
+
+TopoDS_Wire NSurfaceFactory::CreateWireFromTag
+(const std::vector<std::vector<TaggedPoint>>& allPoints, const std::vector<TopLoc_Location>& locations, const std::string& tag)
+{
+	BRepBuilderAPI_MakePolygon polygon;
+	size_t i = 0;
+
+	for (const auto& vec : allPoints) {
+		const TopLoc_Location& location = locations[i];
+		for (const auto& taggedPoint : vec) {
+			if (taggedPoint.tag == tag) {
+				const gp_Pnt& transformed = taggedPoint.point.Transformed(location.Transformation());
+				polygon.Add(transformed);
+			}
+		}
+		i++;
+	}
+
+	return polygon.Wire();
 }

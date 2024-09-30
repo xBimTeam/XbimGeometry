@@ -20,8 +20,6 @@
 #include <ShapeFix_Edge.hxx>
 #include <TopExp_Explorer.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
-#include <GeomAPI_PointsToBSplineSurface.hxx>
-#include <BRepOffsetAPI_ThruSections.hxx>
 #include <BRepFill.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 
@@ -145,6 +143,9 @@ namespace Xbim
 				for (int i = 0; i < sectionedSurface->CrossSections->Count; i++)
 				{
 					IfcOpenCrossProfileDef^ section = static_cast<IfcOpenCrossProfileDef^>(sectionedSurface->CrossSections[i]);
+
+					if (section->ProfileType != Xbim::Ifc4x3::ProfileResource::IfcProfileTypeEnum::CURVE)
+						throw RaiseGeometryFactoryException("Rule ProfileType must be IfcProfileTypeEnum.Curve", section);
 					if (section == nullptr)
 						throw RaiseGeometryFactoryException("IfcSectionedSurface section should be of type IfcOpenCrossProfileDef");
 
@@ -224,83 +225,23 @@ namespace Xbim
 				}
 
 				std::vector<std::string> tags;
-				std::vector<TopoDS_Shape> surfaces;
-
 				for (const auto& taggedPoint : allPoints[0]) {
 					tags.push_back(taggedPoint.tag);
 				}
 
-				for (size_t i = 0; i < tags.size() - 1; ++i)
-				{
-					BRepBuilderAPI_Sewing sewingTool;
-
-					std::string currenTag = tags[i];
-					std::string nextTag = tags[i + 1];
-
-					TopoDS_Wire wire1 = CreateWireFromTag(allPoints, locations, currenTag);
-					TopoDS_Wire wire2 = CreateWireFromTag(allPoints, locations, nextTag);
-
-					std::vector<TopoDS_Edge> edges1;
-					std::vector<TopoDS_Edge> edges2;
-
-					for (TopExp_Explorer explorer(wire1, TopAbs_EDGE); explorer.More(); explorer.Next()) {
-						TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
-						edges1.push_back(edge);
-					}
-
-					for (TopExp_Explorer explorer(wire2, TopAbs_EDGE); explorer.More(); explorer.Next()) {
-						TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
-						edges2.push_back(edge);
-					}
-
-					for (size_t i = 0; i < edges1.size(); ++i) {
-						TopoDS_Shape ruledSurface = BRepFill::Face(edges1[i], edges2[i]);
-						sewingTool.Add(ruledSurface);
-					}
-
-					sewingTool.Perform();
-					TopoDS_Shape surface = sewingTool.SewedShape();
-					surfaces.push_back(surface);
-				}
-
-				BRepBuilderAPI_Sewing sewingTool;
-				for (const auto& shape : surfaces)
-				{
-					sewingTool.Add(shape);
-				}
-
-				sewingTool.Perform();
+				const TopoDS_Shape& shape = EXEC_NATIVE->CreateSurfaceShape(allPoints, locations, tags);
 
 				std::ostringstream oss;
 				oss << "DBRep_DrawableShape" << std::endl;
-				BRepTools::Write(sewingTool.SewedShape(), oss);
+				BRepTools::Write(shape, oss);
 				std::ofstream outFile("C:/Users/ibrah/OneDrive/Desktop/Surface.brep");
 				outFile << oss.str();
 				outFile.close();
 
-				return sewingTool.SewedShape();
+				return shape;
 
 			}
 
-			TopoDS_Wire SurfaceFactory::CreateWireFromTag
-				(const std::vector<std::vector<TaggedPoint>>& allPoints, const std::vector<TopLoc_Location>& locations, const std::string& tag)
-			{
-				BRepBuilderAPI_MakePolygon polygon;
-				size_t i = 0;
-
-				for (const auto& vec : allPoints) {
-					const TopLoc_Location& location = locations[i];
-					for (const auto& taggedPoint : vec) {
-						if (taggedPoint.tag == tag) {
-							const gp_Pnt& transformed = taggedPoint.point.Transformed(location.Transformation());
-							polygon.Add(transformed);
-						}
-					}
-					i++;
-				}
-
-				return polygon.Wire();
-			}
 
 			bool SurfaceFactory::ContainsTag(const std::vector<TaggedPoint>& points, const std::string& tag)
 			{
@@ -310,21 +251,7 @@ namespace Xbim
 					}
 				}
 				return false;
-			}
-
-			TopoDS_Wire SurfaceFactory::CreateWireFromSection(const std::vector<TaggedPoint>& section, const TopLoc_Location& location)
-			{
-				BRepBuilderAPI_MakePolygon polygon;
-
-				for (const auto& taggedPoint : section)
-				{
-					const gp_Pnt& transformed = taggedPoint.point.Transformed(location.Transformation());
-
-					polygon.Add(transformed);
-				}
-
-				return polygon.Wire();
-			}
+			} 
  
 
 			bool SurfaceFactory::IsUniform(std::vector<std::vector<TaggedPoint>>& allPoints)
@@ -344,8 +271,6 @@ namespace Xbim
 				(const std::vector<double>& widths, const std::vector<double>& slopes, const std::vector<std::string>& tags, bool horizontalWidths)
 			{
 				gp_Pnt currentPoint(0, 0, 0);
-				bool hasTags = tags.size() > 0 && tags.size() == widths.size() + 1;
-
 				TaggedPoint currentTaggedPnt(currentPoint, hasTags? tags[0] : "");
 				std::vector<TaggedPoint> points;
 				points.push_back(currentTaggedPnt);
@@ -369,7 +294,7 @@ namespace Xbim
 					}
 
 					gp_Pnt nextPoint(currentPoint.X() + dx, currentPoint.Y() + dy, 0);
-					TaggedPoint taggedPnt(nextPoint, hasTags? tags[i+1] : "");
+					TaggedPoint taggedPnt(nextPoint, tags[i+1]);
 					points.push_back(taggedPnt);
 					currentPoint = nextPoint;
 				}

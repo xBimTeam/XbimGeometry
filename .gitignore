@@ -8,6 +8,7 @@
 *.orig
 .vs/
 .idea/
+global.json
 
 # Build results
 [Dd]ebug/

@@ -23,15 +23,6 @@ namespace Xbim
 	{
 		namespace Factories
 		{
-			struct TaggedPoint
-			{
-			public:
-				gp_Pnt point;
-				std::string tag;
-
-				TaggedPoint(const gp_Pnt& p, const std::string& t) : point(p), tag(t) {}
-			};
-
 			public ref class SurfaceFactory : FactoryBase<NSurfaceFactory>, IXSurfaceFactory	
 			{					
 				public:
@@ -59,9 +50,7 @@ namespace Xbim
 
 				private:
 					bool IsUniform(std::vector<std::vector<TaggedPoint>>& allPoints);
-					TopoDS_Wire CreateWireFromSection(const std::vector<TaggedPoint>& section, const TopLoc_Location& location);
 					bool ContainsTag(const std::vector<TaggedPoint>& points, const std::string& tag);
-					TopoDS_Wire CreateWireFromTag(const std::vector<std::vector<TaggedPoint>>& allPoints, const std::vector<TopLoc_Location>& locations, const std::string& tag);
 
 			};
 
