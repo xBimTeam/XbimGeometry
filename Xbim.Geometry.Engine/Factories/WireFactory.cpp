@@ -214,9 +214,9 @@ namespace Xbim
 				bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 				bool sense = ifcTrimmedCurve->SenseAgreement;
 				//get the parametric values
-				IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+				Xbim::Ifc4::Interfaces::IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
-				bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+				bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == Xbim::Ifc4::Interfaces::IfcTrimmingPreference::CARTESIAN);
 
 				double u1 = double::NegativeInfinity;
 				double u2 = double::PositiveInfinity;

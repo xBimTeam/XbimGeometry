@@ -294,7 +294,7 @@ namespace Xbim.Geometry.Engine.Tests
             Assert.Equal(XCurveType.IfcCircle, tc.BasisCurve.CurveType);
             var basisCurve = tc.BasisCurve as IXCircle;
             Assert.NotNull(basisCurve);
-            var origin = basisCurve.Position as IXAxisPlacement2d;
+            var origin = basisCurve.Position as IXAxis2Placement2d;
             Assert.NotNull(origin);
 
             switch (ifcCase)
@@ -470,7 +470,7 @@ namespace Xbim.Geometry.Engine.Tests
             Assert.Equal(XCurveType.IfcEllipse, tc.BasisCurve.CurveType);
             var basisCurve = tc.BasisCurve as IXEllipse;
             Assert.NotNull(basisCurve);
-            var origin = basisCurve.Position as IXAxisPlacement2d;
+            var origin = basisCurve.Position as IXAxis2Placement2d;
             Assert.NotNull(origin);
             Assert.False(tc.Is3d);
             (tc.StartPoint.X).Should().BeApproximately(origin.Location.X + semi1, _modelSvc.Precision);

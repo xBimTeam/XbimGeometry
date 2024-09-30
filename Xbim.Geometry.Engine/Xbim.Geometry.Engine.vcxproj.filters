@@ -465,6 +465,9 @@
     <ClInclude Include="Services\ModelPlacementBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\XSectionedSurface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XbimCompound.cpp">

@@ -249,6 +249,8 @@ namespace Xbim
 					return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
 				case XSolidModelType::IfcAdvancedBrep:
 					return BuildAdvancedBrep(static_cast<IIfcAdvancedBrep^>(ifcSolid));
+
+
 				//TODO: SRL: the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
 				case XSolidModelType::IfcAdvancedBrepWithVoids:
 					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);

@@ -193,6 +193,7 @@
     <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
     <ClInclude Include="BRep\XCylindricalSurface.h" />
     <ClInclude Include="BRep\XDirection.h" />
+    <ClInclude Include="BRep\XSectionedSurface.h" />
     <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
@@ -507,7 +508,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.347-develop</Version>
+      <Version>6.2.351-develop</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

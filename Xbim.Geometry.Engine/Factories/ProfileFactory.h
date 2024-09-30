@@ -4,6 +4,8 @@
 #include "FactoryBase.h"
 #include "GeometryFactory.h"
 
+// using namespace Xbim::Ifc4x3::ProfileResource;
+
 namespace Xbim
 {
 	namespace Geometry
@@ -36,6 +38,7 @@ namespace Xbim
 				TopoDS_Wire BuildProfileWire(IIfcUShapeProfileDef^ uShapedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcZShapeProfileDef^ zShapedProfile);
 				TopoDS_Wire BuildProfileWire(IIfcTrapeziumProfileDef^ trapeziumShapedProfile);
+				// TopoDS_Wire BuildProfileWire(IfcOpenCrossProfileDef^ openCrossProfileDef);
 				void BuildProfileWire(IIfcCompositeProfileDef^ compositeProfile, TopTools_ListOfShape& profileWires);
 				
 				TopLoc_Location BuildParameterizedProfilePosition(IIfcAxis2Placement^ position);

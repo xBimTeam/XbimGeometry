@@ -26,7 +26,7 @@ namespace Xbim
 				virtual IXCurve^ Build(IIfcCurve^ curve);
 				virtual IXCurve^ BuildDirectrix(IIfcCurve^ curve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 
-			protected:
+			internal:
 				virtual IXCurve^ BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType);
 				virtual IXCurve^ BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType);
 				IXCurve^ BuildDirectrix(IIfcCurve^ curve, double startParam, double endParam);

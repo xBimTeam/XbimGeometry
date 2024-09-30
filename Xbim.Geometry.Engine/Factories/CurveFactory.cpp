@@ -82,8 +82,6 @@ namespace Xbim
 #pragma region 2d Curve builders
 
 
-
-
 			void CurveFactory::BuildIndexPolyCurveSegments2d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom2d_SequenceOfBoundedCurve& segments)
 			{
 
@@ -110,8 +108,6 @@ namespace Xbim
 
 				if (ifcIndexedPolyCurve->Segments != nullptr && Enumerable::Any(ifcIndexedPolyCurve->Segments))
 				{
-
-
 					for each (IIfcSegmentIndexSelect ^ segment in  ifcIndexedPolyCurve->Segments)
 					{
 						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
@@ -174,11 +170,7 @@ namespace Xbim
 					}
 				}
 			}
-
-
-
-
-
+			
 
 			void CurveFactory::BuildCompositeCurveSegments2d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments)
 			{
@@ -253,13 +245,6 @@ namespace Xbim
 #pragma endregion
 
 
-
-
-
-
-
-
-
 #pragma region Build 3d Curves
 
 			Handle(Geom_Curve) CurveFactory::BuildCurve(IIfcCurve^ curve)
@@ -275,37 +260,37 @@ namespace Xbim
 
 				switch (curveType)
 				{
-				case XCurveType::IfcBSplineCurveWithKnots:
-					return BuildCurve(static_cast<IIfcBSplineCurveWithKnots^>(curve));
-				case XCurveType::IfcCircle:
-					return BuildCurve(static_cast<IIfcCircle^>(curve));
-				case XCurveType::IfcCompositeCurve:
-					return BuildCurve(static_cast<IIfcCompositeCurve^>(curve));
-				case XCurveType::IfcCompositeCurveOnSurface:
-					return BuildCurve(static_cast<IIfcCompositeCurveOnSurface^>(curve));
-				case XCurveType::IfcEllipse:
-					return BuildCurve(static_cast<IIfcEllipse^>(curve));
-				case XCurveType::IfcIndexedPolyCurve:
-					return BuildCurve(static_cast<IIfcIndexedPolyCurve^>(curve));
-				case XCurveType::IfcLine:
-					return BuildCurve(static_cast<IIfcLine^>(curve));
-				case XCurveType::IfcOffsetCurve2D:
-					return BuildCurve(static_cast<IIfcOffsetCurve2D^>(curve));
-				case XCurveType::IfcOffsetCurve3D:
-					return BuildCurve(static_cast<IIfcOffsetCurve3D^>(curve));
-				case XCurveType::IfcPcurve:
-					return BuildCurve(static_cast<IIfcPcurve^>(curve));
-				case XCurveType::IfcPolyline:
-					return BuildCurve(static_cast<IIfcPolyline^>(curve));
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-					return BuildCurve(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-				case XCurveType::IfcSurfaceCurve:
-					return BuildCurve(static_cast<IIfcSurfaceCurve^>(curve));
-				case XCurveType::IfcTrimmedCurve:
-					return BuildCurve(static_cast<IIfcTrimmedCurve^>(curve));
+					case XCurveType::IfcBSplineCurveWithKnots:
+						return BuildCurve(static_cast<IIfcBSplineCurveWithKnots^>(curve));
+					case XCurveType::IfcCircle:
+						return BuildCurve(static_cast<IIfcCircle^>(curve));
+					case XCurveType::IfcCompositeCurve:
+						return BuildCurve(static_cast<IIfcCompositeCurve^>(curve));
+					case XCurveType::IfcCompositeCurveOnSurface:
+						return BuildCurve(static_cast<IIfcCompositeCurveOnSurface^>(curve));
+					case XCurveType::IfcEllipse:
+						return BuildCurve(static_cast<IIfcEllipse^>(curve));
+					case XCurveType::IfcIndexedPolyCurve:
+						return BuildCurve(static_cast<IIfcIndexedPolyCurve^>(curve));
+					case XCurveType::IfcLine:
+						return BuildCurve(static_cast<IIfcLine^>(curve));
+					case XCurveType::IfcOffsetCurve2D:
+						return BuildCurve(static_cast<IIfcOffsetCurve2D^>(curve));
+					case XCurveType::IfcOffsetCurve3D:
+						return BuildCurve(static_cast<IIfcOffsetCurve3D^>(curve));
+					case XCurveType::IfcPcurve:
+						return BuildCurve(static_cast<IIfcPcurve^>(curve));
+					case XCurveType::IfcPolyline:
+						return BuildCurve(static_cast<IIfcPolyline^>(curve));
+					case XCurveType::IfcRationalBSplineCurveWithKnots:
+						return BuildCurve(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+					case XCurveType::IfcSurfaceCurve:
+						return BuildCurve(static_cast<IIfcSurfaceCurve^>(curve));
+					case XCurveType::IfcTrimmedCurve:
+						return BuildCurve(static_cast<IIfcTrimmedCurve^>(curve));
 
-				default:
-					throw RaiseGeometryFactoryException("Curve type not implemented.", curve);
+					default:
+						throw RaiseGeometryFactoryException("Curve type not implemented.", curve);
 				}
 				throw;
 			}
@@ -541,9 +526,9 @@ namespace Xbim
 
 					bool sense = ifcTrimmedCurve->SenseAgreement;
 					//get the parametric values
-					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+					Xbim::Ifc4::Interfaces::IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
-					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == Xbim::Ifc4::Interfaces::IfcTrimmingPreference::CARTESIAN);
 
 					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
 					IIfcCartesianPoint^ cp1 = nullptr;
@@ -623,36 +608,35 @@ namespace Xbim
 
 				switch (curveType)
 				{
-				case XCurveType::IfcBSplineCurveWithKnots:
-					return BuildCurve2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));
-				case XCurveType::IfcCircle:
-					return BuildCurve2d(static_cast<IIfcCircle^>(curve));
-				case XCurveType::IfcCompositeCurve:
-					return BuildCurve2d(static_cast<IIfcCompositeCurve^>(curve));
-				case XCurveType::IfcCompositeCurveOnSurface:
-					return BuildCurve2d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
-				case XCurveType::IfcEllipse:
-					return BuildCurve2d(static_cast<IIfcEllipse^>(curve));
-				case XCurveType::IfcIndexedPolyCurve:
-					return BuildCurve2d(static_cast<IIfcIndexedPolyCurve^>(curve));
-				case XCurveType::IfcLine:
-					return BuildCurve2d(static_cast<IIfcLine^>(curve));
-				case XCurveType::IfcOffsetCurve2D:
-					return BuildCurve2d(static_cast<IIfcOffsetCurve2D^>(curve));
-				case XCurveType::IfcPcurve:
-					return BuildCurve2d(static_cast<IIfcPcurve^>(curve));
-				case XCurveType::IfcPolyline:
-					return BuildCurve2d(static_cast<IIfcPolyline^>(curve));
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-					return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
-				case XCurveType::IfcSurfaceCurve:
-					return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));
-				case XCurveType::IfcTrimmedCurve:
-					return BuildCurve2d(static_cast<IIfcTrimmedCurve^>(curve));
-				default:
-					throw RaiseGeometryFactoryException("Unsupported 2d curve type", curve);
+					case XCurveType::IfcBSplineCurveWithKnots:
+						return BuildCurve2d(static_cast<IIfcBSplineCurveWithKnots^>(curve));
+					case XCurveType::IfcCircle:
+						return BuildCurve2d(static_cast<IIfcCircle^>(curve));
+					case XCurveType::IfcCompositeCurve:
+						return BuildCurve2d(static_cast<IIfcCompositeCurve^>(curve));
+					case XCurveType::IfcCompositeCurveOnSurface:
+						return BuildCurve2d(static_cast<IIfcCompositeCurveOnSurface^>(curve));
+					case XCurveType::IfcEllipse:
+						return BuildCurve2d(static_cast<IIfcEllipse^>(curve));
+					case XCurveType::IfcIndexedPolyCurve:
+						return BuildCurve2d(static_cast<IIfcIndexedPolyCurve^>(curve));
+					case XCurveType::IfcLine:
+						return BuildCurve2d(static_cast<IIfcLine^>(curve));
+					case XCurveType::IfcOffsetCurve2D:
+						return BuildCurve2d(static_cast<IIfcOffsetCurve2D^>(curve));
+					case XCurveType::IfcPcurve:
+						return BuildCurve2d(static_cast<IIfcPcurve^>(curve));
+					case XCurveType::IfcPolyline:
+						return BuildCurve2d(static_cast<IIfcPolyline^>(curve));
+					case XCurveType::IfcRationalBSplineCurveWithKnots:
+						return BuildCurve2d(static_cast<IIfcRationalBSplineCurveWithKnots^>(curve));
+					case XCurveType::IfcSurfaceCurve:
+						return BuildCurve2d(static_cast<IIfcSurfaceCurve^>(curve));
+					case XCurveType::IfcTrimmedCurve:
+						return BuildCurve2d(static_cast<IIfcTrimmedCurve^>(curve));
+					default:
+						throw RaiseGeometryFactoryException("Unsupported 2d curve type", curve);
 				}
-
 			}
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
@@ -896,9 +880,9 @@ namespace Xbim
 					bool isEllipse = (dynamic_cast<IIfcEllipse^>(ifcTrimmedCurve->BasisCurve) != nullptr);
 					bool sense = ifcTrimmedCurve->SenseAgreement;
 					//get the parametric values
-					IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
+					Xbim::Ifc4::Interfaces::IfcTrimmingPreference trimPref = ifcTrimmedCurve->MasterRepresentation;
 
-					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+					bool trim_cartesian = (ifcTrimmedCurve->MasterRepresentation == Xbim::Ifc4::Interfaces::IfcTrimmingPreference::CARTESIAN);
 
 					double u1 = double::NegativeInfinity, u2 = double::PositiveInfinity;
 					IIfcCartesianPoint^ cp1 = nullptr;
@@ -961,7 +945,6 @@ namespace Xbim
 
 
 #pragma endregion
-
 
 
 			template <typename IfcType>
@@ -1140,79 +1123,53 @@ namespace Xbim
 			{
 				switch (curveType)
 				{
-
-				case XCurveType::IfcCircle:
-					return gcnew XCircle(Handle(Geom_Circle)::DownCast(curve));
-				case XCurveType::IfcCompositeCurve:
-					return gcnew XBSplineCurve(Handle(Geom_BSplineCurve)::DownCast(curve));
-
-				case XCurveType::IfcEllipse:
-					return gcnew XEllipse(Handle(Geom_Ellipse)::DownCast(curve));
-
-				case XCurveType::IfcLine:
-					return gcnew Xbim::Geometry::BRep::XLine(Handle(Geom_LineWithMagnitude)::DownCast(curve));
-
-				case XCurveType::IfcTrimmedCurve:
-					return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
-				case XCurveType::IfcIndexedPolyCurve:
-
-				case XCurveType::IfcCompositeCurveOnSurface:
-
-				case XCurveType::IfcBSplineCurveWithKnots:
-
-				case XCurveType::IfcOffsetCurve2D:
-
-				case XCurveType::IfcPcurve:
-
-				case XCurveType::IfcPolyline:
-
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-
-				case XCurveType::IfcSurfaceCurve:
-
-				default:
-					return gcnew XCurve(curve, curveType);
+					case XCurveType::IfcCircle:
+						return gcnew XCircle(Handle(Geom_Circle)::DownCast(curve));
+					case XCurveType::IfcCompositeCurve:
+						return gcnew XBSplineCurve(Handle(Geom_BSplineCurve)::DownCast(curve));
+					case XCurveType::IfcEllipse:
+						return gcnew XEllipse(Handle(Geom_Ellipse)::DownCast(curve));
+					case XCurveType::IfcLine:
+						return gcnew Xbim::Geometry::BRep::XLine(Handle(Geom_LineWithMagnitude)::DownCast(curve));
+					case XCurveType::IfcTrimmedCurve:
+						return gcnew XTrimmedCurve(Handle(Geom_TrimmedCurve)::DownCast(curve));
+					case XCurveType::IfcIndexedPolyCurve:
+					case XCurveType::IfcCompositeCurveOnSurface:
+					case XCurveType::IfcBSplineCurveWithKnots:
+					case XCurveType::IfcOffsetCurve2D:
+					case XCurveType::IfcPcurve:
+					case XCurveType::IfcPolyline:
+					case XCurveType::IfcRationalBSplineCurveWithKnots:
+					case XCurveType::IfcSurfaceCurve:
+					default:
+						return gcnew XCurve(curve, curveType);
 				}
 				throw RaiseGeometryFactoryException("Unsupported curve type");
-
 			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom2d_Curve) curve, XCurveType curveType)
 			{
 				switch (curveType)
 				{
-
-				case XCurveType::IfcCircle:
-					return gcnew XCircle2d(Handle(Geom2d_Circle)::DownCast(curve));
-
-				case XCurveType::IfcEllipse:
-					return gcnew XEllipse2d(Handle(Geom2d_Ellipse)::DownCast(curve));
-
-				case XCurveType::IfcLine:
-					return gcnew XLine2d(Handle(Geom2d_LineWithMagnitude)::DownCast(curve));
-
-				case XCurveType::IfcTrimmedCurve:
-					return gcnew XTrimmedCurve2d(Handle(Geom2d_TrimmedCurve)::DownCast(curve));
-				case XCurveType::IfcIndexedPolyCurve:
-
-				case XCurveType::IfcCompositeCurve:
-
-				case XCurveType::IfcCompositeCurveOnSurface:
-
-				case XCurveType::IfcBSplineCurveWithKnots:
-
-				case XCurveType::IfcOffsetCurve2D:
-
-				case XCurveType::IfcPcurve:
-
-				case XCurveType::IfcPolyline:
-
-				case XCurveType::IfcRationalBSplineCurveWithKnots:
-
-				case XCurveType::IfcSurfaceCurve:
-
-				default:
-					return gcnew XCurve2d(curve, curveType);
+					case XCurveType::IfcCircle:
+						return gcnew XCircle2d(Handle(Geom2d_Circle)::DownCast(curve));
+					case XCurveType::IfcEllipse:
+						return gcnew XEllipse2d(Handle(Geom2d_Ellipse)::DownCast(curve));
+					case XCurveType::IfcLine:
+						return gcnew XLine2d(Handle(Geom2d_LineWithMagnitude)::DownCast(curve));
+					case XCurveType::IfcTrimmedCurve:
+						return gcnew XTrimmedCurve2d(Handle(Geom2d_TrimmedCurve)::DownCast(curve));
+					case XCurveType::IfcIndexedPolyCurve:
+					case XCurveType::IfcCompositeCurve:
+					case XCurveType::IfcCompositeCurveOnSurface:
+					case XCurveType::IfcBSplineCurveWithKnots:
+					case XCurveType::IfcOffsetCurve2D:
+					case XCurveType::IfcPcurve:
+					case XCurveType::IfcPolyline:
+					case XCurveType::IfcRationalBSplineCurveWithKnots:
+					case XCurveType::IfcSurfaceCurve:
+					default:
+						return gcnew XCurve2d(curve, curveType);
 				}
 				throw RaiseGeometryFactoryException("Unsupported 2d curve type");
 
@@ -1315,7 +1272,7 @@ namespace Xbim
 				if (dynamic_cast<IIfcLine^>(curve)) return false;
 				if (dynamic_cast<IIfcOffsetCurve3D^>(curve)) return IsBoundedCurve((static_cast<IIfcOffsetCurve3D^>(curve))->BasisCurve);
 				if (dynamic_cast<IIfcOffsetCurve2D^>(curve)) return IsBoundedCurve((static_cast<IIfcOffsetCurve2D^>(curve))->BasisCurve);
-				if (dynamic_cast<IIfcPcurve^>(curve)) return false;
+				if (dynamic_cast<IIfcPcurve^>(curve)) return false; // This is not always the case for Pcurves, if the BasisSurface is bounded, then it is a bounded curve
 				if (dynamic_cast<IIfcSurfaceCurve^>(curve)) return false;
 				return true;
 			}

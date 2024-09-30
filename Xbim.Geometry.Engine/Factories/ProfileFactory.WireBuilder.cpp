@@ -90,6 +90,8 @@ namespace Xbim
 				}
 				
 			}
+
+			
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcArbitraryClosedProfileDef^ arbitraryClosedProfile)
 			{
 				//validation
@@ -123,8 +125,7 @@ namespace Xbim
 				TopoDS_Wire wire = WIRE_FACTORY->BuildWire(arbitraryOpenProfile->Curve, false); //throws exception
 				return wire;
 			}
-
-
+			
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCShapeProfileDef^ cShapeProfileDef)
 			{
 				if (cShapeProfileDef->Depth <= 0 || cShapeProfileDef->Girth <= 0 || cShapeProfileDef->WallThickness <= 0 || cShapeProfileDef->Width <= 0)
@@ -142,6 +143,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcCircleProfileDef^ circleProfileDef)
 			{
 				auto edge = BuildProfileEdge(circleProfileDef); //throws an exception
@@ -151,6 +153,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcEllipseProfileDef^ ellipseProfileDef)
 			{
 				auto edge = BuildProfileEdge(ellipseProfileDef); //throws an exception
@@ -184,6 +187,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcAsymmetricIShapeProfileDef^ asymmetricIShapedProfile)
 			{
 				if (asymmetricIShapedProfile->BottomFlangeWidth <= 0 || asymmetricIShapedProfile->OverallDepth <= 0 || asymmetricIShapedProfile->WebThickness <= 0
@@ -200,6 +204,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcIShapeProfileDef^ iShapedProfile)
 			{
 				if (iShapedProfile->OverallWidth <= 0 || iShapedProfile->OverallDepth <= 0)
@@ -212,6 +217,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcLShapeProfileDef^ lShapedProfile)
 			{
 				if (lShapedProfile->Depth <= 0 || lShapedProfile->Thickness <= 0)
@@ -226,6 +232,7 @@ namespace Xbim
 				else
 					return wire;
 			}
+
 			TopoDS_Wire ProfileFactory::BuildProfileWire(IIfcTShapeProfileDef^ tShapedProfile)
 			{
 				if (tShapedProfile->Depth <= 0 || tShapedProfile->FlangeWidth <= 0 || tShapedProfile->FlangeThickness <= 0 || tShapedProfile->WebThickness <= 0)
@@ -310,7 +317,6 @@ namespace Xbim
 				}
 			}
 
-
 			TopLoc_Location ProfileFactory::BuildParameterizedProfilePosition(IIfcAxis2Placement^ position)
 			{
 				if (position == nullptr) return TopLoc_Location();
@@ -355,9 +361,7 @@ namespace Xbim
 				return wire;
 
 			}
-
-
-
+			
 		}
 	}
 }

@@ -13,6 +13,7 @@
 #include <gp_GTrsf.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Trsf.hxx>
+
 #include <TColgp_SequenceOfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
@@ -24,6 +25,7 @@
 
 
 using namespace Xbim::Ifc4::MeasureResource;
+using namespace Xbim::Ifc4x3::GeometryResource;
 using namespace Xbim::Geometry::BRep;
 namespace Xbim
 {
@@ -42,6 +44,7 @@ namespace Xbim
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
 				gp_Pnt BuildPoint3d(IXPoint^ xPoint);
+				bool BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent);
 
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
 				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
@@ -75,17 +78,19 @@ namespace Xbim
 				void GetPolylinePoints2d(IIfcPolyline^ ifcPolyline, TColgp_Array1OfPnt2d& points);
 
 				bool ToLocation(IIfcAxis2Placement^ axis, TopLoc_Location& location);
-
+				bool ToLocation(IfcAxis2PlacementLinear^ axis, TopLoc_Location& location);
+				bool ToTransform(IfcAxis2PlacementLinear^ axis, gp_Trsf& trsf);
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
-				virtual IXAxisPlacement2d^ BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection);
+				virtual IXAxis2Placement2d^ BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection);
 				virtual IXAxis2Placement3d^ BuildAxis2Placement3d(IXPoint^ location, IXDirection^ XaxisDirection, IXDirection^ ZaxisDirection);
-				virtual IXAxisPlacement2d^ BuildAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
+				virtual IXAxis2Placement2d^ BuildAxis2Placement2d(IXPoint^ location, IXVector^ XaxisDirection);
 				virtual IXAxis2Placement3d^ BuildAxis2Placement3d(IXPoint^ location, IXVector^ XaxisDirection, IXVector^ ZaxisDirection);
 				virtual IXDirection^ BuildDirection3d(double x, double y, double z);
 				virtual IXDirection^ BuildDirection2d(double x, double y);
 				virtual IXPoint^ BuildPoint3d(double x, double y, double z);
 				virtual IXPoint^ BuildPoint2d(double x, double y);
+				virtual IXPoint^ BuildPoint3d(IfcPointByDistanceExpression^ pointByDistanceExpression);
 
 				virtual IXPlane^ BuildPlane(IIfcPlane^ plane);
 				virtual double Distance(IXPoint^ a, IXPoint^ b);
@@ -95,6 +100,7 @@ namespace Xbim
 				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
 				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ BuildLocation();
+				virtual IXLocation^ BuildLocation(IfcAxis2PlacementLinear^ linearPlacement);
 
 				virtual IXMatrix^ BuildTransform(IIfcCartesianTransformationOperator^ transOp);
 				virtual IXLocation^ BuildLocation(IIfcAxis2Placement^ axis2);

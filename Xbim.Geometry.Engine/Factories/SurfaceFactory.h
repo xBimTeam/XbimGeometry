@@ -11,35 +11,61 @@
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_SphericalSurface.hxx>
 #include <Geom_ToroidalSurface.hxx>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+ using namespace Xbim::Ifc4x3::GeometricModelResource;
+
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Factories
 		{
+			struct TaggedPoint
+			{
+			public:
+				gp_Pnt point;
+				std::string tag;
+
+				TaggedPoint(const gp_Pnt& p, const std::string& t) : point(p), tag(t) {}
+			};
+
 			public ref class SurfaceFactory : FactoryBase<NSurfaceFactory>, IXSurfaceFactory	
 			{					
-			public:
-				SurfaceFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService,new NSurfaceFactory()) {};
-				virtual IXPlane^ BuildPlane(IXPoint^ origin, IXDirection^ normal);
-				virtual IXSurface^ Build(IIfcSurface^ surface);
-			internal:
-				Handle(Geom_Surface) BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType% surfaceType);
-				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane);
-				Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane, bool snap );
-				Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution);
-				Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion);
-				TopoDS_Face BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);
-				TopoDS_Face BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface);
-				Handle(Geom_RectangularTrimmedSurface) BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface);
-				Handle(Geom_BSplineSurface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
-				Handle(Geom_BSplineSurface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
-				Handle(Geom_CylindricalSurface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
-				Handle(Geom_SphericalSurface) BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface);
-				Handle(Geom_ToroidalSurface) BuildToroidalSurface(IIfcToroidalSurface^ ifcToroidalSurface);
-			protected:
-				
+				public:
+					SurfaceFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService,new NSurfaceFactory()) {};
+					virtual IXPlane^ BuildPlane(IXPoint^ origin, IXDirection^ normal);
+					virtual IXSurface^ Build(IIfcSurface^ surface);
+				internal:
+					Handle(Geom_Surface) BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType surfaceType);
+					Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane);
+					Handle(Geom_Plane) BuildPlane(IIfcPlane^ ifcPlane, bool snap );
+					Handle(Geom_SurfaceOfRevolution) BuildSurfaceOfRevolution(IIfcSurfaceOfRevolution^ ifcSurfaceOfRevolution);
+					Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(IIfcSurfaceOfLinearExtrusion^ ifcSurfaceOfLinearExtrusion);
+					TopoDS_Face BuildCurveBoundedPlane(IIfcCurveBoundedPlane^ ifcCurveBoundedPlane);
+					TopoDS_Face BuildCurveBoundedSurface(IIfcCurveBoundedSurface^ ifcCurveBoundedSurface);
+					Handle(Geom_RectangularTrimmedSurface) BuildRectangularTrimmedSurface(IIfcRectangularTrimmedSurface^ ifcRectangularTrimmedSurface);
+					Handle(Geom_BSplineSurface) BuildBSplineSurfaceWithKnots(IIfcBSplineSurfaceWithKnots^ ifcBSplineSurfaceWithKnots);
+					Handle(Geom_BSplineSurface) BuildRationalBSplineSurfaceWithKnots(IIfcRationalBSplineSurfaceWithKnots^ ifcRationalBSplineSurfaceWithKnots);
+					Handle(Geom_CylindricalSurface) BuildCylindricalSurface(IIfcCylindricalSurface^ ifcCylindricalSurface);
+					Handle(Geom_SphericalSurface) BuildSphericalSurface(IIfcSphericalSurface^ ifcSphericalSurface);
+					Handle(Geom_ToroidalSurface) BuildToroidalSurface(IIfcToroidalSurface^ ifcToroidalSurface);
+					
+					TopoDS_Shape BuildSectionedSurface(IfcSectionedSurface^ sectionedSurface, Handle(Geom_Curve) % directrix, XCurveType% curveType);
+					std::vector<TaggedPoint> BuildPolylinePoints
+						(const std::vector<double>& widths, const std::vector<double>& slopes, const std::vector<std::string>& tags, bool horizontalWidths);
+
+				private:
+					bool IsUniform(std::vector<std::vector<TaggedPoint>>& allPoints);
+					TopoDS_Wire CreateWireFromSection(const std::vector<TaggedPoint>& section, const TopLoc_Location& location);
+					bool ContainsTag(const std::vector<TaggedPoint>& points, const std::string& tag);
+					TopoDS_Wire CreateWireFromTag(const std::vector<std::vector<TaggedPoint>>& allPoints, const std::vector<TopLoc_Location>& locations, const std::string& tag);
+
 			};
+
+			
 		}
 	}
 }

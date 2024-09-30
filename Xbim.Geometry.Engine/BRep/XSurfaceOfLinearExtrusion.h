@@ -17,7 +17,7 @@ namespace Xbim
 				XSurfaceOfLinearExtrusion(Handle(Geom_SurfaceOfLinearExtrusion) surface) :XBoundedSurface(surface)
 				{
 				}
-				property XSurfaceType SurfaceType {virtual XSurfaceType get() override { return XSurfaceType::IfcRectangularTrimmedSurface; }}
+				virtual property XSurfaceType SurfaceType {virtual XSurfaceType get() override { return XSurfaceType::IfcRectangularTrimmedSurface; }}
 				virtual property IXCurve^ BasisCurve {IXCurve^ get() { return XCurve::GeomToXCurve(Handle(Geom_SurfaceOfLinearExtrusion)::DownCast(Ref())->BasisCurve()); }}
 				virtual property IXDirection^ Direction { IXDirection^ get() { return gcnew XDirection(Handle(Geom_SurfaceOfLinearExtrusion)::DownCast(Ref())->Direction()); }}
 			};
