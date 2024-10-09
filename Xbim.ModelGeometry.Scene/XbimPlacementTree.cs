@@ -45,7 +45,8 @@ namespace Xbim.ModelGeometry.Scene
                 Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement));
             foreach (var localPlacement in localPlacements)
             {
-                if (localPlacement.PlacementRelTo != null) //resolve parent
+                // need to check it is available in the tree, with ifc 4.3Add2 they can exist only in the root.
+                if (localPlacement.PlacementRelTo != null && Nodes.ContainsKey(localPlacement.PlacementRelTo.EntityLabel)) //resolve parent
                 {
                     var xbimPlacement = Nodes[localPlacement.EntityLabel];
                     var xbimPlacementParent = Nodes[localPlacement.PlacementRelTo.EntityLabel];
