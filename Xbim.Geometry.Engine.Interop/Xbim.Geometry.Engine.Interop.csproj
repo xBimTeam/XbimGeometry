@@ -123,7 +123,7 @@
   
   <ItemGroup>
 		
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.351-develop" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.356-develop" />
 	</ItemGroup>
 
 </Project>

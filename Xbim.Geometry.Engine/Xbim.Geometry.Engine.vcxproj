@@ -190,6 +190,13 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_ConvertibleToBSpline.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_GradientCurve.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_SegmentedReferenceCurve.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Clothoid.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_SineSpiral.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Spiral.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_PolynomialSpiral.h" />
     <ClInclude Include="BRep\TaggedPoint.h" />
     <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
     <ClInclude Include="BRep\XCylindricalSurface.h" />
@@ -274,6 +281,8 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\Caching\Cache.h" />
+    <ClInclude Include="Services\Caching\ManagedCache.h" />
     <ClInclude Include="Services\ModelPlacementBuilder.h" />
     <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
@@ -509,7 +518,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.351-develop</Version>
+      <Version>6.2.356-develop</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
