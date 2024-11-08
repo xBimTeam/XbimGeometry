@@ -26,6 +26,152 @@
 #include <BRep_Tool.hxx>
 #include <Extrema_ExtPC.hxx>
 #include <Geom2dAPI_InterCurveCurve.hxx>
+#include <Geom2d_Transformation.hxx>
+#include <GCPnts_UniformAbscissa.hxx>
+#include "../../BRep/OccExtensions/Curves/Segments/Geom2d_Spiral.h"
+#include <NCollection_Vector.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Face.hxx>
+#include <GeomAPI_ProjectPointOnCurve.hxx>
+
+TColgp_Array1OfPnt NCurveFactory::GetPointsFromProjectionAndHeightCurves(TColgp_Array1OfPnt& points, Standard_Integer nbPoints, Handle(Geom2d_Curve) projection, Handle(Geom2d_Curve) height)
+{
+
+	double projectionParm1 = projection->FirstParameter();
+	double projectionParm2 = projection->LastParameter();
+
+	Geom2dAdaptor_Curve adaptorHorizontalProjection(projection, projectionParm1, projectionParm2);
+	GCPnts_UniformAbscissa uniformAbscissa(adaptorHorizontalProjection, nbPoints);
+
+	for (Standard_Integer i = 1; i <= nbPoints; ++i) {
+
+		Standard_Real param = uniformAbscissa.Parameter(i);
+		gp_Pnt2d p2d;
+		projection->D0(param, p2d);
+		gp_Pnt2d heightPoint;
+		height->D0(param, heightPoint);
+
+		// For the Height Function:
+		// Y coord of the curve is the Z ccord of the 3D point
+		Standard_Real z = heightPoint.Y();
+		gp_Pnt p3d(p2d.X(), p2d.Y(), z);
+		points.SetValue(i, p3d);
+	}
+	return points;
+}
+
+TColGeom2d_SequenceOfBoundedCurve NCurveFactory::GetSegmentsSequnce(std::vector<Handle(Geom2d_Curve)> curves, Standard_Real tolerance)
+{
+	TColGeom2d_SequenceOfBoundedCurve segmentsSequence;
+	gp_Pnt2d prevEndPoint;
+	bool hasPrevEndPoint = false;
+
+	for (const auto& curve : curves)
+	{
+		Handle(Geom2d_BoundedCurve) boundedCurve = Handle(Geom2d_BoundedCurve)::DownCast(curve);
+		if (boundedCurve.IsNull())
+			Standard_Failure::Raise("IfcGradientCurve segments can only be bounded curves");
+
+		gp_Pnt2d startPoint, endPoint;
+		boundedCurve->D0(boundedCurve->FirstParameter(), startPoint);
+		boundedCurve->D0(boundedCurve->LastParameter(), endPoint);
+		if (hasPrevEndPoint)
+		{
+			if (!prevEndPoint.IsEqual(startPoint, tolerance))
+			{
+				Handle(Geom2d_TrimmedCurve) gapLine = new Geom2d_TrimmedCurve
+				(new Geom2d_Line(prevEndPoint,
+					gp_Dir2d(startPoint.X() - prevEndPoint.X(), startPoint.Y() - prevEndPoint.Y())), 0, prevEndPoint.Distance(startPoint));
+				segmentsSequence.Append(gapLine);
+			}
+		}
+
+		segmentsSequence.Append(boundedCurve);
+		prevEndPoint = endPoint;
+		hasPrevEndPoint = true;
+	}
+	return segmentsSequence;
+}
+
+
+TColGeom_SequenceOfBoundedCurve NCurveFactory::GetSegmentsSequnce(std::vector<Handle(Geom_Curve)> curves, Standard_Real tolerance) 
+{
+	TColGeom_SequenceOfBoundedCurve segmentsSequence;
+	gp_Pnt prevEndPoint;
+	bool hasPrevEndPoint = false;
+
+	for (const auto& curve : curves)
+	{
+		Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(curve);
+		if (boundedCurve.IsNull())
+			Standard_Failure::Raise("IfcSegmentedReferenceCurve segments can only be bounded curves");
+
+		gp_Pnt startPoint, endPoint;
+		boundedCurve->D0(boundedCurve->FirstParameter(), startPoint);
+		boundedCurve->D0(boundedCurve->LastParameter(), endPoint);
+		if (hasPrevEndPoint)
+		{
+			if (!prevEndPoint.IsEqual(startPoint, tolerance))
+			{
+				Handle(Geom_TrimmedCurve) gapLine = new Geom_TrimmedCurve
+				(new Geom_Line(prevEndPoint,
+					gp_Dir(startPoint.X() - prevEndPoint.X(), startPoint.Y() - prevEndPoint.Y(), startPoint.Z() - prevEndPoint.Z())), 0, prevEndPoint.Distance(startPoint));
+				segmentsSequence.Append(gapLine);
+			}
+		}
+
+		segmentsSequence.Append(boundedCurve);
+		prevEndPoint = endPoint;
+		hasPrevEndPoint = true;
+	}
+	return segmentsSequence;
+}
+
+
+
+Handle(Geom2d_Curve) NCurveFactory::MoveBoundedCurveToOrigin(const Handle(Geom2d_BoundedCurve)& boundedCurve)
+{
+	Standard_Real firstParam = boundedCurve->FirstParameter();
+
+	gp_Pnt2d startPoint;
+	gp_Vec2d tangent;
+	gp_Trsf2d translation;
+	gp_Trsf2d rotation;
+
+	boundedCurve->D1(firstParam, startPoint, tangent);
+	tangent.Normalize();
+	gp_Vec2d translationVec(-startPoint.X(), -startPoint.Y());
+	translation.SetTranslation(translationVec);
+
+	Standard_Real angle = atan2(tangent.Y(), tangent.X());
+	rotation.SetRotation(gp_Pnt2d(.0, .0),  - angle);
+
+	gp_Trsf2d combinedTransformation = rotation * translation;
+	
+	boundedCurve->Transform(combinedTransformation);
+
+	return boundedCurve;
+}
+
+
+Handle(Geom2d_Curve) NCurveFactory::AlignToXAxis(const Handle(Geom2d_BoundedCurve)& boundedCurve)
+{
+	Standard_Real firstParam = boundedCurve->FirstParameter();
+
+	gp_Pnt2d startPoint;
+	gp_Vec2d tangent;
+	gp_Trsf2d rotation;
+
+	boundedCurve->D1(firstParam, startPoint, tangent);
+	Standard_Real angle = atan2(tangent.Y(), tangent.X());
+	rotation.SetRotation(gp_Pnt2d(.0, .0), -angle);
+
+	boundedCurve->Transform(rotation);
+
+	return boundedCurve;
+}
 
 int NCurveFactory::Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections, double intersectTolerance)
 {
@@ -123,14 +269,42 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 {
 	try
 	{
-		Geom2dConvert_CompCurveToBSplineCurve compositeConverter(Convert_ParameterisationType::Convert_RationalC1); //provides exact parameterisation
+		Geom2dConvert_CompCurveToBSplineCurve compositeConverter
+					(Convert_ParameterisationType::Convert_RationalC1); //provides exact parameterisation
+
 
 		//all the segments will be bounded curves or offset curves base on a bounded curve
 		for (auto& it = segments.cbegin(); it != segments.cend(); ++it)
 		{
 			Handle(Geom2d_BoundedCurve) curve = *it;
-			if (!compositeConverter.Add(curve, tolerance, false))
+			Handle(Geom2d_Spiral) spiral = Handle(Geom2d_Spiral)::DownCast(curve);
+
+			if (spiral) {
+				// Approximate the curve
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+				int numPoints = spiral.get()->GetIntervalsCount();
+				TColgp_Array1OfPnt2d points(1, numPoints);
+
+				for (Standard_Integer i = 1; i <= numPoints; ++i) {
+					Standard_Real U = firstParam + (lastParam - firstParam) * (i - 1) / (numPoints - 1);
+					gp_Pnt2d P;
+					curve->D0(U, P);
+					points.SetValue(i, P);
+				}
+
+				Geom2dAPI_PointsToBSpline curveBuilder(points, 8, 8, GeomAbs_CN);
+				Handle(Geom2d_BSplineCurve) approximate = curveBuilder.Curve();
+				if (!compositeConverter.Add(approximate, tolerance, false))
+				{
+					Standard_Failure::Raise("Compound curve segment is not continuous");
+				}
+			}
+			else
+				if (!compositeConverter.Add(curve, tolerance, false))
+			{ 
 				Standard_Failure::Raise("Compound curve segment is not continuous");
+			}
 		}
 		return compositeConverter.BSplineCurve();
 	}
@@ -635,6 +809,7 @@ Handle(Geom_Curve) NCurveFactory::TrimDirectrix(const Handle(Geom_Curve)& basisC
 
 
 }
+
 Handle(Geom_Curve) NCurveFactory::GetBasisCurve(const Handle(Geom_Curve)& geomCurve)
 {
 	// kill trimmed curves
@@ -647,6 +822,7 @@ Handle(Geom_Curve) NCurveFactory::GetBasisCurve(const Handle(Geom_Curve)& geomCu
 	}
 	return basisCurve;
 }
+
 bool NCurveFactory::LocateVertexOnCurve(const Handle(Geom_Curve)& geomCurve, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance)
 {
 	Standard_Real Eps2 = maxTolerance * maxTolerance;
@@ -714,6 +890,109 @@ bool NCurveFactory::Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parame
 
 }
 
+
+bool NCurveFactory::GetPlaneFromWire(const TopoDS_Wire& wire, gp_Pln& plane) {
+	BRepBuilderAPI_MakeFace faceMaker(wire);
+	if (!faceMaker.IsDone()) {
+		return false;
+	} 
+	Handle(Geom_Surface) surface = BRep_Tool::Surface(faceMaker.Face());
+	Handle(Geom_Plane) geomPlane = Handle(Geom_Plane)::DownCast(surface);
+	if (geomPlane.IsNull()) {
+		return false;
+	}
+
+	plane = geomPlane->Pln();
+	return true;
+}
+
+bool NCurveFactory::GetPlaneFromFace(const TopoDS_Face& face, gp_Pln& plane)
+{
+ 
+	Handle(Geom_Surface) surface = BRep_Tool::Surface(face);
+	Handle(Geom_Plane) geomPlane = Handle(Geom_Plane)::DownCast(surface);
+	if (geomPlane.IsNull()) {
+		return false;
+	}
+
+	plane = geomPlane->Pln();
+	return true;
+}
+
+
+Handle(Geom_Curve) NCurveFactory::TrimCurveByWires(const Handle(Geom_Curve)& curve, const TopoDS_Wire& wire1, const TopoDS_Wire& wire2) {
+	std::vector<Standard_Real> parameters;
+	for (const TopoDS_Wire& wire : { wire1, wire2 }) {
+		gp_Pln plane;
+		if (GetPlaneFromWire(wire, plane)) {
+			// Intersect the curve with the plane
+			Handle(Geom_Surface) geomPlane = new Geom_Plane(plane);
+			GeomAPI_IntCS intersector(curve, geomPlane);
+
+			if (intersector.NbPoints() > 0) {
+				Standard_Real param;
+				Standard_Real v;
+				Standard_Real w;
+				intersector.Parameters(1, param, v, w);
+				parameters.push_back(param);
+			}
+		}
+	}
+
+	if (parameters.size() == 2) {
+		if (parameters[0] > parameters[1]) {
+			std::swap(parameters[0], parameters[1]);
+		}
+
+		Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(curve, parameters[0], parameters[1]);
+
+		return trimmedCurve;
+	}
+
+	return curve;
+}
+
+
+Handle(Geom_Curve) NCurveFactory::TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2)
+{
+	std::vector<Standard_Real> parameters;
+
+	// Process each face
+	GProp_GProps props;
+
+	BRepGProp::SurfaceProperties(face1, props);
+	gp_Pnt facePoint = props.CentreOfMass();
+
+	GeomAPI_ProjectPointOnCurve projector1(facePoint, curve);
+	if (projector1.NbPoints() > 0)
+	{
+		Standard_Real param = projector1.LowerDistanceParameter();
+		parameters.push_back(param);
+	}
+
+
+	BRepGProp::SurfaceProperties(face2, props);
+	facePoint = props.CentreOfMass();
+
+	GeomAPI_ProjectPointOnCurve projector2(facePoint, curve);
+	if (projector2.NbPoints() > 0)
+	{
+		Standard_Real param = projector2.LowerDistanceParameter();
+		parameters.push_back(param);
+	}
+
+	if (parameters.size() == 2)
+	{
+		if (parameters[0] > parameters[1]) {
+			std::swap(parameters[0], parameters[1]);
+		}
+
+		Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(curve, parameters[0], parameters[1]);
+		return trimmedCurve;
+	}
+
+	return curve;
+}
 
 
 
