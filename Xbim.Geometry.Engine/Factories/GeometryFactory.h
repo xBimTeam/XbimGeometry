@@ -44,7 +44,7 @@ namespace Xbim
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
 				gp_Pnt BuildPoint3d(IXPoint^ xPoint);
-				bool BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent);
+				bool BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis);
 
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
 				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
@@ -80,6 +80,7 @@ namespace Xbim
 				bool ToLocation(IIfcAxis2Placement^ axis, TopLoc_Location& location);
 				bool ToLocation(IfcAxis2PlacementLinear^ axis, TopLoc_Location& location);
 				bool ToTransform(IfcAxis2PlacementLinear^ axis, gp_Trsf& trsf);
+				bool GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis);
 
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
 				virtual IXAxis2Placement2d^ BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection);
@@ -97,13 +98,16 @@ namespace Xbim
 				virtual double IsEqual(IXPoint^ a, IXPoint^ b, double tolerance);
 				virtual IXDirection^ NormalAt(IXFace^ face, IXPoint^ position, double tolerance);
 
-				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
-				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ BuildLocation();
+				virtual IXLocation^ BuildLocation(double tx, double ty, double tz, double sc, double qw, double qx, double qy, double qz);
+				virtual IXLocation^ BuildLocation(IIfcPlacement^ placement);
+				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement);
 				virtual IXLocation^ BuildLocation(IfcAxis2PlacementLinear^ linearPlacement);
+				virtual IXLocation^ BuildLocation(IIfcAxis2Placement^ axis2);
 
 				virtual IXMatrix^ BuildTransform(IIfcCartesianTransformationOperator^ transOp);
-				virtual IXLocation^ BuildLocation(IIfcAxis2Placement^ axis2);
+				virtual void BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix);
+
 				static double GetDeterminant(double x1, double y1, double x2, double y2);
 				static double Area(const TColgp_SequenceOfPnt2d& points2d);
 				gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement);
@@ -126,11 +130,15 @@ namespace Xbim
 
 				gp_Trsf ToTrsf(IIfcCartesianTransformationOperator2D^ ct2D);
 
-				virtual void BuildMapTransform(IIfcCartesianTransformationOperator^ transform, IIfcAxis2Placement^ origin, IXLocation^% location, IXMatrix^% matrix);
 
 				gp_XYZ BuildXYZ(IIfcCartesianPoint^ ifcPoint);
 				bool BuildDirection3d(double x, double y, double z, gp_Vec& vec);
 				TopLoc_Location BuildAxis2PlacementLocation(IIfcAxis2Placement^ axis2);
+
+
+			private:
+				void EvaluateNextPlacement(IIfcLocalPlacement^% localPlacement, Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^% linearPlacement);
+
 			};
 		}
 	}

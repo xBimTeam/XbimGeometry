@@ -23,8 +23,10 @@ namespace Xbim.ModelGeometry.Scene
             XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
             if (product.ObjectPlacement is IIfcLocalPlacement)
                 placementTransform = tree[product.ObjectPlacement.EntityLabel];
-            else if (product.ObjectPlacement is IIfcGridPlacement)
-                placementTransform = engine.ToMatrix3D((IIfcGridPlacement)product.ObjectPlacement,null);
+            else if (product.ObjectPlacement is IIfcGridPlacement gridPlacament)
+                placementTransform = engine.ToMatrix3D(gridPlacament, null);
+            else if (product.ObjectPlacement is Ifc4x3.GeometricConstraintResource.IfcLinearPlacement linearPlacement)
+                placementTransform = engine.ToMatrix3D(linearPlacement, null);
             return placementTransform;
         }
 
@@ -32,17 +34,27 @@ namespace Xbim.ModelGeometry.Scene
         ///     Builds a placement tree of all ifcLocalPlacements
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="engine"></param>
         /// <param name="adjustWcs">
         ///     If there is a single root displacement, this is removed from the tree and added to the World
         ///     Coordinate System. Useful for models where the site has been located into a geographical context
         /// </param>
-        public XbimPlacementTree(IModel model, bool adjustWcs = true)
+        public XbimPlacementTree(IModel model, IXbimGeometryEngine engine, bool adjustWcs = true)
         {
             var rootNodes = new List<XbimPlacementNode>();
             var localPlacements = model.Instances.OfType<IIfcLocalPlacement>(true).ToList();
+            var linearPlacements = model.Instances.OfType<Xbim.Ifc4x3.GeometricConstraintResource.IfcLinearPlacement>(true).ToList();
+
             Nodes = new Dictionary<int, XbimPlacementNode>();
             foreach (var placement in localPlacements)
                 Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement));
+
+            foreach (var placement in linearPlacements)
+            {
+                var placementTransform = engine.ToMatrix3D(placement, null);
+                Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement.EntityLabel, placementTransform));
+            }
+
             foreach (var localPlacement in localPlacements)
             {
                 if (localPlacement.PlacementRelTo != null) //resolve parent
@@ -85,6 +97,13 @@ namespace Xbim.ModelGeometry.Scene
             {
                 PlacementLabel = placement.EntityLabel;
                 Matrix = placement.RelativePlacement.ToMatrix3D();
+                _isAdjustedToGlobal = false;
+            }
+
+            public XbimPlacementNode(int placementId, XbimMatrix3D placementMatrix)
+            {
+                PlacementLabel = placementId;
+                Matrix = placementMatrix;
                 _isAdjustedToGlobal = false;
             }
 

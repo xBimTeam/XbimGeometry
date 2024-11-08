@@ -77,7 +77,8 @@ namespace Xbim
 			{
 				gp_Pnt result;
 				gp_Vec tangent;
-				BuildPoint3d(pointByDistanceExpression, result, tangent);
+				gp_Vec axis;
+				BuildPoint3d(pointByDistanceExpression, result, tangent, axis);
 				return gcnew XPoint(result);
 			}
 
@@ -297,43 +298,55 @@ namespace Xbim
 
 			}
 			
-			bool GeometryFactory::ToTransform(IfcAxis2PlacementLinear^ axis, gp_Trsf& trsf)
+			bool GeometryFactory::ToTransform(IfcAxis2PlacementLinear^ axisPlacement, gp_Trsf& trsf)
 			{
-				IfcPointByDistanceExpression^ point = dynamic_cast<IfcPointByDistanceExpression^>(axis->Location);
+				IfcPointByDistanceExpression^ point = dynamic_cast<IfcPointByDistanceExpression^>(axisPlacement->Location);
 				if (point == nullptr)
-					throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear should have a Location property of type IfcPointByDistanceExpression", axis);
+					throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear should have a Location property of type IfcPointByDistanceExpression", axisPlacement);
 
 				gp_Pnt loc;
 				gp_Vec tangent;
-				if (BuildPoint3d(point, loc, tangent))
+				gp_Vec axis(0, 0, 1);
+				bool hasAxis;
+				bool hasRef;
+
+				if (BuildPoint3d(point, loc, tangent, axis))
 				{
-					if (axis->Axis != nullptr && axis->RefDirection != nullptr)
+					if (axisPlacement->RefDirection != nullptr)
 					{
-						gp_Vec zDir;
-						if (!BuildDirection3d(axis->Axis, zDir))
-							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Axis Direction is invalid ", axis->Axis);
-						zDir.Normalize();
-						gp_Vec xDir;
-						if (!BuildDirection3d(axis->RefDirection, xDir))
-							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Reference Direction is invalid ", axis->RefDirection);
-						xDir.Normalize();
-						trsf.SetTransformation(gp_Ax3(loc, zDir, xDir), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+						if (!BuildDirection3d(axisPlacement->RefDirection, tangent))
+							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Reference Direction is invalid ", axisPlacement->RefDirection);
+						tangent.Normalize();
+						hasRef = true;
 					}
-					else
+					
+					if (axisPlacement->Axis != nullptr)
 					{
-						gp_Dir xDir(tangent);
-						gp_Dir referenceDir(0, 0, 1); 
-						if (Abs(xDir.Dot(referenceDir)) > 1.0 - Precision::Confusion()) {
-							referenceDir = gp_Dir(0, 1, 0);
-						}
-						gp_Dir prep = xDir.Crossed(referenceDir);
-						gp_Dir zDir = xDir.Crossed(prep);
-						trsf.SetTransformation(gp_Ax3(loc, zDir, xDir));
+						if (!BuildDirection3d(axisPlacement->Axis, axis))
+							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Axis Direction is invalid ", axisPlacement->Axis);
+						axis.Normalize();
+						hasAxis = true;
 					}
+					
+					//if(!hasAxis && !hasRef) axis = tangent.Crossed(axis.Crossed(tangent));
+
+					trsf.SetTransformation(gp_Ax3(loc, axis, tangent), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
+					
 					return true;
 				}
 
-				throw RaiseGeometryFactoryException("Couldn't build IfcAxis2PlacementLinear", axis);
+				throw RaiseGeometryFactoryException("Couldn't build IfcAxis2PlacementLinear", axisPlacement);
+			}
+
+
+
+			bool GeometryFactory::GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis)
+			{
+				IfcPointByDistanceExpression^ point = dynamic_cast<IfcPointByDistanceExpression^>(axisPlacement->Location);
+				if (point == nullptr)
+					throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear should have a Location property of type IfcPointByDistanceExpression", axisPlacement);
+
+				return BuildPoint3d(point, loc, tangent, axis);
 			}
 
 			
@@ -345,27 +358,81 @@ namespace Xbim
 				return true;
 			}
 
-
-			bool GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent)
+			bool GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis)
 			{
-				const TopoDS_Wire wire = WIRE_FACTORY->BuildWire(point->BasisCurve, false);
-				GProp_GProps gProps;
-				BRepGProp::LinearProperties(wire, gProps);
-				const double length = gProps.Mass();
-				
+
+				Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(point->BasisCurve); 
+
+				GeomAdaptor_Curve curveAdaptor(curve);
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+				Standard_Real length = GCPnts_AbscissaPoint::Length(curveAdaptor, firstParam, lastParam, ModelGeometryService->Precision);
+
 				Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^ lengthValue = 
 					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^>(point->DistanceAlong);
 				Xbim::Ifc4x3::MeasureResource::IfcParameterValue^ parameterValue =
 					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcParameterValue^>(point->DistanceAlong);
-				BRepAdaptor_CompCurve cc(wire, Standard_True);
+				auto conic = (dynamic_cast<IIfcConic^>(point->BasisCurve));
+
+				Standard_Real len;
 				if (lengthValue != nullptr)
-					cc.D1(static_cast<double>(lengthValue->Value), result, tangent);
+				{
+					len = static_cast<Standard_Real>(lengthValue->Value);
+					curve->D1(len, result, tangent);
+				}
 				else if (parameterValue != nullptr) {
-					bool isConic = (dynamic_cast<IIfcConic^>(point->BasisCurve) != nullptr);
-					double parameterFactor = isConic ? GetModelModelGeometryService()->RadianFactor : 1;
-					cc.D1(static_cast<double>(parameterValue->Value) * parameterFactor * length, result, tangent);
+					if (conic != nullptr)
+					{
+						auto param = static_cast<double>(parameterValue->Value) * ModelGeometryService->RadianFactor;
+						curve->D1(param, result, tangent);
+					}
+					else 
+					{
+						auto param = static_cast<double>(parameterValue->Value);
+						len = param * length;
+						curve->D1(len, result, tangent);
+					}
 				}
 				else throw RaiseGeometryFactoryException("DistanceAlong must be specified", point);
+				tangent.Normalize();
+
+				Handle(Geom_SegmentedReferenceCurve) segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(curve);
+				
+				tangent.Normalize();
+				gp_Vec up(0, 0, 1);
+				gp_Vec y = up.Crossed(tangent);
+				y.Normalize();
+				axis = tangent.Crossed(y);
+				tangent.Normalize();
+
+
+				if (segmentedRef) 
+				{
+					auto superElevationAndTilt = segmentedRef->GetSuperelevationAndCantTiltAt(len);
+					Standard_Real tilt = std::get<1>(superElevationAndTilt);
+					gp_Ax1 rotationAxis(gp_Pnt(0.0, 0.0, 0.0), tangent);
+					axis.Rotate(rotationAxis, tilt);
+					y.Rotate(rotationAxis, tilt);
+				}
+				
+				if (point->OffsetLateral.HasValue && ((double)point->OffsetLateral.Value.Value) != 0)
+				{
+					double lateralOffset = point->OffsetLateral.Value;
+					result.Translate(y.Scaled(lateralOffset));
+				}
+
+				if (point->OffsetVertical.HasValue && ((double)point->OffsetVertical.Value.Value) != 0)
+				{
+					double verticalOffset = point->OffsetVertical.Value;
+					result.Translate(axis.Scaled(verticalOffset));
+				}
+
+				if (point->OffsetLongitudinal.HasValue && ((double)point->OffsetLongitudinal.Value.Value) != 0)
+				{
+					double longOffset = point->OffsetLongitudinal.Value;
+					result.Translate(tangent.Scaled(longOffset));
+				}
+
 				return true;
 			}
 
@@ -487,6 +554,17 @@ namespace Xbim
 				TopLoc_Location loc;
 				ToLocation(linearPlacement, loc);
 				return gcnew XLocation(loc);
+			}
+
+			IXLocation^ GeometryFactory::BuildLocation(IIfcPlacement^ placement)
+			{
+				IfcAxis2PlacementLinear^ linear = dynamic_cast<IfcAxis2PlacementLinear^>(placement);
+				IIfcAxis2Placement^ axis2 = dynamic_cast<IIfcAxis2Placement^>(placement);
+				if (linear != nullptr)
+					return BuildLocation(linear);
+				if(axis2 != nullptr)
+					return BuildLocation(linear);
+				throw RaiseGeometryFactoryException("Not supported type of IfcPlacement");
 			}
 
 
@@ -614,7 +692,8 @@ namespace Xbim
 						{
 							throw RaiseGeometryFactoryException("Support for Object Placements other than 3D not implemented");
 						}
-						localPlacement = dynamic_cast<IIfcLocalPlacement^>(localPlacement->PlacementRelTo);
+
+						EvaluateNextPlacement(localPlacement, linearPlacement);
 					}
 					else if (gridPlacement != nullptr)//gridplacement;
 					{
@@ -689,7 +768,7 @@ namespace Xbim
 						localPlacement = nullptr;
 						gridPlacement = nullptr;
 					}
-					if (linearPlacement != nullptr)
+					else if (linearPlacement != nullptr)
 					{
 						if (linearPlacement->RelativePlacement != nullptr)
 						{
@@ -701,9 +780,8 @@ namespace Xbim
 						{
 							throw RaiseGeometryFactoryException("RelativePlacement for LinearPlacement must be specified");
 						}
-						localPlacement = dynamic_cast<IIfcLocalPlacement^>(linearPlacement->PlacementRelTo);
-						linearPlacement =
-							dynamic_cast<Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^>(linearPlacement->PlacementRelTo);
+
+						EvaluateNextPlacement(localPlacement, linearPlacement);
 					}
 					else
 					{
@@ -713,6 +791,42 @@ namespace Xbim
 					}
 				}
 				return trsf;
+			}
+
+			void GeometryFactory::EvaluateNextPlacement(IIfcLocalPlacement^% localPlacement, Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^% linearPlacement)
+			{
+				if (localPlacement != nullptr && localPlacement->PlacementRelTo != nullptr)
+				{
+					auto relTo = localPlacement->PlacementRelTo;
+
+					IIfcLocalPlacement^ nextLocalPlacement = dynamic_cast<IIfcLocalPlacement^>(relTo);
+
+					if (nextLocalPlacement != nullptr)
+					{
+						localPlacement = nextLocalPlacement;
+						linearPlacement = nullptr;
+					}
+					else
+					{
+						linearPlacement = dynamic_cast<Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^>(relTo);
+
+						if (linearPlacement != nullptr)
+						{
+							localPlacement = nullptr;
+						}
+						else
+						{
+							localPlacement = nullptr;
+							linearPlacement = nullptr;
+						}
+					}
+				}
+				else
+				{
+					localPlacement = nullptr;
+					linearPlacement = nullptr;
+				}
+
 			}
 
 			TopLoc_Location GeometryFactory::ToLocation(IIfcObjectPlacement^ placement)
