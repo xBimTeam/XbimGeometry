@@ -231,13 +231,6 @@ namespace Xbim
 
 				const TopoDS_Shape& shape = EXEC_NATIVE->CreateSurfaceShape(allPoints, locations, tags);
 
-				std::ostringstream oss;
-				oss << "DBRep_DrawableShape" << std::endl;
-				BRepTools::Write(shape, oss);
-				std::ofstream outFile("C:/Users/ibrah/OneDrive/Desktop/Surface.brep");
-				outFile << oss.str();
-				outFile.close();
-
 				return shape;
 
 			}
@@ -271,7 +264,7 @@ namespace Xbim
 				(const std::vector<double>& widths, const std::vector<double>& slopes, const std::vector<std::string>& tags, bool horizontalWidths)
 			{
 				gp_Pnt currentPoint(0, 0, 0);
-				TaggedPoint currentTaggedPnt(currentPoint, hasTags? tags[0] : "");
+				TaggedPoint currentTaggedPnt(currentPoint, tags[0]);
 				std::vector<TaggedPoint> points;
 				points.push_back(currentTaggedPnt);
 
@@ -294,7 +287,7 @@ namespace Xbim
 					}
 
 					gp_Pnt nextPoint(currentPoint.X() + dx, currentPoint.Y() + dy, 0);
-					TaggedPoint taggedPnt(nextPoint, tags[i+1]);
+					TaggedPoint taggedPnt(nextPoint, tags[i + 1]);
 					points.push_back(taggedPnt);
 					currentPoint = nextPoint;
 				}

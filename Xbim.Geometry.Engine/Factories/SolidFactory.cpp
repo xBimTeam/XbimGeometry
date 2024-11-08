@@ -28,6 +28,9 @@
 #include <BRepAlgoAPI_Common.hxx>
 #include <ShapeFix_Solid.hxx>
 #include <ShapeFix_Shape.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
+#include <BRepOffsetAPI_MakePipeShell.hxx>
+
 using namespace System;
 using namespace Xbim::Geometry::BRep;
 
@@ -211,7 +214,6 @@ namespace Xbim
 			}
 
 
-
 			IXShape^ SolidFactory::Build(IIfcSolidModel^ ifcSolid)
 			{
 				TopoDS_Shape topoShape = BuildSolidModel(ifcSolid);
@@ -220,7 +222,6 @@ namespace Xbim
 				topoShape.Closed(true);
 				return  ShapeFactory::GetXbimShape(topoShape);
 			}
-
 			
 
 			///this method builds all solid models and is the main entry point
@@ -233,41 +234,209 @@ namespace Xbim
 
 				switch (solidModelType)
 				{
-				case XSolidModelType::IfcFacetedBrep:
-					return BuildFacetedBrep(static_cast<IIfcFacetedBrep^>(ifcSolid));
-				case XSolidModelType::IfcSweptDiskSolid:
-					return BuildSweptDiskSolid(static_cast<IIfcSweptDiskSolid^>(ifcSolid));
-				case XSolidModelType::IfcExtrudedAreaSolid:
-					return BuildExtrudedAreaSolid(static_cast<IIfcExtrudedAreaSolid^>(ifcSolid));
-				case XSolidModelType::IfcSweptDiskSolidPolygonal:
-					return BuildSweptDiskSolidPolygonal(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid));
-				case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
-					return BuildSurfaceCurveSweptAreaSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid));
-				case XSolidModelType::IfcCsgSolid:
-					return BuildCsgSolid(static_cast<IIfcCsgSolid^>(ifcSolid));
-				case XSolidModelType::IfcExtrudedAreaSolidTapered:
-					return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
-				case XSolidModelType::IfcAdvancedBrep:
-					return BuildAdvancedBrep(static_cast<IIfcAdvancedBrep^>(ifcSolid));
+					case XSolidModelType::IfcFacetedBrep:
+						return BuildFacetedBrep(static_cast<IIfcFacetedBrep^>(ifcSolid));
+					case XSolidModelType::IfcSweptDiskSolid:
+						return BuildSweptDiskSolid(static_cast<IIfcSweptDiskSolid^>(ifcSolid));
+					case XSolidModelType::IfcExtrudedAreaSolid:
+						return BuildExtrudedAreaSolid(static_cast<IIfcExtrudedAreaSolid^>(ifcSolid));
+					case XSolidModelType::IfcSweptDiskSolidPolygonal:
+						return BuildSweptDiskSolidPolygonal(static_cast<IIfcSweptDiskSolidPolygonal^>(ifcSolid));
+					case XSolidModelType::IfcSurfaceCurveSweptAreaSolid:
+						return BuildSurfaceCurveSweptAreaSolid(static_cast<IIfcSurfaceCurveSweptAreaSolid^>(ifcSolid));
+					case XSolidModelType::IfcCsgSolid:
+						return BuildCsgSolid(static_cast<IIfcCsgSolid^>(ifcSolid));
+					case XSolidModelType::IfcExtrudedAreaSolidTapered:
+						return BuildExtrudedAreaSolidTapered(static_cast<IIfcExtrudedAreaSolidTapered^>(ifcSolid));
+					case XSolidModelType::IfcAdvancedBrep:
+						return BuildAdvancedBrep(static_cast<IIfcAdvancedBrep^>(ifcSolid));
+					case XSolidModelType::IfcSectionedSolidHorizontal:
+						return BuildSectionedSolidHorizontal(static_cast<IfcSectionedSolidHorizontal^>(ifcSolid));
+					case XSolidModelType::IfcDirectrixDerivedReferenceSweptAreaSolid:
+						return BuildDirectrixDerivedReferenceSweptAreaSolid(static_cast<IfcDirectrixDerivedReferenceSweptAreaSolid^>(ifcSolid));
 
+					//TODO: SRL: the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
+					case XSolidModelType::IfcAdvancedBrepWithVoids:
+						return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
+					case XSolidModelType::IfcFacetedBrepWithVoids:
+						return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
+					case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
+						return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
+					case XSolidModelType::IfcRevolvedAreaSolid:
+						return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolid^>(ifcSolid), Logger(), _modelService);
+					case XSolidModelType::IfcRevolvedAreaSolidTapered:
+						return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
 
-				//TODO: SRL: the following methods will need to be implemented as Version 6, defaulting to version 5 implementation	
-				case XSolidModelType::IfcAdvancedBrepWithVoids:
-					return gcnew XbimSolid(static_cast<IIfcAdvancedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcFacetedBrepWithVoids:
-					return gcnew XbimSolid(static_cast<IIfcFacetedBrepWithVoids^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcFixedReferenceSweptAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcFixedReferenceSweptAreaSolid^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcRevolvedAreaSolid:
-					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolid^>(ifcSolid), Logger(), _modelService);
-				case XSolidModelType::IfcRevolvedAreaSolidTapered:
-					return gcnew XbimSolid(static_cast<IIfcRevolvedAreaSolidTapered^>(ifcSolid), Logger(), _modelService);
-
-				default:
-					break;
+					default:
+						break;
 				}
 				throw RaiseGeometryFactoryException("Not implemented. SolidModel type", ifcSolid);
 			}
+
+
+
+			TopoDS_Shape SolidFactory::BuildDirectrixDerivedReferenceSweptAreaSolid(IfcDirectrixDerivedReferenceSweptAreaSolid^ directrixDerivedReferenceSweptAreaSolid)
+			{
+				Handle(Geom_Curve) spine;
+				auto sweptArea = PROFILE_FACTORY->BuildProfileFace(directrixDerivedReferenceSweptAreaSolid->SweptArea);
+				
+				Ifc4x3::MeasureResource::IfcLengthMeasure^ startLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
+				Ifc4x3::MeasureResource::IfcLengthMeasure^ endLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
+				Ifc4x3::MeasureResource::IfcParameterValue^ startParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
+				Ifc4x3::MeasureResource::IfcParameterValue^ endParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
+				double firstParam;
+				double lastParam;
+
+				if (startLen && endLen)
+				{
+					XCurveType curveType;
+					spine = CURVE_FACTORY->BuildCurve(directrixDerivedReferenceSweptAreaSolid->Directrix);
+					firstParam = static_cast<double>(startLen->Value);
+					lastParam = static_cast<double>(endLen->Value);
+				}
+				else if (startParam && endParam) {
+					spine = CURVE_FACTORY->BuildCurve(directrixDerivedReferenceSweptAreaSolid->Directrix);
+					double length = spine->LastParameter() - spine->FirstParameter();
+					firstParam = static_cast<double>(startParam->Value) * length;
+					lastParam = static_cast<double>(endParam->Value) * length;
+				}
+				
+				IIfcDirection^ xdir = directrixDerivedReferenceSweptAreaSolid->FixedReference;
+				std::vector<TopoDS_Wire> sections;
+				auto step = 100 * _modelService->OneMillimeter;
+				int n = (int)((lastParam - firstParam) / step);
+				auto segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(spine);
+				
+				for (size_t i = 0; i <= n; i++)
+				{
+					gp_Pnt loc;
+					gp_Vec normal;
+					double len = firstParam + (i * step);
+					spine->D1(len, loc, normal);
+					gp_Vec xVec(xdir->X, xdir->Y, xdir->Z);
+
+					if (segmentedRef)
+					{
+						auto superElevationAndTilt = segmentedRef->GetSuperelevationAndCantTiltAt(len);
+						Standard_Real tilt = std::get<1>(superElevationAndTilt);
+						gp_Ax1 rotationAxis(gp_Pnt(0.0, 0.0, 0.0), normal);
+						xVec.Rotate(rotationAxis, tilt);
+					}
+
+					auto moved = MovedSection(loc, normal, xVec, sweptArea);
+					TopoDS_Wire section = BRepTools::OuterWire(moved);
+					sections.push_back(section);
+				}
+
+				auto trimmed = new Geom_TrimmedCurve(spine, firstParam, lastParam);
+				Handle(Geom_BSplineCurve) bSpline = CURVE_FACTORY->ToBSpline(trimmed, n);
+				auto solid = EXEC_NATIVE->BuildExtrudedAreaSolid(bSpline, sections, ModelGeometryService->Precision);
+				if (directrixDerivedReferenceSweptAreaSolid->Position != nullptr) {
+					TopLoc_Location location;
+					if (GEOMETRY_FACTORY->ToLocation(directrixDerivedReferenceSweptAreaSolid->Position, location)) {
+						solid.Move(location);
+					}
+				}
+
+				return solid;
+			}
+
+			TopoDS_Shape SolidFactory::BuildSectionedSolidHorizontal(IfcSectionedSolidHorizontal^ sectionedSolidHorizontal)
+			{
+				if (sectionedSolidHorizontal->CrossSectionPositions->Count != sectionedSolidHorizontal->CrossSections->Count)
+					throw RaiseGeometryFactoryException("Number of cross-section position doesn't match the number of cross-sections", sectionedSolidHorizontal);
+
+				Handle(Geom_Curve) spine = CURVE_FACTORY->BuildCurve(sectionedSolidHorizontal->Directrix);
+
+				std::vector<TopoDS_Wire> sections;
+				std::vector<TopoDS_Face> sectionFaces;
+				size_t lastEdgeCount = 0;
+
+				// It is assumed that all sections will be of the same type
+				bool isIfcParameterizedProfileDef = dynamic_cast<IIfcParameterizedProfileDef^>(sectionedSolidHorizontal->CrossSections[0]) != nullptr;
+
+				for (int i = 0; i < sectionedSolidHorizontal->CrossSections->Count; i++)
+				{
+					/*XProfileDefType profileType;
+					TopoDS_Wire outerWire = PROFILE_FACTORY->BuildProfileWire(sectionedSolidHorizontal->CrossSections[i], profileType);*/
+					TopoDS_Face sectionFace = PROFILE_FACTORY->BuildProfileFace(sectionedSolidHorizontal->CrossSections[i]);
+
+					gp_Pnt loc;
+					gp_Vec normal;
+					gp_Vec refVec;
+					gp_Vec up;
+					bool hasAxis;
+					bool hasRef;
+
+
+					// The profile placement is not necessarily derived 
+					// from the spine curve if the Axis and RefDirection is specified
+					IfcAxis2PlacementLinear^ placement = sectionedSolidHorizontal->CrossSectionPositions[i];
+					if (placement->Axis != nullptr)
+					{
+						if (!GEOMETRY_FACTORY->BuildDirection3d(placement->Axis, up))
+							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Axis Direction is invalid ", placement);
+						up.Normalize();
+						hasAxis = true;
+					}
+
+					if (placement->RefDirection != nullptr)
+					{
+						if (!GEOMETRY_FACTORY->BuildDirection3d(placement->RefDirection, refVec))
+							throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear Reference Direction is invalid ", placement);
+						refVec.Normalize();
+						hasRef = true;
+					}
+
+					if(hasAxis && hasRef)
+						normal = refVec.Crossed(up);
+					else 
+					{
+						GEOMETRY_FACTORY->GetTangentAtPlacement(placement, loc, normal, up);
+						refVec = up.Crossed(normal);
+					}
+
+					// curve tangent is the section normal
+					MoveSection(loc, normal, refVec, sectionFace);
+					TopoDS_Wire section = BRepTools::OuterWire(sectionFace);
+					sections.push_back(section);
+					sectionFaces.push_back(sectionFace);
+					 
+					// Should have similar edge count if not IfcParameterizedProfileDef
+					if (!isIfcParameterizedProfileDef)
+					{
+						std::vector<TopoDS_Edge> edges;
+						for (TopExp_Explorer explorer(section, TopAbs_EDGE); explorer.More(); explorer.Next())
+						{
+							TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
+							edges.push_back(edge);
+						}
+
+						if (i > 0 && edges.size() != lastEdgeCount)
+							throw RaiseGeometryFactoryException("Cross-sections should have the same number of points and edges", sectionedSolidHorizontal);
+
+						lastEdgeCount = edges.size();
+					}
+				}
+
+				
+				Handle(Geom_GradientCurve) gradient = Handle(Geom_GradientCurve)::DownCast(spine);
+				Handle(Geom_SegmentedReferenceCurve) segmented = Handle(Geom_SegmentedReferenceCurve)::DownCast(spine);
+				Handle(Geom_Curve) trimmed = CURVE_FACTORY->TrimCurveByFaces(spine, sectionFaces.front(), sectionFaces.back());
+				int n = (int)((trimmed->LastParameter() - trimmed->FirstParameter()) / (100 * _modelService->OneMillimeter));
+
+				if (gradient) {
+					Handle(Geom_BSplineCurve) bSSpline = CURVE_FACTORY->ToBSpline(trimmed, n);
+					return EXEC_NATIVE->BuildSectionedSolid(bSSpline, sections);
+				}
+				else if (segmented) {
+					Handle(Geom_BSplineCurve) bSSpline = CURVE_FACTORY->ToBSpline(trimmed, n);
+					return EXEC_NATIVE->BuildSectionedSolid(bSSpline, sections);
+				}
+
+				return EXEC_NATIVE->BuildSectionedSolid(trimmed, sections);
+			}
+
 			
 			TopoDS_Shape SolidFactory::BuildSurfaceCurveSweptAreaSolid(IIfcSurfaceCurveSweptAreaSolid^ ifcSurfaceCurveSweptAreaSolid)
 			{
@@ -399,7 +568,6 @@ namespace Xbim
 					return BuildExtrudedAreaSolid(extrudedSolid, extrudedSolid->SweptArea);
 			}
 
-			
 
 			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef)
 			{
@@ -445,8 +613,6 @@ namespace Xbim
 					return BuildExtrudedAreaSolidTapered(extrudedSolidTapered, extrudedSolidTapered->SweptArea, extrudedSolidTapered->EndSweptArea);
 			}
 
-
-
 			TopoDS_Shape SolidFactory::BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolidTapered, IIfcProfileDef^ startProfileDef, IIfcProfileDef^ endProfileDef)
 			{
 				if (startProfileDef == nullptr)
@@ -478,6 +644,7 @@ namespace Xbim
 				return SHELL_FACTORY->BuildClosedShell(facetedBrep->Outer, isFixed); //throws exeptions
 
 			}
+
 			/// <summary>
 			/// FC4 CHANGE  The entity has been deprecated and shall not be used. The entity IfcFacetedBrep shall be used instead. Implemented for backward compatibility
 			/// </summary>
@@ -497,6 +664,7 @@ namespace Xbim
 				}
 				return compound;
 			}
+
 			TopoDS_Shape SolidFactory::BuildPolygonalFaceSet(IIfcPolygonalFaceSet^ ifcPolygonalFaceSet)
 			{
 				bool isFixed;
@@ -526,6 +694,7 @@ namespace Xbim
 				else
 					return shape;
 			}
+
 			TopoDS_Shape SolidFactory::BuildAdvancedBrep(IIfcAdvancedBrep^ ifcAdvancedBrep)
 			{
 				bool isFixed;
@@ -534,6 +703,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Error creating solid from advanced brep", ifcAdvancedBrep);
 				return shape;
 			}
+
 			TopoDS_Solid SolidFactory::BuildCsgSolid(IIfcCsgSolid^ ifcCsgSolid)
 			{
 				//at the root of a csg solid is either a boolean result or a csg solid primitive
@@ -543,6 +713,7 @@ namespace Xbim
 				if (primitive3d == nullptr) throw RaiseGeometryFactoryException("Unsupported TreeRootExpression type", ifcCsgSolid);
 				return BuildCsgPrimitive3D(primitive3d);
 			}
+
 			TopoDS_Solid SolidFactory::BuildBooleanResult(IIfcBooleanResult^ ifcBooleanResult)
 			{
 				auto shape = BOOLEAN_FACTORY->BuildBooleanResult(ifcBooleanResult);
@@ -552,6 +723,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Failed to build Boolean Result as a solid", ifcBooleanResult);
 				return TopoDS::Solid(shape);
 			}
+
 			TopoDS_Solid SolidFactory::BuildCsgPrimitive3D(IIfcCsgPrimitive3D^ ifcCsgPrimitive3D)
 			{
 
@@ -576,6 +748,7 @@ namespace Xbim
 				throw RaiseGeometryFactoryException("Not implemented. CsgPrimitive3D type", ifcCsgPrimitive3D);
 
 			}
+
 			TopoDS_Solid SolidFactory::BuildBlock(IIfcBlock^ ifcBlock)
 			{
 				gp_Ax2 ax2;
@@ -586,6 +759,7 @@ namespace Xbim
 				return EXEC_NATIVE->BuildBlock(ax2, ifcBlock->XLength, ifcBlock->YLength, ifcBlock->ZLength);
 
 			}
+
 			TopoDS_Solid SolidFactory::BuildRectangularPyramid(IIfcRectangularPyramid^ ifcRectangularPyramid)
 			{
 				gp_Ax2 ax2;
@@ -595,6 +769,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg Rectangular Pyramid is a solid with zero volume", ifcRectangularPyramid);
 				return EXEC_NATIVE->BuildRectangularPyramid(ax2, ifcRectangularPyramid->XLength, ifcRectangularPyramid->YLength, ifcRectangularPyramid->Height);
 			}
+
 			TopoDS_Solid SolidFactory::BuildRightCircularCone(IIfcRightCircularCone^ ifcRightCircularCone)
 			{
 				gp_Ax2 ax2;
@@ -604,6 +779,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg RightCircularCone is a solid with zero volume");
 				return EXEC_NATIVE->BuildRightCircularCone(ax2, ifcRightCircularCone->BottomRadius, ifcRightCircularCone->Height);
 			}
+
 			TopoDS_Solid SolidFactory::BuildRightCircularCylinder(IIfcRightCircularCylinder ^ (ifcRightCircularCylinder))
 			{
 				gp_Ax2 ax2;
@@ -613,6 +789,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Csg RightCircularCylinder is a solid with zero volume");
 				return EXEC_NATIVE->BuildRightCylinder(ax2, ifcRightCircularCylinder->Radius, ifcRightCircularCylinder->Height);
 			}
+
 			TopoDS_Solid SolidFactory::BuildSphere(IIfcSphere^ ifcSphere)
 			{
 				gp_Ax2 ax2;
@@ -621,6 +798,35 @@ namespace Xbim
 				if (ifcSphere->Radius <= 0)
 					throw RaiseGeometryFactoryException("Csg Sphere is a solid with zero volume", ifcSphere);
 				return EXEC_NATIVE->BuildSphere(ax2, ifcSphere->Radius);
+			}
+
+
+			void SolidFactory::MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section)
+			{
+				gp_Ax3 toAx3(loc, sectionNormal, refVec);
+				gp_Trsf trsf;
+				trsf.SetTransformation(toAx3, gp_Ax3());
+				TopLoc_Location topLoc(trsf);
+				section.Move(topLoc);
+			}
+
+			void SolidFactory::MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section)
+			{
+				gp_Ax3 toAx3(loc, sectionNormal, refVec);
+				gp_Trsf trsf;
+				trsf.SetTransformation(toAx3, gp_Ax3());
+				TopLoc_Location topLoc(trsf);
+				section.Move(topLoc);
+			}
+
+			TopoDS_Face SolidFactory::MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section)
+			{
+				gp_Ax3 toAx3(loc, sectionNormal, refVec);
+				gp_Trsf trsf;
+				trsf.SetTransformation(toAx3, gp_Ax3());
+				TopLoc_Location topLoc(trsf);
+
+				return TopoDS::Face(section.Moved(topLoc));
 			}
 
 		}
