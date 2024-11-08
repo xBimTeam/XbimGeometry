@@ -15,7 +15,7 @@ using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
 
 
-namespace Xbim.Geometry.Engine.Tests
+namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 {
     public class IfcSectionedSurfaceTests
     {
@@ -40,6 +40,12 @@ namespace Xbim.Geometry.Engine.Tests
             using var txn = model.BeginTransaction(nameof(CanBuildIfcSectionedSurface));
             var surface = BuildIfcSectionedSurface(model);
             var modelSvc = _factory.CreateModelGeometryService(model, _loggerFactory);
+
+            using (var stream = File.Create("0000000000000000000000000000.ifc"))
+            {
+                model.SaveAsStep21(stream);
+            }
+
 
             // Act
             var xSurface = modelSvc.SurfaceFactory.Build(surface);
@@ -155,14 +161,14 @@ namespace Xbim.Geometry.Engine.Tests
                 placement.Location = CreatePointByDistanceExpression(radius, semiCircleEndAngle, distanceAlong, model);
                 placement.RefDirection = model.Instances.New<IfcDirection>(refDir =>
                 {
-                    refDir.X = 0;
+                    refDir.X = 1;
                     refDir.Y = 0;
-                    refDir.Z = -1;
+                    refDir.Z = 0;
                 });
                 placement.Axis = model.Instances.New<IfcDirection>(dir =>
                 {
-                    dir.X = 1;
-                    dir.Y = 0;
+                    dir.X = 0;
+                    dir.Y = 1;
                     dir.Z = 0;
                 });
 

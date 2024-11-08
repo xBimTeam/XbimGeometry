@@ -1,18 +1,20 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using System.Drawing;
+using System.Security.Cryptography;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4x3;
+using Xbim.Ifc4x3.GeometricConstraintResource;
 using Xbim.Ifc4x3.GeometryResource;
 using Xbim.Ifc4x3.MeasureResource;
 using Xbim.IO.Memory;
 using Xunit;
 using ILoggerFactory = Microsoft.Extensions.Logging.ILoggerFactory;
 
-namespace Xbim.Geometry.Engine.Tests
+namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 {
     public class IfcAxis2PlacementLinearTests
     {
@@ -27,113 +29,59 @@ namespace Xbim.Geometry.Engine.Tests
             _loggerFactory = loggerFactory;
         }
 
-
         [Theory]
-        [InlineData(20, 94, XCurveMeasureType.LengthMeasure, Math.PI / 2)]
-        [InlineData(20, 180, XCurveMeasureType.LengthMeasure, Math.PI)]
-        [InlineData(23, 80, XCurveMeasureType.LengthMeasure, Math.PI / 10)]
-        [InlineData(30, 300, XCurveMeasureType.ParameterValue, 0.2)]
-        public void CanBuildLocationFromIfcAxis2PlacementLinear
-                (double radius, double semiCircleEndAngle, XCurveMeasureType curveMeasureType, double curveMeasure)
+        [InlineData(@"TestFiles\IFC4x3\PlacmentOfSignal.ifc", 3021)]
+        [InlineData(@"TestFiles\IFC4x3\Viadotto Acerno.ifc", 194771)]
+        public void CanBuildLinearPlacement(string filePath, int placementId)
         {
-            // Arrange
-            IfcCurveMeasureSelect distanceAlong = curveMeasureType switch
-            {
-                XCurveMeasureType.LengthMeasure => new IfcLengthMeasure(radius * curveMeasure),
-                XCurveMeasureType.ParameterValue => new IfcParameterValue(curveMeasure),
-                _ => throw new NotImplementedException()
-            };
 
-            using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
-            using var txn = model.BeginTransaction(nameof(CanBuildLocationFromIfcAxis2PlacementLinear));
+            // Arrange
+            using var model = MemoryModel.OpenRead(filePath);
+            var placement = model.Instances[placementId] as IfcLinearPlacement;
             var modelSvc = _factory.CreateModelGeometryService(model, _loggerFactory);
-            var placementLinear = CreateIfcAxis2PlacementLinear
-                                                        (radius, semiCircleEndAngle, distanceAlong, model);
 
             // Act
-            var location = modelSvc.GeometryFactory.BuildLocation(placementLinear);
+            var location = modelSvc.GeometryFactory.BuildLocation(placement);
+
 
             // Assert
             location.Should().NotBeNull();
-            var theta = curveMeasureType switch
-            {
-                XCurveMeasureType.LengthMeasure => (double)(distanceAlong.Value) / radius,
-                XCurveMeasureType.ParameterValue => (double)(distanceAlong.Value) * semiCircleEndAngle * (Math.PI / 180),
-                _ => throw new NotImplementedException()
-            };
-            location.IsIdentity.Should().BeFalse();
-            location.OffsetX.Should().BeApproximately(radius * Math.Cos(theta), Tolerance);
-            location.OffsetY.Should().BeApproximately(radius * Math.Sin(theta), Tolerance);
-            location.OffsetZ.Should().Be(0);
         }
 
 
-        private static IfcAxis2PlacementLinear CreateIfcAxis2PlacementLinear
-                 (double radius, double semiCircleEndAngle, IfcCurveMeasureSelect distanceAlong, MemoryModel model)
-
+        [Theory]
+        [InlineData(@"TestFiles\IFC4x3\PlacmentOfSignal.ifc")]
+        public void CanBuildIfcRefrentsLocations(string filePath)
         {
-            var pointByDistanceExpression = model.Instances.New<IfcAxis2PlacementLinear>(placement =>
-            {
-                placement.Location = CreatePointByDistanceExpression(radius, semiCircleEndAngle, distanceAlong, model);
-                placement.RefDirection = model.Instances.New<IfcDirection>(refDir =>
-                {
-                    refDir.X = 1;
-                    refDir.Y = 0;
-                    refDir.Z = 0;
-                });
-                placement.Axis = model.Instances.New<IfcDirection>(dir =>
-                {
-                    dir.X = 0;
-                    dir.Y = 0;
-                    dir.Z = 1;
-                });
+            // Arrange
+            using var model = MemoryModel.OpenRead(filePath);
+            var referents = model.Instances.OfType<IIfcReferent>()
+                .OrderBy(p => (((p.ObjectPlacement as IfcLinearPlacement).RelativePlacement.Location as IfcPointByDistanceExpression).DistanceAlong as IfcMeasureValue).Value);
+           
+            var modelSvc = _factory.CreateModelGeometryService(model, _loggerFactory);
 
-            });
-            return pointByDistanceExpression;
+            // Act
+            var locations = new List<IXLocation>();
+            foreach (var referent in referents) {
+
+                var location = modelSvc.GeometryFactory.BuildLocation(referent.ObjectPlacement);
+                location.Should().NotBeNull();
+                locations.Add(location);
+            }
+
+            // Assert
+            const double tolerance = 1e-3;
+            var translations = locations.Select(loc => loc.Translation).ToList();
+            for (int i = 1; i < translations.Count; i++)
+            {
+                var currentZ = translations[i].Z;
+                var previousZ = translations[i - 1].Z;
+                double difference = currentZ - previousZ;
+                bool isDecreasingWithinTolerance = difference <= tolerance;
+                isDecreasingWithinTolerance.Should().BeTrue("The gradient curve has a decreasing elevations along");
+            }
         }
 
-        private static IfcPointByDistanceExpression CreatePointByDistanceExpression
-                  (double radius, double semiCircleEndAngle, IfcCurveMeasureSelect distanceAlong, MemoryModel model)
-        {
-            var pointByDistanceExpression = model.Instances.New<IfcPointByDistanceExpression>(point =>
-            {
-                point.DistanceAlong = distanceAlong;
-                point.BasisCurve = model.Instances.New<IfcTrimmedCurve>(curve =>
-                {
-                    curve.BasisCurve = model.Instances.New<IfcCircle>(circle =>
-                    {
-                        circle.Radius = radius;
-                        circle.Position = model.Instances.New<IfcAxis2Placement3D>(placement =>
-                        {
-
-                            placement.Axis = model.Instances.New<IfcDirection>(dir =>
-                            {
-                                dir.X = 0;
-                                dir.Y = 0;
-                                dir.Z = 1;
-                            });
-                            placement.RefDirection = model.Instances.New<IfcDirection>(refDir =>
-                            {
-                                refDir.X = 1;
-                                refDir.Y = 0;
-                                refDir.Z = 0;
-                            });
-                            placement.Location = model.Instances.New<IfcCartesianPoint>(p =>
-                            {
-                                p.X = 0;
-                                p.Y = 0;
-                                p.Z = 0;
-                            });
-                        });
-                    });
-                    curve.MasterRepresentation = Ifc4x3.GeometryResource.IfcTrimmingPreference.PARAMETER;
-                    curve.SenseAgreement = true;
-                    curve.Trim1.Add(new IfcParameterValue(0));
-                    curve.Trim2.Add(new IfcParameterValue(semiCircleEndAngle));
-                });
-            });
-            return pointByDistanceExpression;
-        }
     }
 
 }

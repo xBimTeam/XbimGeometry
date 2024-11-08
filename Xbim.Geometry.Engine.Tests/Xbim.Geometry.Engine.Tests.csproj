@@ -127,6 +127,36 @@
 		<None Update="TestFiles\Github\Github_issue_473_minimal.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\IFC4x3\01 - ACCA - RFI - Track - Cancello - San Felice a Cancello.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\ACCA_sleepers-linear-placement-cant-explicit.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\ACCA_sleepers-linear-placement-cant-implicit.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\DirectrixDerivedReferenceSweptAreaSolid-2.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\GENERATED__Bloss_100.0_inf_300_1_Meter.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\GENERATED__INDEXEDPOLYCURVE__CantAlignment_SineCurve_100.0_inf_300_1_Meter.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\PlacmentOfSignal.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\SectionedSolidHorizontal-1.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\test.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\Viadotto Acerno.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\IfcExamples\beam-standard-case.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
