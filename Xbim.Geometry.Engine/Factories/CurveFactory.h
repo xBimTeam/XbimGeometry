@@ -17,6 +17,7 @@
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_Clothoid.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_PolynomialSpiral.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_SineSpiral.h"
+#include "../BRep/OccExtensions/Curves/Segments/Geom2d_CosineSpiral.h"
 
 #include "../BRep/OccExtensions/Curves/Geom_GradientCurve.h"
 #include "../BRep/OccExtensions/Curves/Geom_SegmentedReferenceCurve.h"
@@ -118,6 +119,7 @@ namespace Xbim
 				Handle(Geom2d_PolynomialSpiral) BuildPolynomialSpiral(Ifc4x3::GeometryResource::IfcThirdOrderPolynomialSpiral^ polynomialSpiral, Standard_Real startParam, Standard_Real endParam);
 				Handle(Geom2d_PolynomialSpiral) BuildPolynomialSpiral(Ifc4x3::GeometryResource::IfcSeventhOrderPolynomialSpiral^ polynomialSpiral, Standard_Real startParam, Standard_Real endParam);
 				Handle(Geom2d_SineSpiral) BuildSineSpiral(Ifc4x3::GeometryResource::IfcSineSpiral^ sineSpiral, Standard_Real startParam, Standard_Real endParam);
+				Handle(Geom2d_CosineSpiral) BuildCosineSpiral(Ifc4x3::GeometryResource::IfcCosineSpiral^ cosineSpiral, Standard_Real startParam, Standard_Real endParam);
 
 #pragma endregion
 

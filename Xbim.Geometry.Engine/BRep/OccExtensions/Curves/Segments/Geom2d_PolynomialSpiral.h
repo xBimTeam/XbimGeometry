@@ -166,6 +166,7 @@ private:
         gp_Pnt2d pntLocal(x, y);
         gp_Trsf2d transform;
         transform.SetTransformation(_placement.XAxis());
+        transform.Invert();
         P = pntLocal.Transformed(transform);
 
         if (V1 || V2) {

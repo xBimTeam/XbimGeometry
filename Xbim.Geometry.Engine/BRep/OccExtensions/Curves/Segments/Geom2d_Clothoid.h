@@ -164,10 +164,10 @@ private:
 		gp_Pnt2d pntLocal(x, y);
 
 
-		gp_Trsf2d transform2d;
-		transform2d.SetTransformation(_placement.XAxis());
-		transform2d.Invert();
-		P = pntLocal.Transformed(transform2d);
+		gp_Trsf2d transform;
+		transform.SetTransformation(_placement.XAxis());
+		transform.Invert();
+		P = pntLocal.Transformed(transform);
 
 		if (V1 || V2) 
 		{
@@ -178,7 +178,7 @@ private:
 			Standard_Real dyds = sin(theta);
 			gp_Vec2d tangentLocal(dxds, dyds);
 
-			gp_Vec2d tangent = tangentLocal.Transformed(transform2d);
+			gp_Vec2d tangent = tangentLocal.Transformed(transform);
 			tangent.Normalize();
 			if (V1) {
 				*V1 = tangent;
@@ -190,7 +190,7 @@ private:
 				Standard_Real ddxds = -dtheta_ds * sin(theta);
 				Standard_Real ddyds = dtheta_ds * cos(theta);
 				gp_Vec2d normalLocal(ddxds, ddyds);
-				gp_Vec2d normal = normalLocal.Transformed(transform2d);
+				gp_Vec2d normal = normalLocal.Transformed(transform);
 				normal.Normalize();
 				*V2 = normal;
 			}

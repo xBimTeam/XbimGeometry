@@ -13,21 +13,19 @@
 #include <algorithm>
 #include <cmath>
 
-class Geom2d_SineSpiral;
-DEFINE_STANDARD_HANDLE(Geom2d_SineSpiral, Geom2d_Spiral)
+class Geom2d_CosineSpiral;
+DEFINE_STANDARD_HANDLE(Geom2d_CosineSpiral, Geom2d_Spiral)
 
-class Geom2d_SineSpiral : public Geom2d_Spiral {
+class Geom2d_CosineSpiral : public Geom2d_Spiral {
 public:
-	Geom2d_SineSpiral(
+	Geom2d_CosineSpiral(
 		const gp_Ax22d& placement,
-		Standard_Real SineTerm,
-		Standard_Real LinearTerm = 0.0,
+		Standard_Real CosineTerm,
 		Standard_Real ConstantTerm = 0.0,
 		Standard_Real firstParam = 0.0,
 		Standard_Real lastParam = 1.0)
 		: _placement(placement),
-		_sineTerm(SineTerm),
-		_linearTerm(LinearTerm),
+		_cosineTerm(CosineTerm),
 		_constantTerm(ConstantTerm),
 		_startParam(firstParam),
 		_endParam(lastParam)
@@ -87,7 +85,7 @@ public:
 			return V2;
 		}
 		else {
-			Standard_NotImplemented::Raise("Geom2d_SineSpiral::DN not implemented for N > 2");
+			Standard_NotImplemented::Raise("Geom2d_CosineSpiral::DN not implemented for N > 2");
 			return gp_Vec2d();
 		}
 	}
@@ -117,7 +115,7 @@ public:
 	}
 
 	virtual void Reverse() override {
-		Standard_NotImplemented::Raise("Geom2d_SineSpiral::Reverse not implemented");
+		Standard_NotImplemented::Raise("Geom2d_CosineSpiral::Reverse not implemented");
 	}
 
 	virtual Standard_Real ReversedParameter(Standard_Real U) const override {
@@ -134,7 +132,7 @@ public:
 	}
 
 	virtual Handle(Geom2d_Geometry) Copy() const override {
-		return new Geom2d_SineSpiral(_placement, _sineTerm, _linearTerm, _constantTerm, _startParam, _endParam);
+		return new Geom2d_CosineSpiral(_placement, _cosineTerm, _constantTerm, _startParam, _endParam);
 	}
 
 	virtual gp_Pnt2d StartPoint() const override {
@@ -152,19 +150,17 @@ public:
 	Standard_Real GetCurvatureAt(Standard_Real s) const {
 		auto sign = [](double v) -> double { return v ? v / fabs(v) : 1.0; };
 		auto firstTerm = _constantTerm != 0 ? _length / _constantTerm : 0.0;
-		auto secondTerm = _linearTerm != 0 ? sign(_linearTerm) * pow(_length / (_linearTerm), 2.0) * (s / _length) : 0.0;
-		auto thirdTerm = (_length / (_sineTerm)) * sin(2 * M_PI * s / _length);
-		return firstTerm + secondTerm + thirdTerm;
+		auto secondTerm = (_length / (_cosineTerm)) * cos(M_PI * s / _length);
+		return firstTerm + secondTerm;
 	}
 
 	Standard_Integer GetIntervalsCount() const override {
 		return _integrationSteps;
-    }
+	}
 
 private:
 	gp_Ax22d _placement;
-	Standard_Real _sineTerm;
-	Standard_Real _linearTerm;
+	Standard_Real _cosineTerm;
 	Standard_Real _constantTerm;
 	Standard_Real _startParam;
 	Standard_Real _endParam;
@@ -174,11 +170,9 @@ private:
 	Standard_Real GetHeadingAt(Standard_Real s) const {
 		auto sign = [](double v) -> double { return v ? v / fabs(v) : 1.0; };
 		auto firstTerm = _constantTerm != 0 ? s / _constantTerm : 0.0;
-		auto secondTerm = _linearTerm != 0 ? 0.5 * sign(_linearTerm) * pow(s / (_linearTerm), 2.0) : 0.0;
-		auto thirdTerm = -1 * (_length / (2 * M_PI * _sineTerm)) * (cos(2 * M_PI * s / _length) - 1);
-		return firstTerm + secondTerm + thirdTerm;
+		auto secondTerm = (_length / (M_PI * _cosineTerm)) * sin(M_PI * s / _length);
+		return firstTerm + secondTerm;
 	}
-
 
 	void Evaluate(Standard_Real s, Standard_Real& x, Standard_Real& y) const {
 		s = std::clamp(s, _startParam, _endParam);

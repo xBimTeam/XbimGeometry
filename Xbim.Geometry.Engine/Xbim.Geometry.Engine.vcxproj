@@ -194,6 +194,7 @@
     <ClInclude Include="BRep\OccExtensions\Curves\Geom_GradientCurve.h" />
     <ClInclude Include="BRep\OccExtensions\Curves\Geom_SegmentedReferenceCurve.h" />
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Clothoid.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_CosineSpiral.h" />
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_SineSpiral.h" />
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Spiral.h" />
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_PolynomialSpiral.h" />

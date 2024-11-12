@@ -94,7 +94,7 @@ namespace Xbim
 			IXCurve^ CurveFactory::BuildSpiral(Ifc4x3::GeometryResource::IfcSpiral^ curve, double startParam, double endParam)
 			{
 				Geom2d_Spiral::IntegrationSteps = (int)((endParam - startParam) / _modelService->OneMeter);
-				Handle(Geom2d_BoundedCurve) spiralCurve = BuildBoundedSpiral(curve, startParam, endParam);
+				Handle(Geom2d_Curve) spiralCurve = EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedSpiral(curve, startParam, endParam));
 				XCurveType curveType;
 				return BuildXCurve(spiralCurve, curveType);
 			}
@@ -561,14 +561,14 @@ namespace Xbim
 
 
 			TopoDS_Edge CurveFactory::Convert2dToEdge(const Handle(Geom2d_Curve)& clothoid2d) {
-				Standard_Integer numPoints = 1000;
+				Standard_Integer numPoints = 100;
 				Standard_Real firstParam = clothoid2d->FirstParameter();
 				Standard_Real lastParam = clothoid2d->LastParameter();
 
-				TColgp_Array1OfPnt points3d(1, numPoints);
+				TColgp_Array1OfPnt points3d(0, numPoints - 1);
 
-				for (Standard_Integer i = 1; i <= numPoints; ++i) {
-					Standard_Real U = firstParam + (lastParam - firstParam) * (i - 1) / (numPoints - 1);
+				for (Standard_Integer i = 0; i < numPoints; ++i) {
+					Standard_Real U = firstParam + ((lastParam - firstParam) / numPoints) * i;
 					gp_Pnt2d P2d;
 					clothoid2d->D0(U, P2d);
 					gp_Pnt P3d(P2d.X(), P2d.Y(), 0.0); // Map to 3D by adding Z = 0
@@ -581,20 +581,20 @@ namespace Xbim
 				return edge;
 			}
 
-			TopoDS_Edge CurveFactory::ConvertToEdge(const Handle(Geom_Curve)& clothoid2d, Standard_Integer numPoints) {
-				Standard_Real firstParam = clothoid2d->FirstParameter();
-				Standard_Real lastParam = clothoid2d->LastParameter();
+			TopoDS_Edge CurveFactory::ConvertToEdge(const Handle(Geom_Curve)& curve, Standard_Integer numPoints) {
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
 
-				TColgp_Array1OfPnt points3d(1, numPoints);
+				TColgp_Array1OfPnt points(0, numPoints - 1);
 
-				for (Standard_Integer i = 1; i <= numPoints; ++i) {
-					Standard_Real U = firstParam + (lastParam - firstParam) * (i - 1) / (numPoints - 1);
-					gp_Pnt P2d;
-					clothoid2d->D0(U, P2d);
-					points3d.SetValue(i, P2d);
+				for (Standard_Integer i = 0; i < numPoints; ++i) {
+					Standard_Real U = firstParam + ((lastParam - firstParam) / numPoints) * i;
+					gp_Pnt P;
+					curve->D0(U, P);
+					points.SetValue(i, P);
 				}
 
-				Handle(Geom_BSplineCurve) bsplineCurve3d = GeomAPI_PointsToBSpline(points3d);
+				Handle(Geom_BSplineCurve) bsplineCurve3d = GeomAPI_PointsToBSpline(points);
 				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(bsplineCurve3d);
 
 				return edge;
@@ -630,7 +630,7 @@ namespace Xbim
 					if (curve2d.IsNull()) {
 						continue;
 					}
-					int n = (curve2d.get()->LastParameter() - curve2d.get()->FirstParameter()) / (100 * _modelService->OneMillimeter);
+					int n = (int)((curve2d.get()->LastParameter() - curve2d.get()->FirstParameter()) / (100 * _modelService->OneMillimeter));
 					TopoDS_Edge edge = ConvertToEdge(curve2d, n);;
 					builder.Add(compound, edge);
 				}
@@ -1104,9 +1104,11 @@ namespace Xbim
 							= dynamic_cast<Ifc4x3::GeometryResource::IfcSineSpiral^>(ifcSpiral);
 						return BuildSineSpiral(sineSpiral, startParam, endParam);
 					}
-
-					case XCurveType::IfcCosineSpiral:
-						throw RaiseGeometryFactoryException("Spiral curve type not supported yet", ifcSpiral);
+					case XCurveType::IfcCosineSpiral: {
+						Ifc4x3::GeometryResource::IfcCosineSpiral^ cosineSpiral
+							= dynamic_cast<Ifc4x3::GeometryResource::IfcCosineSpiral^>(ifcSpiral);
+						return BuildCosineSpiral(cosineSpiral, startParam, endParam);
+					}
 					default:
 						throw RaiseGeometryFactoryException("Unknown spiral curve type", ifcSpiral);
 				}
@@ -1133,33 +1135,30 @@ namespace Xbim
 
 				Handle(Geom2d_SineSpiral) spiral = new Geom2d_SineSpiral(position, sineTerm, linearTerm, constantTerm, startParam, endParam);
 
+				return spiral;
+			}
 
-				int numPoints = 1000;
-				TColgp_Array1OfPnt2d points(1, numPoints);
-				Standard_Real firstParam = spiral->FirstParameter();
-				Standard_Real lastParam = spiral->LastParameter();
+			Handle(Geom2d_CosineSpiral) CurveFactory::BuildCosineSpiral(Ifc4x3::GeometryResource::IfcCosineSpiral^ cosineSpiral, Standard_Real startParam, Standard_Real endParam)
+			{
 
-				for (Standard_Integer i = 1; i <= numPoints; ++i) {
-					Standard_Real U = firstParam + (lastParam - firstParam) * (i - 1) / (numPoints - 1);
-					gp_Pnt2d P;
-					spiral->D0(U, P);
-					points.SetValue(i, P);
-				}
+				gp_Ax22d position;
+				IIfcAxis2Placement2D^ placement = dynamic_cast<IIfcAxis2Placement2D^>(cosineSpiral->Position);
 
-				Geom2dAPI_PointsToBSpline curveBuilder(points);
-				Handle(Geom2d_BSplineCurve) approximate = curveBuilder.Curve();
+				if (placement == nullptr)
+					throw RaiseGeometryFactoryException("Coine Spirals must have a Axis2Placement2D placement", cosineSpiral);
+
+				Standard_Real constantTerm = cosineSpiral->ConstantTerm.HasValue
+					? (Standard_Real)cosineSpiral->ConstantTerm.Value.Value
+					: 0;
 				 
-				auto edge = Convert2dToEdge(approximate);
-				std::ostringstream oss;
-				oss << "DBRep_DrawableShape" << std::endl;
-				BRepTools::Write(edge, oss);
-				std::ofstream outFile("C:/Users/ibrah/OneDrive/Desktop/sine spiral.brep");
-				outFile << oss.str();
-				outFile.close();
 
+				Standard_Real cosineTerm = (Standard_Real)cosineSpiral->CosineTerm.Value;
+
+				Handle(Geom2d_CosineSpiral) spiral = new Geom2d_CosineSpiral(position, cosineTerm, constantTerm, startParam, endParam);
 
 				return spiral;
 			}
+
 
 			Handle(Geom2d_PolynomialSpiral) CurveFactory::BuildPolynomialSpiral(Ifc4x3::GeometryResource::IfcSecondOrderPolynomialSpiral^ polynomialSpiral, Standard_Real startParam, Standard_Real endParam)
 			{

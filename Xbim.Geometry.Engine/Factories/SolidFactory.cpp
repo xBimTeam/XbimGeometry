@@ -289,7 +289,6 @@ namespace Xbim
 
 				if (startLen && endLen)
 				{
-					XCurveType curveType;
 					spine = CURVE_FACTORY->BuildCurve(directrixDerivedReferenceSweptAreaSolid->Directrix);
 					firstParam = static_cast<double>(startLen->Value);
 					lastParam = static_cast<double>(endLen->Value);
@@ -307,7 +306,7 @@ namespace Xbim
 				int n = (int)((lastParam - firstParam) / step);
 				auto segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(spine);
 				
-				for (size_t i = 0; i <= n; i++)
+				for (int i = 0; i <= n; i++)
 				{
 					gp_Pnt loc;
 					gp_Vec normal;
