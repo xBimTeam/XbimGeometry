@@ -14,6 +14,7 @@
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <vector>
+#include "../BRep/OccExtensions/Curves/Segments/Geom2d_Polynomial.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_Clothoid.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_PolynomialSpiral.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_SineSpiral.h"
@@ -44,6 +45,7 @@ namespace Xbim
 				virtual IXCurve^ Build(IIfcCurve^ curve);
 				virtual IXCurve^ BuildDirectrix(IIfcCurve^ curve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 				virtual IXCurve^ BuildSpiral(Ifc4x3::GeometryResource::IfcSpiral^ curve, double startParam, double endParam);
+				virtual IXCurve^ BuildPolynomialCurve2d(Ifc4x3::GeometryResource::IfcPolynomialCurve^ curve, double startParam, double endParam);
 
 			internal:
 				virtual IXCurve^ BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType);
@@ -112,8 +114,9 @@ namespace Xbim
 				Handle(Geom2d_Curve) BuildCurve2d(IIfcSurfaceCurve^ ifcPolyline);
 				Handle(Geom2d_TrimmedCurve) BuildCurve2d(IIfcTrimmedCurve^ ifcTrimmedCurve);
 				
-				
-				Handle(Geom2d_BoundedCurve) BuildBoundedSpiral(Ifc4x3::GeometryResource::IfcSpiral^ spiral, Standard_Real startParam, Standard_Real endParam);
+				Handle(Geom2d_Polynomial) BuildBoundedPolynomialCurve
+					(Ifc4x3::GeometryResource::IfcPolynomialCurve^ curve, Standard_Real startParam, Standard_Real endParam);
+				Handle(Geom2d_Spiral) BuildBoundedSpiral(Ifc4x3::GeometryResource::IfcSpiral^ spiral, Standard_Real startParam, Standard_Real endParam, XCurveType& curveType);
 				Handle(Geom2d_Clothoid) BuildClothoid(Ifc4x3::GeometryResource::IfcClothoid^ clothoid, Standard_Real startParam, Standard_Real endParam);
 				Handle(Geom2d_PolynomialSpiral) BuildPolynomialSpiral(Ifc4x3::GeometryResource::IfcSecondOrderPolynomialSpiral^ polynomialSpiral, Standard_Real startParam, Standard_Real endParam);
 				Handle(Geom2d_PolynomialSpiral) BuildPolynomialSpiral(Ifc4x3::GeometryResource::IfcThirdOrderPolynomialSpiral^ polynomialSpiral, Standard_Real startParam, Standard_Real endParam);

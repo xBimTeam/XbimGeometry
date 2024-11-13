@@ -31,9 +31,9 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
         }
 
         [Theory]
-        [InlineData(-207.019667802706, SpiralType.ClothoidCurve_300_1000, -142.857142857143, 100)]
-        [InlineData(173.205080756888, SpiralType.ClothoidCurve_neg300_negInf, -100, 100)]
-        public void CanBuildClothoid(double clothoidConstant, SpiralType type, double firstParam, double length)
+        [InlineData(-207.019667802706, SegmentType.ClothoidCurve_300_1000, -142.857142857143, 100)]
+        [InlineData(173.205080756888, SegmentType.ClothoidCurve_neg300_negInf, -100, 100)]
+        public void CanBuildClothoid(double clothoidConstant, SegmentType type, double firstParam, double length)
         {
             // Arrange
             using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
@@ -68,7 +68,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
             // Assert
             xClothoid.Should().NotBeNull();
 
-            foreach (var location in SpiralsData.GetPoints(type))
+            foreach (var location in CurveSegmentData.GetPoints(type))
             {
                 var point = xClothoid.GetPoint(location.Key + xClothoid.FirstParameter);
                 point.X.Should().BeApproximately(location.Value.X, Precision);
@@ -117,8 +117,8 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
         [Theory]
-        [InlineData(-110.668191970032, 100, SpiralType.BlossCurve_inf_300)]
-        public void CanBuildThirdOrderPolynomialSpiral(double cubicTerm, double quadraticTerm, SpiralType spiralType)
+        [InlineData(-110.668191970032, 100, SegmentType.BlossCurve_inf_300)]
+        public void CanBuildThirdOrderPolynomialSpiral(double cubicTerm, double quadraticTerm, SegmentType spiralType)
         {
             // Arrange
             using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
@@ -152,7 +152,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
             // Assert
             xSpiral.Should().NotBeNull();
-            foreach (var location in SpiralsData.GetPoints(spiralType))
+            foreach (var location in CurveSegmentData.GetPoints(spiralType))
             {
                 var point = xSpiral.GetPoint(location.Key);
                 point.X.Should().BeApproximately(location.Value.X, Precision);
@@ -162,13 +162,13 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
         [Theory]
-        [InlineData(82.48484305114, -67.097076273516, 61.2742234216927, -68.9807356362507, -91.7493208218373, 141.521951256265, null, 300.0, SpiralType.VienneseBend_300_1000)]
-        [InlineData(78.8880838459446, -63.7638813456506, 57.7378785242934, -64.2314061308743, -83.922298125931, 125.657906854859, null, 300.0, SpiralType.VienneseBend_300_inf)]
-        [InlineData(78.8880838459446, -63.7638813456506, 57.7378785242934, -64.2314061308743, -83.922298125931, 125.657906854859, null, null, SpiralType.VienneseBend_negInf_neg300)]
+        [InlineData(82.48484305114, -67.097076273516, 61.2742234216927, -68.9807356362507, -91.7493208218373, 141.521951256265, null, 300.0, SegmentType.VienneseBend_300_1000)]
+        [InlineData(78.8880838459446, -63.7638813456506, 57.7378785242934, -64.2314061308743, -83.922298125931, 125.657906854859, null, 300.0, SegmentType.VienneseBend_300_inf)]
+        [InlineData(78.8880838459446, -63.7638813456506, 57.7378785242934, -64.2314061308743, -83.922298125931, 125.657906854859, null, null, SegmentType.VienneseBend_negInf_neg300)]
         public void CanBuildSeventhOrderPolynomialSpiral
             (double septicTerm, double? sexticTerm, double? quinticTerm, 
             double? quarticTerm, double? cubicTerm, double? quadraticTerm, 
-            double? linearTerm, double? constantTerm, SpiralType spiralType)
+            double? linearTerm, double? constantTerm, SegmentType spiralType)
         {
             // Arrange
             using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
@@ -209,7 +209,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
             // Assert
             xSpiral.Should().NotBeNull();
-            foreach (var location in SpiralsData.GetPoints(spiralType))
+            foreach (var location in CurveSegmentData.GetPoints(spiralType))
             {
                 var point = xSpiral.GetPoint(location.Key);
                 point.X.Should().BeApproximately(location.Value.X, Precision);
@@ -219,10 +219,10 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
         [Theory]
-        [InlineData(-1884.95559215388, 173.205080756888, 0, SpiralType.SineCurve_inf_300)]
-        [InlineData(-2692.79370307697, 207.019667802706, 1000, SpiralType.SineCurve_1000_300)]
-        [InlineData(-1884.95559215388, 173.205080756888, -300, SpiralType.SineCurve_neg300_negInf)]
-        public void CanBuildSineSpiral(double sineTerm, double linearTerm, double constantTerm, SpiralType spiralType)
+        [InlineData(-1884.95559215388, 173.205080756888, 0, SegmentType.SineCurve_inf_300)]
+        [InlineData(-2692.79370307697, 207.019667802706, 1000, SegmentType.SineCurve_1000_300)]
+        [InlineData(-1884.95559215388, 173.205080756888, -300, SegmentType.SineCurve_neg300_negInf)]
+        public void CanBuildSineSpiral(double sineTerm, double linearTerm, double constantTerm, SegmentType spiralType)
         {
             // Arrange
             using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
@@ -258,7 +258,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
             // Assert
             xSpiral.Should().NotBeNull();
-            foreach (var location in SpiralsData.GetPoints(spiralType))
+            foreach (var location in CurveSegmentData.GetPoints(spiralType))
             {
                 var point = xSpiral.GetPoint(location.Key);
                 point.X.Should().BeApproximately(location.Value.X, Precision);
@@ -268,9 +268,9 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
         [Theory]
-        [InlineData(857.142857142857, -461.538461538462, SpiralType.CosineCurve_neg1000_neg300)]
-        [InlineData(-600, -600, SpiralType.CosineCurve_neg300_negInf)]
-        public void CanBuildCosineSpiral(double cosineTerm, double constantTerm, SpiralType spiralType)
+        [InlineData(857.142857142857, -461.538461538462, SegmentType.CosineCurve_neg1000_neg300)]
+        [InlineData(-600, -600, SegmentType.CosineCurve_neg300_negInf)]
+        public void CanBuildCosineSpiral(double cosineTerm, double constantTerm, SegmentType spiralType)
         {
             // Arrange
             using MemoryModel model = new MemoryModel(new EntityFactoryIfc4x3Add2());
@@ -305,7 +305,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
             // Assert
             xSpiral.Should().NotBeNull();
-            foreach (var location in SpiralsData.GetPoints(spiralType))
+            foreach (var location in CurveSegmentData.GetPoints(spiralType))
             {
                 var point = xSpiral.GetPoint(location.Key);
                 point.X.Should().BeApproximately(location.Value.X, Precision);

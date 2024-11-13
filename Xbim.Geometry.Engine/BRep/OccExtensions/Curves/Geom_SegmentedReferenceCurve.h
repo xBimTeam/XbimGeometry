@@ -9,6 +9,7 @@
 #include "./Geom_ConvertibleToBSpline.h"
 #include "./Geom_GradientCurve.h"
 #include "./Segments/Geom2d_Spiral.h"
+#include "./Segments/Geom2d_Polynomial.h"
 
 
 class Geom_SegmentedReferenceCurve;
@@ -278,11 +279,24 @@ public:
         auto currentLoc = _superElevationFunction[segmentIndex].second;
         auto currentRateOfChange = _superElevationFunction[segmentIndex].first;
         Handle(Geom2d_Spiral) spiral = Handle(Geom2d_Spiral)::DownCast(currentRateOfChange);
+        Handle(Geom2d_Polynomial) polynomial = Handle(Geom2d_Polynomial)::DownCast(currentRateOfChange);
 
         Standard_Real startTilt = GetRotationAroundX(currentLoc);
-        Standard_Real delta1 = spiral ? spiral->GetCurvatureAt(spiral->FirstParameter()) : 0;
-        Standard_Real delta2 = spiral ? spiral->GetCurvatureAt(spiral->LastParameter()) : 0;
+        Standard_Real delta1 = 0;
+        Standard_Real delta2 = 0;
         Standard_Real deltaCurrent = spiral ? spiral->GetCurvatureAt(x_value - spiral->Placement().Location().X()) : 0;
+
+        if (spiral) {
+            delta1 = spiral->GetCurvatureAt(spiral->FirstParameter());
+            delta2 = spiral->GetCurvatureAt(spiral->LastParameter());
+            Standard_Real deltaCurrent = spiral->GetCurvatureAt(x_value - spiral->Placement().Location().X());
+        }
+        else if (polynomial)
+        {
+            delta1 = polynomial->GetCurvatureAt(polynomial->FirstParameter());
+            delta2 = polynomial->GetCurvatureAt(polynomial->LastParameter());
+            Standard_Real deltaCurrent = polynomial->GetCurvatureAt(x_value - polynomial->Placement().Location().X());
+        }
 
         Standard_Real startSuperElevation = currentLoc.Transformation().TranslationPart().Y();
 
@@ -301,7 +315,7 @@ public:
             Standard_Real currentTilt;
             Standard_Real currentSuperElevation;
 
-            if (spiral.IsNull() || fabs(denominator) < epsilon) {
+            if (spiral.IsNull() || polynomial.IsNull() || fabs(denominator) < epsilon) {
                 currentTilt = startTilt;
                 currentSuperElevation = startSuperElevation;
             }
@@ -321,7 +335,7 @@ public:
             Standard_Real currentTilt;
             Standard_Real currentSuperElevation;
 
-            if (spiral.IsNull() || fabs(denominator) < epsilon) {
+            if (spiral.IsNull() || polynomial.IsNull() || fabs(denominator) < epsilon) {
                 currentTilt = startTilt;
                 currentSuperElevation = startSuperElevation;
             }

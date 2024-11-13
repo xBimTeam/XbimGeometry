@@ -37,6 +37,10 @@ public:
 			Standard_DomainError::Raise("lastParam must be greater than firstParam.");
 		}
 		_length = _endParam - _startParam;
+		gp_Trsf2d transform;
+		transform.SetTransformation(_placement.XAxis());
+		transform.Invert();
+		_placementTrsf = transform;
 	}
 
 
@@ -51,20 +55,14 @@ public:
 		D0(U, P);
 		Standard_Real theta = GetHeadingAt(U);
 		V1.SetCoord(std::cos(theta), std::sin(theta));
-		gp_Trsf2d transform;
-		transform.SetTransformation(_placement.XAxis());
-		transform.Invert();
-		V1.Transform(transform);
+		V1.Transform(_placementTrsf);
 	}
 
 	virtual void D2(Standard_Real U, gp_Pnt2d& P, gp_Vec2d& V1, gp_Vec2d& V2) const override {
 		D1(U, P, V1);
 		Standard_Real K = GetCurvatureAt(U);
 		V2.SetCoord(-K * V1.Y(), K * V1.X());
-		gp_Trsf2d transform;
-		transform.SetTransformation(_placement.XAxis());
-		transform.Invert();
-		V2.Transform(transform);
+		V2.Transform(_placementTrsf);
 	}
 
 	virtual void D3(Standard_Real U, gp_Pnt2d& P, gp_Vec2d& V1, gp_Vec2d& V2, gp_Vec2d& V3) const override {
@@ -126,6 +124,10 @@ public:
 
 	virtual void Transform(const gp_Trsf2d& T) override {
 		_placement.Transform(T);
+		gp_Trsf2d transform;
+		transform.SetTransformation(_placement.XAxis());
+		transform.Invert();
+		_placementTrsf = transform;
 	}
 
 
@@ -163,6 +165,7 @@ public:
 
 private:
 	gp_Ax22d _placement;
+	gp_Trsf2d _placementTrsf;
 	Standard_Real _sineTerm;
 	Standard_Real _linearTerm;
 	Standard_Real _constantTerm;
@@ -203,10 +206,7 @@ private:
 		y = (ds / 3.0) * sumY;
 
 		gp_Pnt2d P(x, y);
-		gp_Trsf2d transform;
-		transform.SetTransformation(_placement.XAxis());
-		transform.Invert();
-		P.Transform(transform);
+		P.Transform(_placementTrsf);
 		x = P.X();
 		y = P.Y();
 	}

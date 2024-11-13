@@ -498,6 +498,15 @@
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_SineSpiral.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_CosineSpiral.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Polynomial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BRep\XSpiral.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XbimCompound.cpp">
@@ -867,6 +876,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\ModelPlacementBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BRep\XSpiral.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

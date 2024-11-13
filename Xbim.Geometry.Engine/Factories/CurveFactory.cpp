@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "../BRep/XLine.h"
+#include "../BRep/XSpiral.h"
 #include "../BRep/XLine2d.h"
 #include "../BRep/XCircle.h"
 #include "../BRep/XCircle2d.h"
@@ -17,6 +18,7 @@
 #include "../BRep/XTrimmedCurve2d.h"
 #include "../BRep/XBSplineCurve.h"
 #include "../BRep/OccExtensions/Curves/Segments/Geom2d_Spiral.h"
+#include "../BRep/OccExtensions/Curves/Segments/Geom2d_Polynomial.h"
 
 #include "TColgp_Array1OfPnt2d.hxx"
 #include "TColStd_Array1OfReal.hxx"
@@ -94,11 +96,16 @@ namespace Xbim
 			IXCurve^ CurveFactory::BuildSpiral(Ifc4x3::GeometryResource::IfcSpiral^ curve, double startParam, double endParam)
 			{
 				Geom2d_Spiral::IntegrationSteps = (int)((endParam - startParam) / _modelService->OneMeter);
-				Handle(Geom2d_Curve) spiralCurve = EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedSpiral(curve, startParam, endParam));
-				XCurveType curveType;
-				return BuildXCurve(spiralCurve, curveType);
+				XCurveType spiralType;
+				Handle(Geom2d_Curve) spiralCurve = EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedSpiral(curve, startParam, endParam, spiralType));
+				return gcnew XCurve2d(spiralCurve, spiralType);
 			}
 
+			IXCurve^ CurveFactory::BuildPolynomialCurve2d(Ifc4x3::GeometryResource::IfcPolynomialCurve^ curve, double startParam, double endParam) 
+			{
+				Geom2d_Spiral::IntegrationSteps = (int)((endParam - startParam) / _modelService->OneMeter);
+				return gcnew XCurve2d(EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedPolynomialCurve(curve, startParam, endParam)), XCurveType::IfcPolynomialCurve);
+			}
 
 			IXCurve^ CurveFactory::BuildXCurve(Handle(Geom_Curve) curve, XCurveType curveType)
 			{
@@ -149,13 +156,7 @@ namespace Xbim
 					case XCurveType::IfcPolyline:
 					case XCurveType::IfcRationalBSplineCurveWithKnots:
 					case XCurveType::IfcSurfaceCurve:
-					// Spirals
-					case XCurveType::IfcClothoid:
-					case XCurveType::IfcSecondOrderPolynomialSpiral:
-					case XCurveType::IfcThirdOrderPolynomialSpiral:
-					case XCurveType::IfcSeventhOrderPolynomialSpiral:
-					case XCurveType::IfcCosineSpiral:
-					case XCurveType::IfcSineSpiral:
+					
 					default:
 						return gcnew XCurve2d(curve, curveType);
 				}
@@ -561,7 +562,7 @@ namespace Xbim
 
 
 			TopoDS_Edge CurveFactory::Convert2dToEdge(const Handle(Geom2d_Curve)& clothoid2d) {
-				Standard_Integer numPoints = 100;
+				Standard_Integer numPoints = 1000;
 				Standard_Real firstParam = clothoid2d->FirstParameter();
 				Standard_Real lastParam = clothoid2d->LastParameter();
 
@@ -1071,9 +1072,43 @@ namespace Xbim
 #pragma region Spirals
 
 
-			Handle(Geom2d_BoundedCurve) CurveFactory::BuildBoundedSpiral(Ifc4x3::GeometryResource::IfcSpiral^ ifcSpiral, Standard_Real startParam, Standard_Real endParam)
+			Handle(Geom2d_Polynomial) CurveFactory::BuildBoundedPolynomialCurve
+				(Ifc4x3::GeometryResource::IfcPolynomialCurve^ curve, Standard_Real startParam, Standard_Real endParam)
 			{
-				XCurveType curveType;
+				if (!curve->CoefficientsX || !curve->CoefficientsY) {
+					throw RaiseGeometryFactoryException("CoefficientsX and CoefficientsY must be defined", curve);
+				}
+				gp_Ax22d position;
+				IIfcAxis2Placement2D^ placement = dynamic_cast<IIfcAxis2Placement2D^>(curve->Position);
+
+				if (placement == nullptr)
+					throw RaiseGeometryFactoryException("Polynomial curves must have a Axis2Placement2D placement", curve);
+
+				GEOMETRY_FACTORY->BuildAxis2Placement2d(placement, position);
+
+				std::vector<Standard_Real> coeffX;
+				std::vector<Standard_Real> coeffY;
+
+				for (int i = 0; i < curve->CoefficientsX->Count; i++)
+				{
+					coeffX.push_back(curve->CoefficientsX[i]);
+				}
+
+				for (int i = 0; i < curve->CoefficientsY->Count; i++)
+				{
+					coeffY.push_back(curve->CoefficientsY[i]);
+				}
+
+				Handle(Geom2d_Polynomial) polyCurve = new Geom2d_Polynomial(position, coeffX, coeffY, startParam, endParam);
+
+				return polyCurve;
+			}
+
+
+			Handle(Geom2d_Spiral) CurveFactory::BuildBoundedSpiral
+				(Ifc4x3::GeometryResource::IfcSpiral^ ifcSpiral, Standard_Real startParam, Standard_Real endParam, XCurveType& curveType)
+			{
+
 				if (!Enum::TryParse<XCurveType>(static_cast<IPersistEntity^>(ifcSpiral)->ExpressType->ExpressName, curveType))
 					throw RaiseGeometryFactoryException("Unsupported curve type", ifcSpiral);
 
@@ -1441,7 +1476,25 @@ namespace Xbim
 				TColGeom2d_SequenceOfBoundedCurve segments;
 				ProcessCompositeCurveSegments(ifcCompositeCurve, curveType, segments);
 
-				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->OneMillimeter);
+				BRep_Builder builder;
+				TopoDS_Compound occCompound;
+				builder.MakeCompound(occCompound);
+
+				std::ostringstream oss;
+				oss << "DBRep_DrawableShape" << std::endl;
+				for (auto& polyIt = segments.cbegin(); polyIt != segments.cend(); polyIt++)
+				{
+					auto edge = Convert2dToEdge(*polyIt);
+					builder.Add(occCompound, edge);
+				}
+
+				BRepTools::Write(occCompound, oss);
+				std::ofstream outFile("C:\\Users\\ibrah\\OneDrive\\Desktop\\comp curve.brep");
+				outFile << oss.str();
+				outFile.close();
+
+
+				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->OneMeter);
 
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
@@ -1722,6 +1775,7 @@ namespace Xbim
 			Handle(Geom2d_Curve) CurveFactory::BuildCurveSegment2d(Ifc4x3::GeometryResource::IfcCurveSegment^ segment)
 			{
 				Ifc4x3::GeometryResource::IfcSpiral^ spiral = dynamic_cast<Ifc4x3::GeometryResource::IfcSpiral^>(segment->ParentCurve);
+				Ifc4x3::GeometryResource::IfcPolynomialCurve^ polyCurve = dynamic_cast<Ifc4x3::GeometryResource::IfcPolynomialCurve^>(segment->ParentCurve);
 				Ifc4x3::MeasureResource::IfcLengthMeasure^ startLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(segment->SegmentStart);
 				Ifc4x3::MeasureResource::IfcLengthMeasure^ curveLength = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(segment->SegmentLength);
 
@@ -1738,10 +1792,15 @@ namespace Xbim
 				if (startParam == endParam)
 					return nullptr;
 
-				if (spiral != nullptr) 
+				if (spiral) 
 				{
 					// Spirals are parameterized by arc length, so startParam and endParam correspond to the starting and ending arc length values along the spiral.
-					return EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedSpiral(spiral, startParam, endParam));
+					XCurveType spiralType;
+					return EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedSpiral(spiral, startParam, endParam, spiralType));
+				}
+				else if (polyCurve) 
+				{
+					return EXEC_NATIVE->MoveBoundedCurveToOrigin(BuildBoundedPolynomialCurve(polyCurve, startParam, endParam));
 				}
 
 				XCurveType curveType;

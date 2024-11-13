@@ -24,6 +24,10 @@ public:
 		_endParam(endParam)
 	{
 		_integrationSteps = std::max(IntegrationSteps, 1000);
+		gp_Trsf2d transform;
+		transform.SetTransformation(_placement.XAxis());
+		transform.Invert();
+		_placementTrsf = transform;
 	}
 
 	virtual void D0(Standard_Real U, gp_Pnt2d& P) const {
@@ -104,6 +108,10 @@ public:
 
 	virtual void Transform(const gp_Trsf2d& T) override {
 		_placement.Transform(T);
+		gp_Trsf2d transform;
+		transform.SetTransformation(_placement.XAxis());
+		transform.Invert();
+		_placementTrsf = transform;
 	}
 
 	virtual Standard_Real TransformedParameter(Standard_Real U, const gp_Trsf2d& T) const override {
@@ -143,6 +151,7 @@ public:
 
 private:
 	gp_Ax22d _placement;
+	gp_Trsf2d _placementTrsf;
 	Standard_Real _clothoidConstant;
 	Standard_Real _startParam;
 	Standard_Real _endParam;
@@ -162,12 +171,8 @@ private:
 		Standard_Real x = _clothoidConstant * sqrt(M_PI) * fresnelC;
 		Standard_Real y = _clothoidConstant * sqrt(M_PI) *  fresnelS;
 		gp_Pnt2d pntLocal(x, y);
-
-
-		gp_Trsf2d transform;
-		transform.SetTransformation(_placement.XAxis());
-		transform.Invert();
-		P = pntLocal.Transformed(transform);
+		 
+		P = pntLocal.Transformed(_placementTrsf);
 
 		if (V1 || V2) 
 		{
@@ -178,7 +183,7 @@ private:
 			Standard_Real dyds = sin(theta);
 			gp_Vec2d tangentLocal(dxds, dyds);
 
-			gp_Vec2d tangent = tangentLocal.Transformed(transform);
+			gp_Vec2d tangent = tangentLocal.Transformed(_placementTrsf);
 			tangent.Normalize();
 			if (V1) {
 				*V1 = tangent;
@@ -190,7 +195,7 @@ private:
 				Standard_Real ddxds = -dtheta_ds * sin(theta);
 				Standard_Real ddyds = dtheta_ds * cos(theta);
 				gp_Vec2d normalLocal(ddxds, ddyds);
-				gp_Vec2d normal = normalLocal.Transformed(transform);
+				gp_Vec2d normal = normalLocal.Transformed(_placementTrsf);
 				normal.Normalize();
 				*V2 = normal;
 			}

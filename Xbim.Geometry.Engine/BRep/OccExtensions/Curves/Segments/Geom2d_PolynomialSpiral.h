@@ -30,6 +30,10 @@ public:
     {
         _coefficients.resize(8);
         _integrationSteps = std::max(IntegrationSteps, 1000);
+        gp_Trsf2d transform;
+        transform.SetTransformation(_placement.XAxis());
+        transform.Invert();
+        _placementTrsf = transform;
     }
 
     virtual void D0(Standard_Real U, gp_Pnt2d& P) const override {
@@ -111,6 +115,10 @@ public:
 
     virtual void Transform(const gp_Trsf2d& T) override {
         _placement.Transform(T);
+        gp_Trsf2d transform;
+        transform.SetTransformation(_placement.XAxis());
+        transform.Invert();
+        _placementTrsf = transform;
     }
 
     virtual GeomAbs_Shape Continuity() const override {
@@ -139,6 +147,7 @@ public:
 
 private:
     gp_Ax22d _placement;
+    gp_Trsf2d _placementTrsf;
     std::vector<std::optional<Standard_Real>> _coefficients; // A0 to A7
     Standard_Real _startParam;
     Standard_Real _endParam;
@@ -164,17 +173,14 @@ private:
         y *= dt / 3.0;
 
         gp_Pnt2d pntLocal(x, y);
-        gp_Trsf2d transform;
-        transform.SetTransformation(_placement.XAxis());
-        transform.Invert();
-        P = pntLocal.Transformed(transform);
+        P = pntLocal.Transformed(_placementTrsf);
 
         if (V1 || V2) {
             Standard_Real theta = CalculateTheta(t);
             Standard_Real dxdt = cos(theta);
             Standard_Real dydt = sin(theta);
             gp_Vec2d tangentLocal(dxdt, dydt);
-            gp_Vec2d tangent = tangentLocal.Transformed(transform);
+            gp_Vec2d tangent = tangentLocal.Transformed(_placementTrsf);
             if (V1) {
                 *V1 = tangent;
             }
@@ -185,7 +191,7 @@ private:
                 Standard_Real ddxdt = -kappa * sin(theta);
                 Standard_Real ddydt = kappa * cos(theta);
                 gp_Vec2d normalLocal(ddxdt, ddydt);
-                gp_Vec2d normal = normalLocal.Transformed(transform);
+                gp_Vec2d normal = normalLocal.Transformed(_placementTrsf);
                 *V2 = normal;
             }
         }

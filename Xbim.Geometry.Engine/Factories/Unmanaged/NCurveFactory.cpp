@@ -29,6 +29,7 @@
 #include <Geom2d_Transformation.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include "../../BRep/OccExtensions/Curves/Segments/Geom2d_Spiral.h"
+#include "../../BRep/OccExtensions/Curves/Segments/Geom2d_Polynomial.h"
 #include <NCollection_Vector.hxx>
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
@@ -278,8 +279,30 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 		{
 			Handle(Geom2d_BoundedCurve) curve = *it;
 			Handle(Geom2d_Spiral) spiral = Handle(Geom2d_Spiral)::DownCast(curve);
+			Handle(Geom2d_Polynomial) polynomial = Handle(Geom2d_Polynomial)::DownCast(curve);
+			
+			if (polynomial) {
+				// Approximate the curve
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+				int numPoints = std::max(Geom2d_Spiral::IntegrationSteps, 1000);
+				TColgp_Array1OfPnt2d points(1, numPoints);
 
-			if (spiral) {
+				for (Standard_Integer i = 1; i <= numPoints; ++i) {
+					Standard_Real U = firstParam + (lastParam - firstParam) * (i - 1) / (numPoints - 1);
+					gp_Pnt2d P;
+					curve->D0(U, P);
+					points.SetValue(i, P);
+				}
+
+				Geom2dAPI_PointsToBSpline curveBuilder(points, 8, 8, GeomAbs_CN);
+				Handle(Geom2d_BSplineCurve) approximate = curveBuilder.Curve();
+				if (!compositeConverter.Add(approximate, tolerance, false))
+				{
+					Standard_Failure::Raise("Compound curve segment is not continuous");
+				}
+			}
+			else if (spiral) {
 				// Approximate the curve
 				Standard_Real firstParam = curve->FirstParameter();
 				Standard_Real lastParam = curve->LastParameter();
