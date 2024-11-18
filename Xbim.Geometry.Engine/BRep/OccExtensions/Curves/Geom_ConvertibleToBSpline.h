@@ -9,6 +9,7 @@ class Geom_ConvertibleToBSpline : public Geom_Curve {
 public:
     virtual ~Geom_ConvertibleToBSpline() = default;
     virtual  Handle(Geom_BSplineCurve) ToBSpline(int nbPoints) const = 0;
+    virtual  Handle(Geom_BSplineCurve) ToBSpline(double startParam, double endParam, int nbPoints) const = 0;
 
 protected:
     Geom_ConvertibleToBSpline() = default;

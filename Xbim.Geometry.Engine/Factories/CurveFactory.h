@@ -56,10 +56,12 @@ namespace Xbim
 				TopoDS_Shape ConvertCurvesToShape(const TColGeom_SequenceOfBoundedCurve& curves2d);
 				TopoDS_Edge Convert2dToEdge(const Handle(Geom2d_Curve)& clothoid2d);
 				TopoDS_Edge ConvertToEdge(const Handle(Geom_Curve)& clothoid2d, Standard_Integer numPoints);
+				TopoDS_Shape ConvertToShape(const Handle(Geom_Curve)& clothoid2d, Standard_Integer numPoints);
 				Handle(Geom_BSplineCurve) CurveFactory::ToBSpline(Handle(Geom_Curve) curve, int nbPoints);
 
 				Handle(Geom_Curve) TrimCurveByWires(const Handle(Geom_Curve)& curveEdge, const TopoDS_Wire& wire1, const TopoDS_Wire& wire2);
 				Handle(Geom_Curve) TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2);
+				Handle(Geom_Curve) TrimCurveByAtDistances(const Handle(Geom_Curve)& curve, Standard_Real distance1, Standard_Real distance2);
 
 #pragma endregion
 
@@ -101,7 +103,7 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
 				Handle(Geom2d_Circle) BuildCurve2d(IIfcCircle^ ifcCircle);
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve);
-				void ProcessCompositeCurveSegments(Xbim::Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve, Xbim::Geometry::Abstractions::XCurveType& curveType, TColGeom2d_SequenceOfBoundedCurve& segments);
+				void ProcessCompositeCurveSegments(Xbim::Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments);
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcCompositeCurve^ ifcCompositeCurve);
 				Handle(Geom2d_BSplineCurve) BuildCurve2d(IIfcCompositeCurveOnSurface^ ifcCompositeCurve);
 				Handle(Geom2d_Ellipse) BuildCurve2d(IIfcEllipse^ ifcEllipse);

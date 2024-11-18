@@ -35,7 +35,10 @@
 #include <BRepGProp.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Face.hxx>
+#include <TopoDS_Edge.hxx>
+#include <BRepBuilderAPI_MakeEdge.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
+#include <BRepExtrema_DistShapeShape.hxx>
 
 TColgp_Array1OfPnt NCurveFactory::GetPointsFromProjectionAndHeightCurves(TColgp_Array1OfPnt& points, Standard_Integer nbPoints, Handle(Geom2d_Curve) projection, Handle(Geom2d_Curve) height)
 {
@@ -130,6 +133,41 @@ TColGeom_SequenceOfBoundedCurve NCurveFactory::GetSegmentsSequnce(std::vector<Ha
 	return segmentsSequence;
 }
 
+Handle(Geom2d_BoundedCurve) NCurveFactory::TranslateCurveStartPointToX(const Handle(Geom2d_BoundedCurve)& boundedCurve, Standard_Real xDistance)
+{
+	Standard_Real firstParam = boundedCurve->FirstParameter();
+	gp_Pnt2d startPoint;
+	boundedCurve->D0(firstParam, startPoint);
+	gp_Vec2d translationVec(xDistance - startPoint.X(), -startPoint.Y());
+	gp_Trsf2d translation;
+	translation.SetTranslation(translationVec);
+	boundedCurve->Transform(translation);
+	return boundedCurve;
+}
+
+void NCurveFactory::TranslateCurveSequenceStartPointToX(TColGeom2d_SequenceOfBoundedCurve& curves, Standard_Real xDistance)
+{
+	if (curves.IsEmpty()) {
+		Standard_Failure::Raise("The curve sequence is empty.");
+		return;
+	}
+
+	Handle(Geom2d_BoundedCurve) firstCurve = curves.Value(1);
+
+	Standard_Real firstParam = firstCurve->FirstParameter();
+
+	gp_Pnt2d startPoint;
+	firstCurve->D0(firstParam, startPoint);
+
+	gp_Vec2d translationVec(xDistance - startPoint.X(), 0);
+
+	gp_Trsf2d translation;
+	translation.SetTranslation(translationVec);
+
+	for (Standard_Integer i = 1; i <= curves.Length(); ++i) {
+		curves.Value(i)->Transform(translation);
+	}
+}
 
 
 Handle(Geom2d_Curve) NCurveFactory::MoveBoundedCurveToOrigin(const Handle(Geom2d_BoundedCurve)& boundedCurve)
@@ -295,7 +333,7 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 					points.SetValue(i, P);
 				}
 
-				Geom2dAPI_PointsToBSpline curveBuilder(points, 8, 8, GeomAbs_CN);
+				Geom2dAPI_PointsToBSpline curveBuilder(points, 3, 8, GeomAbs_CN);
 				Handle(Geom2d_BSplineCurve) approximate = curveBuilder.Curve();
 				if (!compositeConverter.Add(approximate, tolerance, false))
 				{
@@ -316,7 +354,7 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 					points.SetValue(i, P);
 				}
 
-				Geom2dAPI_PointsToBSpline curveBuilder(points, 8, 8, GeomAbs_CN);
+				Geom2dAPI_PointsToBSpline curveBuilder(points, 3, 8, GeomAbs_CN);
 				Handle(Geom2d_BSplineCurve) approximate = curveBuilder.Curve();
 				if (!compositeConverter.Add(approximate, tolerance, false))
 				{
@@ -980,37 +1018,39 @@ Handle(Geom_Curve) NCurveFactory::TrimCurveByFaces(const Handle(Geom_Curve)& cur
 {
 	std::vector<Standard_Real> parameters;
 
-	// Process each face
-	GProp_GProps props;
-
-	BRepGProp::SurfaceProperties(face1, props);
-	gp_Pnt facePoint = props.CentreOfMass();
-
-	GeomAPI_ProjectPointOnCurve projector1(facePoint, curve);
-	if (projector1.NbPoints() > 0)
-	{
-		Standard_Real param = projector1.LowerDistanceParameter();
-		parameters.push_back(param);
+	TopoDS_Edge curveEdge = BRepBuilderAPI_MakeEdge(curve);
+	BRepExtrema_DistShapeShape distShapeShape1(curveEdge, face1);
+	if (distShapeShape1.IsDone() && distShapeShape1.Value() < Precision::Confusion()) {
+		Standard_Real paramOnCurve;
+		for (Standard_Integer i = 1; i <= distShapeShape1.NbSolution(); ++i) {
+			if (distShapeShape1.SupportTypeShape1(i) == BRepExtrema_SupportType::BRepExtrema_IsOnEdge) {
+				distShapeShape1.ParOnEdgeS1(i, paramOnCurve);
+				parameters.push_back(paramOnCurve);
+				break;
+			}
+		}
 	}
 
 
-	BRepGProp::SurfaceProperties(face2, props);
-	facePoint = props.CentreOfMass();
-
-	GeomAPI_ProjectPointOnCurve projector2(facePoint, curve);
-	if (projector2.NbPoints() > 0)
-	{
-		Standard_Real param = projector2.LowerDistanceParameter();
-		parameters.push_back(param);
+	BRepExtrema_DistShapeShape distShapeShape2(curveEdge, face1);
+	if (distShapeShape2.IsDone() && distShapeShape2.Value() < Precision::Confusion()) {
+		Standard_Real paramOnCurve;
+		for (Standard_Integer i = 1; i <= distShapeShape2.NbSolution(); ++i) {
+			if (distShapeShape2.SupportTypeShape1(i) == BRepExtrema_SupportType::BRepExtrema_IsOnEdge) {
+				distShapeShape2.ParOnEdgeS1(i, paramOnCurve);
+				parameters.push_back(paramOnCurve);
+				break;
+			}
+		}
 	}
 
-	if (parameters.size() == 2)
-	{
+	if (parameters.size() == 2) {
 		if (parameters[0] > parameters[1]) {
 			std::swap(parameters[0], parameters[1]);
 		}
 
 		Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(curve, parameters[0], parameters[1]);
+
 		return trimmedCurve;
 	}
 

@@ -205,8 +205,16 @@ namespace Xbim
 
 			TopoDS_Face ProfileFactory::BuildProfileFace(IIfcDerivedProfileDef^ derivedProfileDef)
 			{
-
-				auto face = BuildProfileFace(derivedProfileDef->ParentProfile); //throws an exception		
+				TopoDS_Face face;
+				std::optional<TopoDS_Shape> parentCached = GetCache()->GetShape(derivedProfileDef->ParentProfile->EntityLabel);
+				if (parentCached.has_value()) {
+					face = TopoDS::Face(parentCached.value());
+				}
+				else {
+					face = BuildProfileFace(derivedProfileDef->ParentProfile); //throws an exception	
+					GetCache()->InsertShape(derivedProfileDef->ParentProfile->EntityLabel, face);
+				}
+				
 				if (face.IsNull())
 					throw RaiseGeometryFactoryException("Profile face could not be built", derivedProfileDef);
 				auto nonUniform2d = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(derivedProfileDef->Operator);

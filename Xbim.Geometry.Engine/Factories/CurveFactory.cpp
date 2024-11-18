@@ -416,15 +416,12 @@ namespace Xbim
 				}
 				throw;
 			}
-
 			Handle(Geom_GradientCurve) CurveFactory::BuildCurve(Ifc4x3::GeometryResource::IfcGradientCurve^ ifcGradientCurve)
 			{
-
 				std::optional<Handle(Standard_Transient)> cached = GetCache()->Get(ifcGradientCurve->EntityLabel);
 				if (cached.has_value()) {
 					return Handle(Geom_GradientCurve)::DownCast(cached.value());
 				}
-
 
 				// The base curve is the horizontal projection
 				XCurveType curveType;
@@ -438,47 +435,65 @@ namespace Xbim
 				for (int i = 0; i < ifcGradientCurve->NSegments; i++)
 				{
 					Ifc4x3::GeometryResource::IfcCurveSegment^ curveSegment = dynamic_cast<Ifc4x3::GeometryResource::IfcCurveSegment^>(ifcGradientCurve->Segments[i]);
-					if(curveSegment == nullptr)
+					if (curveSegment == nullptr)
 						throw RaiseGeometryFactoryException("IfcGradientCurve Segments should be of type IfcCurveSegment", ifcGradientCurve);
 				}
 
 				std::vector<Handle(Geom2d_Curve)> heightFunctionCurves = ProcessSegments(ifcGradientCurve);
+			
+				bool hasEndPoint = false;
+				gp_Pnt2d endPoint;
+
+				if (ifcGradientCurve->EndPoint != nullptr)
+				{
+					IIfcAxis2Placement2D^ axis2Placement = dynamic_cast<IIfcAxis2Placement2D^>(ifcGradientCurve->EndPoint);
+
+					TopLoc_Location location;
+					if (axis2Placement) {
+						hasEndPoint = GEOMETRY_FACTORY->ToLocation(axis2Placement, location);
+					}
+					
+					if (hasEndPoint) {
+						gp_Trsf trsf = location.Transformation();
+						endPoint = gp_Pnt2d(0, 0).Transformed(trsf);
+					}
+				}
+
+				if (hasEndPoint)
+				{
+					gp_Pnt2d lastPoint;
+					Standard_Real lastParam = heightFunctionCurves.back()->LastParameter();
+					heightFunctionCurves.back()->D0(lastParam, lastPoint);
+					if (!lastPoint.IsEqual(endPoint, Precision::Confusion())) {
+						Handle(Geom2d_Line) endSegment = new Geom2d_Line(lastPoint, gp_Vec2d(lastPoint, endPoint));
+						Standard_Real length = lastPoint.Distance(endPoint);
+						Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(endSegment, 0, length);
+						heightFunctionCurves.push_back(trimmed);
+					}
+				}
+
 				TColGeom2d_SequenceOfBoundedCurve segmentsSequence = EXEC_NATIVE->GetSegmentsSequnce(heightFunctionCurves, ModelGeometryService->MinimumGap);
 				Handle(Geom2d_BSplineCurve) heightFunction = EXEC_NATIVE->BuildCompositeCurve2d(segmentsSequence, ModelGeometryService->MinimumGap);
 
 				if (heightFunction.IsNull())
 					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built", ifcGradientCurve);
 
-				bool hasEndPoint = false;
-				gp_Pnt endPoint;
+				gp_Pnt2d pnt;
+				heightFunction->D0(heightFunction->FirstParameter() , pnt);
+				auto startDistAlong = pnt.X();
+				horizontalProjection->D0(horizontalProjection->FirstParameter(), pnt);
+				auto horizontalProjectionStart = pnt.X();
 
-				if (ifcGradientCurve->EndPoint != nullptr)
-				{
-					IfcAxis2PlacementLinear^ linearPlacement = dynamic_cast<IfcAxis2PlacementLinear^>(ifcGradientCurve->EndPoint);
-					IIfcAxis2Placement3D^ axis2Placement = dynamic_cast<IIfcAxis2Placement3D^>(ifcGradientCurve->EndPoint);
-
-					TopLoc_Location location;
-					if (linearPlacement) {
-						hasEndPoint = GEOMETRY_FACTORY->ToLocation(linearPlacement, location);
-					}
-					else if (axis2Placement) {
-						hasEndPoint = GEOMETRY_FACTORY->ToLocation(axis2Placement, location);
-					}
-
-					if (hasEndPoint) {
-						gp_Trsf trsf = location.Transformation();
-						endPoint = gp_Pnt(0, 0, 0).Transformed(trsf);
-					}
+				if (horizontalProjectionStart != 0 || startDistAlong != 0) {
+					EXEC_NATIVE->TranslateCurveStartPointToX(heightFunction, horizontalProjectionStart + startDistAlong);
 				}
 
-				Handle(Geom_GradientCurve) gradientCurve = new Geom_GradientCurve(
-					horizontalProjection, heightFunction, endPoint, hasEndPoint);
-				 
+				Handle(Geom_GradientCurve) gradientCurve = new Geom_GradientCurve(horizontalProjection, heightFunction);
+
 				GetCache()->Insert(ifcGradientCurve->EntityLabel, gradientCurve);
 
 				return gradientCurve;
 			}
-			 
 
 			Handle(Geom_SegmentedReferenceCurve) CurveFactory::BuildCurve(Ifc4x3::GeometryResource::IfcSegmentedReferenceCurve^ ifcSegmentedReferenceCurve)
 			{
@@ -513,8 +528,12 @@ namespace Xbim
 				{
 					IfcAxis2PlacementLinear^ linearPlacement = dynamic_cast<IfcAxis2PlacementLinear^>(ifcSegmentedReferenceCurve->EndPoint);
 					IIfcAxis2Placement3D^ axis2Placement = dynamic_cast<IIfcAxis2Placement3D^>(ifcSegmentedReferenceCurve->EndPoint);
+					IIfcAxis2Placement2D^ axis2Placement2d = dynamic_cast<IIfcAxis2Placement2D^>(ifcSegmentedReferenceCurve->EndPoint);
 
-					if (linearPlacement) {
+					if (axis2Placement2d) {
+						hasEndPoint = GEOMETRY_FACTORY->ToLocation(axis2Placement2d, endLocation);
+					}
+					else if (linearPlacement) {
 						hasEndPoint = GEOMETRY_FACTORY->ToLocation(linearPlacement, endLocation);
 					}
 					else if (axis2Placement) {
@@ -555,7 +574,7 @@ namespace Xbim
 					points.SetValue(i, pnt);
 				}
 
-				GeomAPI_PointsToBSpline pointsToBSpline(points, 8, 8, GeomAbs_CN);
+				GeomAPI_PointsToBSpline pointsToBSpline(points, 1, 8, GeomAbs_C1);
 				return pointsToBSpline.Curve();
 			}
 
@@ -599,6 +618,32 @@ namespace Xbim
 				TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(bsplineCurve3d);
 
 				return edge;
+			}
+
+
+			TopoDS_Shape CurveFactory::ConvertToShape(const Handle(Geom_Curve)& curve, Standard_Integer numPoints) {
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+
+				TColgp_Array1OfPnt points(0, numPoints - 1);
+				for (Standard_Integer i = 0; i < numPoints; ++i) {
+					Standard_Real U = firstParam + ((lastParam - firstParam) / numPoints) * i;
+					gp_Pnt P;
+					curve->D0(U, P);
+					points.SetValue(i, P);
+				}
+				TopoDS_Compound compound;
+				BRep_Builder builder;
+				builder.MakeCompound(compound);
+
+				for (Standard_Integer i = points.Lower(); i < points.Upper(); ++i) {
+					gp_Pnt p1 = points.Value(i);
+					gp_Pnt p2 = points.Value(i + 1);
+					TopoDS_Edge edge = BRepBuilderAPI_MakeEdge(p1, p2);
+					builder.Add(compound, edge);
+				}
+
+				return compound;
 			}
 
 			TopoDS_Shape CurveFactory::Convert2dCurvesToShape(const TColGeom2d_SequenceOfBoundedCurve& curves2d) {
@@ -719,10 +764,67 @@ namespace Xbim
 			{
 				return EXEC_NATIVE->TrimCurveByWires(curve, wire1, wire2);
 			}
+
 			Handle(Geom_Curve) CurveFactory::TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2)
 			{
 				return EXEC_NATIVE->TrimCurveByFaces(curve, face1, face2);
 			}
+
+			Handle(Geom_Curve) CurveFactory::TrimCurveByAtDistances(const Handle(Geom_Curve)& curve, Standard_Real distance1, Standard_Real distance2)
+			{
+				if (distance1 < 0 || distance2 < 0) {
+					Standard_Failure::Raise("Distances must be non-negative.");
+					return curve; // Not reached, but added for completeness
+				}
+
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+
+				auto convertibleToBSpline = Handle(Geom_ConvertibleToBSpline)::DownCast(curve);
+
+				if (convertibleToBSpline) {
+					Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(curve, firstParam + distance1, firstParam + distance2);
+					return trimmedCurve;
+				}
+
+				GeomAdaptor_Curve adaptor(curve, firstParam, lastParam);
+				Standard_Real totalLength = GCPnts_AbscissaPoint::Length(adaptor, firstParam, lastParam);
+
+				if (curve->IsClosed()) {
+					distance1 = fmod(distance1, totalLength);
+					distance2 = fmod(distance2, totalLength);
+					if (distance1 < 0) distance1 += totalLength;
+					if (distance2 < 0) distance2 += totalLength;
+				}
+
+				if (distance1 > distance2) {
+					std::swap(distance1, distance2);
+				}
+
+				if (distance1 - totalLength > Precision::Confusion() || distance2 - totalLength > Precision::Confusion()) {
+					Standard_Failure::Raise("Distances exceed the total length of the curve.");
+					return curve;
+				}
+
+				GCPnts_AbscissaPoint abscissaPoint1(adaptor, distance1, firstParam, lastParam);
+				if (!abscissaPoint1.IsDone()) {
+					Standard_Failure::Raise("Failed to compute parameter for the first distance.");
+					return curve;
+				}
+				Standard_Real param1 = abscissaPoint1.Parameter();
+
+				GCPnts_AbscissaPoint abscissaPoint2(adaptor, distance2, firstParam, lastParam);
+				if (!abscissaPoint2.IsDone()) {
+					Standard_Failure::Raise("Failed to compute parameter for the second distance.");
+					return curve; 
+				}
+				Standard_Real param2 = abscissaPoint2.Parameter();
+
+				Handle(Geom_TrimmedCurve) trimmedCurve = new Geom_TrimmedCurve(curve, param1, param2);
+
+				return trimmedCurve;
+			}
+
 
 			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots)
 			{
@@ -1472,37 +1574,25 @@ namespace Xbim
 
 			Handle(Geom2d_BSplineCurve) CurveFactory::BuildCurve2d(Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve)
 			{
-				XCurveType curveType;
 				TColGeom2d_SequenceOfBoundedCurve segments;
-				ProcessCompositeCurveSegments(ifcCompositeCurve, curveType, segments);
+				ProcessCompositeCurveSegments(ifcCompositeCurve, segments);
 
 				BRep_Builder builder;
 				TopoDS_Compound occCompound;
 				builder.MakeCompound(occCompound);
 
-				std::ostringstream oss;
-				oss << "DBRep_DrawableShape" << std::endl;
-				for (auto& polyIt = segments.cbegin(); polyIt != segments.cend(); polyIt++)
-				{
-					auto edge = Convert2dToEdge(*polyIt);
-					builder.Add(occCompound, edge);
-				}
-
-				BRepTools::Write(occCompound, oss);
-				std::ofstream outFile("C:\\Users\\ibrah\\OneDrive\\Desktop\\comp curve.brep");
-				outFile << oss.str();
-				outFile.close();
-
-
 				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->OneMeter);
 
 				if (bSpline.IsNull())
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
+
 				return bSpline;
 			}
 
-			void CurveFactory::ProcessCompositeCurveSegments(Xbim::Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve, Xbim::Geometry::Abstractions::XCurveType& curveType, TColGeom2d_SequenceOfBoundedCurve& segments)
+			void CurveFactory::ProcessCompositeCurveSegments(Xbim::Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve, TColGeom2d_SequenceOfBoundedCurve& segments)
 			{
+				XCurveType curveType;
+
 				for each (Ifc4x3::GeometryResource::IfcSegment ^ segment in ifcCompositeCurve->Segments)
 				{
 
@@ -1536,7 +1626,7 @@ namespace Xbim
 					else if (curveSegment != nullptr)
 					{
 						Handle(Geom2d_Curve) seg = BuildCurveSegment2d(curveSegment);
-
+						
 						if (!seg) continue;
 
 						IIfcAxis2Placement2D^ axis2 = dynamic_cast<IIfcAxis2Placement2D^>(curveSegment->Placement);
@@ -1549,7 +1639,8 @@ namespace Xbim
 							throw RaiseGeometryFactoryException("Composite curve segments must be bounded curves", segment);
 
 						TransformCurveWithLocation(boundedCurve, axis2);
-
+						auto firstParam = boundedCurve->FirstParameter();
+						auto lastParam = boundedCurve->LastParameter();
 						segments.Append(boundedCurve);
 					}
 				}

@@ -84,8 +84,9 @@ namespace Xbim
 						gp_Pnt loc;
 						gp_Vec tangent;
 						gp_Vec axis;
+						Standard_Real distancesAlong;
 
-						if (GEOMETRY_FACTORY->BuildPoint3d(point, loc, tangent, axis))
+						if (GEOMETRY_FACTORY->BuildPoint3d(point, loc, tangent, axis, distancesAlong))
 						{
 							if (linearPlacement->EntityLabel == rootId) 
 							{

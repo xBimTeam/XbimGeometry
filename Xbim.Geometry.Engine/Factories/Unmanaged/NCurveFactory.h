@@ -34,6 +34,8 @@ public:
 
 #pragma region Geometric methods
 
+	Handle(Geom2d_BoundedCurve) TranslateCurveStartPointToX(const Handle(Geom2d_BoundedCurve)& boundedCurve, Standard_Real xDistance);
+	void TranslateCurveSequenceStartPointToX(TColGeom2d_SequenceOfBoundedCurve& curves, Standard_Real xDistance);
 	Handle(Geom2d_Curve) MoveBoundedCurveToOrigin(const Handle(Geom2d_BoundedCurve)& boundedCurve);
 	Handle(Geom2d_Curve) AlignToXAxis(const Handle(Geom2d_BoundedCurve)& boundedCurve);
 	TColgp_Array1OfPnt GetPointsFromProjectionAndHeightCurves(TColgp_Array1OfPnt& points, Standard_Integer nbPoints, Handle(Geom2d_Curve) projection, Handle(Geom2d_Curve) height);

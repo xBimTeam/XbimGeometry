@@ -217,38 +217,44 @@ public:
 
     Handle(Geom_BSplineCurve) ToBSpline(int nbPoints) const override
     {
-        double baseCurveParm1 = _baseCurve->HorizontalCurve()->FirstParameter();
-        double baseCurveParm2 = _baseCurve->HorizontalCurve()->LastParameter();
+        double baseCurveParm1 = _baseCurve->FirstParameter();
+        double baseCurveParm2 = _baseCurve->LastParameter();
 
-        TColgp_Array1OfPnt points(1, nbPoints + (_hasEndPoint ? 1 : 0));
-        Geom2dAdaptor_Curve adaptorHorizontalProjection(_baseCurve->HorizontalCurve() , baseCurveParm1, baseCurveParm2);
-        GCPnts_UniformAbscissa uniformAbscissa(adaptorHorizontalProjection, nbPoints);
+        TColgp_Array1OfPnt points(0, nbPoints);
 
-        for (Standard_Integer i = 1; i <= nbPoints; ++i) {
+        for (Standard_Integer i = 0; i < nbPoints; ++i) {
+            Standard_Real param = baseCurveParm1 + ((baseCurveParm2 - baseCurveParm1) / nbPoints) * i;
 
-            Standard_Real param = uniformAbscissa.Parameter(i);
-            gp_Pnt2d basePoint;
-            _baseCurve->HorizontalCurve()->D0(param, basePoint);
-
+            gp_Pnt basePoint;
+            _baseCurve->D0(param, basePoint);
             std::tuple<Standard_Real, Standard_Real> superElevationAndTilt = GetSuperelevationAndCantTiltAt(param);
-
             Standard_Real superElevation = std::get<0>(superElevationAndTilt);
-            
-            gp_Pnt2d heightPoint;
-            _baseCurve->HeightFunction()->D0(param, heightPoint);
-
-            // Coord Z is the base gradient height + the the additional superelevation
-            Standard_Real z = heightPoint.Y() + superElevation;
+            Standard_Real z = basePoint.Z() + superElevation;
             gp_Pnt p3d(basePoint.X(), basePoint.Y(), z);
             points.SetValue(i, p3d);
         }
 
-        if (_hasEndPoint) {
-            //points.SetValue(nbPoints + 1, _endPoint.Transformation().TranslationPart());
-        }
-
-        GeomAPI_PointsToBSpline pointsToBSpline(points, 8, 8, GeomAbs_CN);
+        GeomAPI_PointsToBSpline pointsToBSpline(points, 3, 8, GeomAbs_CN);
         return pointsToBSpline.Curve();
+    }
+
+    Handle(Geom_BSplineCurve) ToBSpline(double startParam, double endParam, int nbPoints) const override
+    {
+        TColgp_Array1OfPnt points(0, nbPoints);
+
+        for (Standard_Integer i = 0; i < nbPoints; ++i) {
+            Standard_Real param = startParam + ((endParam - startParam) / nbPoints) * i;
+            gp_Pnt basePoint;
+            _baseCurve->D0(param, basePoint);
+            std::tuple<Standard_Real, Standard_Real> superElevationAndTilt = GetSuperelevationAndCantTiltAt(param);
+            Standard_Real superElevation = std::get<0>(superElevationAndTilt);
+            Standard_Real z = basePoint.Z() + superElevation;
+            gp_Pnt p3d(basePoint.X(), basePoint.Y(), z);
+            points.SetValue(i, p3d);
+        }
+        GeomAPI_PointsToBSpline pointsToBSpline(points, 3, 8, GeomAbs_CN);
+        return pointsToBSpline.Curve();
+    
     }
 
     const Handle(Geom_GradientCurve)& BaseCurve() {

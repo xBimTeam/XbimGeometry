@@ -17,36 +17,27 @@ class Geom_GradientCurve : public Geom_ConvertibleToBSpline {
 public:
     Geom_GradientCurve(
         const Handle(Geom2d_Curve)& horizontalCurve,
-        const Handle(Geom2d_Curve)& heightFunction,
-        const gp_Pnt& endPoint,
-        const bool hasEndPoint)
+        const Handle(Geom2d_Curve)& heightFunction)
         : _horizontalCurve(horizontalCurve),
-        _heightFunction(heightFunction),
-        _endPoint(endPoint),
-        _hasEndPoint(hasEndPoint)
+        _heightFunction(heightFunction)
     {
-        _firstParam = _horizontalCurve->FirstParameter();
-        _lastParam = _horizontalCurve->LastParameter();
-
-        if (_hasEndPoint)
-        {
-            Standard_Real endParam = ComputeParameterAtEndPoint();
-            _lastParam = endParam;
-        }
+        _firstParam = 0.0;
+        _lastParam = _horizontalCurve->LastParameter() - _horizontalCurve->FirstParameter();
     }
-     
+
 
     void D0(Standard_Real U, gp_Pnt& P) const
     {
-
         if (U < _firstParam) U = _firstParam;
         if (U > _lastParam) U = _lastParam;
+        Standard_Real hU = U + _horizontalCurve->FirstParameter();
+        Standard_Real vU = U + _heightFunction->FirstParameter();
 
         gp_Pnt2d horizontalPnt;
-        _horizontalCurve->D0(U, horizontalPnt);
+        _horizontalCurve->D0(hU, horizontalPnt);
 
         gp_Pnt2d heightPnt;
-        _heightFunction->D0(U, heightPnt);
+        _heightFunction->D0(vU, heightPnt);
 
         P.SetCoord(horizontalPnt.X(), horizontalPnt.Y(), heightPnt.Y());
     }
@@ -55,14 +46,16 @@ public:
     {
         if (U < _firstParam) U = _firstParam;
         if (U > _lastParam) U = _lastParam;
+        Standard_Real hU = U + _horizontalCurve->FirstParameter();
+        Standard_Real vU = U + _heightFunction->FirstParameter();
 
         gp_Pnt2d horizontalPnt;
         gp_Vec2d horizontalVec;
-        _horizontalCurve->D1(U, horizontalPnt, horizontalVec);
+        _horizontalCurve->D1(hU, horizontalPnt, horizontalVec);
 
         gp_Pnt2d heightPnt;
         gp_Vec2d heightVec;
-        _heightFunction->D1(U, heightPnt, heightVec);
+        _heightFunction->D1(vU, heightPnt, heightVec);
 
         P.SetCoord(horizontalPnt.X(), horizontalPnt.Y(), heightPnt.Y());
         V.SetCoord(horizontalVec.X(), horizontalVec.Y(), heightVec.Y());
@@ -73,14 +66,16 @@ public:
     {
         if (U < _firstParam) U = _firstParam;
         if (U > _lastParam) U = _lastParam;
+        Standard_Real hU = U + _horizontalCurve->FirstParameter();
+        Standard_Real vU = U + _heightFunction->FirstParameter();
 
         gp_Pnt2d horizontalPnt;
         gp_Vec2d horizontalVec1, horizontalVec2;
-        _horizontalCurve->D2(U, horizontalPnt, horizontalVec1, horizontalVec2);
+        _horizontalCurve->D2(hU, horizontalPnt, horizontalVec1, horizontalVec2);
 
         gp_Pnt2d heightPnt;
         gp_Vec2d heightVec1, heightVec2;
-        _heightFunction->D2(U, heightPnt, heightVec1, heightVec2);
+        _heightFunction->D2(vU, heightPnt, heightVec1, heightVec2);
 
         P.SetCoord(horizontalPnt.X(), horizontalPnt.Y(), heightPnt.Y());
         V1.SetCoord(horizontalVec1.X(), horizontalVec1.Y(), heightVec1.Y());
@@ -91,14 +86,16 @@ public:
     {
         if (U < _firstParam) U = _firstParam;
         if (U > _lastParam) U = _lastParam;
+        Standard_Real hU = U + _horizontalCurve->FirstParameter();
+        Standard_Real vU = U + _heightFunction->FirstParameter();
 
         gp_Pnt2d horizontalPnt;
         gp_Vec2d horizontalVec1, horizontalVec2, horizontalVec3;
-        _horizontalCurve->D3(U, horizontalPnt, horizontalVec1, horizontalVec2, horizontalVec3);
+        _horizontalCurve->D3(hU, horizontalPnt, horizontalVec1, horizontalVec2, horizontalVec3);
 
         gp_Pnt2d heightPnt;
         gp_Vec2d heightVec1, heightVec2, heightVec3;
-        _heightFunction->D3(U, heightPnt, heightVec1, heightVec2, heightVec3);
+        _heightFunction->D3(vU, heightPnt, heightVec1, heightVec2, heightVec3);
 
         P.SetCoord(horizontalPnt.X(), horizontalPnt.Y(), heightPnt.Y());
         V1.SetCoord(horizontalVec1.X(), horizontalVec1.Y(), heightVec1.Y());
@@ -179,7 +176,10 @@ public:
 
     void Transform(const gp_Trsf& T)
     {
-        Standard_NotImplemented::Raise("Transform not implemented");
+        _horizontalCurve->Transform(T);
+        _heightFunction->Transform(T);
+        _firstParam = 0.0;
+        _lastParam = _horizontalCurve->LastParameter() - _horizontalCurve->FirstParameter();
     }
 
     Handle(Geom_Geometry) Copy() const
@@ -187,7 +187,7 @@ public:
         Handle(Geom2d_Curve) horizontalCopy = Handle(Geom2d_Curve)::DownCast(_horizontalCurve->Copy());
         Handle(Geom2d_Curve) heightCopy = Handle(Geom2d_Curve)::DownCast(_heightFunction->Copy());
 
-        return new Geom_GradientCurve(horizontalCopy, heightCopy, _endPoint, _hasEndPoint);
+        return new Geom_GradientCurve(horizontalCopy, heightCopy);
     }
 
     Standard_Boolean IsCN(Standard_Integer N) const {
@@ -196,49 +196,39 @@ public:
 
     Handle(Geom_BSplineCurve) ToBSpline(int nbPoints) const override
     {
-        TColgp_Array1OfPnt points(1, nbPoints + (_hasEndPoint ? 1 : 0));
+        TColgp_Array1OfPnt points(1, nbPoints);
         GetPointsFromProjectionAndHeightCurves(points, nbPoints);
-        if (_hasEndPoint) {
-            points.SetValue(nbPoints + 1, _endPoint);
-        }
-        GeomAPI_PointsToBSpline pointsToBSpline(points, 8, 8, GeomAbs_CN);
+        GeomAPI_PointsToBSpline pointsToBSpline(points, 3, 8, GeomAbs_CN);
         return pointsToBSpline.Curve();
     }
 
-
-    Standard_Real ComputeParameterAtEndPoint()
+    Handle(Geom_BSplineCurve) ToBSpline(double startParam, double endParam, int nbPoints) const override
     {
-        auto func = [this](Standard_Real U) -> Standard_Real {
-            gp_Pnt P;
-            this->D0(U, P);
-            return P.Distance(_endPoint);
-            };
-
-        Standard_Real tol = 1e-6;
-        Standard_Real low = _firstParam;
-        Standard_Real high = _lastParam;
-
-        while (high - low > tol) {
-            Standard_Real mid = (low + high) / 2.0;
-            Standard_Real distMid = func(mid);
-            Standard_Real distLow = func(low);
-            Standard_Real distHigh = func(high);
-
-            if (distMid < tol) {
-                return mid;
-            }
-
-            if (distLow < distHigh) {
-                high = mid;
-            }
-            else {
-                low = mid;
-            }
-        }
-
-        return (low + high) / 2.0;
+        TColgp_Array1OfPnt points(1, nbPoints );
+        GetPointsFromProjectionAndHeightCurves(points, nbPoints, startParam, endParam);
+        GeomAPI_PointsToBSpline pointsToBSpline(points, 3, 8, GeomAbs_CN);
+        return pointsToBSpline.Curve();
     }
 
+    void Geom_GradientCurve::GetPointsFromProjectionAndHeightCurves(
+        TColgp_Array1OfPnt& points,
+        Standard_Integer nbPoints,
+        Standard_Real startParam,
+        Standard_Real endParam) const
+    {
+        if (nbPoints < 2) nbPoints = 2;
+
+        Standard_Real deltaParam = (endParam - startParam) / (nbPoints - 1);
+
+        for (Standard_Integer i = 1; i <= nbPoints; ++i) {
+            Standard_Real U = startParam + (i - 1) * deltaParam;
+            if (U > endParam) U = endParam;
+
+            gp_Pnt P;
+            D0(U, P);
+            points.SetValue(i, P);
+        }
+    }
 
 
     TColgp_Array1OfPnt GetPointsFromProjectionAndHeightCurves(TColgp_Array1OfPnt& points, Standard_Integer nbPoints)const {
@@ -280,7 +270,5 @@ private:
     Handle(Geom2d_Curve) _heightFunction;
     Standard_Real _firstParam;
     Standard_Real _lastParam;
-    gp_Pnt _endPoint;
-    bool _hasEndPoint;
 };
 
