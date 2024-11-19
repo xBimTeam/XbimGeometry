@@ -1017,6 +1017,38 @@ Handle(Geom_Curve) NCurveFactory::TrimCurveByFaces(const Handle(Geom_Curve)& cur
 	return curve;
 }
 
+Handle(Geom2d_BoundedCurve) NCurveFactory::TranslateCurveStartPointToX(const Handle(Geom2d_BoundedCurve)& boundedCurve, Standard_Real xDistance)
+{
+	Standard_Real firstParam = boundedCurve->FirstParameter();
+	gp_Pnt2d startPoint;
+	boundedCurve->D0(firstParam, startPoint);
+	gp_Vec2d translationVec(xDistance - startPoint.X(), 0);
+	gp_Trsf2d translation;
+	translation.SetTranslation(translationVec);
+	boundedCurve->Transform(translation);
+	return boundedCurve;
+}
 
+void NCurveFactory::TranslateCurveSequenceStartPointToX(TColGeom2d_SequenceOfBoundedCurve& curves, Standard_Real xDistance)
+{
+	if (curves.IsEmpty()) {
+		Standard_Failure::Raise("The curve sequence is empty.");
+		return;
+	}
 
+	Handle(Geom2d_BoundedCurve) firstCurve = curves.Value(1);
 
+	Standard_Real firstParam = firstCurve->FirstParameter();
+
+	gp_Pnt2d startPoint;
+	firstCurve->D0(firstParam, startPoint);
+
+	gp_Vec2d translationVec(xDistance - startPoint.X(), 0);
+
+	gp_Trsf2d translation;
+	translation.SetTranslation(translationVec);
+
+	for (Standard_Integer i = 1; i <= curves.Length(); ++i) {
+		curves.Value(i)->Transform(translation);
+	}
+}

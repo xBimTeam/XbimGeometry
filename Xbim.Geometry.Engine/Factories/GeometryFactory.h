@@ -44,7 +44,7 @@ namespace Xbim
 				//builds a 3d point, if the Ifc point is 2d the Z coordinate is 0
 				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
 				gp_Pnt BuildPoint3d(IXPoint^ xPoint);
-				bool BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis);
+				bool BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis, Standard_Real& distanceAlong);
 
 				//builds a 2d point, if the Ifc point is 3d an exception is thrown
 				bool BuildPoint2d(IIfcCartesianPoint^ ifcPoint, gp_Pnt2d& pnt2d);
@@ -80,8 +80,8 @@ namespace Xbim
 				bool ToLocation(IIfcAxis2Placement^ axis, TopLoc_Location& location);
 				bool ToLocation(IfcAxis2PlacementLinear^ axis, TopLoc_Location& location);
 				bool ToTransform(IfcAxis2PlacementLinear^ axis, gp_Trsf& trsf);
-				bool GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis);
-
+				bool GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis, Standard_Real& distanceAlong);
+				Standard_Real GetDistanceAlong(IfcPointByDistanceExpression^ point);
 				virtual bool IsFacingAwayFrom(IXFace^ face, IXDirection^ direction);
 				virtual IXAxis2Placement2d^ BuildAxis2Placement2d(IXPoint^ location, IXDirection^ XaxisDirection);
 				virtual IXAxis2Placement3d^ BuildAxis2Placement3d(IXPoint^ location, IXDirection^ XaxisDirection, IXDirection^ ZaxisDirection);

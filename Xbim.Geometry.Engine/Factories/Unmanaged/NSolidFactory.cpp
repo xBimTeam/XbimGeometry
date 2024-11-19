@@ -762,7 +762,7 @@ TopoDS_Solid NSolidFactory::BuildSectionedSolid(const opencascade::handle<Geom_C
 	BRepBuilderAPI_MakeWire wireMaker;
 	wireMaker.Add(spineEdge);
 	BRepOffsetAPI_MakePipeShell pipeShell(wireMaker.Wire());
-	pipeShell.SetMode(true);
+	pipeShell.SetDiscreteMode();
 	for each (auto wire in sections)
 	{
 		pipeShell.Add(wire);
@@ -791,7 +791,7 @@ TopoDS_Solid NSolidFactory::BuildSectionedSolid(const opencascade::handle<Geom_C
 	BRepBuilderAPI_MakeWire wireMaker;
 	wireMaker.Add(spineEdge);
 	BRepOffsetAPI_MakePipeShell pipeShell(wireMaker.Wire());
-	pipeShell.SetMode(true);
+	pipeShell.SetDiscreteMode();
 	for each (auto face in sections)
 	{
 		pipeShell.Add(face);

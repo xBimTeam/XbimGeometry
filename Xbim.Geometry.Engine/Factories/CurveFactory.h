@@ -60,6 +60,7 @@ namespace Xbim
 
 				Handle(Geom_Curve) TrimCurveByWires(const Handle(Geom_Curve)& curveEdge, const TopoDS_Wire& wire1, const TopoDS_Wire& wire2);
 				Handle(Geom_Curve) TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2);
+				Handle(Geom_Curve) TrimCurveByAtDistances(const Handle(Geom_Curve)& curve, Standard_Real distance1, Standard_Real distance2);
 
 #pragma endregion
 

@@ -348,8 +348,8 @@ namespace Xbim
 				Handle(Geom_Curve) spine = CURVE_FACTORY->BuildCurve(sectionedSolidHorizontal->Directrix);
 
 				std::vector<TopoDS_Wire> sections;
-				std::vector<TopoDS_Face> sectionFaces;
 				size_t lastEdgeCount = 0;
+				std::vector<Standard_Real> distancesAlong;
 
 				// It is assumed that all sections will be of the same type
 				bool isIfcParameterizedProfileDef = dynamic_cast<IIfcParameterizedProfileDef^>(sectionedSolidHorizontal->CrossSections[0]) != nullptr;
@@ -386,20 +386,24 @@ namespace Xbim
 						refVec.Normalize();
 						hasRef = true;
 					}
-
-					if(hasAxis && hasRef)
+					Standard_Real distanceAlong;
+					
+					if (hasAxis && hasRef) {
+						auto distanceAlongPoint = static_cast<IfcPointByDistanceExpression^>(placement->Location);
+						distanceAlong = GEOMETRY_FACTORY->GetDistanceAlong(distanceAlongPoint);
 						normal = refVec.Crossed(up);
+					}
 					else 
 					{
-						GEOMETRY_FACTORY->GetTangentAtPlacement(placement, loc, normal, up);
+						GEOMETRY_FACTORY->GetTangentAtPlacement(placement, loc, normal, up, distanceAlong);
 						refVec = up.Crossed(normal);
 					}
+					distancesAlong.push_back(distanceAlong);
 
 					// curve tangent is the section normal
 					MoveSection(loc, normal, refVec, sectionFace);
 					TopoDS_Wire section = BRepTools::OuterWire(sectionFace);
 					sections.push_back(section);
-					sectionFaces.push_back(sectionFace);
 					 
 					// Should have similar edge count if not IfcParameterizedProfileDef
 					if (!isIfcParameterizedProfileDef)
@@ -417,22 +421,17 @@ namespace Xbim
 						lastEdgeCount = edges.size();
 					}
 				}
-
 				
-				Handle(Geom_GradientCurve) gradient = Handle(Geom_GradientCurve)::DownCast(spine);
-				Handle(Geom_SegmentedReferenceCurve) segmented = Handle(Geom_SegmentedReferenceCurve)::DownCast(spine);
-				Handle(Geom_Curve) trimmed = CURVE_FACTORY->TrimCurveByFaces(spine, sectionFaces.front(), sectionFaces.back());
-				int n = (int)((trimmed->LastParameter() - trimmed->FirstParameter()) / (100 * _modelService->OneMillimeter));
+				Handle(Geom_ConvertibleToBSpline) convertibleToBSpline = Handle(Geom_ConvertibleToBSpline)::DownCast(spine);
 
-				if (gradient) {
-					Handle(Geom_BSplineCurve) bSSpline = CURVE_FACTORY->ToBSpline(trimmed, n);
-					return EXEC_NATIVE->BuildSectionedSolid(bSSpline, sections);
-				}
-				else if (segmented) {
-					Handle(Geom_BSplineCurve) bSSpline = CURVE_FACTORY->ToBSpline(trimmed, n);
-					return EXEC_NATIVE->BuildSectionedSolid(bSSpline, sections);
+				if (convertibleToBSpline)
+				{
+					int n = (int)std::clamp((distancesAlong.back() - distancesAlong.front()) / _modelService->OneMeter, 10., 1000.);
+					auto trimmed = convertibleToBSpline->ToBSpline(distancesAlong.front(), distancesAlong.back(), n);
+					return EXEC_NATIVE->BuildSectionedSolid(trimmed, sections);
 				}
 
+				Handle(Geom_Curve) trimmed = CURVE_FACTORY->TrimCurveByAtDistances(spine, distancesAlong.front(), distancesAlong.back());
 				return EXEC_NATIVE->BuildSectionedSolid(trimmed, sections);
 			}
 

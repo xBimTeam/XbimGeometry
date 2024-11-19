@@ -204,7 +204,6 @@
     <ClInclude Include="BRep\XCylindricalSurface.h" />
     <ClInclude Include="BRep\XDirection.h" />
     <ClInclude Include="BRep\XSectionedSurface.h" />
-    <ClInclude Include="BRep\XSpiral.h" />
     <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
@@ -357,7 +356,6 @@
   <ItemGroup>
     <ClCompile Include="BRep\Unmanaged\NFootprint.cpp" />
     <ClCompile Include="BRep\XEllipse.cpp" />
-    <ClCompile Include="BRep\XSpiral.cpp" />
     <ClCompile Include="Extensions\ToGTransform.h" />
     <ClCompile Include="Factories\BIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="BRep\XAxisAlignedBox.cpp" />

@@ -78,7 +78,9 @@ namespace Xbim
 				gp_Pnt result;
 				gp_Vec tangent;
 				gp_Vec axis;
-				BuildPoint3d(pointByDistanceExpression, result, tangent, axis);
+				Standard_Real distanceAlong;
+
+				BuildPoint3d(pointByDistanceExpression, result, tangent, axis, distanceAlong);
 				return gcnew XPoint(result);
 			}
 
@@ -309,8 +311,9 @@ namespace Xbim
 				gp_Vec axis(0, 0, 1);
 				bool hasAxis;
 				bool hasRef;
+				Standard_Real distanceAlong;
 
-				if (BuildPoint3d(point, loc, tangent, axis))
+				if (BuildPoint3d(point, loc, tangent, axis, distanceAlong))
 				{
 					if (axisPlacement->RefDirection != nullptr)
 					{
@@ -338,15 +341,56 @@ namespace Xbim
 				throw RaiseGeometryFactoryException("Couldn't build IfcAxis2PlacementLinear", axisPlacement);
 			}
 
+			Standard_Real GeometryFactory::GetDistanceAlong(IfcPointByDistanceExpression^ point)
+			{
+				Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^ lengthValue =
+					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^>(point->DistanceAlong);
+				Xbim::Ifc4x3::MeasureResource::IfcParameterValue^ parameterValue =
+					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcParameterValue^>(point->DistanceAlong);
+				auto conic = (dynamic_cast<IIfcConic^>(point->BasisCurve));
+
+				Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(point->BasisCurve);
+				GeomAdaptor_Curve curveAdaptor(curve);
+				Standard_Real firstParam = curve->FirstParameter();
+				Standard_Real lastParam = curve->LastParameter();
+				gp_Pnt result;
+				gp_Vec tangent;
+				gp_Vec  axis;
+				Standard_Real len;
+				if (lengthValue != nullptr)
+				{
+					len = static_cast<Standard_Real>(lengthValue->Value);
+					curve->D1(len, result, tangent);
+					return len;
+				}
+				else if (parameterValue != nullptr) {
+					if (conic != nullptr)
+					{
+						auto param = static_cast<double>(parameterValue->Value) * ModelGeometryService->RadianFactor;
+						curve->D1(param, result, tangent);
+					}
+					else
+					{
+						auto param = static_cast<double>(parameterValue->Value);
+						Standard_Real length = GCPnts_AbscissaPoint::Length
+						(curveAdaptor, firstParam, lastParam, ModelGeometryService->Precision);
+						len = param * length;
+						curve->D1(len, result, tangent);
+					}
+					return len;
+				}
+
+				throw RaiseGeometryFactoryException("DistanceAlong must be specified", point);
+			}
 
 
-			bool GeometryFactory::GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis)
+			bool GeometryFactory::GetTangentAtPlacement(IfcAxis2PlacementLinear^ axisPlacement, gp_Pnt& loc, gp_Vec& tangent, gp_Vec& axis, Standard_Real& distanceAlong)
 			{
 				IfcPointByDistanceExpression^ point = dynamic_cast<IfcPointByDistanceExpression^>(axisPlacement->Location);
 				if (point == nullptr)
 					throw RaiseGeometryFactoryException("IfcAxis2PlacementLinear should have a Location property of type IfcPointByDistanceExpression", axisPlacement);
 
-				return BuildPoint3d(point, loc, tangent, axis);
+				return BuildPoint3d(point, loc, tangent, axis, distanceAlong);
 			}
 
 			
@@ -358,7 +402,7 @@ namespace Xbim
 				return true;
 			}
 
-			bool GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis)
+			bool GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis, Standard_Real& len)
 			{
 
 				Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(point->BasisCurve); 
@@ -373,8 +417,7 @@ namespace Xbim
 				Xbim::Ifc4x3::MeasureResource::IfcParameterValue^ parameterValue =
 					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcParameterValue^>(point->DistanceAlong);
 				auto conic = (dynamic_cast<IIfcConic^>(point->BasisCurve));
-
-				Standard_Real len;
+				 
 				if (lengthValue != nullptr)
 				{
 					len = static_cast<Standard_Real>(lengthValue->Value);

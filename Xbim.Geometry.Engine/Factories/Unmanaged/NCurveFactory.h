@@ -93,6 +93,8 @@ public:
 
 	Handle(Geom_Curve) TrimCurveByWires(const Handle(Geom_Curve)& curveEdge, const TopoDS_Wire& wire1, const TopoDS_Wire& wire2);
 	Handle(Geom_Curve) TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2);
+	void TranslateCurveSequenceStartPointToX(TColGeom2d_SequenceOfBoundedCurve& curves, Standard_Real xDistance);
+	Handle(Geom2d_BoundedCurve) TranslateCurveStartPointToX(const Handle(Geom2d_BoundedCurve)& boundedCurve, Standard_Real xDistance);
 
 private:
 	bool GetPlaneFromWire(const TopoDS_Wire& wire, gp_Pln& plane);
