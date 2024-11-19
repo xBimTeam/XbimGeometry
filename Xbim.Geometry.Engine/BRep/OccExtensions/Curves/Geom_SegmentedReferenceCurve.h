@@ -220,8 +220,13 @@ public:
         double baseCurveParm1 = _baseCurve->HorizontalCurve()->FirstParameter();
         double baseCurveParm2 = _baseCurve->HorizontalCurve()->LastParameter();
 
+        return ToBSpline(baseCurveParm1, baseCurveParm2, nbPoints);
+    }
+
+    Handle(Geom_BSplineCurve) ToBSpline(double startParam, double endParam, int nbPoints) const override
+    {
         TColgp_Array1OfPnt points(1, nbPoints + (_hasEndPoint ? 1 : 0));
-        Geom2dAdaptor_Curve adaptorHorizontalProjection(_baseCurve->HorizontalCurve() , baseCurveParm1, baseCurveParm2);
+        Geom2dAdaptor_Curve adaptorHorizontalProjection(_baseCurve->HorizontalCurve(), startParam, endParam);
         GCPnts_UniformAbscissa uniformAbscissa(adaptorHorizontalProjection, nbPoints);
 
         for (Standard_Integer i = 1; i <= nbPoints; ++i) {
@@ -233,7 +238,7 @@ public:
             std::tuple<Standard_Real, Standard_Real> superElevationAndTilt = GetSuperelevationAndCantTiltAt(param);
 
             Standard_Real superElevation = std::get<0>(superElevationAndTilt);
-            
+
             gp_Pnt2d heightPoint;
             _baseCurve->HeightFunction()->D0(param, heightPoint);
 
@@ -243,10 +248,6 @@ public:
             points.SetValue(i, p3d);
         }
 
-        if (_hasEndPoint) {
-            //points.SetValue(nbPoints + 1, _endPoint.Transformation().TranslationPart());
-        }
-
         GeomAPI_PointsToBSpline pointsToBSpline(points, 8, 8, GeomAbs_CN);
         return pointsToBSpline.Curve();
     }
@@ -254,7 +255,6 @@ public:
     const Handle(Geom_GradientCurve)& BaseCurve() {
         return _baseCurve;
     }
-
 
     std::tuple<Standard_Real, Standard_Real> GetSuperelevationAndCantTiltAt(Standard_Real x_value) const
     {
