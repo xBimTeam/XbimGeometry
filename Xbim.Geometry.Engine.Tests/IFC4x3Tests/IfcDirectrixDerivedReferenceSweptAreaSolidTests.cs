@@ -4,6 +4,7 @@ using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4x3.GeometricModelResource;
+using Xbim.Ifc4x3.GeometryResource;
 using Xbim.Ifc4x3.SharedInfrastructureElements;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
@@ -29,23 +30,14 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
 
+
         [Theory]
         [InlineData(@"TestFiles\IFC4x3\ACCA_sleepers-linear-placement-cant-implicit.ifc", 2778)]
-        //[InlineData(@"TestFiles\IFC4x3\DirectrixDerivedReferenceSweptAreaSolid-2.ifc", 119)]
+        [InlineData(@"TestFiles\IFC4x3\DirectrixDerivedReferenceSweptAreaSolid-2.ifc", 119)]
         public void CanBuildIfcDirectrixDerivedReferenceSweptAreaSolid(string ifcFile, int solidId)
         {
             // Arrange
             using var model = MemoryModel.OpenRead(ifcFile);
-
-
-            var context = new Xbim3DModelContext(model, engineVersion: XGeometryEngineVersion.V6);
-            context.CreateContext(null, true);
-            using var wexBimFile = File.Create(Path.ChangeExtension(ifcFile, "wexbim"));
-            using var wexBimBinaryWriter = new BinaryWriter(wexBimFile);
-            model.SaveAsWexBim(wexBimBinaryWriter);
-
-
-
             var solid = model.Instances[solidId] as IfcDirectrixDerivedReferenceSweptAreaSolid;
             var modelSvc = _factory.CreateModelGeometryService(model, _loggerFactory);
 
@@ -55,8 +47,6 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
             // Assert
             xSolid.Should().NotBeNull();
         }
-         
-
     }
 
 }

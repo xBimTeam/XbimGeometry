@@ -86,6 +86,7 @@ namespace Xbim
 				void MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section);
 				void MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section);
 				TopoDS_Face MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section);
+				TopoDS_Wire MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section);
 			};
 		}
 	}

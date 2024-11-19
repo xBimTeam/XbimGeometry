@@ -14,6 +14,7 @@
 #include "../BRep/XShell.h"
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <TopoDS.hxx>
+#include <BRepLib.hxx>
 #include "../BRep/XShape.h"
 #include "../BRep/XVertex.h"
 #include "../BRep/XEdge.h"
@@ -30,6 +31,7 @@
 #include <ShapeFix_Shape.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepOffsetAPI_MakePipeShell.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 
 using namespace System;
 using namespace Xbim::Geometry::BRep;
@@ -353,7 +355,7 @@ namespace Xbim
 
 				// It is assumed that all sections will be of the same type
 				bool isIfcParameterizedProfileDef = dynamic_cast<IIfcParameterizedProfileDef^>(sectionedSolidHorizontal->CrossSections[0]) != nullptr;
-
+			
 				for (int i = 0; i < sectionedSolidHorizontal->CrossSections->Count; i++)
 				{
 					/*XProfileDefType profileType;
@@ -366,7 +368,6 @@ namespace Xbim
 					gp_Vec up;
 					bool hasAxis;
 					bool hasRef;
-
 
 					// The profile placement is not necessarily derived 
 					// from the spine curve if the Axis and RefDirection is specified
@@ -399,12 +400,11 @@ namespace Xbim
 						refVec = up.Crossed(normal);
 					}
 					distancesAlong.push_back(distanceAlong);
-
+					
 					// curve tangent is the section normal
-					MoveSection(loc, normal, refVec, sectionFace);
-					TopoDS_Wire section = BRepTools::OuterWire(sectionFace);
+					TopoDS_Wire section = MovedSection(loc, normal, refVec, BRepTools::OuterWire(sectionFace));
 					sections.push_back(section);
-					 
+				
 					// Should have similar edge count if not IfcParameterizedProfileDef
 					if (!isIfcParameterizedProfileDef)
 					{
@@ -413,6 +413,7 @@ namespace Xbim
 						{
 							TopoDS_Edge edge = TopoDS::Edge(explorer.Current());
 							edges.push_back(edge);
+
 						}
 
 						if (i > 0 && edges.size() != lastEdgeCount)
@@ -421,6 +422,7 @@ namespace Xbim
 						lastEdgeCount = edges.size();
 					}
 				}
+
 				
 				Handle(Geom_ConvertibleToBSpline) convertibleToBSpline = Handle(Geom_ConvertibleToBSpline)::DownCast(spine);
 
@@ -823,10 +825,22 @@ namespace Xbim
 				gp_Trsf trsf;
 				trsf.SetTransformation(toAx3, gp_Ax3());
 				TopLoc_Location topLoc(trsf);
-
-				return TopoDS::Face(section.Moved(topLoc));
+				BRepBuilderAPI_Transform transformer(section, topLoc, true);
+				transformer.Build();
+				return TopoDS::Face(transformer.Shape());
 			}
 
+			TopoDS_Wire SolidFactory::MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section)
+			{
+				gp_Ax3 toAx3(loc, sectionNormal, refVec);
+				gp_Trsf trsf;
+				trsf.SetTransformation(toAx3, gp_Ax3());
+				TopLoc_Location topLoc(trsf);
+				BRepBuilderAPI_Transform transformer(section, topLoc, true);
+				transformer.Build();
+				auto wire = TopoDS::Wire(transformer.Shape());
+				return wire;
+			}
 		}
 	}
 }

@@ -437,17 +437,15 @@ namespace Xbim
 					}
 				}
 				else throw RaiseGeometryFactoryException("DistanceAlong must be specified", point);
-				tangent.Normalize();
-
-				Handle(Geom_SegmentedReferenceCurve) segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(curve);
 				
 				tangent.Normalize();
 				gp_Vec up(0, 0, 1);
 				gp_Vec y = up.Crossed(tangent);
 				y.Normalize();
 				axis = tangent.Crossed(y);
-				tangent.Normalize();
+				axis.Normalize();
 
+				Handle(Geom_SegmentedReferenceCurve) segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(curve);
 
 				if (segmentedRef) 
 				{
