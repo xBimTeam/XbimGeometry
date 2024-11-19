@@ -49,15 +49,15 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                 xa = xa.Normalized();
                 XbimVector3D ya = XbimVector3D.CrossProduct(za, xa);
                 ya = ya.Normalized();
-                double useZ = axis3.Location.Z;
+                double useZ = axis3.Location?.Z ?? 0.0;
                 if (double.IsNaN(useZ))
                     useZ = 0;
                 
                 return new XbimMatrix3D(
                     xa.X, xa.Y, xa.Z, 0, 
                     ya.X, ya.Y, ya.Z, 0, 
-                    za.X, za.Y, za.Z, 0, 
-                    axis3.Location.X, axis3.Location.Y, useZ, 1);
+                    za.X, za.Y, za.Z, 0,
+                    axis3.Location?.X ?? 0.0, axis3.Location?.Y ?? 0.0, useZ, 1);
             }
             else if (axis3.Location != null)
             {
