@@ -109,7 +109,7 @@ namespace Xbim.Geometry.Engine.Tests
         {
             var axis3dMoq = MakeMoq<IIfcAxis2Placement3D>();
             var axis3d = axis3dMoq.Object;
-            axis3d.Axis = axis??IfcDirection3dMock();
+            axis3d.Axis = axis ?? IfcDirection3dMock();
             axis3d.RefDirection = refDir;
             axis3d.Location = loc ?? IfcCartesianPoint3dMock();
             return axis3d;

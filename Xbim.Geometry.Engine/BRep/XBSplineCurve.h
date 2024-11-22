@@ -25,27 +25,27 @@ namespace Xbim
 				virtual property bool IsRational {bool get() { return OccBSplineCurve()->IsRational(); } }				
 				virtual property IXPoint^ StartPoint {IXPoint^ get() { return gcnew XPoint(OccBSplineCurve()->StartPoint()); }};
 				virtual property IXPoint^ EndPoint {IXPoint^ get() { return gcnew XPoint(OccBSplineCurve()->EndPoint()); }};
-				virtual property IXGeometricContinuity Continuity {IXGeometricContinuity get()
+				virtual property XGeometricContinuity Continuity {XGeometricContinuity get()
 				{
 					GeomAbs_Shape continuity = OccBSplineCurve()->Continuity();
 					switch (continuity)
 					{
-					case GeomAbs_C0:
-						return IXGeometricContinuity::GeomAbs_C0;
-					case GeomAbs_G1:
-						return IXGeometricContinuity::GeomAbs_G1;
-					case GeomAbs_C1:
-						return IXGeometricContinuity::GeomAbs_C1;
-					case GeomAbs_G2:
-						return IXGeometricContinuity::GeomAbs_G2;
-					case GeomAbs_C2:
-						return IXGeometricContinuity::GeomAbs_C2;
-					case GeomAbs_C3:
-						return IXGeometricContinuity::GeomAbs_C3;
-					case GeomAbs_CN:
-						return IXGeometricContinuity::GeomAbs_CN;
-					default:
-						return IXGeometricContinuity::GeomAbs_C0;
+						case GeomAbs_C0:
+							return XGeometricContinuity::GeomAbs_C0;
+						case GeomAbs_G1:
+							return XGeometricContinuity::GeomAbs_G1;
+						case GeomAbs_C1:
+							return XGeometricContinuity::GeomAbs_C1;
+						case GeomAbs_G2:
+							return XGeometricContinuity::GeomAbs_G2;
+						case GeomAbs_C2:
+							return XGeometricContinuity::GeomAbs_C2;
+						case GeomAbs_C3:
+							return XGeometricContinuity::GeomAbs_C3;
+						case GeomAbs_CN:
+							return XGeometricContinuity::GeomAbs_CN;
+						default:
+							return XGeometricContinuity::GeomAbs_C0;
 					}
 				};
 

@@ -33,7 +33,7 @@ namespace Xbim
 			ref class XWire;
 			ref class XEdge;
 			ref class XVertex;
-
+			ref class XSectionedSurface;
 
 			public ref class XShape abstract : XbimHandle<TopoDS_Shape>, IXShape
 			{

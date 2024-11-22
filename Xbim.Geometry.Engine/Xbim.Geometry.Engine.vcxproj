@@ -190,9 +190,20 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_ConvertibleToBSpline.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_GradientCurve.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Geom_SegmentedReferenceCurve.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Clothoid.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_CosineSpiral.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Polynomial.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_SineSpiral.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Spiral.h" />
+    <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_PolynomialSpiral.h" />
+    <ClInclude Include="BRep\TaggedPoint.h" />
     <ClInclude Include="BRep\Unmanaged\NFootprint.h" />
     <ClInclude Include="BRep\XCylindricalSurface.h" />
     <ClInclude Include="BRep\XDirection.h" />
+    <ClInclude Include="BRep\XSectionedSurface.h" />
     <ClInclude Include="Factories\BIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_EllipseWithSemiAxes.h" />
     <ClInclude Include="BRep\OccExtensions\Geom2d_LineWithMagnitude.h" />
@@ -272,6 +283,8 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Services\Caching\Cache.h" />
+    <ClInclude Include="Services\Caching\ManagedCache.h" />
     <ClInclude Include="Services\ModelPlacementBuilder.h" />
     <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
@@ -507,7 +520,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.347-develop</Version>
+      <Version>6.2.359-develop</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

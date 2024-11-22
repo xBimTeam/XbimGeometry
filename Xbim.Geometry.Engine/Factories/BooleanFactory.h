@@ -15,7 +15,7 @@ namespace Xbim
 			private:
 				
 			public:
-				BooleanFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService,new NBooleanFactory(modelService->Timeout)){	}
+				BooleanFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NBooleanFactory(modelService->Timeout)){	}
 				virtual IXShape^ Build(IIfcBooleanResult^ boolResult);
 				TopoDS_Shape BuildBooleanResult(IIfcBooleanResult^ boolResult);
 				TopoDS_Shape BuildOperand(IIfcBooleanOperand^ boolOp);

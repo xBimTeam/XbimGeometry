@@ -231,7 +231,7 @@ namespace Xbim
 			}
 			catch (System::Exception^ e)
 			{
-				throw RaiseGeometryServiceException("Error building geometry shape", geomRep, e);
+				throw RaiseGeometryServiceException("Error building geometry shape: " + e->Message, geomRep, e);
 			}
 
 		}
@@ -840,8 +840,23 @@ namespace Xbim
 #pragma endregion
 
 #pragma region Sundry Methods
+
 		XbimMatrix3D XbimGeometryCreatorV6::ToMatrix3D(IIfcObjectPlacement^ objPlacement, ILogger^)
 		{
+			Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^  linearPlacement = 
+				dynamic_cast<Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^>(objPlacement);
+
+			if (linearPlacement)
+			{
+				IXLocation^ xLoc = GeometryFactory->BuildLocation(linearPlacement);
+
+				return XbimMatrix3D
+				   (xLoc->M11, xLoc->M12, xLoc->M13, 0,
+					xLoc->M21, xLoc->M22, xLoc->M23, 0,
+					xLoc->M31, xLoc->M32, xLoc->M33, 0,
+					xLoc->Translation->X, xLoc->Translation->Y, xLoc->Translation->Z, 1);
+			}
+
 			return XbimConvert::ConvertMatrix3D(objPlacement, Logger(), this);
 		}
 

@@ -38,7 +38,10 @@
 #include <GeomLProp_SLProps.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <BRepOffsetAPI_ThruSections.hxx>
+#include <BRepBuilderAPI_MakeSolid.hxx>
 #include "NBooleanFactory.h"
+
+
 bool NSolidFactory::TryUpgrade(const TopoDS_Solid& solid, TopoDS_Shape& shape)
 {
 	try
@@ -722,3 +725,90 @@ TopoDS_Shape NSolidFactory::BuildExtrudedAreaSolidTapered(const TopoDS_Face& swe
 	return TopoDS_Solid();
 
 }
+
+
+TopoDS_Solid NSolidFactory::BuildExtrudedAreaSolid(const opencascade::handle<Geom_Curve>& spine, const std::vector<TopoDS_Wire>& sections, double precision)
+{
+
+	TopoDS_Edge spineEdge = BRepBuilderAPI_MakeEdge(spine);
+	BRepBuilderAPI_MakeWire wireMaker;
+	wireMaker.Add(spineEdge);
+
+	BRepOffsetAPI_ThruSections pipeMaker(Standard_True, Standard_False, precision);
+	for (size_t i = 0; i < sections.size(); i++)
+	{
+		pipeMaker.AddWire(sections[i]);
+	}
+
+	pipeMaker.Build();
+	if (!pipeMaker.IsDone())
+		Standard_Failure::Raise("Failed to extrude solid");
+	TopoDS_Shape shape = pipeMaker.Shape();
+	shape.Closed(Standard_True);
+	if (!shape.IsNull() && shape.ShapeType() == TopAbs_SOLID)
+	{
+		return TopoDS::Solid(shape);
+	}
+	else
+	{
+		pLoggingService->LogError("Could not build solid from pipe shell");
+	}
+	return TopoDS_Solid();
+}
+
+TopoDS_Solid NSolidFactory::BuildSectionedSolid(const opencascade::handle<Geom_Curve>& spine, const std::vector<TopoDS_Wire>& sections)
+{
+	TopoDS_Edge spineEdge = BRepBuilderAPI_MakeEdge(spine);
+	BRepBuilderAPI_MakeWire wireMaker;
+	wireMaker.Add(spineEdge);
+	BRepOffsetAPI_MakePipeShell pipeShell(wireMaker.Wire());
+	pipeShell.SetDiscreteMode();
+	for each (auto wire in sections)
+	{
+		pipeShell.Add(wire);
+	}
+	
+	pipeShell.Build();
+	pipeShell.MakeSolid();
+	TopoDS_Shape shape = pipeShell.Shape();
+	shape.Closed(Standard_True);
+	if (!shape.IsNull() && shape.ShapeType() == TopAbs_SOLID)
+	{
+		return TopoDS::Solid(shape);
+	}
+	else
+	{
+		pLoggingService->LogError("Could not build solid from pipe shell");
+	}
+	return TopoDS_Solid();
+}
+
+
+
+TopoDS_Solid NSolidFactory::BuildSectionedSolid(const opencascade::handle<Geom_Curve>& spine, const std::vector<TopoDS_Face>& sections)
+{
+	TopoDS_Edge spineEdge = BRepBuilderAPI_MakeEdge(spine);
+	BRepBuilderAPI_MakeWire wireMaker;
+	wireMaker.Add(spineEdge);
+	BRepOffsetAPI_MakePipeShell pipeShell(wireMaker.Wire());
+	pipeShell.SetDiscreteMode();
+	for each (auto face in sections)
+	{
+		pipeShell.Add(face);
+	}
+
+	pipeShell.Build();
+    pipeShell.MakeSolid();
+	TopoDS_Shape shape = pipeShell.Shape();
+	shape.Closed(Standard_True);
+	if (!shape.IsNull() && shape.ShapeType() == TopAbs_SOLID)
+	{
+		return TopoDS::Solid(shape);
+	}
+	else
+	{
+		pLoggingService->LogError("Could not build solid from pipe shell");
+	}
+	return TopoDS_Solid();
+}
+

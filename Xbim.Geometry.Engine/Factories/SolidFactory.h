@@ -1,6 +1,7 @@
 #pragma once
 #include "FactoryBase.h"
 #include <TopoDS_Solid.hxx>
+#include <BRepOffsetAPI_ThruSections.hxx>
 #include "./Unmanaged/NSolidFactory.h"
 #include "../Services/LoggingService.h"
 #include "GeometryFactory.h"
@@ -76,7 +77,16 @@ namespace Xbim
 
 				TopoDS_Shape BuildExtrudedAreaSolid(IIfcExtrudedAreaSolid^ extrudedSolid, IIfcProfileDef^ profileDef);
 				TopoDS_Shape BuildExtrudedAreaSolidTapered(IIfcExtrudedAreaSolidTapered^ extrudedSolid, IIfcProfileDef^ profileDef, IIfcProfileDef^ endProfileDef);
+				
+				TopoDS_Shape BuildSectionedSolidHorizontal(Xbim::Ifc4x3::GeometricModelResource::IfcSectionedSolidHorizontal^ sectionedSolidHorizontal);
+				TopoDS_Shape BuildDirectrixDerivedReferenceSweptAreaSolid(Xbim::Ifc4x3::GeometricModelResource::IfcDirectrixDerivedReferenceSweptAreaSolid^ directrixDerivedReferenceSweptAreaSolid);
 
+
+			private:
+				void MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section);
+				void MoveSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section);
+				TopoDS_Face MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Face& section);
+				TopoDS_Wire MovedSection(gp_Pnt& loc, gp_Vec& sectionNormal, gp_Vec& refVec, TopoDS_Wire& section);
 			};
 		}
 	}

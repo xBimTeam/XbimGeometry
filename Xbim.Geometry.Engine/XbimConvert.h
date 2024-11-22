@@ -23,7 +23,7 @@ namespace Xbim
 	    public ref class XbimConvert
 		{
 		private:
-			static IfcDimensionCount dimensions3D = IfcDimensionCount(3);
+			static Xbim::Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Xbim::Ifc4::GeometryResource::IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
 		// Converts a Local Placement into a TopLoc_Location

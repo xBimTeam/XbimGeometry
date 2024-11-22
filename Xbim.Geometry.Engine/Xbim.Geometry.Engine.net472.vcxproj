@@ -141,6 +141,9 @@
     <Reference Include="Xbim.Ifc2x3">
       <HintPath>$(PackagesDir)Xbim.Ifc2x3.dll</HintPath>
     </Reference>
+		<Reference Include="Xbim.Ifc4x3">
+			<HintPath>$(PackagesDir)Xbim.Ifc4x3.dll</HintPath>
+		</Reference>
     <Reference Include="Xbim.IO.MemoryModel">
       <HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
     </Reference>

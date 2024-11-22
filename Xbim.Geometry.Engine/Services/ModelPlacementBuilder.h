@@ -26,58 +26,61 @@ namespace Xbim
 		{
 			public ref class ModelPlacementBuilder : public FactoryBase<NGeometryFactory>, IXModelPlacementBuilder
 			{
-			private:
-				Xbim::Geometry::Services::ModelGeometryService^ _modelGeometryServices;
-				IXPoint^ _wcs;
-				IXLocation^ _rootTrsf;
-				int _rootId = -1;
+				private:
+					Xbim::Geometry::Services::ModelGeometryService^ _modelGeometryServices;
+					IXPoint^ _wcs;
+					IXLocation^ _rootTrsf;
+					int _rootId = -1;
 
-			public:
-				ModelPlacementBuilder(Xbim::Geometry::Services::ModelGeometryService^ modelGeometryService) : FactoryBase(modelGeometryService, new NGeometryFactory())
-				{
-					_modelGeometryServices = modelGeometryService;
-					_wcs = gcnew XPoint(0, 0, 0);
+				public:
+					ModelPlacementBuilder(Xbim::Geometry::Services::ModelGeometryService^ modelGeometryService) : FactoryBase(modelGeometryService, new NGeometryFactory())
+					{
+						_modelGeometryServices = modelGeometryService;
+						_wcs = gcnew XPoint(0, 0, 0);
 					
-					List<IIfcLocalPlacement^>^ localPlacements = Enumerable::ToList(_modelGeometryServices->Model->Instances->OfType<IIfcLocalPlacement^>());
+						List<IIfcLocalPlacement^>^ localPlacements = Enumerable::ToList(_modelGeometryServices->Model->Instances->OfType<IIfcLocalPlacement^>());
 
-					if(localPlacements->Count == 0) return; //nothing to do
+						if(localPlacements->Count == 0) return; //nothing to do
 
-					List<IIfcLocalPlacement^>^ roots = gcnew List<IIfcLocalPlacement^>();
+						List<IIfcLocalPlacement^>^ roots = gcnew List<IIfcLocalPlacement^>();
 
-					// identify tree roots
-					for each(IIfcLocalPlacement^ localPlacement in localPlacements)
-					{
-						if (localPlacement->PlacementRelTo == nullptr)
-						{ 
-							roots->Add(localPlacement);
-							if (roots->Count > 1)
-								return; // more than one root, no need to continue
-						} 
+						// identify tree roots
+						for each(IIfcLocalPlacement^ localPlacement in localPlacements)
+						{
+							if (localPlacement->PlacementRelTo == nullptr)
+							{ 
+								roots->Add(localPlacement);
+								if (roots->Count > 1)
+									return; // more than one root, no need to continue
+							} 
+						}
+
+						if (roots->Count == 1)
+						{
+							IIfcLocalPlacement^ root = roots[0];
+							_rootId = root->EntityLabel;
+							_rootTrsf = _modelGeometryServices->GeometryFactory->BuildLocation(root);
+							_wcs = _rootTrsf->Translation;
+							_rootTrsf->SetTranslation(0, 0, 0);
+						}
+					};
+
+					virtual property IXPoint^ WorldCoordinateSystem { 
+						IXPoint^ get() { return _wcs;  };
 					}
 
-					if (roots->Count == 1)
-					{
-						IIfcLocalPlacement^ root = roots[0];
-						_rootId = root->EntityLabel;
-						_rootTrsf = _modelGeometryServices->GeometryFactory->BuildLocation(root);
-						_wcs = _rootTrsf->Translation;
-						_rootTrsf->SetTranslation(0, 0, 0);
+					virtual property IXLocation^ RootPlacement { 
+						IXLocation^ get() { return _rootTrsf;  };
 					}
-				};
 
-				virtual property IXPoint^ WorldCoordinateSystem { 
-					IXPoint^ get() { return _wcs;  };
-				}
-
-				virtual property IXLocation^ RootPlacement { 
-					IXLocation^ get() { return _rootTrsf;  };
-				}
-
-				virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement, bool adjustWcs);
+					virtual IXLocation^ BuildLocation(IIfcObjectPlacement^ placement, bool adjustWcs);
 			
-				gp_Trsf ToTransform(IIfcLocalPlacement^ localPlacement, bool adjustWcs);
-				bool BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& dir);
-				gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
+					gp_Trsf ToTransform(IIfcObjectPlacement^ placement, bool adjustWcs);
+					bool BuildDirection3d(IIfcDirection^ ifcDir, gp_Vec& dir);
+					gp_Pnt BuildPoint3d(IIfcCartesianPoint^ ifcPoint);
+
+				private:
+					void EvaluateNextPlacement(IIfcLocalPlacement^% localPlacement, Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^% linearPlacement);
 
 			};
 		}

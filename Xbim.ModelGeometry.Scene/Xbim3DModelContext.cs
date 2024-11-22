@@ -253,14 +253,15 @@ namespace Xbim.ModelGeometry.Scene
             /// Initialise the <see cref="XbimCreateContextHelper"/>
             /// </summary>
             /// <param name="adjustWcs"></param>
+            /// <param name="engine"></param>
             /// <param name="generateFullGeometry"><c>true</c> if full BREPS required, <c>false</c> just to Tesselate</param>
             /// <returns></returns>
-            internal bool Initialise(bool adjustWcs, bool generateFullGeometry = false)
+            internal bool Initialise(bool adjustWcs, IXbimGeometryEngine engine, bool generateFullGeometry = false)
             {
                 try
                 {
 
-                    PlacementTree = new XbimPlacementTree(Model, adjustWcs);
+                    PlacementTree = new XbimPlacementTree(Model, engine, adjustWcs);
                     GeometryShapeLookup = new ConcurrentDictionary<int, int>();
                     MapGeometryReferences = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
@@ -806,7 +807,7 @@ namespace Xbim.ModelGeometry.Scene
                     progDelegate?.Invoke(-1, "Initialise");
                     // Creation of full BREP representation is an optional V6 only feature
                     var createFullGeometry = engineVersion == XGeometryEngineVersion.V6 && generateBREPs == true;
-                    if (!contextHelper.Initialise(adjustWcs, createFullGeometry))
+                    if (!contextHelper.Initialise(adjustWcs, _engine, createFullGeometry))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
                     progDelegate?.Invoke(101, "Initialise");
 

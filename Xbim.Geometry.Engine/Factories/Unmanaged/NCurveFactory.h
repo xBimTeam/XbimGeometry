@@ -20,12 +20,25 @@
 #include <Geom_OffsetCurve.hxx>
 #include <TColGeom_SequenceOfBoundedCurve.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <vector>
+#include <GeomAPI_IntCS.hxx>
+#include <TopoDS_Wire.hxx>
+#include <Geom_Plane.hxx>
+#include <BRepBuilderAPI_MakeFace.hxx>
+
+
 public class NCurveFactory : public NFactoryBase
 {
 
 public:
 
 #pragma region Geometric methods
+
+	Handle(Geom2d_Curve) MoveBoundedCurveToOrigin(const Handle(Geom2d_BoundedCurve)& boundedCurve);
+	Handle(Geom2d_Curve) AlignToXAxis(const Handle(Geom2d_BoundedCurve)& boundedCurve);
+	TColgp_Array1OfPnt GetPointsFromProjectionAndHeightCurves(TColgp_Array1OfPnt& points, Standard_Integer nbPoints, Handle(Geom2d_Curve) projection, Handle(Geom2d_Curve) height);
+	TColGeom2d_SequenceOfBoundedCurve GetSegmentsSequnce(std::vector<Handle(Geom2d_Curve)> curves, Standard_Real tolerance);
+	TColGeom_SequenceOfBoundedCurve NCurveFactory::GetSegmentsSequnce(std::vector<Handle(Geom_Curve)> curves, Standard_Real tolerance);
 
 	int Intersections(const Handle(Geom2d_Curve)& c1, const Handle(Geom2d_Curve)& c2, TColgp_Array1OfPnt2d& intersections, double intersectTolerance);
 
@@ -77,6 +90,16 @@ public:
 	static bool LocateVertexOnCurve(const Handle(Geom_Curve)& C, const TopoDS_Vertex& V, double maxTolerance, double& parameter, double& actualDistance);
 	bool Tangent2dAt(const Handle(Geom2d_Curve)& curve, double parameter, gp_Pnt2d& pnt2d, gp_Vec2d& tangent);
 	static Handle(Geom_Curve) GetBasisCurve(const Handle(Geom_Curve)& geomCurve);
+
+	Handle(Geom_Curve) TrimCurveByWires(const Handle(Geom_Curve)& curveEdge, const TopoDS_Wire& wire1, const TopoDS_Wire& wire2);
+	Handle(Geom_Curve) TrimCurveByFaces(const Handle(Geom_Curve)& curve, const TopoDS_Face& face1, const TopoDS_Face& face2);
+	void TranslateCurveSequenceStartPointToX(TColGeom2d_SequenceOfBoundedCurve& curves, Standard_Real xDistance);
+	Handle(Geom2d_BoundedCurve) TranslateCurveStartPointToX(const Handle(Geom2d_BoundedCurve)& boundedCurve, Standard_Real xDistance);
+
+private:
+	bool GetPlaneFromWire(const TopoDS_Wire& wire, gp_Pln& plane);
+	bool GetPlaneFromFace(const TopoDS_Face& face, gp_Pln& plane);
+
 #pragma endregion
 
 };

@@ -1,5 +1,8 @@
-﻿using Xbim.Ifc4.GeometryResource;
-using Xbim.Ifc4.Interfaces;
+﻿using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4x3.MeasureResource;
+using Xbim.Ifc4x3.GeometryResource;
+using IfcCartesianTransformationOperator3D = Xbim.Ifc4.GeometryResource.IfcCartesianTransformationOperator3D;
+using IfcCartesianTransformationOperator3DnonUniform = Xbim.Ifc4.GeometryResource.IfcCartesianTransformationOperator3DnonUniform;
 
 namespace Xbim.Geometry.Engine.Tests
 {
@@ -17,6 +20,17 @@ namespace Xbim.Geometry.Engine.Tests
             ct3d.LocalOrigin = IfcMoq.IfcCartesianPoint3dMock(x, y, z);
             ct3d.Scale = scale;
             return ct3d;
+        }
+        
+        public static IfcPointByDistanceExpression IfcPointByDistanceExpressionMoq(double distanceAlongCurve = 2.0)
+        {
+            var pointExpressionMoq = MakeMoq<IfcPointByDistanceExpression>();
+            var circ1 = IfcMoq.IfcCircle3dMock(radius: 20);
+            var arc = IfcMoq.IfcTrimmedCurve3dMock(circ1, trimParam2: Math.PI / 2);
+            var pointByDistanceExpression = pointExpressionMoq.Object;
+            pointByDistanceExpression.BasisCurve = arc as IfcCurve;
+            pointByDistanceExpression.DistanceAlong = (IfcLengthMeasure)distanceAlongCurve;
+            return pointByDistanceExpression;
         }
 
         public static IIfcCartesianTransformationOperator3D IfcCartesianTransformationOperator3DMoqNonUniform

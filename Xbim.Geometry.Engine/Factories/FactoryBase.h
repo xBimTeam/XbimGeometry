@@ -1,6 +1,8 @@
 #pragma once
 #include "../XbimHandle.h"
 #include "../Services/ModelGeometryService.h"
+#include <any>
+#include <unordered_map>
 
 using namespace Xbim::Geometry::Services;
 using namespace Xbim::Geometry::Abstractions;
@@ -114,7 +116,6 @@ namespace Xbim
 				};
 			public:
 
-
 				FactoryBase<T>(ModelGeometryService^ modelService, T* nativeFactory) : XbimHandle<T>(nativeFactory)
 				{
 					_modelService = modelService;
@@ -123,8 +124,10 @@ namespace Xbim
 
 				virtual property IXModelGeometryService^ ModelGeometryService {IXModelGeometryService^ get() { return _modelService; }; }
 				virtual property IXLoggingService^ LoggingService {IXLoggingService^ get() { return _modelService->LoggingService; }; }
-			};
 
+			
+
+			};
 
 		}
 	}
