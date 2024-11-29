@@ -16,7 +16,10 @@ pr:
     - '*' 
 
 pool:
-  vmImage: 'windows-2022'
+  name: Default
+  demands:
+  - msbuild
+  - visualstudio
   
 variables:
   BuildConfiguration: 'Release'
