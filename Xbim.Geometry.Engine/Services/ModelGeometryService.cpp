@@ -150,7 +150,7 @@ namespace Xbim
 			ShapeBinarySerializer^ ModelGeometryService::GetShapeBinarySerializer()
 			{
 				if (_shapeBinarySerializer == nullptr)
-					_shapeBinarySerializer = gcnew Xbim::Geometry::Services::ShapeBinarySerializer(this);
+					_shapeBinarySerializer = gcnew Xbim::Geometry::Services::ShapeBinarySerializer();
 				return _shapeBinarySerializer;
 			}
 

@@ -1,8 +1,8 @@
 #include "ShapeBinarySerializer.h"
+
 using namespace Xbim::Geometry::BRep;
 using namespace Xbim::Geometry::Exceptions;
 using namespace Xbim::Geometry::Abstractions;
-
 
 class membuf : public std::basic_streambuf<char> {
 public:
@@ -22,19 +22,18 @@ private:
 	membuf _buffer;
 };
 
+
 namespace Xbim
 {
 	namespace Geometry
 	{
 		namespace Services
 		{
-			ShapeBinarySerializer::ShapeBinarySerializer(Xbim::Geometry::Services::ModelGeometryService^ modelService) 
+			ShapeBinarySerializer::ShapeBinarySerializer() 
 			{
-				_modelService = modelService;
-				_loggingService = modelService->LoggingService;
 			};
 
-			array<System::Byte>^ ShapeBinarySerializer::ToArray(IXShape^ shape, bool withTriangles, bool withNormals)
+			cli::array<System::Byte>^ ShapeBinarySerializer::ToArray(IXShape^ shape, bool withTriangles, bool withNormals)
 			{
 				try
 				{
@@ -60,7 +59,7 @@ namespace Xbim
 				}
 			}
 
-			IXShape^ ShapeBinarySerializer::FromArray(array<System::Byte>^ bytes)
+			IXShape^ ShapeBinarySerializer::FromArray(cli::array<System::Byte>^ bytes)
 			{
 				TopoDS_Shape topoShape;
 				try
