@@ -97,7 +97,6 @@ namespace Xbim
 				Xbim::Geometry::Factories::MaterialFactory^ _materialFactory;
 				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
 				Xbim::Geometry::Factories::WexBimMeshFactory^ _wexBimMeshFactory;
-				Xbim::Geometry::Storage::BRepDocumentManager^ _bRepDocumentManager;
 				Xbim::Geometry::Services::ModelPlacementBuilder^ _modelPlacementBuilder;
 			internal:
 				//Factories
@@ -120,7 +119,6 @@ namespace Xbim
 				Xbim::Geometry::Factories::WexBimMeshFactory^ GetWexBimMeshFactory();
 
 				//Other services
-				Xbim::Geometry::Storage::BRepDocumentManager^ GetBRepDocumentManager();
 				Xbim::Geometry::Services::ModelPlacementBuilder^ ModelGeometryService::GetModelPlacementBuilder();
 			public:
 

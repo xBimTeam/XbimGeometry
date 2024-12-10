@@ -1,6 +1,5 @@
 #include "ModelGeometryService.h"
 #include "ModelPlacementBuilder.h"
-#include "../Storage/BRepDocumentManager.h"
 #include "../Services/LoggingService.h"
 #include <BRepTools.hxx>
 
@@ -249,11 +248,6 @@ namespace Xbim
 				return _bimAuthoringToolWorkArounds;
 			}
 
-			Xbim::Geometry::Storage::BRepDocumentManager^ ModelGeometryService::GetBRepDocumentManager()
-			{
-				if (_bRepDocumentManager == nullptr) _bRepDocumentManager = gcnew Xbim::Geometry::Storage::BRepDocumentManager(this);
-				return _bRepDocumentManager;
-			}
 
 			IXGeometryFactory^ ModelGeometryService::GeometryFactory::get() { return GetGeometryFactory(); }
 			IXVertexFactory^ ModelGeometryService::VertexFactory::get() { return GetVertexFactory(); }
@@ -271,7 +265,7 @@ namespace Xbim
 			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
 			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
 			IXWexBimMeshFactory^ ModelGeometryService::WexBimMeshFactory::get() { return GetWexBimMeshFactory(); }
-			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return GetBRepDocumentManager(); }
+			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return nullptr; }
 			IXModelPlacementBuilder^ ModelGeometryService::ModelPlacementBuilder::get() { return GetModelPlacementBuilder(); }
 		}
 

@@ -304,15 +304,6 @@
     <ClInclude Include="Services\ShapeService.h" />
     <ClInclude Include="Services\Unmanaged\NWexBimMesh.h" />
     <ClInclude Include="Services\Unmanaged\PointInspector.h" />
-    <ClInclude Include="Storage\BRepDocument.h" />
-    <ClInclude Include="Storage\BRepDocumentManager.h" />
-    <ClInclude Include="Storage\BRepDocumentItem.h" />
-    <ClInclude Include="Storage\Unmanaged\FlexApp_Application.h" />
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers.h" />
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h" />
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.h" />
-    <ClInclude Include="Storage\Unmanaged\FlexShape.h" />
-    <ClInclude Include="Storage\Unmanaged\NBRepDocument.h" />
     <ClInclude Include="Visual\ColourRGB.h" />
     <ClInclude Include="Visual\VisualMaterial.h" />
     <ClInclude Include="Visual\XbimShapeColour.h" />
@@ -438,15 +429,6 @@
     <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
     <ClCompile Include="Services\Unmanaged\PackedNormal.cpp" />
     <ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
-    <ClCompile Include="Storage\BRepDocument.cpp" />
-    <ClCompile Include="Storage\BRepDocumentManager.cpp" />
-    <ClCompile Include="Storage\BRepDocumentItem.cpp" />
-    <ClCompile Include="Storage\Unmanaged\FlexApp_Application.cpp" />
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers.cpp" />
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.cpp" />
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp" />
-    <ClCompile Include="Storage\Unmanaged\FlexShape.cpp" />
-    <ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp" />
     <ClCompile Include="Visual\ColourRGB.cpp" />
     <ClCompile Include="Visual\VisualMaterial.cpp" />
     <ClCompile Include="Visual\XbimShapeColour.cpp" />
@@ -520,7 +502,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.359-develop</Version>
+      <Version>6.2.361</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
