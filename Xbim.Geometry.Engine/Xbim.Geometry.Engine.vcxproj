@@ -304,6 +304,7 @@
     <ClInclude Include="Services\ShapeService.h" />
     <ClInclude Include="Services\Unmanaged\NWexBimMesh.h" />
     <ClInclude Include="Services\Unmanaged\PointInspector.h" />
+    <ClInclude Include="Services\ShapeBinarySerializer.h" />
     <ClInclude Include="Visual\ColourRGB.h" />
     <ClInclude Include="Visual\VisualMaterial.h" />
     <ClInclude Include="Visual\XbimShapeColour.h" />
@@ -429,6 +430,7 @@
     <ClCompile Include="Services\Unmanaged\NWexBimMesh.cpp" />
     <ClCompile Include="Services\Unmanaged\PackedNormal.cpp" />
     <ClCompile Include="Services\Unmanaged\PointInspector.cpp" />
+    <ClCompile Include="Services\ShapeBinarySerializer.cpp" />
     <ClCompile Include="Visual\ColourRGB.cpp" />
     <ClCompile Include="Visual\VisualMaterial.cpp" />
     <ClCompile Include="Visual\XbimShapeColour.cpp" />
@@ -502,7 +504,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.361</Version>
+      <Version>6.2.362-develop</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

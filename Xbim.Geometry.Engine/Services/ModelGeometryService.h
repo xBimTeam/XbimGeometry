@@ -45,13 +45,11 @@ namespace Xbim
 			ref class ProjectionFactory;
 			ref class WexBimMeshFactory;
 		}
-		namespace Storage
-		{
-			ref class BRepDocumentManager;
-		}
+		
 		namespace Services
 		{
 			ref class ModelPlacementBuilder;
+			ref class ShapeBinarySerializer;
 		}
 	}
 }
@@ -98,6 +96,7 @@ namespace Xbim
 				Xbim::Geometry::Factories::ProjectionFactory^ _projectionFactory;
 				Xbim::Geometry::Factories::WexBimMeshFactory^ _wexBimMeshFactory;
 				Xbim::Geometry::Services::ModelPlacementBuilder^ _modelPlacementBuilder;
+				Xbim::Geometry::Services::ShapeBinarySerializer^ _shapeBinarySerializer;
 			internal:
 				//Factories
 				Xbim::Geometry::Factories::VertexFactory^ GetVertexFactory();
@@ -119,7 +118,9 @@ namespace Xbim
 				Xbim::Geometry::Factories::WexBimMeshFactory^ GetWexBimMeshFactory();
 
 				//Other services
-				Xbim::Geometry::Services::ModelPlacementBuilder^ ModelGeometryService::GetModelPlacementBuilder();
+				Xbim::Geometry::Services::ModelPlacementBuilder^ GetModelPlacementBuilder();
+				Xbim::Geometry::Services::ShapeBinarySerializer^ GetShapeBinarySerializer();
+
 			public:
 
 				ModelGeometryService(IModel^ model, ILoggerFactory^ loggerFactory);
@@ -166,10 +167,10 @@ namespace Xbim
 				virtual property IXMaterialFactory^ MaterialFactory {IXMaterialFactory^ get(); }
 				virtual property IXProjectionFactory^ ProjectionFactory {IXProjectionFactory^ get(); }
 				virtual property IXWexBimMeshFactory^ WexBimMeshFactory {IXWexBimMeshFactory^ get(); }
-				virtual property IXBRepDocumentManager^ BRepDocumentManager {IXBRepDocumentManager^ get(); }
 
 				//Other services
 				virtual property IXModelPlacementBuilder^ ModelPlacementBuilder {IXModelPlacementBuilder^ get(); }
+				virtual property IXShapeBinarySerializer^ ShapeBinarySerializer {IXShapeBinarySerializer^ get(); }
 
 
 #pragma region Logging and Exceptions

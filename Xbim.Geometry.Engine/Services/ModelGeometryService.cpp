@@ -1,5 +1,6 @@
 #include "ModelGeometryService.h"
 #include "ModelPlacementBuilder.h"
+#include "ShapeBinarySerializer.h"
 #include "../Services/LoggingService.h"
 #include <BRepTools.hxx>
 
@@ -146,6 +147,13 @@ namespace Xbim
 				return _modelPlacementBuilder;
 			}
 
+			ShapeBinarySerializer^ ModelGeometryService::GetShapeBinarySerializer()
+			{
+				if (_shapeBinarySerializer == nullptr)
+					_shapeBinarySerializer = gcnew Xbim::Geometry::Services::ShapeBinarySerializer(this);
+				return _shapeBinarySerializer;
+			}
+
 			VertexFactory^ ModelGeometryService::GetVertexFactory()
 			{
 				if (_vertexFactory == nullptr) _vertexFactory = gcnew Xbim::Geometry::Factories::VertexFactory(this);
@@ -265,7 +273,7 @@ namespace Xbim
 			IXMaterialFactory^ ModelGeometryService::MaterialFactory::get() { return GetMaterialFactory(); }
 			IXProjectionFactory^ ModelGeometryService::ProjectionFactory::get() { return GetProjectionFactory(); }
 			IXWexBimMeshFactory^ ModelGeometryService::WexBimMeshFactory::get() { return GetWexBimMeshFactory(); }
-			IXBRepDocumentManager^ ModelGeometryService::BRepDocumentManager::get() { return nullptr; }
+			IXShapeBinarySerializer^ ModelGeometryService::ShapeBinarySerializer::get() { return GetShapeBinarySerializer(); }
 			IXModelPlacementBuilder^ ModelGeometryService::ModelPlacementBuilder::get() { return GetModelPlacementBuilder(); }
 		}
 
