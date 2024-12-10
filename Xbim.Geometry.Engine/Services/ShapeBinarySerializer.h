@@ -4,10 +4,21 @@
 #include "../BRep/XShape.h"
 #include <BinTools.hxx>
 #include "../Services/ModelGeometryService.h"
-#include "ModelGeometryService.h"
 
 using namespace Xbim::Geometry::Abstractions;
- 
+
+namespace Xbim
+{
+	namespace Geometry
+	{
+		namespace Services
+		{
+			ref class ModelGeometryService;
+		}
+	}
+}
+
+
 namespace Xbim
 {
 	namespace Geometry

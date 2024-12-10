@@ -63,10 +63,8 @@ namespace Xbim
 			IXShape^ ShapeBinarySerializer::FromArray(array<System::Byte>^ bytes)
 			{
 				TopoDS_Shape topoShape;
-
 				try
 				{
-
 					pin_ptr<System::Byte> pbArr = &bytes[0];
 					memstream iStrm(pbArr, bytes->Length);
 					BinTools::Read(topoShape, iStrm);
