@@ -96,6 +96,8 @@ namespace Xbim
 
 			Handle(Geom_Surface) SurfaceFactory::BuildSurface(IIfcSurface^ ifcSurface, XSurfaceType surfaceType)
 			{
+				if (!Enum::TryParse<XSurfaceType>(ifcSurface->ExpressType->ExpressName, surfaceType))
+					throw RaiseGeometryFactoryException("Unsupported surface type", ifcSurface);
 
 				switch (surfaceType)
 				{
