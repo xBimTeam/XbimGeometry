@@ -87,6 +87,7 @@ jobs:
       FilenamePattern: .csproj
       Field: fileversion
       OutputVersion: OutputedVersion
+
   - task: VersionDotNetCoreAssemblies@2
     displayName: 'Update global Versions'
     inputs: 
@@ -102,10 +103,12 @@ jobs:
   - powershell: |
       ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace '"FileVersion", "6.0.0.0"','"FileVersion", "$(fileversion)"') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FileVersion'
+
   - powershell: |
       ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 6,0,0,0','FILEVERSION $(major),$(minor),$(buildNo),0') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FILEVERSION - for Master'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+
   - powershell: |
       ((Get-Content -path Xbim.Geometry.Engine\app.rc -Raw) -replace 'FILEVERSION 6,0,0,0','FILEVERSION $(major),$(minor),0,$(buildNo)') | Set-Content -Path Xbim.Geometry.Engine\app.rc
     displayName: 'Update Native C++ FILEVERSION - for Pre-Release'
@@ -141,14 +144,9 @@ jobs:
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
 
-  # Xbim.Geometry meta package
-  #- powershell: |
-  #    ((Get-Content -path Xbim.Geometry\Xbim.Geometry.tmpl -Raw) -replace '{{version}}','$(packageversion)') | Set-Content -Path Xbim.Geometry\Xbim.Geometry.nuspec
-  #  name: Geometry_metapackage_Update
-  #- script: nuget pack Xbim.Geometry\Xbim.Geometry.nuspec -OutputDirectory Xbim.Geometry/bin/$(BuildConfiguration)
-  #  name: Geometry_metapackage_Pack
-  
-  
+- job: TestAndPublish
+  timeoutInMinutes: 120
+  steps:
   - task: VSTest@2
     displayName: 'VsTest - testAssemblies'
     inputs:
@@ -183,9 +181,6 @@ jobs:
       PathtoPublish: '$(build.artifactstagingdirectory)'
     condition: succeededOrFailed()
 
-
-  
-   # Publish to master or develop MyGet feed based on the source branch 
   - task: NuGetCommand@2
     name: 'MyGetPublishing_Master'
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
