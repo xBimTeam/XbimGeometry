@@ -7,6 +7,7 @@
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <NoWarn>CS1591</NoWarn>
+    <Platforms>AnyCPU;x64;x86</Platforms>
 	</PropertyGroup>
 
 	

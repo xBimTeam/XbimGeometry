@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-		<Platforms>AnyCPU</Platforms>
+		<Platforms>AnyCPU;x64;x86</Platforms>
 		<GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/</GeometryInteropDirectory>
 	</PropertyGroup>
 

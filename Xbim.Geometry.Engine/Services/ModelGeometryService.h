@@ -2,6 +2,7 @@
 #pragma warning( disable : 4691 )
 #include "MeshFactors.h"
 #include "LoggingService.h"
+#include "ShapeBinarySerializer.h"
 #include "../XbimGeometryCreator.h"
 
 
@@ -49,7 +50,6 @@ namespace Xbim
 		namespace Services
 		{
 			ref class ModelPlacementBuilder;
-			ref class ShapeBinarySerializer;
 		}
 	}
 }
