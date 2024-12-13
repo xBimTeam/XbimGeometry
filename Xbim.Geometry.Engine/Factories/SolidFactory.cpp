@@ -404,7 +404,7 @@ namespace Xbim
 					// curve tangent is the section normal
 					TopoDS_Wire section = MovedSection(loc, normal, refVec, BRepTools::OuterWire(sectionFace));
 					sections.push_back(section);
-				
+
 					// Should have similar edge count if not IfcParameterizedProfileDef
 					if (!isIfcParameterizedProfileDef)
 					{

@@ -421,7 +421,7 @@ namespace Xbim
 
 				std::optional<Handle(Standard_Transient)> cached = GetCache()->Get(ifcGradientCurve->EntityLabel);
 				if (cached.has_value()) {
-					return Handle(Geom_GradientCurve)::DownCast(cached.value());
+					return Handle(Geom_GradientCurve)::DownCast(cached.value())->Clone();
 				}
 
 
@@ -504,7 +504,7 @@ namespace Xbim
 
 				std::optional<Handle(Standard_Transient)> cached = GetCache()->Get(ifcSegmentedReferenceCurve->EntityLabel);
 				if (cached.has_value()) {
-					return Handle(Geom_SegmentedReferenceCurve)::DownCast(cached.value());
+					return Handle(Geom_SegmentedReferenceCurve)::DownCast(cached.value())->Clone();
 				}
 
 				// Building the base curve
@@ -773,6 +773,10 @@ namespace Xbim
 
 				if (distance1 > distance2) {
 					std::swap(distance1, distance2);
+				}
+
+				if (distance1 <= firstParam && distance2 >= lastParam) {
+					return curve;
 				}
 
 				if (distance1 - totalLength > Precision::Confusion() || distance2 - totalLength > Precision::Confusion()) {

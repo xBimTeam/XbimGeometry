@@ -209,7 +209,7 @@ namespace Xbim
 				TopoDS_Face face;
 				std::optional<TopoDS_Shape> parentCached = GetCache()->GetShape(derivedProfileDef->ParentProfile->EntityLabel);
 				if (parentCached.has_value()) {
-					face = TopoDS::Face(parentCached.value());
+					face = TopoDS::Face(TopoDS_Shape(parentCached.value()));
 				}
 				else {
 					face = BuildProfileFace(derivedProfileDef->ParentProfile); //throws an exception	

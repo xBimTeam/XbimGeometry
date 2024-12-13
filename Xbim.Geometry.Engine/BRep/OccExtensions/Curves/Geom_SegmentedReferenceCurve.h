@@ -186,6 +186,11 @@ public:
 
     Handle(Geom_Geometry) Copy() const
     {
+        return Clone();
+    }
+
+    Handle(Geom_SegmentedReferenceCurve) Clone() const
+    {
         Handle(Geom_GradientCurve) baseCurveCopy = Handle(Geom_GradientCurve)::DownCast(_baseCurve->Copy());
 
         std::vector<std::pair<Handle(Geom2d_Curve), TopLoc_Location>> superElevationFunctionCopy;

@@ -182,9 +182,13 @@ public:
 
     Handle(Geom_Geometry) Copy() const
     {
+        return Clone();
+    }
+
+    Handle(Geom_GradientCurve) Clone() const
+    {
         Handle(Geom2d_Curve) horizontalCopy = Handle(Geom2d_Curve)::DownCast(_horizontalCurve->Copy());
         Handle(Geom2d_Curve) heightCopy = Handle(Geom2d_Curve)::DownCast(_heightFunction->Copy());
-
         return new Geom_GradientCurve(horizontalCopy, heightCopy);
     }
 
@@ -204,7 +208,7 @@ public:
     {
         TColgp_Array1OfPnt points(1, nbPoints);
         GetPointsFromProjectionAndHeightCurves(points, nbPoints, startParam, endParam);
-        GeomAPI_PointsToBSpline pointsToBSpline(points, 3, 8, GeomAbs_CN);
+        GeomAPI_PointsToBSpline pointsToBSpline(points);
         return pointsToBSpline.Curve();
     }
     void Geom_GradientCurve::GetPointsFromProjectionAndHeightCurves(
