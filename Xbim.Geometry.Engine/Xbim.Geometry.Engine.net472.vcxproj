@@ -359,7 +359,7 @@
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Services\ModelPlacementBuilder.h" />
-    <ClCompile Include="Services\ShapeBinarySerializer.h" />
+    <ClInclude Include="Services\ShapeBinarySerializer.h" />
     <ClInclude Include="Services\Unmanaged\PackedNormal.h" />
     <ClInclude Include="Services\Unmanaged\Graphic3d_BndBox3d.h" />
     <ClInclude Include="Services\Unmanaged\NFaceMeshIterator.h" />
