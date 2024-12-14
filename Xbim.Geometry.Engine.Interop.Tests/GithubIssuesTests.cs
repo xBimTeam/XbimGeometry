@@ -61,10 +61,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
             var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
-            // Triggeers OCC Memory violation
+            // Triggers OCC Memory violation
             using (var m = MemoryModel.OpenRead(ifcFile))
             {
-                //m.LoadStep21(ifcFile);
                 var c = new Xbim3DModelContext(m);
                 var result = c.CreateContext(null, true);
 
