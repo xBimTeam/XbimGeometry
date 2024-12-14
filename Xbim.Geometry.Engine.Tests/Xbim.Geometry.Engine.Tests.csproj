@@ -144,6 +144,9 @@
 		<None Update="TestFiles\Github\GitHub_issue_483_minimal.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\Github\Github_issue_512.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\Ifc4TestFiles\wffdmcc3-_Navis - Existing.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Xbim.Common.Configuration;
 using Xbim.Common.Geometry;
 using Xbim.Common.Model;
 using Xbim.Geometry.Abstractions;
@@ -139,6 +141,26 @@ namespace Xbim.Geometry.Engine.Tests
                 geom.FaceCount.Should().Be(56);
                 geom.Length.Should().Be(4317);
 
+            }
+        }
+
+        [Theory(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_512(XGeometryEngineVersion engineVersion)
+        {
+            var loggerFactory = new LoggerFactory();//.AddConsole(LogLevel.Trace);
+            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
+            var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
             }
         }
 
