@@ -1,5 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using FluentAssertions;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Drawing;
 using System.Linq;
+using Xbim.Common.Configuration;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
@@ -72,5 +77,63 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsFalse(m.GeometryStore.IsEmpty, "Store expected to be full");
             }
         }
+
+        [TestMethod]
+        public void Github_Issue_512b()
+        {
+            //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            //Common.Configuration.XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
+            var ifcFile = @"TestFiles\Github\Github_issue_512b.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m);
+                var result = c.CreateContext(null, true);
+
+                Assert.IsTrue(result, "Expect success");
+
+                Assert.IsFalse(m.GeometryStore.IsEmpty, "Store expected to be full");
+
+                using (var reader = m.GeometryStore.BeginRead())
+                {
+                    var regions = reader.ContextRegions.Where(cr => cr.MostPopulated() != null).Select(cr => cr.MostPopulated());
+
+                    var region = regions.FirstOrDefault();
+
+                    region.Size.Length.Should().BeApproximately(1.747, 0.001);
+                }
+            }
+        }
+
+        //[TestMethod]
+
+        //public void Github_Issue_512d()
+        //{
+
+        //    var ifcFile = @"C:\Users\AndyWard\XBIM\Models - Documents\0400 Under NDA\TraceSoftware\CDO_EXE_240_ML04_S_1_01.extracted.ifc";
+        //    // Triggers OCC Memory violation
+        //    using (var m = MemoryModel.OpenRead(ifcFile))
+        //    {
+        //        var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+        //        var geomEngine = new XbimGeometryEngine();
+        //        var logger = loggerFactory.CreateLogger<GithubIssuesTests>();
+
+        //        IIfcAdvancedBrep brep = m.Instances[9020] as IIfcAdvancedBrep;
+
+        //        var geom = geomEngine.CreateSolidSet(brep, logger);
+
+        //        geom.IsValid.Should().BeTrue();
+
+        //        foreach(var shape in geom)
+        //        {
+        //            var bb = shape.BoundingBox;
+        //            Console.WriteLine($"{shape.IsValid} {shape.IsPolyhedron} {shape.BoundingBox.Length()} {shape.BoundingBox} ");
+        //        }
+        //       // geom.SaveAsBrep("Foo.brep");
+
+        //        geom.BoundingBox.Length().Should().BeLessOrEqualTo(1e10);
+        //    }
+
+        //}
     }
 }
