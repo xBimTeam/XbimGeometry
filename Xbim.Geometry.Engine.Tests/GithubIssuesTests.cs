@@ -149,8 +149,8 @@ namespace Xbim.Geometry.Engine.Tests
         [InlineData(XGeometryEngineVersion.V6)]
         public void Github_Issue_512(XGeometryEngineVersion engineVersion)
         {
-            var loggerFactory = new LoggerFactory();//.AddConsole(LogLevel.Trace);
-            XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
+            //var loggerFactory = new LoggerFactory();
+            //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
             var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
             // Triggers OCC Memory violation
             using (var m = MemoryModel.OpenRead(ifcFile))
@@ -161,6 +161,33 @@ namespace Xbim.Geometry.Engine.Tests
                 result.Should().BeTrue();
 
                 m.GeometryStore.IsEmpty.Should().BeFalse();
+            }
+        }
+
+        [Fact(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
+        public void Github_Issue_512b()
+        {
+            //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            //Common.Configuration.XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
+            var ifcFile = @"TestFiles\Github\Github_issue_512b.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
+
+                using (var reader = m.GeometryStore.BeginRead())
+                {
+                    var regions = reader.ContextRegions.Where(cr => cr.MostPopulated() != null).Select(cr => cr.MostPopulated());
+
+                    var region = regions.FirstOrDefault();
+
+                    region.Size.Length.Should().BeApproximately(1.747, 0.001);
+                }
             }
         }
 
