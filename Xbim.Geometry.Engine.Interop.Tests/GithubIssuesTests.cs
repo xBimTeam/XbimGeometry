@@ -54,5 +54,23 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.AreEqual(trimEnd, geom.End);
             }
         }
+
+        [TestMethod]
+        public void Github_Issue_512()
+        {
+            //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
+            var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m);
+                var result = c.CreateContext(null, true);
+
+                Assert.IsTrue(result, "Expect success");
+
+                Assert.IsFalse(m.GeometryStore.IsEmpty, "Store expected to be full");
+            }
+        }
     }
 }

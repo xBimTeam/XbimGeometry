@@ -789,7 +789,7 @@ namespace Xbim
 										endVertex = TopoDS::Vertex(vertexGeometries.Find(edgeCurve->EdgeEnd->EntityLabel));
 
 									XbimCurve^ curve = gcnew XbimCurve(edgeCurve->EdgeGeometry, logger);
-									if (!curve->IsValid)
+									if (!curve->IsValid)// TODO: Should check length < tolerance?
 									{
 										XbimGeometryCreator::LogWarning(logger, edgeCurve, "Failed to create edge #{0} with zero length. It has been ignored", edgeCurve->EntityLabel);
 										continue;
@@ -1027,31 +1027,38 @@ namespace Xbim
 							}
 							if (buildFromLoop)
 							{
-								//if its not ok then use the filler
-								BRepFill_Filling filler;
-
-								for (BRepTools_WireExplorer exp(topoOuterLoop); exp.More(); exp.Next())
+								try
 								{
-									TopoDS_Edge e = TopoDS::Edge(exp.Current());
+									//if its not ok then use the filler
+									BRepFill_Filling filler;
 
-									filler.Add(e, GeomAbs_C0);
+									for (BRepTools_WireExplorer exp(topoOuterLoop); exp.More(); exp.Next())
+									{
+										TopoDS_Edge e = TopoDS::Edge(exp.Current());
+
+										filler.Add(e, GeomAbs_C0);
+									}
+									filler.Build();
+									if (filler.IsDone())
+									{
+										TopoDS_Face ruledFace = TopoDS::Face(filler.Face().EmptyCopied()); //build with no edges in the resulting face		
+										/*if (!advancedFace->SameSense)
+											ruledFace.Reverse();*/
+										faceMaker.Init(ruledFace);
+									}
+
+									ShapeFix_Wire wf2(topoOuterLoop, faceMaker.Face(), _sewingTolerance);
+									if (wf2.Perform())
+									{
+										topoOuterLoop = wf2.Wire();
+									}
+									faceMaker.Add(topoOuterLoop);
 								}
-								filler.Build();
-								if (filler.IsDone())
+								catch (Standard_Failure sf)
 								{
-									TopoDS_Face ruledFace = TopoDS::Face(filler.Face().EmptyCopied()); //build with no edges in the resulting face		
-									/*if (!advancedFace->SameSense)
-										ruledFace.Reverse();*/
-									faceMaker.Init(ruledFace);
+									String^ err = gcnew String(sf.GetMessageString());
+									XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not fill face #{0}: {1}, it has been ignored", advancedFace->EntityLabel, err);
 								}
-
-								ShapeFix_Wire wf2(topoOuterLoop, faceMaker.Face(), _sewingTolerance);
-								if (wf2.Perform())
-								{
-									topoOuterLoop = wf2.Wire();
-								}
-								faceMaker.Add(topoOuterLoop);
-
 							}
 						}
 					}
