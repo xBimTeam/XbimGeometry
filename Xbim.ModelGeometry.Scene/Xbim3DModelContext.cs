@@ -1430,6 +1430,8 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
                         LogInfo(_model.Instances[shapeId], "Is an empty shape");
+                    else if (shapeGeom.BoundingBox.SizeX >= 1e100)   // Short cut for Infinite BBox
+                        LogWarning(_model.Instances[shapeId], "Is an invalid shape");
                     else
                     {
                         shapeGeom.IfcShapeLabel = shapeId;
