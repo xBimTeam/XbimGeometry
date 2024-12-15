@@ -24,17 +24,10 @@
 #include <Standard_Real.hxx>
 class gp_Pnt;
 class gp_Mat;
-class GProp_GProps;
-class GProp_PGProps;
-class GProp_CelGProps;
-class GProp_SelGProps;
-class GProp_VelGProps;
-class GProp_PrincipalProps;
-class GProp_PEquation;
 
 
 
-//! This package defines algorithmes to compute the global properties
+//! This package defines algorithms to compute the global properties
 //! of a set of points, a curve, a surface, a solid (non infinite
 //! region of space delimited with geometric entities), a compound
 //! geometric system (heterogeneous composition of the previous

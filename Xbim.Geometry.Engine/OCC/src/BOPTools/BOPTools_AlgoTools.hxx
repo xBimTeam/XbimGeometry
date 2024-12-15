@@ -32,6 +32,7 @@
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <TopTools_ListOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <Precision.hxx>
@@ -59,6 +60,15 @@ class BOPTools_AlgoTools
 public:
 
   DEFINE_STANDARD_ALLOC
+
+public: //! @name Constants
+
+  //! Additional tolerance (delta tolerance) is used in Boolean Operations
+  //! to ensure that the tolerance of new/old entities obtained
+  //! by intersection of two shapes is slightly bigger than the actual
+  //! distances to these shapes. It helps to avoid numerical instability
+  //! which may occur when comparing distances and tolerances.
+  static Standard_Real DTolerance() { return 1.e-12; }
 
 public: //! @name Intersection of the vertices
 
@@ -313,7 +323,7 @@ public: //! @name Choosing correct orientation for the split shape
   //!
   //! @param theSplit [in] Split shape
   //! @param theShape [in] Original shape
-  //! @param theContext [in] Cashed geometrical tools
+  //! @param theContext [in] cached geometrical tools
   //! @param theError [out] Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Shape& theSplit,
                                                            const TopoDS_Shape& theShape,
@@ -346,7 +356,7 @@ public: //! @name Choosing correct orientation for the split shape
   //!
   //! @param theSplit [in] Split face
   //! @param theShape [in] Original face
-  //! @param theContext [in] Cashed geometrical tools
+  //! @param theContext [in] cached geometrical tools
   //! @param theError [out] Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Face& theSplit,
                                                            const TopoDS_Face& theShape,
@@ -371,7 +381,7 @@ public: //! @name Choosing correct orientation for the split shape
   //!
   //! @param theSplit [in] Split edge
   //! @param theShape [in] Original edge
-  //! @param theContext [in] Cashed geometrical tools
+  //! @param theContext [in] cached geometrical tools
   //! @param theError [out] Error Status of the operation
   Standard_EXPORT static Standard_Boolean IsSplitToReverse(const TopoDS_Edge& theSplit,
                                                            const TopoDS_Edge& theShape,
@@ -552,8 +562,21 @@ public: //! @name Other methods
                                                           const TopoDS_Edge& aE,
                                                           const Handle(IntTools_Context)& aContext);
 
-  //! Retutns dimension of the shape <theS>.
+  //! Returns the min and max dimensions of the shape <theS>.
+  Standard_EXPORT static void Dimensions (const TopoDS_Shape& theS,
+                                          Standard_Integer& theDMin,
+                                          Standard_Integer& theDMax);
+
+  //! Returns dimension of the shape <theS>.
+  //! If the shape contains elements of different dimension, -1 is returned.
   Standard_EXPORT static Standard_Integer Dimension(const TopoDS_Shape& theS);
+
+  //! Collects in the output list recursively all non-compound sub-shapes of the first level
+  //! of the given shape theS. The optional map theMap is used to avoid the duplicates in the
+  //! output list, so it will also contain all non-compound sub-shapes.
+  Standard_EXPORT static void TreatCompound (const TopoDS_Shape& theS,
+                                             TopTools_ListOfShape& theList,
+                                             TopTools_MapOfShape* theMap = NULL);
 
   //! Returns true if the  shell <theShell> is open
   Standard_EXPORT static Standard_Boolean IsOpenShell(const TopoDS_Shell& theShell);

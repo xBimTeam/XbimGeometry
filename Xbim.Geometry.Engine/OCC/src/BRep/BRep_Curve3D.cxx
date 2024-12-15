@@ -44,7 +44,7 @@ BRep_Curve3D::BRep_Curve3D(const Handle(Geom_Curve)& C,
 
 void BRep_Curve3D::D0(const Standard_Real U, gp_Pnt& P) const
 {
-  // shoud be D0 NYI
+  // should be D0 NYI
   P = myCurve->Value(U);
 }
 
@@ -91,4 +91,17 @@ Handle(BRep_CurveRepresentation) BRep_Curve3D::Copy() const
 
   C->SetRange(First(), Last());
   return C;
+}
+
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void BRep_Curve3D::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, BRep_GCurve)
+
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, myCurve.get())
 }

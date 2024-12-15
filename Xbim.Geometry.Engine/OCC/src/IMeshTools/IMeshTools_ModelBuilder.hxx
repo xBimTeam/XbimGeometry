@@ -21,14 +21,14 @@
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
 #include <TopoDS_Shape.hxx>
+#include <IMeshData_Model.hxx>
 
-class IMeshData_Model;
 struct IMeshTools_Parameters;
 
 //! Interface class represents API for tool building discrete model.
 //! 
 //! The following statuses should be used by default:
-//! Message_Done1 - model has been sucessfully built.
+//! Message_Done1 - model has been successfully built.
 //! Message_Fail1 - empty shape.
 //! Message_Fail2 - model has not been build due to unexpected reason.
 class IMeshTools_ModelBuilder : public Message_Algorithm
@@ -36,7 +36,7 @@ class IMeshTools_ModelBuilder : public Message_Algorithm
 public:
 
   //! Destructor.
-  Standard_EXPORT virtual ~IMeshTools_ModelBuilder()
+  virtual ~IMeshTools_ModelBuilder()
   {
   }
 
@@ -61,12 +61,12 @@ public:
     }
   }
 
-  DEFINE_STANDARD_RTTI_INLINE(IMeshTools_ModelBuilder, Message_Algorithm)
+  DEFINE_STANDARD_RTTIEXT(IMeshTools_ModelBuilder, Message_Algorithm)
 
 protected:
 
   //! Constructor.
-  Standard_EXPORT IMeshTools_ModelBuilder()
+  IMeshTools_ModelBuilder()
   {
   }
 

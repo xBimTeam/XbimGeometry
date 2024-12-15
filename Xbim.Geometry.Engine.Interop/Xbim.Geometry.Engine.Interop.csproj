@@ -1,78 +1,77 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net472</TargetFrameworks>
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+		<Title>Xbim Geometry Engine</Title>
+		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
+		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
+	</PropertyGroup>
+	<ItemGroup>
+		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+			<Link>Xbim.Geometry.Interop.targets</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
+		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+		<PackageReference Include="Xbim.Ifc" Version="6.0.445" />
+		<PackageReference Include="Xbim.Tessellator" Version="6.0.445" />
+	</ItemGroup>
 
-  <PropertyGroup>
-    <TargetFrameworks>net472</TargetFrameworks>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-    <Title>Xbim Geometry Engine</Title>
-    <Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>Xbim.Geometry.Engine.Interop</PackageId>
-    <PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
-    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageReference Include="Xbim.Tessellator" Version="5.1.341" />
-    <PackageReference Include="Xbim.Ifc" Version="5.1.341" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
-      <AdditionalProperties>
-        Platform=Win32
-      </AdditionalProperties>
-    </NativeGeometryEngine>
-    <NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
-      <AdditionalProperties>
-        Platform=x64   
-      </AdditionalProperties>
-    </NativeGeometryEngine>
-  </ItemGroup>
-  
-  <!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
-  <Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
-    <Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls" Importance="High" />
-    <MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Build"> 
-      <Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />    
-     </MSBuild>
-  </Target>
+	<ItemGroup>
+		<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+			<AdditionalProperties>
+				Platform=Win32
+			</AdditionalProperties>
+		</NativeGeometryEngine>
+		<NativeGeometryEngine Include="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj">
+			<AdditionalProperties>
+				Platform=x64
+			</AdditionalProperties>
+		</NativeGeometryEngine>
+	</ItemGroup>
 
-  <Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
-    <Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Clean">      
-    </MSBuild>
-    <Message Text="Cleaning Xbim.Geometry.Engine x64 Native Dlls" Importance="High" />
-    <MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Clean">      
-    </MSBuild>
-  </Target>
-  
-  <ItemGroup>
-    <Content Include="bin\$(Configuration)\net472\Xbim.Geometry.Engine32.dll">
-      <Pack>true</Pack>
-      <PackagePath>build\net472;</PackagePath>
-    </Content>
-    <Content Include="bin\$(Configuration)\net472\Xbim.Geometry.Engine64.dll">
-      <Pack>true</Pack>
-      <PackagePath>build\net472;</PackagePath>
-    </Content>
-    <Content Include="..\Xbim.Geometry.Engine.Interop.targets">
-      <Link>Xbim.Geometry.Interop.targets</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <PackagePath>build\net472;</PackagePath>
-      <Pack>true</Pack>
-    </Content>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="images\" />
-    <None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
-  </ItemGroup>
- 
+	<!--We need to execute this after a build to ensure the nuget packages are in the correct place for the c++ binding-->
+	<Target Name="BuildNativeCodeEngine" BeforeTargets="Build">
+		<Message Text="Building Xbim.Geometry.Engine x32 and x64 Native Dlls" Importance="High" />
+		<MSBuild Projects="@(NativeGeometryEngine)" Properties="Configuration=$(Configuration) ; OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Build">
+			<Output TaskParameter="TargetOutputs" ItemName="AssembliesBuiltByChildProjects" />
+		</MSBuild>
+	</Target>
+
+	<Target Name=" CleanNativeCodeEngine" BeforeTargets="Clean">
+		<Message Text="Cleaning Xbim.Geometry.Engine x32 Native Dlls" Importance="High" />
+		<MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Clean">
+		</MSBuild>
+		<Message Text="Cleaning Xbim.Geometry.Engine x64 Native Dlls" Importance="High" />
+		<MSBuild Projects="$(MSBuildProjectDirectory)\..\Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj" Properties="Configuration=$(Configuration);Platform=x64;OutDir=..\Xbim.Geometry.Engine.Interop\bin\$(Configuration)\net472\" Targets="Clean">
+		</MSBuild>
+	</Target>
+
+	<ItemGroup>
+		<Content Include="bin\$(Configuration)\net472\Xbim.Geometry.Engine32.dll">
+			<Pack>true</Pack>
+			<PackagePath>build\net472;</PackagePath>
+		</Content>
+		<Content Include="bin\$(Configuration)\net472\Xbim.Geometry.Engine64.dll">
+			<Pack>true</Pack>
+			<PackagePath>build\net472;</PackagePath>
+		</Content>
+		<Content Include="..\Xbim.Geometry.Engine.Interop.targets">
+			<Link>Xbim.Geometry.Interop.targets</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<PackagePath>build\net472;</PackagePath>
+			<Pack>true</Pack>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="images\" />
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
+
 </Project>

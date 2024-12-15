@@ -54,9 +54,16 @@ AppDef_LinearCriteria::AppDef_LinearCriteria(const AppDef_MultiLine& SSP,
 							 const Standard_Integer FirstPoint,
 							 const Standard_Integer LastPoint):
        mySSP(SSP),
+       myQuadraticWeight(0.0),
+       myQualityWeight(0.0),
        myPntWeight(FirstPoint, LastPoint),
-       myE(0)
+       myLength(0.0),
+       myE(0),
+       IF(0),
+       IL(0)
 {
+  memset (myEstimation, 0, sizeof (myEstimation));
+  memset (myPercent, 0, sizeof (myPercent));
   myPntWeight.Init(1.);
 }
 
@@ -353,53 +360,73 @@ Standard_Integer AppDef_LinearCriteria::QualityValues(const Standard_Real J1min,
 //       (critere sureleve => Non minimisation )
 
   for(i = 0; i <= 2; i++)
+  {
     if((ValCri[i] < 0.8 * myEstimation[i]) && (myEstimation[i] > JEsMin[i])) {
       if(ICDANA < 1) ICDANA = 1;
       if(ValCri[i] < 0.1 * myEstimation[i]) ICDANA = 2;
       myEstimation[i] = Max(1.05*ValCri[i], JEsMin[i]); 
     }
-  
+  }
 
 //  (3) Mise a jours des Estimation
 //     (critere sous-estimer => mauvais conditionement)
-
-    if (ValCri[0] > myEstimation[0] * 2) {
-	myEstimation[0] += ValCri[0] * .1;
-	if (ICDANA == 0) {
-	  if (ValCri[0] > myEstimation[0] * 10) {
-	    ICDANA = 2;
-	  }
-	  else ICDANA = 1;
-	}
-	else {
-	  ICDANA = 2;
-	}
+  if (ValCri[0] > myEstimation[0] * 2)
+  {
+    myEstimation[0] += ValCri[0] * .1;
+    if (ICDANA == 0)
+    {
+      if (ValCri[0] > myEstimation[0] * 10)
+      {
+        ICDANA = 2;
+      }
+      else
+      {
+        ICDANA = 1;
+      }
     }
-    if (ValCri[1] > myEstimation[1] * 20) {
-	myEstimation[1] += ValCri[1] * .1;
-	if (ICDANA == 0) {
-	  if (ValCri[1] > myEstimation[1] * 100) {
-	    ICDANA = 2;
-	  }
-	  else ICDANA = 1;
-	}
-	else {
-	   ICDANA = 2;
-	}
+    else
+    {
+      ICDANA = 2;
     }
-    if (ValCri[2] > myEstimation[2] * 20) {
-	myEstimation[2] += ValCri[2] * .05;
-	if (ICDANA == 0) {
-	  if (ValCri[2] > myEstimation[2] * 100) {
-	    ICDANA = 2;
-	  }
-	  else  ICDANA = 1;
-	}
-	else {
-	   ICDANA = 2;
-	}
+  }
+  if (ValCri[1] > myEstimation[1] * 20)
+  {
+    myEstimation[1] += ValCri[1] * .1;
+    if (ICDANA == 0)
+    {
+      if (ValCri[1] > myEstimation[1] * 100)
+      {
+        ICDANA = 2;
+      }
+      else
+      {
+        ICDANA = 1;
+      }
     }
-
+    else
+    {
+      ICDANA = 2;
+    }
+  }
+  if (ValCri[2] > myEstimation[2] * 20)
+  {
+    myEstimation[2] += ValCri[2] * .05;
+    if (ICDANA == 0)
+    {
+      if (ValCri[2] > myEstimation[2] * 100)
+      {
+        ICDANA = 2;
+      }
+      else
+      {
+        ICDANA = 1;
+      }
+    }
+    else
+    {
+      ICDANA = 2;
+    }
+  }
 
   return ICDANA;
 }

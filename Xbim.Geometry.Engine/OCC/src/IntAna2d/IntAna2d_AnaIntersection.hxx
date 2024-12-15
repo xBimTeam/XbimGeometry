@@ -24,15 +24,12 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <IntAna2d_IntPoint.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
 class gp_Lin2d;
 class gp_Circ2d;
 class IntAna2d_Conic;
 class gp_Elips2d;
 class gp_Parab2d;
 class gp_Hypr2d;
-class IntAna2d_IntPoint;
 
 
 //! Implementation of the analytical intersection between:
@@ -101,7 +98,7 @@ public:
   //! Intersection between an hyperbola and another conic.
   Standard_EXPORT void Perform (const gp_Hypr2d& H, const IntAna2d_Conic& C);
   
-  //! Returns TRUE if the computation was succesfull.
+  //! Returns TRUE if the computation was successful.
     Standard_Boolean IsDone() const;
   
   //! Returns TRUE when there is no intersection, i-e

@@ -370,7 +370,7 @@ void Geom2d_BezierCurve::Segment
 {
   closed =  (Abs(Value(U1).Distance (Value(U2))) <= gp::Resolution());
 //
-//   WARNING : when calling trimming be carefull that the cache
+//   WARNING : when calling trimming be careful that the cache
 //   is computed regarding 0.0e0 and not 1.0e0 
 //
   TColStd_Array1OfReal bidflatknots(BSplCLib::FlatBezierKnots(Degree()), 1, 2 * (Degree() + 1));
@@ -822,3 +822,23 @@ void Geom2d_BezierCurve::Init
     weights.Nullify();
 }
 
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Geom2d_BezierCurve::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, Geom2d_BoundedCurve)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, rational)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, closed)
+  if (!poles.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, poles->Size())
+  if (!weights.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, weights->Size())
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, maxderivinv)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, maxderivinvok)
+}

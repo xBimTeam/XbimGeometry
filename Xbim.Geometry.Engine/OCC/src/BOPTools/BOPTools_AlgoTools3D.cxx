@@ -39,6 +39,7 @@
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomAdaptor_Surface.hxx>
+#include <Geom2dAPI_ProjectPointOnCurve.hxx>
 #include <gp_Cylinder.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
@@ -72,11 +73,12 @@ static
 //function : DoSplitSEAMOnFace
 //purpose  : 
 //=======================================================================
-void BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& aSplit,
-                                              const TopoDS_Face& aF)
+Standard_Boolean BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& aSplit,
+                                                          const TopoDS_Face& aF)
 {
   Standard_Boolean bIsUPeriodic, bIsVPeriodic, bIsLeft;
-  Standard_Real aTol, a, b, anUPeriod, anVPeriod, aT, anU, dU, anU1;
+  Standard_Real anUPeriod = 0., anVPeriod = 0.;
+  Standard_Real aTol, a, b, aT, anU, dU, anU1;
   Standard_Real aScPr, anV, dV, anV1;
   Standard_Real aUmin, aUmax, aVmin, aVmax;
   gp_Pnt2d aP2D;
@@ -97,58 +99,64 @@ void BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& aSplit,
   //
   aS->Bounds(aUmin, aUmax, aVmin, aVmax);
   //
-  bIsUPeriodic=aS->IsUPeriodic();
-  bIsVPeriodic=aS->IsVPeriodic();
-  //
-  anUPeriod = bIsUPeriodic ? aS->UPeriod() : 0.;
-  anVPeriod = bIsVPeriodic ? aS->VPeriod() : 0.;
+
+  bIsUPeriodic = aS->IsUClosed();
+  bIsVPeriodic = aS->IsVClosed();
+
+  if (bIsUPeriodic)
+    anUPeriod = aUmax - aUmin;
+  if (bIsVPeriodic)
+    anVPeriod = aVmax - aVmin;
+  
   //
   if (!bIsUPeriodic && !bIsVPeriodic) {
-    Standard_Boolean bIsUClosed, bIsVClosed;
-    Handle(Geom_BSplineSurface) aBS;
-    Handle(Geom_BezierSurface) aBZ;
+    
     Handle(Geom_RectangularTrimmedSurface) aRTS;
+    aRTS = Handle(Geom_RectangularTrimmedSurface)::DownCast(aS);
     //
-    bIsUClosed=Standard_False;
-    bIsVClosed=Standard_False;
-    aBS=Handle(Geom_BSplineSurface)::DownCast(aS);
-    aBZ=Handle(Geom_BezierSurface) ::DownCast(aS);
-    aRTS=Handle(Geom_RectangularTrimmedSurface)::DownCast(aS);
-    //
-    if (!aBS.IsNull()) {
-      bIsUClosed=aBS->IsUClosed();
-      bIsVClosed=aBS->IsVClosed();
-    }
-    else if (!aBZ.IsNull()) {
-      bIsUClosed=aBZ->IsUClosed();
-      bIsVClosed=aBZ->IsVClosed();
-    }
-    else if (!aRTS.IsNull()) {
+    if (aRTS.IsNull())
+      return Standard_False;
+    
+    else {
       Handle(Geom_Surface) aSB;
       //
-      aSB=aRTS->BasisSurface();
-      bIsUPeriodic=aSB->IsUPeriodic();
-      bIsVPeriodic=aSB->IsVPeriodic();
+      aSB = aRTS->BasisSurface();
+      bIsUPeriodic = aSB->IsUPeriodic();
+      bIsVPeriodic = aSB->IsVPeriodic();
       //
+
+      if (bIsUPeriodic || bIsVPeriodic)
+      {
+        anUPeriod = bIsUPeriodic ? aSB->UPeriod() : 0.;
+        anVPeriod = bIsVPeriodic ? aSB->VPeriod() : 0.;
+      }
+      else
+      {
+        Standard_Boolean bIsUClosed = aSB->IsUClosed();
+        Standard_Boolean bIsVClosed = aSB->IsVClosed();
+        Standard_Real aGlobalUmin, aGlobalUmax, aGlobalVmin, aGlobalVmax;
+        aSB->Bounds(aGlobalUmin, aGlobalUmax, aGlobalVmin, aGlobalVmax);
+
+        if (bIsUClosed &&
+            Abs(aUmin - aGlobalUmin) < aTol &&
+            Abs(aUmax - aGlobalUmax) < aTol)
+        {
+          bIsUPeriodic = Standard_True;
+          anUPeriod = aUmax - aUmin;
+        }
+        if (bIsVClosed &&
+            Abs(aVmin - aGlobalVmin) < aTol &&
+            Abs(aVmax - aGlobalVmax) < aTol)
+        {
+          bIsVPeriodic = Standard_True;
+          anVPeriod = aVmax - aVmin;
+        }
+      }
+      
       if (!(bIsUPeriodic || bIsVPeriodic)) {
-        return;
+        return Standard_False;
       }
-      anUPeriod = bIsUPeriodic ? aSB->UPeriod() : 0.;
-      anVPeriod = bIsVPeriodic ? aSB->VPeriod() : 0.;
-    }
-    //
-    if (aRTS.IsNull()) {
-      if (!bIsUClosed && !bIsVClosed) {
-        return;
-      }
-      //
-      if (bIsUClosed) {
-        anUPeriod=aUmax-aUmin;
-      }
-      if (bIsVClosed) {
-        anVPeriod=aVmax-aVmin;
-      }
-    }
+    } //if !RTS.IsNull
   }
   //
   //---------------------------------------------------
@@ -191,7 +199,7 @@ void BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& aSplit,
   }
   //
   if (anU1==anU && anV1==anV) {
-    return;
+    return Standard_False;
   }
   //
   aScPr = (anU1==anU) ? aDir2D1*aDOX : aDir2D1*aDOY;
@@ -222,7 +230,96 @@ void BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& aSplit,
       BB.UpdateEdge(aSp, aC2, aC1, aF, aTol);
     }
   }
+  return Standard_True;
 }
+
+//=======================================================================
+//function : DoSplitSEAMOnFace
+//purpose  : 
+//=======================================================================
+Standard_Boolean BOPTools_AlgoTools3D::DoSplitSEAMOnFace (const TopoDS_Edge& theEOrigin,
+                                                          const TopoDS_Edge& theESplit,
+                                                          const TopoDS_Face& theFace)
+{
+  if (!BRep_Tool::IsClosed (theEOrigin, theFace))
+    return Standard_False;
+
+  if (BRep_Tool::IsClosed (theESplit, theFace))
+    return Standard_True;
+
+  TopoDS_Edge aESplit = theESplit;
+  aESplit.Orientation (TopAbs_FORWARD);
+
+  TopoDS_Face aFace = theFace;
+  aFace.Orientation (TopAbs_FORWARD);
+
+  Standard_Real aTS1, aTS2;
+  Handle(Geom2d_Curve) aC2DSplit = BRep_Tool::CurveOnSurface (aESplit, aFace, aTS1, aTS2);
+  if (aC2DSplit.IsNull())
+    return Standard_False;
+
+  Standard_Real aT1, aT2;
+  Handle(Geom2d_Curve) aC2D1 = BRep_Tool::CurveOnSurface (
+    TopoDS::Edge (theEOrigin.Oriented (TopAbs_FORWARD)), aFace, aT1, aT2);
+  Handle(Geom2d_Curve) aC2D2 = BRep_Tool::CurveOnSurface (
+    TopoDS::Edge (theEOrigin.Oriented (TopAbs_REVERSED)), aFace, aT1, aT2);
+
+  Standard_Real aT = BOPTools_AlgoTools2D::IntermediatePoint (aTS1, aTS2);
+  gp_Pnt2d aPMid;
+  gp_Vec2d aVTgt;
+  aC2DSplit->D1 (aT, aPMid, aVTgt);
+
+  // project on original 2d curves
+  Geom2dAPI_ProjectPointOnCurve aProjPC1, aProjPC2;
+  aProjPC1.Init (aPMid, aC2D1, aT1, aT2);
+  aProjPC2.Init (aPMid, aC2D2, aT1, aT2);
+
+  if (!aProjPC1.NbPoints() && !aProjPC2.NbPoints())
+    return Standard_False;
+
+  Standard_Real aDist1 = aProjPC1.NbPoints() ? aProjPC1.LowerDistance() : RealLast();
+  Standard_Real aDist2 = aProjPC2.NbPoints() ? aProjPC2.LowerDistance() : RealLast();
+
+  if (aDist1 > Precision::PConfusion() && aDist2 > Precision::PConfusion())
+    return Standard_False;
+
+  // choose the closest and take corresponding point from the opposite
+  gp_Pnt2d aNewPnt = aDist1 < aDist2 ? aC2D2->Value (aProjPC1.LowerDistanceParameter()) :
+    aC2D1->Value (aProjPC2.LowerDistanceParameter());
+
+  Handle (Geom2d_Curve) aTmpC1 = Handle (Geom2d_Curve)::DownCast (aC2DSplit->Copy());
+  Handle (Geom2d_Curve) aTmpC2 = Handle (Geom2d_Curve)::DownCast (aC2DSplit->Copy());
+
+  Handle (Geom2d_TrimmedCurve) aC1 = new Geom2d_TrimmedCurve (aTmpC1, aTS1, aTS2);
+  Handle (Geom2d_TrimmedCurve) aC2 = new Geom2d_TrimmedCurve (aTmpC2, aTS1, aTS2);
+
+  gp_Vec2d aTrVec (aPMid, aNewPnt);
+  aC2->Translate (aTrVec);
+
+  gp_Pnt2d aPProj;
+  gp_Vec2d aVTgtOrigin;
+  if (aDist1 < aDist2)
+  {
+    aC2D1->D1 (aProjPC1.LowerDistanceParameter(), aPProj, aVTgtOrigin);
+  }
+  else
+  {
+    aC2D2->D1 (aProjPC2.LowerDistanceParameter(), aPProj, aVTgtOrigin);
+  }
+
+  Standard_Real aDot = aVTgt.Dot (aVTgtOrigin);
+
+  if ((aDist1 < aDist2) == (aDot > 0))
+  {
+    BRep_Builder().UpdateEdge (aESplit, aC1, aC2, aFace, BRep_Tool::Tolerance (aESplit));
+  }
+  else
+  {
+    BRep_Builder().UpdateEdge (aESplit, aC2, aC1, aFace, BRep_Tool::Tolerance (aESplit));
+  }
+  return Standard_True;
+}
+
 //=======================================================================
 //function : GetNormalToFaceOnEdge
 //purpose  : 

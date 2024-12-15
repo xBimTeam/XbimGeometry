@@ -26,14 +26,11 @@
 #include <Standard_Integer.hxx>
 #include <TopTools_ListOfShape.hxx>
 class BRepBuilderAPI_Sewing;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 class TopoDS_Edge;
 
 
-//! Provides methods to identify contigous boundaries
-//! for continuity control (C0, C1, ...)
+//! Provides methods to identify contiguous boundaries for continuity control (C0, C1, ...)
 //!
 //! Use this function as following:
 //! - create an object
@@ -91,8 +88,7 @@ public:
   //! further shapes subsequently and then to repeat the call to Perform.
   Standard_EXPORT void Perform();
   
-  //! Gives  the number  of edges (free  edges + contigous
-  //! edges  +  multiple edge)
+  //! Gives the number of edges (free edges + contiguous edges + multiple edge)
   Standard_EXPORT Standard_Integer NbEdges() const;
   
   //! Returns the number of contiguous edges found by the

@@ -26,11 +26,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 class Geom2d_Curve;
-class Standard_ConstructionError;
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom2d_UndefinedDerivative;
-class Geom2d_UndefinedValue;
 class gp_Pnt2d;
 class gp_Vec2d;
 class gp_Trsf2d;
@@ -255,6 +250,9 @@ public:
 
   //! Creates a new object, which is a copy of this trimmed curve.
   Standard_EXPORT Handle(Geom2d_Geometry) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

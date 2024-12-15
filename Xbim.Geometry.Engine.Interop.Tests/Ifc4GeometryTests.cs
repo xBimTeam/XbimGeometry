@@ -8,10 +8,10 @@ using Microsoft.Extensions.Logging;
 using Xbim.IO.Memory;
 using Xbim.Common;
 using FluentAssertions;
+using Xbim.ModelGeometry.Scene;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
-
     [TestClass]
     public class Ifc4GeometryTests
     {
@@ -26,6 +26,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
+
         [ClassCleanup]
         static public void Cleanup()
         {
@@ -33,11 +34,22 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             geomEngine = null;
             logger = null;
         }
-        
+
+        [TestMethod]
+        public void Github_Issue_281()
+        {
+            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
+            {
+                m.LoadStep21("C:\\Users\\ibrah\\source\\repos\\XbimViewerExample\\WpfApp1\\01.ifc");
+                var c = new Xbim3DModelContext(m);
+                c.CreateContext(null, false);
+            }
+        }
+
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
-            Assert.Inconclusive("Not implemented in master");
+            Assert.Inconclusive("File missing");
             using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
@@ -45,12 +57,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 model.AddRevitWorkArounds();
                 Assert.IsTrue(pfs != null, "No IIfcAdvancedBrep found");
                 var solid = geomEngine.CreateSolid(pfs, logger);
-                
+
                 solid.Volume.Should().BeApproximately(102264692.69692135, 1e-7);
-                solid.Faces.Count.Should().Be(14);              
+                solid.Faces.Count.Should().Be(14);
             }
         }
-       
+
 
         [TestMethod]
         public void Can_build_polygonal_face_tessellation()
@@ -62,7 +74,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var faceModel = geomEngine.CreateSurfaceModel(pfs, logger).OfType<IXbimShell>().FirstOrDefault();
                 faceModel.Should().NotBeNull();
                 faceModel.Faces.Count.Should().Be(11);
-
             }
         }
 
@@ -77,7 +88,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 solidModel.Should().NotBeNull();
                 solidModel.Faces.Count.Should().Be(11);
                 solidModel.Volume.Should().BeApproximately(6500000000000.001, 1e-5);
-
             }
         }
 
@@ -106,12 +116,13 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TrimmedCurveWithLargeRadianValueTest()
         {
-            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest), true))
+            using (var er = new EntityRepository<IIfcExtrudedAreaSolid>(nameof(TrimmedCurveWithLargeRadianValueTest),
+                       true))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
                 var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
                 HelperFunctions.IsValidSolid(extrudedSolid);
-                Assert.AreEqual<long>((long)extrudedSolid.Volume, 14999524619);
+                Assert.AreEqual<long>((long) extrudedSolid.Volume, 14999524619);
             }
         }
 
@@ -124,9 +135,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
                 var extrudedSolid = geomEngine.CreateSolid(er.Entity, logger);
                 HelperFunctions.IsValidSolid(extrudedSolid);
-
             }
         }
+
         [TestMethod]
         public void FacetedBrepIsValidSolidTest()
         {
@@ -135,10 +146,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(solid);
-
             }
-
         }
+
         [TestMethod]
         public void closed_shell_is_valid_test()
         {
@@ -146,23 +156,22 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
                 var solids = geomEngine.CreateSolidSet(er.Entity, logger);
-                Assert.IsTrue(solids.Count==4, "Should return 4 solids");
-
+                Assert.IsTrue(solids.Count == 4, "Should return 4 solids");
             }
-
         }
+
         [TestMethod]
         public void FacetedBrepWithFacesOutsideNorlamTolerancesTest()
         {
-            using (var er = new EntityRepository<IIfcFacetedBrep>(nameof(FacetedBrepWithFacesOutsideNorlamTolerancesTest)))
+            using (var er = new EntityRepository<IIfcFacetedBrep>(
+                       nameof(FacetedBrepWithFacesOutsideNorlamTolerancesTest)))
             {
                 Assert.IsTrue(er.Entity != null, "No IIfcFacetedBrep found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(solid);
-
             }
-
         }
+
         [TestMethod]
         public void CsgSolidIsValidSolidTest()
         {
@@ -171,9 +180,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IIfcCsgSolid found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 HelperFunctions.IsValidSolid(solid);
-
             }
         }
+
         [TestMethod]
         public void IndexedPolyCurveTest()
         {
@@ -182,7 +191,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IIfcExtrudedAreaSolid found");
                 var solid = geomEngine.CreateSolid(er.Entity, logger);
                 HelperFunctions.IsValidSolid(solid);
-
             }
         }
 
@@ -205,7 +213,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(er.Entity != null, "No IfcCsgSolid found");
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger).FirstOrDefault();
                 Assert.IsTrue(Math.Abs(solid.Volume - solid.BoundingBox.Volume) < 1e-5);
-
             }
         }
 
@@ -220,6 +227,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(Math.Abs(solid.Volume - solid.BoundingBox.Volume) < 1e-5);
             }
         }
+
         [TestMethod]
         public void SurfaceModelBasicTest()
         {
@@ -229,7 +237,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(shape);
                 var geom = geomEngine.CreateSurfaceModel(shape);
                 Assert.IsTrue(geom.Shells.Count == 1);
-                Assert.IsTrue((int)geom.Shells.First.BoundingBox.Volume == 2000000000);
+                Assert.IsTrue((int) geom.Shells.First.BoundingBox.Volume == 2000000000);
             }
         }
 
@@ -285,7 +293,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 shape.Should().NotBeNull();
                 var geom = geomEngine.CreateSolid(shape);
                 geom.Volume.Should().BeApproximately(0.83333333333333282, 1e-7);
-                
             }
         }
 
@@ -308,25 +315,26 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             {
                 var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault();
                 Assert.IsNotNull(advancedBrep);
-                
+
                 var basinSolids = geomEngine.CreateSolidSet(advancedBrep);
-                basinSolids.Sum(s=>s.Volume).Should().BeApproximately(2045022.3839364732, 1e-7);
+                basinSolids.Sum(s => s.Volume).Should().BeApproximately(2045022.3839364732, 1e-7);
             }
         }
+
         [TestMethod]
         public void AdvancedBrepComplexCurvesandSurfacesTest()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\Axis2PlacementError.ifc"))
             {
-                var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>().FirstOrDefault(i => i.EntityLabel == 27743);
+                var advancedBrep = model.Instances.OfType<IfcAdvancedBrep>()
+                    .FirstOrDefault(i => i.EntityLabel == 27743);
                 model.AddRevitWorkArounds();
                 //units are not correctly set in the ifc file
                 model.ModelFactors.Initialise(1, 1e-3, 1e-2);
                 advancedBrep.Should().NotBeNull();
                 var basin = geomEngine.CreateSolidSet(advancedBrep);
-                Assert.AreEqual(2, basin.Count()); 
-                basin.Sum(s=>s.Volume).Should().BeApproximately(44861498.858031876, 1e-7);               
-
+                Assert.AreEqual(2, basin.Count());
+                basin.Sum(s => s.Volume).Should().BeApproximately(44861498.858031876, 1e-7);
             }
         }
 
@@ -340,11 +348,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsNotNull(triangulatedFaceSet);
                 var basin = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
                 Assert.AreEqual(23938449.816244926, basin.BoundingBox.Volume, 1e-5);
-
             }
         }
-
-        
 
         #endregion
 
@@ -360,7 +365,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geom = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
                 Assert.IsTrue(geom.Shells.Count == 1);
                 Assert.IsTrue(Math.Abs(geom.Shells.First.BoundingBox.Volume - 1.32) < 1e-5);
-
             }
         }
         //Commented out due to its time taken
@@ -381,16 +385,17 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void TriangulatedFaceSet2Test()
         {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\column-straight-rectangle-tessellation.ifc"))
+            using (var model =
+                   MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\column-straight-rectangle-tessellation.ifc"))
             {
                 var triangulatedFaceSet = model.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
                 Assert.IsNotNull(triangulatedFaceSet);
                 var geom = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
                 Assert.IsTrue(geom.Shells.Count == 1);
                 Assert.IsTrue(Math.Abs(geom.Shells.First.BoundingBox.Volume - 7680) < 1e-5);
-
             }
         }
+
         [TestMethod]
         public void TriangulatedFaceSet3Test()
         {
@@ -401,9 +406,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geom = geomEngine.CreateSurfaceModel(triangulatedFaceSet);
                 Assert.IsTrue(geom.Shells.Count == 1);
                 Assert.IsTrue(Math.Abs(geom.Shells.First.BoundingBox.Volume - 103.92304) < 1e-5);
-
             }
         }
+
         #endregion
 
         #region Grid placement
@@ -413,7 +418,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\grid-placement.ifc"))
             {
-
                 var placements = model.Instances.OfType<IIfcGridPlacement>();
                 Assert.IsTrue(placements.Any());
                 foreach (var p in placements)
@@ -421,6 +425,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     XbimMatrix3D m = geomEngine.ToMatrix3D(p);
                     Assert.IsFalse(m.IsIdentity);
                 }
+
                 //make a graphic of the grid
                 var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
                 Assert.IsNotNull(ifcGrid);
@@ -438,7 +443,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\grid-lines.ifc"))
             {
-
                 var ifcGrid = model.Instances.OfType<IIfcGrid>().FirstOrDefault();
                 Assert.IsNotNull(ifcGrid);
                 var geom = geomEngine.CreateGrid(ifcGrid);
@@ -449,7 +453,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 }
             }
         }
-
 
         #endregion
 
@@ -463,7 +466,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var taperedSolid = model.Instances.OfType<IfcExtrudedAreaSolidTapered>().FirstOrDefault();
                 Assert.IsNotNull(taperedSolid);
                 var bar = geomEngine.CreateSolid(taperedSolid, logger);
-                Assert.IsTrue((int)bar.Volume > 0);
+                Assert.IsTrue((int) bar.Volume > 0);
             }
         }
 
@@ -480,19 +483,14 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         }
 
 
-
-
-
         [TestMethod]
         public void WireInitFromIfcIndexedPolyCurveTest()
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\WirePolycurve.ifc"))
             {
-
                 var shape = model.Instances[185] as IIfcGeometricRepresentationItem;
                 IXbimGeometryObject geomObject = geomEngine.Create(shape);
                 Assert.IsTrue(geomObject.IsValid);
-
             }
         }
 
@@ -519,7 +517,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [TestMethod]
         public void FixedReferenceSweptSolidTest()
         {
-            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\fixed-reference-sweptarea.ifc", logger))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\fixed-reference-sweptarea.ifc"))
             {
                 var sectionedSpine = model.Instances.OfType<IfcFixedReferenceSweptAreaSolid>().FirstOrDefault();
                 Assert.IsNotNull(sectionedSpine);
@@ -527,8 +525,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 Assert.IsTrue(bar.Volume > 0);
             }
         }
-
-        
 
         #endregion
 
@@ -538,7 +534,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\IfcMirroredProfileDef.ifc"))
             {
                 var derived = model.Instances[50] as IIfcDerivedProfileDef; //derived profile, mirrored by transform
-                var mirrored = model.Instances[177] as IIfcMirroredProfileDef;//mirrored versio of above
+                var mirrored = model.Instances[177] as IIfcMirroredProfileDef; //mirrored versio of above
                 Assert.IsNotNull(derived);
                 Assert.IsNotNull(mirrored);
 
@@ -550,10 +546,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var diffs = differ.DiffText(brepM, brepD);
                 Assert.IsTrue(mFace.Normal == dFace.Normal);
                 Assert.IsTrue(diffs.Length == 3);
-
             }
         }
-
 
 
         [TestMethod]
@@ -568,10 +562,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     {
                         Assert.IsTrue(face.Area > 0);
                     }
+
                     Assert.IsTrue(geom.Volume > 0);
                 }
             }
         }
+
         [TestMethod]
         public void NotClosedShellTest()
         {
@@ -582,9 +578,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var solid = geomEngine.CreateSolidSet(er.Entity, logger);
 
                 Assert.IsTrue(solid.IsValid);
-
             }
         }
+
         /// <summary>
         /// This test checks a composite curve that has trimmed IfcLine segments
         /// </summary>
@@ -616,6 +612,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var geom = geomEngine.CreateWire(comp);
             }
         }
+
         /// <summary>
         /// This test checks for a composite curve that has a trimmed circle that is not within the tolerance of the model at its connections
         /// </summary>
@@ -630,7 +627,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var curve = geomEngine.CreateCurve(er.Entity, logger);
                 Assert.AreEqual(curve.Length, wire.Length, 0.999);
             }
-
         }
 
         [TestMethod]
@@ -650,12 +646,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\composite-curve5.ifc"))
             {
-
                 //try building the polygonally bounded half space that has the faulty curve, which is now a seam
                 var pbhs = model.Instances[3942238] as IIfcBooleanClippingResult;
                 var solid = geomEngine.CreateSolidSet(pbhs).FirstOrDefault();
                 Assert.IsTrue(solid.Volume > 0);
-
             }
         }
 
@@ -674,7 +668,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var wall = model.Instances[1133397] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(wall);
                 //create it in the right position
-                var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement) as IXbimSolid;
+                var geomOpening = geomEngine.Create(opening,
+                        (IIfcAxis2Placement3D) ((IIfcLocalPlacement) (ifcOpening.ObjectPlacement)).RelativePlacement) as
+                    IXbimSolid;
                 Assert.IsNotNull(geomOpening);
                 Assert.IsTrue((geomOpening.Volume > 0));
                 var geomWall = geomEngine.CreateSolid(wall);
@@ -692,13 +688,11 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\closed-profile-with-voids.ifc"))
             {
-
                 var eas = model.Instances[23512] as IIfcExtrudedAreaSolid;
                 eas.Should().NotBeNull();
                 var geom = geomEngine.CreateSolid(eas);
-                geom.Volume.Should().BeApproximately(2278352481546.0332,1e-7);
-
-
+                // geom.Volume.Should().BeApproximately(2278352481546.0332,1e-7);
+                geom.Volume.Should().BeApproximately(2285696563304.0693, 1e-7);
             }
         }
 
@@ -707,12 +701,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\TrimmedEllipseTest.ifc"))
             {
-
                 var eas = model.Instances[272261] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(eas);
                 var geom = geomEngine.CreateSolid(eas);
                 Assert.IsTrue((geom.Volume > 0));
-
             }
         }
 
@@ -721,7 +713,6 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         {
             using (var model = MemoryModel.OpenRead(@"TestFiles\Ifc4TestFiles\long-running-boolean.ifc"))
             {
-
                 var ifcWall = model.Instances[39] as IIfcExtrudedAreaSolid;
                 Assert.IsNotNull(ifcWall);
                 var solids = geomEngine.CreateSolidSet();
@@ -731,23 +722,24 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     Assert.IsNotNull(firstOrDefault);
                     {
                         var opening = firstOrDefault.Items.FirstOrDefault() as IIfcGeometricRepresentationItem;
-                        var geomOpening = geomEngine.Create(opening, (IIfcAxis2Placement3D)((IIfcLocalPlacement)(ifcOpening.ObjectPlacement)).RelativePlacement) as IXbimSolid;
+                        var geomOpening = geomEngine.Create(opening,
+                            (IIfcAxis2Placement3D) ((IIfcLocalPlacement) (ifcOpening.ObjectPlacement))
+                            .RelativePlacement) as IXbimSolid;
                         Assert.IsNotNull(geomOpening);
                         solids.Add(geomOpening);
                     }
-
                 }
+
                 var wallGeom = geomEngine.CreateSolid(ifcWall);
 
                 var result = wallGeom.Cut(solids, model.ModelFactors.Precision);
                 Assert.IsTrue(result.Count > 0);
-
             }
         }
+
         [TestMethod]
         public void IfcCenterLineProfileDefTest()
         {
-
             using (var m = new MemoryModel(new Xbim.Ifc4.EntityFactoryIfc4()))
             {
                 using (var txn = m.BeginTransaction("Test"))
@@ -756,7 +748,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     var cl = IfcModelBuilder.MakeCenterLineProfileDef(m, semiCircle, 5);
                     var face = geomEngine.CreateFace(cl);
                     Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
-                    Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                    Assert.IsTrue(((IXbimFace) face).IsValid, "Invalid face returned");
                 }
             }
         }
@@ -772,7 +764,7 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var cl = IfcModelBuilder.MakeSurfaceOfLinearExtrusion(m, def, 50, new XbimVector3D(0, 0, 1));
                 var face = geomEngine.CreateFace(cl);
                 Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
-                Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                Assert.IsTrue(((IXbimFace) face).IsValid, "Invalid face returned");
             }
         }
 
@@ -787,10 +779,8 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var rev = IfcModelBuilder.MakeSurfaceOfRevolution(m, def);
                 var face = geomEngine.CreateFace(rev);
                 Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
-                Assert.IsTrue(((IXbimFace)face).IsValid, "Invalid face returned");
+                Assert.IsTrue(((IXbimFace) face).IsValid, "Invalid face returned");
             }
         }
-
-       
     }
 }

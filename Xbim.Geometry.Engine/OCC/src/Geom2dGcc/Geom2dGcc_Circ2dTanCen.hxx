@@ -30,9 +30,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class Standard_OutOfRange;
-class GccEnt_BadQualifier;
-class StdFail_NotDone;
 class Geom2dGcc_QualifiedCurve;
 class Geom2d_Point;
 class gp_Circ2d;
@@ -52,7 +49,7 @@ class gp_Pnt2d;
 //! We want to create a circle tangent to an EnclosedCurv C1
 //! with a tolerance Tolerance.
 //! If we did not used Tolerance it is impossible to
-//! find a solution in the the following case : Pcenter is
+//! find a solution in the following case : Pcenter is
 //! outside C1.
 //! With Tolerance we will give a solution if the distance
 //! between C1 and Pcenter is lower than or equal Tolerance/2.
@@ -118,7 +115,7 @@ public:
   //! StdFail_NotDone if the construction fails.
   Standard_EXPORT void WhichQualifier (const Standard_Integer Index, GccEnt_Position& Qualif1) const;
   
-  //! Returns informations about the tangency point between the
+  //! Returns information about the tangency point between the
   //! result number Index and the first argument.
   //! ParSol is the intrinsic parameter of the point PntSol on the solution curv.
   //! ParArg is the intrinsic parameter of the point PntSol on the argument curv.

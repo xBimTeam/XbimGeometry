@@ -37,7 +37,7 @@
 #include <GccEnt_QualifiedLin.hxx>
 #include <GccInt_BHyper.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dGcc_Circ2d2TanOnGeo.hxx>
 #include <Geom2dInt_TheIntConicCurveOfGInter.hxx>
 #include <gp_Circ2d.hxx>
@@ -46,24 +46,26 @@
 #include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 
+static const Standard_Integer aNbSolMAX = 8;
+
 Geom2dGcc_Circ2d2TanOnGeo::
 Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedCirc&     Qualified1 ,
                            const GccEnt_QualifiedCirc&     Qualified2 ,
                            const Geom2dAdaptor_Curve&      OnCurv     ,
                            const Standard_Real             Tolerance  ):
-  cirsol(1,8)    ,
-  qualifier1(1,8),
-  qualifier2(1,8),
-  TheSame1(1,8)  ,
-  TheSame2(1,8)  ,
-  pnttg1sol(1,8) ,
-  pnttg2sol(1,8) ,
-  pntcen(1,8)    ,
-  par1sol(1,8)   ,
-  par2sol(1,8)   ,
-  pararg1(1,8)   ,
-  pararg2(1,8)   ,
-  parcen3(1,8)   
+  cirsol(1, aNbSolMAX)    ,
+  qualifier1(1, aNbSolMAX),
+  qualifier2(1, aNbSolMAX),
+  TheSame1(1, aNbSolMAX)  ,
+  TheSame2(1, aNbSolMAX)  ,
+  pnttg1sol(1, aNbSolMAX) ,
+  pnttg2sol(1, aNbSolMAX) ,
+  pntcen(1, aNbSolMAX)    ,
+  par1sol(1, aNbSolMAX)   ,
+  par2sol(1, aNbSolMAX)   ,
+  pararg1(1, aNbSolMAX)   ,
+  pararg2(1, aNbSolMAX)   ,
+  parcen3(1, aNbSolMAX)
 {
   WellDone = Standard_False;
   Standard_Real thefirst = -100000.;
@@ -93,7 +95,7 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedCirc&     Qualified1 ,
   if (Bis.IsDone()) {
     Geom2dInt_TheIntConicCurveOfGInter Intp;
     Standard_Integer nbsolution = Bis.NbSolutions();
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve Cu2(HCu2,0.);
     firstparam = Max(Cu2.FirstParameter(),thefirst);
     lastparam  = Min(Cu2.LastParameter(),thelast);
@@ -200,7 +202,7 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedCirc&     Qualified1 ,
               }
             }
             if (nnsol > 0) {
-              for (Standard_Integer k = 1 ; k <= nnsol ; k++) {
+              for (Standard_Integer k = 1 ; k <= nnsol && NbrSol < aNbSolMAX; k++) {
                 NbrSol++;
                 cirsol(NbrSol) = gp_Circ2d(gp_Ax2d(Center,dirx),Radius(k));
                 //              ==========================================================
@@ -276,19 +278,19 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedCirc&     Qualified1 ,
                            const GccEnt_QualifiedLin&      Qualified2 , 
                            const Geom2dAdaptor_Curve&                 OnCurv     ,
                            const Standard_Real             Tolerance  ):
-cirsol(1,8)    ,
-qualifier1(1,8),
-qualifier2(1,8),
-TheSame1(1,8)  ,
-TheSame2(1,8)  ,
-pnttg1sol(1,8) ,
-pnttg2sol(1,8) ,
-pntcen(1,8)    ,
-par1sol(1,8)   ,
-par2sol(1,8)   ,
-pararg1(1,8)   ,
-pararg2(1,8)   ,
-parcen3(1,8)   
+cirsol(1, aNbSolMAX)    ,
+qualifier1(1, aNbSolMAX),
+qualifier2(1, aNbSolMAX),
+TheSame1(1, aNbSolMAX)  ,
+TheSame2(1, aNbSolMAX)  ,
+pnttg1sol(1, aNbSolMAX) ,
+pnttg2sol(1, aNbSolMAX) ,
+pntcen(1, aNbSolMAX)    ,
+par1sol(1, aNbSolMAX)   ,
+par2sol(1, aNbSolMAX)   ,
+pararg1(1, aNbSolMAX)   ,
+pararg2(1, aNbSolMAX)   ,
+parcen3(1, aNbSolMAX)
 {
 
   WellDone = Standard_False;
@@ -321,7 +323,7 @@ parcen3(1,8)
     Standard_Real Tol2 = Tol1;
     Geom2dInt_TheIntConicCurveOfGInter Intp;
     Standard_Integer nbsolution = Bis.NbSolutions();
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve C2(HCu2,0.);
     firstparam = Max(C2.FirstParameter(),thefirst);
     lastparam  = Min(C2.LastParameter(),thelast);
@@ -353,7 +355,7 @@ parcen3(1,8)
       }
       if (Intp.IsDone()) {
         if (!Intp.IsEmpty()) {
-          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() ; j++) {
+          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() && NbrSol < aNbSolMAX; j++) {
             gp_Pnt2d Center(Intp.Point(j).Value());
             Standard_Real dist1 = Center.Distance(center1);
             //	    Standard_Integer nbsol = 1;
@@ -454,19 +456,19 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedLin&      Qualified1 ,
                            const GccEnt_QualifiedLin&      Qualified2 , 
                            const Geom2dAdaptor_Curve&                 OnCurv     ,
                            const Standard_Real             Tolerance  ):
-cirsol(1,8)    ,
-qualifier1(1,8),
-qualifier2(1,8),
-TheSame1(1,8)  ,
-TheSame2(1,8)  ,
-pnttg1sol(1,8) ,
-pnttg2sol(1,8) ,
-pntcen(1,8)    ,
-par1sol(1,8)   ,
-par2sol(1,8)   ,
-pararg1(1,8)   ,
-pararg2(1,8)   ,
-parcen3(1,8)   
+cirsol(1, aNbSolMAX)    ,
+qualifier1(1, aNbSolMAX),
+qualifier2(1, aNbSolMAX),
+TheSame1(1, aNbSolMAX)  ,
+TheSame2(1, aNbSolMAX)  ,
+pnttg1sol(1, aNbSolMAX) ,
+pnttg2sol(1, aNbSolMAX) ,
+pntcen(1, aNbSolMAX)    ,
+par1sol(1, aNbSolMAX)   ,
+par2sol(1, aNbSolMAX)   ,
+pararg1(1, aNbSolMAX)   ,
+pararg2(1, aNbSolMAX)   ,
+parcen3(1, aNbSolMAX)
 {
 
   WellDone = Standard_False;
@@ -499,7 +501,7 @@ parcen3(1,8)
     Standard_Real Tol2 = Tol1;
     Geom2dInt_TheIntConicCurveOfGInter Intp;
     Standard_Integer nbsolution = Bis.NbSolutions();
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve C2(HCu2,0.);
     firstparam = Max(C2.FirstParameter(),thefirst);
     lastparam  = Min(C2.LastParameter(),thelast);
@@ -510,7 +512,7 @@ parcen3(1,8)
       Intp.Perform(Bis.ThisSolution(i),D1,C2,D2,Tol1,Tol2);
       if (Intp.IsDone()) {
         if ((!Intp.IsEmpty())) {
-          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() ; j++) {
+          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() && NbrSol < aNbSolMAX; j++) {
             gp_Pnt2d Center(Intp.Point(j).Value());
             Standard_Real dist1 = L1.Distance(Center);
             Standard_Real dist2 = L2.Distance(Center);
@@ -609,19 +611,19 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedCirc&     Qualified1 ,
                            const gp_Pnt2d&                 Point2     , 
                            const Geom2dAdaptor_Curve&                 OnCurv     ,
                            const Standard_Real             Tolerance  ):
-cirsol(1,8)    ,
-qualifier1(1,8),
-qualifier2(1,8),
-TheSame1(1,8)  ,
-TheSame2(1,8)  ,
-pnttg1sol(1,8) ,
-pnttg2sol(1,8) ,
-pntcen(1,8)    ,
-par1sol(1,8)   ,
-par2sol(1,8)   ,
-pararg1(1,8)   ,
-pararg2(1,8)   ,
-parcen3(1,8)   
+cirsol(1, aNbSolMAX)    ,
+qualifier1(1, aNbSolMAX),
+qualifier2(1, aNbSolMAX),
+TheSame1(1, aNbSolMAX)  ,
+TheSame2(1, aNbSolMAX)  ,
+pnttg1sol(1, aNbSolMAX) ,
+pnttg2sol(1, aNbSolMAX) ,
+pntcen(1, aNbSolMAX)    ,
+par1sol(1, aNbSolMAX)   ,
+par2sol(1, aNbSolMAX)   ,
+pararg1(1, aNbSolMAX)   ,
+pararg2(1, aNbSolMAX)   ,
+parcen3(1, aNbSolMAX)
 {
 
   WellDone = Standard_False;
@@ -647,7 +649,7 @@ parcen3(1,8)
     Standard_Real Tol2 = Tol1;
     Geom2dInt_TheIntConicCurveOfGInter Intp;
     Standard_Integer nbsolution = Bis.NbSolutions();
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve C2(HCu2,0.);
     firstparam = Max(C2.FirstParameter(),thefirst);
     lastparam  = Min(C2.LastParameter(),thelast);
@@ -697,7 +699,7 @@ parcen3(1,8)
       }
       if (Intp.IsDone()) {
         if ((!Intp.IsEmpty())) {
-          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() ; j++) {
+          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() && NbrSol < aNbSolMAX; j++) {
             gp_Pnt2d Center(Intp.Point(j).Value());
             Radius = Center.Distance(Point2);
             Standard_Real dist1 = center1.Distance(Center);
@@ -771,19 +773,19 @@ Geom2dGcc_Circ2d2TanOnGeo (const GccEnt_QualifiedLin&      Qualified1 ,
                            const gp_Pnt2d&                 Point2     , 
                            const Geom2dAdaptor_Curve&                 OnCurv     ,
                            const Standard_Real             Tolerance  ):
-cirsol(1,8)    ,
-qualifier1(1,8),
-qualifier2(1,8),
-TheSame1(1,8)  ,
-TheSame2(1,8)  ,
-pnttg1sol(1,8) ,
-pnttg2sol(1,8) ,
-pntcen(1,8)    ,
-par1sol(1,8)   ,
-par2sol(1,8)   ,
-pararg1(1,8)   ,
-pararg2(1,8)   ,
-parcen3(1,8)   
+cirsol(1, aNbSolMAX)    ,
+qualifier1(1, aNbSolMAX),
+qualifier2(1, aNbSolMAX),
+TheSame1(1, aNbSolMAX)  ,
+TheSame2(1, aNbSolMAX)  ,
+pnttg1sol(1, aNbSolMAX) ,
+pnttg2sol(1, aNbSolMAX) ,
+pntcen(1, aNbSolMAX)    ,
+par1sol(1, aNbSolMAX)   ,
+par2sol(1, aNbSolMAX)   ,
+pararg1(1, aNbSolMAX)   ,
+pararg2(1, aNbSolMAX)   ,
+parcen3(1, aNbSolMAX)
 {
 
   WellDone = Standard_False;
@@ -808,7 +810,7 @@ parcen3(1,8)
     Standard_Real Tol1 = Abs(Tolerance);
     Standard_Real Tol2 = Tol1;
     Geom2dInt_TheIntConicCurveOfGInter Intp;
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve C2(HCu2,0.);
     firstparam = Max(C2.FirstParameter(),thefirst);
     lastparam  = Min(C2.LastParameter(),thelast);
@@ -839,7 +841,7 @@ parcen3(1,8)
     }
     if (Intp.IsDone()) {
       if ((!Intp.IsEmpty())) {
-        for (Standard_Integer j = 1 ; j <= Intp.NbPoints() ; j++) {
+        for (Standard_Integer j = 1 ; j <= Intp.NbPoints() && NbrSol < aNbSolMAX; j++) {
           gp_Pnt2d Center(Intp.Point(j).Value());
           Standard_Real Radius = L1.Distance(Center);
           //	  Standard_Integer nbsol = 1;
@@ -908,19 +910,19 @@ Geom2dGcc_Circ2d2TanOnGeo (const gp_Pnt2d&               Point1    ,
                            const gp_Pnt2d&               Point2    ,
                            const Geom2dAdaptor_Curve&               OnCurv    ,
                            const Standard_Real           Tolerance ):
-cirsol(1,8)    ,
-qualifier1(1,8),
-qualifier2(1,8),
-TheSame1(1,8)  ,
-TheSame2(1,8)  ,
-pnttg1sol(1,8) ,
-pnttg2sol(1,8) ,
-pntcen(1,8)    ,
-par1sol(1,8)   ,
-par2sol(1,8)   ,
-pararg1(1,8)   ,
-pararg2(1,8)   ,
-parcen3(1,8)   
+cirsol(1, aNbSolMAX)    ,
+qualifier1(1, aNbSolMAX),
+qualifier2(1, aNbSolMAX),
+TheSame1(1, aNbSolMAX)  ,
+TheSame2(1, aNbSolMAX)  ,
+pnttg1sol(1, aNbSolMAX) ,
+pnttg2sol(1, aNbSolMAX) ,
+pntcen(1, aNbSolMAX)    ,
+par1sol(1, aNbSolMAX)   ,
+par2sol(1, aNbSolMAX)   ,
+pararg1(1, aNbSolMAX)   ,
+pararg2(1, aNbSolMAX)   ,
+parcen3(1, aNbSolMAX)
 {
 
   WellDone = Standard_False;
@@ -936,7 +938,7 @@ parcen3(1,8)
     Standard_Real Tol1 = Abs(Tolerance);
     Standard_Real Tol2 = Tol1;
     Geom2dInt_TheIntConicCurveOfGInter Intp;
-    Handle(Geom2dAdaptor_HCurve) HCu2 = new Geom2dAdaptor_HCurve(OnCurv); 
+    Handle(Geom2dAdaptor_Curve) HCu2 = new Geom2dAdaptor_Curve(OnCurv); 
     Adaptor2d_OffsetCurve Cu2(HCu2,0.);
     firstparam = Max(Cu2.FirstParameter(),thefirst);
     lastparam  = Min(Cu2.LastParameter(),thelast);
@@ -947,7 +949,7 @@ parcen3(1,8)
       Intp.Perform(Bis.ThisSolution(),D1,Cu2,D2,Tol1,Tol2);
       if (Intp.IsDone()) {
         if ((!Intp.IsEmpty())) {
-          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() ; j++) {
+          for (Standard_Integer j = 1 ; j <= Intp.NbPoints() && NbrSol < aNbSolMAX; j++) {
             gp_Pnt2d Center(Intp.Point(j).Value());
             Standard_Real Radius = Point2.Distance(Center);
             NbrSol++;

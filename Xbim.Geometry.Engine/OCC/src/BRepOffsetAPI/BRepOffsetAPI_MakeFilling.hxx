@@ -28,9 +28,6 @@
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 class TopoDS_Face;
 class TopoDS_Edge;
 class gp_Pnt;
@@ -108,7 +105,7 @@ public:
   //! Degree:      it is the order of energy criterion to minimize for computing
   //! the deformation of the surface.
   //! The default value is 3
-  //! The recommanded value is i+2 where i is the maximum order of the
+  //! The recommended value is i+2 where i is the maximum order of the
   //! constraints.
   //! NbPtsOnCur:  it is the average number of points for discretisation
   //! of the edges.
@@ -183,7 +180,7 @@ public:
   Standard_EXPORT Standard_Integer Add (const Standard_Real U, const Standard_Real V, const TopoDS_Face& Support, const GeomAbs_Shape Order);
   
   //! Builds the resulting faces
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Tests whether computation of the filling plate has been completed.
   Standard_EXPORT virtual Standard_Boolean IsDone() const Standard_OVERRIDE;

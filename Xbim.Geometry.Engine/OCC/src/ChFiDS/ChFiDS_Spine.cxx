@@ -19,7 +19,7 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <ChFiDS_ErrorStatus.hxx>
-#include <ChFiDS_HElSpine.hxx>
+#include <ChFiDS_ElSpine.hxx>
 #include <ChFiDS_ListIteratorOfListOfHElSpine.hxx>
 #include <ChFiDS_Spine.hxx>
 #include <ElCLib.hxx>
@@ -41,16 +41,26 @@ IMPLEMENT_STANDARD_RTTIEXT(ChFiDS_Spine,Standard_Transient)
 //purpose  : 
 //=======================================================================
 ChFiDS_Spine::ChFiDS_Spine()
-: splitdone(Standard_False),
-  myMode(ChFiDS_ClassicChamfer),
-  tolesp(Precision::Confusion()),
-  firstprolon(Standard_False), 
-  lastprolon(Standard_False),
-  firstistgt(Standard_False), 
-  lastistgt(Standard_False),
-  hasfirsttgt(Standard_False), 
-  haslasttgt(Standard_False),
-  hasref(Standard_False)
+: splitdone (Standard_False),
+  myMode (ChFiDS_ClassicChamfer),
+  indexofcurve (0),
+  myTypeOfConcavity (ChFiDS_Other),
+  firstState (ChFiDS_OnSame),
+  lastState (ChFiDS_OnSame),
+  tolesp (Precision::Confusion()),
+  firstparam (0.0),
+  lastparam (0.0),
+  firstprolon (Standard_False),
+  lastprolon (Standard_False),
+  firstistgt (Standard_False),
+  lastistgt (Standard_False),
+  firsttgtpar (0.0),
+  lasttgtpar (0.0),
+  hasfirsttgt (Standard_False),
+  haslasttgt (Standard_False),
+  valref (0.0),
+  hasref (Standard_False),
+  errorstate (ChFiDS_Ok)
 {
 }
 
@@ -59,16 +69,26 @@ ChFiDS_Spine::ChFiDS_Spine()
 //purpose  : 
 //=======================================================================
 ChFiDS_Spine::ChFiDS_Spine(const Standard_Real Tol)
-  : splitdone(Standard_False),
-    myMode(ChFiDS_ClassicChamfer),
-    tolesp(Tol),
-    firstprolon(Standard_False), 
-    lastprolon(Standard_False),
-    firstistgt(Standard_False), 
-    lastistgt(Standard_False),
-    hasfirsttgt(Standard_False), 
-    haslasttgt(Standard_False),
-    hasref(Standard_False)
+: splitdone (Standard_False),
+  myMode (ChFiDS_ClassicChamfer),
+  indexofcurve (0),
+  myTypeOfConcavity (ChFiDS_Other),
+  firstState (ChFiDS_OnSame),
+  lastState (ChFiDS_OnSame),
+  tolesp (Tol),
+  firstparam (0.0),
+  lastparam (0.0),
+  firstprolon (Standard_False),
+  lastprolon (Standard_False),
+  firstistgt (Standard_False),
+  lastistgt (Standard_False),
+  firsttgtpar (0.0),
+  lasttgtpar (0.0),
+  hasfirsttgt (Standard_False),
+  haslasttgt (Standard_False),
+  valref (0.0),
+  hasref (Standard_False),
+  errorstate (ChFiDS_Ok)
 {
 }
 
@@ -77,7 +97,7 @@ ChFiDS_Spine::ChFiDS_Spine(const Standard_Real Tol)
 //purpose  : 
 //=======================================================================
 
-void ChFiDS_Spine::AppendElSpine(const Handle(ChFiDS_HElSpine)& Els)
+void ChFiDS_Spine::AppendElSpine(const Handle(ChFiDS_ElSpine)& Els)
 {
   elspines.Append(Els);
 }
@@ -87,7 +107,7 @@ void ChFiDS_Spine::AppendElSpine(const Handle(ChFiDS_HElSpine)& Els)
 //purpose  : 
 //=======================================================================
 
-void ChFiDS_Spine::AppendOffsetElSpine(const Handle(ChFiDS_HElSpine)& Els)
+void ChFiDS_Spine::AppendOffsetElSpine(const Handle(ChFiDS_ElSpine)& Els)
 {
   offset_elspines.Append(Els);
 }
@@ -97,19 +117,19 @@ void ChFiDS_Spine::AppendOffsetElSpine(const Handle(ChFiDS_HElSpine)& Els)
 //purpose  : 
 //=======================================================================
 
-Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const TopoDS_Edge& E) const 
+Handle(ChFiDS_ElSpine) ChFiDS_Spine::ElSpine(const TopoDS_Edge& E) const 
 {
   return ElSpine(Index(E));
 }
 
-Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Integer IE) const 
+Handle(ChFiDS_ElSpine) ChFiDS_Spine::ElSpine(const Standard_Integer IE) const 
 {
   Standard_Real wmil = 0.5 * (FirstParameter(IE) + LastParameter(IE));
   if(IsPeriodic()) wmil = ElCLib::InPeriod(wmil,FirstParameter(),LastParameter());
   return ElSpine(wmil);
 }
 
-Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Real W) const 
+Handle(ChFiDS_ElSpine) ChFiDS_Spine::ElSpine(const Standard_Real W) const 
 {
   if (elspines.Extent() == 1)
     return elspines.First();
@@ -117,12 +137,12 @@ Handle(ChFiDS_HElSpine) ChFiDS_Spine::ElSpine(const Standard_Real W) const
   {
     ChFiDS_ListIteratorOfListOfHElSpine It(elspines);
     for (; It.More(); It.Next()) {
-      Handle(ChFiDS_HElSpine) cur = It.Value();
+      Handle(ChFiDS_ElSpine) cur = It.Value();
       Standard_Real uf = cur->FirstParameter();
       Standard_Real ul = cur->LastParameter();
       if(uf <= W && W <= ul) return cur;
     }  
-    return Handle(ChFiDS_HElSpine)();
+    return Handle(ChFiDS_ElSpine)();
   }
 }
 

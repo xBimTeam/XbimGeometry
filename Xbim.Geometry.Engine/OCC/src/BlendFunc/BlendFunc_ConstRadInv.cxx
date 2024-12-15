@@ -15,9 +15,9 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor2d_HCurve2d.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <BlendFunc.hxx>
 #include <BlendFunc_ConstRadInv.hxx>
 #include <math_Matrix.hxx>
@@ -26,11 +26,18 @@
 #define Eps 1.e-15
 
 
-BlendFunc_ConstRadInv::BlendFunc_ConstRadInv(const Handle(Adaptor3d_HSurface)& S1,
-					     const Handle(Adaptor3d_HSurface)& S2,
-					     const Handle(Adaptor3d_HCurve)& C):
-       surf1(S1),surf2(S2),curv(C)
-{}
+BlendFunc_ConstRadInv::BlendFunc_ConstRadInv(const Handle(Adaptor3d_Surface)& S1,
+					     const Handle(Adaptor3d_Surface)& S2,
+					     const Handle(Adaptor3d_Curve)& C)
+: surf1(S1),
+  surf2(S2),
+  curv(C),
+  ray1(0.0),
+  ray2(0.0),
+  choix(0),
+  first(Standard_False)
+{
+}
 
 void BlendFunc_ConstRadInv::Set(const Standard_Real R,
 				const Standard_Integer Choix)
@@ -72,7 +79,7 @@ void BlendFunc_ConstRadInv::Set(const Standard_Real R,
 }
 
 void BlendFunc_ConstRadInv::Set(const Standard_Boolean OnFirst,
-				const Handle(Adaptor2d_HCurve2d)& C)
+				const Handle(Adaptor2d_Curve2d)& C)
 {
   first = OnFirst;
   csurf = C;

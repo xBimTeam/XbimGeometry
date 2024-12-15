@@ -649,7 +649,7 @@ namespace Xbim
 					}
 
 					Handle(TColGeom_HArray1OfBSplineCurve)  concatcurve;     //array of the concatenated curves
-					Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remining Vertex
+					Handle(TColStd_HArray1OfInteger)        ArrayOfIndices;  //array of the remaining Vertex
 					GeomConvert::ConcatC1(tab,
 						tabtolvertex,
 						ArrayOfIndices,
@@ -699,7 +699,7 @@ namespace Xbim
 								const Standard_Real aTol = BRep_Tool::Tolerance(aVtx);
 
 								if (aPFirst.IsEqual(aPnt, aTol)) {
-									// The coinsident vertex is found.
+									// The coincident vertex is found.
 									FirstVertex = aVtx;
 									LastVertex = aVtx;
 									FirstVertex.Orientation(TopAbs_FORWARD);
@@ -809,7 +809,7 @@ namespace Xbim
 			// If one is null, but not both, return false.
 			if (((Object^)left == nullptr) || ((Object^)right == nullptr))
 				return false;
-			//this edge comparer does not conseider orientation
+			//this edge comparer does not consider orientation
 			return  ((const TopoDS_Edge&)left).IsSame(right) == Standard_True;
 
 		}
@@ -999,6 +999,8 @@ namespace Xbim
 				ShapeFix_ShapeTolerance FTol;
 				FTol.LimitTolerance(*pEdge, curve->Model->ModelFactors->Precision);
 			}
+
+			GC::KeepAlive(xbimCurve);
 		}
 
 		void XbimEdge::Init(IIfcProfileDef^ profile, ILogger^ logger)

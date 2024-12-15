@@ -21,8 +21,9 @@
 #define No_Standard_RangeError
 #define No_Standard_OutOfRange
 
+#include <GeomAdaptor_Curve.hxx>
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <BSplCLib.hxx>
 #include <BSplCLib_Cache.hxx>
 #include <Geom_BezierCurve.hxx>
@@ -36,8 +37,6 @@
 #include <Geom_Parabola.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomEvaluator_OffsetCurve.hxx>
 #include <gp_Circ.hxx>
@@ -62,6 +61,29 @@
 //#include <GeomConvert_BSplineCurveKnotSplitting.hxx>
 static const Standard_Real PosTol = Precision::PConfusion() / 2;
 
+IMPLEMENT_STANDARD_RTTIEXT(GeomAdaptor_Curve, Adaptor3d_Curve)
+
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Curve) GeomAdaptor_Curve::ShallowCopy() const
+{
+  Handle(GeomAdaptor_Curve) aCopy = new GeomAdaptor_Curve();
+
+  aCopy->myCurve           = myCurve;
+  aCopy->myTypeCurve       = myTypeCurve;
+  aCopy->myFirst           = myFirst;
+  aCopy->myLast            = myLast;
+  aCopy->myBSplineCurve    = myBSplineCurve;
+  if (!myNestedEvaluator.IsNull())
+  {
+    aCopy->myNestedEvaluator = myNestedEvaluator->ShallowCopy();
+  }
+
+  return aCopy;
+}
 
 //=======================================================================
 //function : LocalContinuity
@@ -187,7 +209,7 @@ void GeomAdaptor_Curve::load(const Handle(Geom_Curve)& C,
       Handle(Geom_OffsetCurve) anOffsetCurve = Handle(Geom_OffsetCurve)::DownCast(myCurve);
       // Create nested adaptor for base curve
       Handle(Geom_Curve) aBaseCurve = anOffsetCurve->BasisCurve();
-      Handle(GeomAdaptor_HCurve) aBaseAdaptor = new GeomAdaptor_HCurve(aBaseCurve);
+      Handle(GeomAdaptor_Curve) aBaseAdaptor = new GeomAdaptor_Curve(aBaseCurve);
       myNestedEvaluator = new GeomEvaluator_OffsetCurve(
           aBaseAdaptor, anOffsetCurve->Offset(), anOffsetCurve->Direction());
     }
@@ -509,11 +531,11 @@ void GeomAdaptor_Curve::Intervals(TColStd_Array1OfReal& T,
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HCurve) GeomAdaptor_Curve::Trim(const Standard_Real First,
+Handle(Adaptor3d_Curve) GeomAdaptor_Curve::Trim(const Standard_Real First,
                                                  const Standard_Real Last,
                                                  const Standard_Real /*Tol*/) const
 {
-  return Handle(GeomAdaptor_HCurve)(new GeomAdaptor_HCurve(myCurve,First,Last));
+  return Handle(GeomAdaptor_Curve)(new GeomAdaptor_Curve(myCurve,First,Last));
 }
 
 

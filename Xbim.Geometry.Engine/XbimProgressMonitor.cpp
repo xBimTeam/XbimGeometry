@@ -8,8 +8,10 @@
 XbimProgressMonitor::XbimProgressMonitor(Standard_Real maxDurationSeconds, bool startTimer) :
 	Message_ProgressIndicator()
 {
+	timedOut = false;
 	maxRunDuration = maxDurationSeconds;
-	if (startTimer) StartTimer();
+	if (startTimer) 
+		StartTimer();
 }
 
 Standard_Boolean XbimProgressMonitor::UserBreak()

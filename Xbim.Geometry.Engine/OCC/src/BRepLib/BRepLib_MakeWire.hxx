@@ -31,10 +31,7 @@
 #include <Bnd_Box.hxx>
 #include <NCollection_UBTree.hxx>
 
-class StdFail_NotDone;
-class TopoDS_Edge;
 class TopoDS_Wire;
-class TopoDS_Vertex;
 
 //! Provides methods to build wires.
 //!
@@ -47,7 +44,7 @@ class TopoDS_Vertex;
 //! - A new wire  is created with the edges  of  the
 //! wire + the edge.
 //!
-//! - If the edge is not connnected  to the wire the
+//! - If the edge is not connected  to the wire the
 //! flag NotDone   is set and  the  method Wire will
 //! raise an error.
 //!
@@ -101,7 +98,7 @@ public:
   //! Make a Wire from four edges.
   Standard_EXPORT BRepLib_MakeWire(const TopoDS_Edge& E1, const TopoDS_Edge& E2, const TopoDS_Edge& E3, const TopoDS_Edge& E4);
   
-  //! Make a Wire from a Wire. Usefull for adding later.
+  //! Make a Wire from a Wire. Useful for adding later.
   Standard_EXPORT BRepLib_MakeWire(const TopoDS_Wire& W);
   
   //! Add an edge to a wire.
@@ -135,8 +132,12 @@ private:
   {
   public:
     BRepLib_BndBoxVertexSelector(const TopTools_IndexedMapOfShape& theMapOfShape)
-      : BRepLib_BndBoxVertexSelector::Selector(), myMapOfShape (theMapOfShape)
-    {}
+    : BRepLib_BndBoxVertexSelector::Selector(),
+      myMapOfShape (theMapOfShape),
+      myTolP(0.0),
+      myVInd(0)
+    {
+    }
 
     Standard_Boolean Reject (const Bnd_Box& theBox) const
     {
@@ -165,7 +166,7 @@ private:
 
     const TopTools_IndexedMapOfShape& myMapOfShape; //vertices
     gp_Pnt myP;
-    Standard_Real mySTol;
+    Standard_Real myTolP;
     Standard_Integer myVInd;
     Bnd_Box myVBox;
     NCollection_List<Standard_Integer> myResultInd; 

@@ -21,7 +21,7 @@
 //! By the moment, only operations necessary for reference counter
 //! in Standard_Transient objects are implemented.
 //!
-//! This is preffered to use fixed size types "int32_t" / "int64_t" for
+//! This is preferred to use fixed size types "int32_t" / "int64_t" for
 //! correct function declarations however we leave "int" assuming it is 32bits for now.
 
 #ifndef _Standard_Atomic_HeaderFile
@@ -44,7 +44,7 @@ inline int Standard_Atomic_Decrement (volatile int* theValue);
 inline bool Standard_Atomic_CompareAndSwap (volatile int* theValue, int theOldValue, int theNewValue);
 
 // Platform-dependent implementation
-#if defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4)
+#if defined(__GCC_HAVE_SYNC_COMPARE_AND_SWAP_4) || defined(__EMSCRIPTEN__)
 // gcc explicitly defines the macros __GCC_HAVE_SYNC_COMPARE_AND_SWAP_*
 // starting with version 4.4+, although built-in functions
 // are available since 4.1.x. However unless __GCC_HAVE_SYNC_COMPARE_AND_SWAP_*

@@ -18,7 +18,7 @@
 #include <Geom2d_CartesianPoint.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
 #include <MAT2d_BiInt.hxx>
@@ -75,6 +75,7 @@ static Standard_Real CrossProd(const Handle(Geom2d_Geometry)& Geom1,
 //=============================================================================
 MAT2d_Circuit::MAT2d_Circuit(const GeomAbs_JoinType aJoinType,
                              const Standard_Boolean IsOpenResult)
+: direction(0.0)
 {
   myJoinType = aJoinType;
   myIsOpenResult = IsOpenResult;
@@ -268,12 +269,12 @@ Standard_Boolean MAT2d_Circuit::IsSharpCorner(const Handle(Geom2d_Geometry)& Geo
     D = Min(P1.Distance(P),P2.Distance(P));
     D /= 10;
     
-    if (Direction > 0.) D = -D;
-    
-    Handle(Geom2dAdaptor_HCurve) HC1 = new Geom2dAdaptor_HCurve(C1);
-    Handle(Geom2dAdaptor_HCurve) HC2 = new Geom2dAdaptor_HCurve(C2);
-    Adaptor2d_OffsetCurve OC1(HC1,D,MilC1,C1->LastParameter());
-    Adaptor2d_OffsetCurve OC2(HC2,D,C2->FirstParameter(),MilC2);
+    if (Direction < 0.) D = -D;
+
+    Handle(Geom2dAdaptor_Curve) HC1 = new Geom2dAdaptor_Curve(C1);
+    Handle(Geom2dAdaptor_Curve) HC2 = new Geom2dAdaptor_Curve(C2);
+    Adaptor2d_OffsetCurve OC1(HC1, D, MilC1, C1->LastParameter());
+    Adaptor2d_OffsetCurve OC2(HC2, D, C2->FirstParameter(), MilC2);
     Geom2dInt_GInter Intersect; 
     Intersect.Perform(OC1,OC2,Tol,Tol);
     

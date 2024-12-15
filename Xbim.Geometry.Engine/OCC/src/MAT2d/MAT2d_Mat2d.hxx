@@ -32,7 +32,7 @@ class MAT2d_Tool2d;
 class MAT_Bisector;
 
 
-//! this class contains the generic algoritm of
+//! this class contains the generic algorithm of
 //! computation of the bisecting locus.
 class MAT2d_Mat2d 
 {
@@ -41,13 +41,15 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  //! Empty construtor.
+  //! Empty constructor.
   Standard_EXPORT MAT2d_Mat2d(const Standard_Boolean IsOpenResult = Standard_False);
   
-  //! Algoritm of computation of the bisecting locus.
+  Standard_EXPORT ~MAT2d_Mat2d();
+  
+  //! Algorithm of computation of the bisecting locus.
   Standard_EXPORT void CreateMat (MAT2d_Tool2d& aTool);
   
-  //! Algoritm of computation of the bisecting locus for
+  //! Algorithm of computation of the bisecting locus for
   //! open wire.
   Standard_EXPORT void CreateMatOpen (MAT2d_Tool2d& aTool);
   
@@ -96,6 +98,7 @@ private:
   Standard_Integer thenumberofedges;
   Standard_Boolean semiInfinite;
   Handle(MAT_ListOfEdge) theedgelist;
+  Handle(MAT_ListOfEdge) RemovedEdgesList;
   TColStd_DataMapOfIntegerInteger typeofbisectortoremove;
   MAT_DataMapOfIntegerBisector bisectoronetoremove;
   MAT_DataMapOfIntegerBisector bisectortwotoremove;

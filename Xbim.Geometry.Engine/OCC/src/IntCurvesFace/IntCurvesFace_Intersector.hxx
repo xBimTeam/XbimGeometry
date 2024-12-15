@@ -17,31 +17,21 @@
 #ifndef _IntCurvesFace_Intersector_HeaderFile
 #define _IntCurvesFace_Intersector_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Real.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <IntCurveSurface_SequenceOfPnt.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Integer.hxx>
 #include <TopoDS_Face.hxx>
-#include <Standard_Address.hxx>
 #include <GeomAbs_SurfaceType.hxx>
 #include <IntCurveSurface_TransitionOnCurve.hxx>
 #include <TopAbs_State.hxx>
+
 class BRepTopAdaptor_TopolTool;
-class BRepAdaptor_HSurface;
-class TopoDS_Face;
 class gp_Lin;
-class Adaptor3d_HCurve;
 class gp_Pnt;
 class IntCurveSurface_HInter;
 class gp_Pnt2d;
 class Bnd_Box;
-
-
 
 class IntCurvesFace_Intersector 
 {
@@ -61,7 +51,7 @@ public:
   //! otherwise surface is not restricted.
   //! If UseBToler = false then the 2d-point of intersection is classified with null-tolerance
   //! (relative to face);
-  //! otherwise it's using maximium between input tolerance(aTol) and tolerances of face bounds (edges).
+  //! otherwise it's using maximum between input tolerance(aTol) and tolerances of face bounds (edges).
   Standard_EXPORT IntCurvesFace_Intersector(const TopoDS_Face& F, const Standard_Real aTol, 
                                             const Standard_Boolean aRestr = Standard_True,
                                             const Standard_Boolean UseBToler = Standard_True);
@@ -70,7 +60,7 @@ public:
   //! segment L and the loaded face.
   //!
   //! PInf is the smallest parameter on the line
-  //! PSup is the highest  parmaeter on the line
+  //! PSup is the highest  parameter on the line
   //!
   //! For an infinite line PInf and PSup can be
   //! +/- RealLast.
@@ -78,7 +68,7 @@ public:
   
   //! same method for a HCurve from Adaptor3d.
   //! PInf an PSup can also be - and + INF.
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HCurve)& HCu, const Standard_Real PInf, const Standard_Real PSup);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_Curve)& HCu, const Standard_Real PInf, const Standard_Real PSup);
   
   //! Return the surface type
   Standard_EXPORT GeomAbs_SurfaceType SurfaceType() const;
@@ -111,7 +101,7 @@ public:
   //! The values can be either TopAbs_IN
   //! ( the point is in the face)
   //! or TopAbs_ON
-  //! ( the point is on a boudary of the face).
+  //! ( the point is on a boundary of the face).
     TopAbs_State State (const Standard_Integer I) const;
 
   //! Returns true if curve is parallel or belongs face surface
@@ -155,7 +145,7 @@ private:
 
 
   Handle(BRepTopAdaptor_TopolTool) myTopolTool;
-  Handle(BRepAdaptor_HSurface) Hsurface;
+  Handle(BRepAdaptor_Surface) Hsurface;
   Standard_Real Tol;
   IntCurveSurface_SequenceOfPnt SeqPnt;
   TColStd_SequenceOfInteger mySeqState;

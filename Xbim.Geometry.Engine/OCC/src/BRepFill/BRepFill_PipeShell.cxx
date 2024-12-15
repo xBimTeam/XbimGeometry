@@ -17,7 +17,7 @@
 
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAdaptor_HCompCurve.hxx>
+#include <BRepAdaptor_CompCurve.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
@@ -38,8 +38,8 @@
 #include <BRepGProp.hxx>
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeFace.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Curve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomFill_ConstantBiNormal.hxx>
 #include <GeomFill_CorrectedFrenet.hxx>
 #include <GeomFill_CurveAndTrihedron.hxx>
@@ -386,7 +386,7 @@ BRepFill_PipeShell::BRepFill_PipeShell(const TopoDS_Wire& Spine)
     DBRep::Set("theguide", TheGuide);
 #endif
   // transform the guide in a single curve
-  Handle(BRepAdaptor_HCompCurve) Guide = new (BRepAdaptor_HCompCurve) (TheGuide);
+  Handle(BRepAdaptor_CompCurve) Guide = new (BRepAdaptor_CompCurve) (TheGuide);
 
   if (CurvilinearEquivalence) { // trihedron by curvilinear reduced abscissa
     if (KeepContact == BRepFill_Contact ||
@@ -491,9 +491,9 @@ void BRepFill_PipeShell::SetForceApproxC1(const Standard_Boolean ForceApproxC1)
 
    TopoDS_Face ProfileFace = BRepLib_MakeFace(TopoDS::Wire(Profile), Standard_True); //only plane
    Handle(Geom_Surface) thePlane = BRep_Tool::Surface(ProfileFace);
-   Handle(GeomAdaptor_HSurface) GAHplane = new GeomAdaptor_HSurface(thePlane);
+   Handle(GeomAdaptor_Surface) GAHplane = new GeomAdaptor_Surface(thePlane);
    IntCurveSurface_HInter Intersector;
-   Handle(Adaptor3d_HCurve) aHCurve [2];
+   Handle(Adaptor3d_Curve) aHCurve [2];
    aHCurve[0] = Loc->GetCurve();
    aHCurve[1] = Loc->Guide();
    gp_Pnt PointsOnSpines [2];
@@ -732,7 +732,7 @@ void BRepFill_PipeShell::SetForceApproxC1(const Standard_Boolean ForceApproxC1)
     }
     // eap 5 Jun 2002 occ332, end modif
   }
-#if DRAW
+#ifdef DRAW
   if (Affich) {
     DBRep::Set("PipeFirst", myFirst);
     DBRep::Set("PipeLast",  myLast);
@@ -1377,7 +1377,7 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
           BB.Add(aWire, CurEdge);
         } //for (jj = 2; jj <= SeqEdges.Length(); jj++)
         //case of closed wire
-        if (mySection->IsVClosed() &&
+        if (myLocation->IsClosed() &&
             !CurVertex.IsSame(FirstVertex))
         {
           const TopTools_ListOfShape& Elist = VEmap.FindFromKey(CurVertex);
@@ -1450,6 +1450,10 @@ void BRepFill_PipeShell::BuildHistory(const BRepFill_Sweep& theSweep)
     for (Standard_Integer i = 1; i <= aVEdges->UpperRow(); i++)
     {
       const TopoDS_Shape& aVshape = aVEdges->Value(i, inde);
+      if (aVshape.IsNull())
+      {
+        continue;
+      }
       if (aVshape.ShapeType() == TopAbs_EDGE ||
           aVshape.ShapeType() == TopAbs_FACE)
         ListVshapes->Append(aVshape);

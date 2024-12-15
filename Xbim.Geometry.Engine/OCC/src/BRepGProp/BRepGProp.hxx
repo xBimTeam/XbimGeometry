@@ -28,16 +28,6 @@
 class TopoDS_Shape;
 class GProp_GProps;
 class gp_Pln;
-class BRepGProp_EdgeTool;
-class BRepGProp_Face;
-class BRepGProp_Domain;
-class BRepGProp_Cinert;
-class BRepGProp_Sinert;
-class BRepGProp_Vinert;
-class BRepGProp_VinertGK;
-class BRepGProp_UFunction;
-class BRepGProp_TFunction;
-class gp_XYZ;
 
 
 //! Provides global functions to compute a shape's global
@@ -146,7 +136,7 @@ public:
                                          const Standard_Boolean SkipShared = Standard_False,
                                   const Standard_Boolean UseTriangulation = Standard_False);
   
-  //! Updates <SProps> with the shape <S>, that contains its pricipal properties.
+  //! Updates <SProps> with the shape <S>, that contains its principal properties.
   //! The surface properties of all the faces in <S> are computed.
   //! Adaptive 2D Gauss integration is used.
   //! Parameter Eps sets maximal relative error of computed mass (area) for each face.
@@ -207,7 +197,7 @@ public:
                                         const Standard_Boolean SkipShared = Standard_False,
                                  const Standard_Boolean UseTriangulation = Standard_False);
   
-  //! Updates <VProps> with the shape <S>, that contains its pricipal properties.
+  //! Updates <VProps> with the shape <S>, that contains its principal properties.
   //! The volume properties of all the FORWARD and REVERSED faces in <S> are computed.
   //! If OnlyClosed is True then computed faces must belong to closed Shells.
   //! Adaptive 2D Gauss integration is used.
@@ -225,7 +215,7 @@ public:
                          const Standard_Real Eps, const Standard_Boolean OnlyClosed = Standard_False, 
                                                  const Standard_Boolean SkipShared = Standard_False);
   
-  //! Updates <VProps> with the shape <S>, that contains its pricipal properties.
+  //! Updates <VProps> with the shape <S>, that contains its principal properties.
   //! The volume properties of all the FORWARD and REVERSED faces in <S> are computed.
   //! If OnlyClosed is True then computed faces must belong to closed Shells.
   //! Adaptive 2D Gauss integration is used.

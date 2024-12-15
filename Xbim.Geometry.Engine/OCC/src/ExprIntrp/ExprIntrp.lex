@@ -45,7 +45,9 @@ static int yywrap()
 // provide safe error handler (exception instead of exit())
 #define YY_FATAL_ERROR(msg) ExprIntrperror(msg)
 
+// MSVC specifics
 #ifdef _MSC_VER
+
 // add includes for flex 2.91 (Linux version)
 #include <stdlib.h>
 #include <io.h>
@@ -57,11 +59,15 @@ static int yywrap()
 // Note that Intel compiler also defines _MSC_VER but has different warning ids
 #if defined(__INTEL_COMPILER)
 #pragma warning(disable:177 1786 1736)
+#elif defined(__clang__)
+#pragma GCC diagnostic ignored "-Wunused-function"
+#pragma GCC diagnostic ignored "-Winconsistent-dllimport"
+#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
 #else
 #pragma warning(disable:4131 4244 4273 4127 4267)
 #endif
 
-#endif
+#endif /* MSC_VER */
 
 #ifdef __GNUC__
 // add includes for flex 2.91 (Linux version)

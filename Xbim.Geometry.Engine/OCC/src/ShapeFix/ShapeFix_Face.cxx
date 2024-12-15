@@ -51,7 +51,8 @@
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_SphericalSurface.hxx>
 #include <Geom_Surface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <Geom_ToroidalSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GProp_GProps.hxx>
 #include <IntRes2d_Domain.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
@@ -118,9 +119,9 @@ static Standard_Boolean IsSurfaceUVInfinite(const Handle(Geom_Surface)& theSurf)
           Precision::IsInfinite(VMax)   );
 }
 
-static Standard_Boolean IsSurfaceUVPeriodic(const Handle(Geom_Surface)& theSurf)
+static Standard_Boolean IsSurfaceUVPeriodic(const Handle(GeomAdaptor_Surface)& theSurf)
 {
-  return theSurf->IsUPeriodic() && theSurf->IsVPeriodic();
+	return ( (theSurf->IsUPeriodic() && theSurf->IsVPeriodic()) || theSurf->GetType() == GeomAbs_Sphere);
 }
 
 //=======================================================================
@@ -279,8 +280,8 @@ void ShapeFix_Face::Add (const TopoDS_Wire& wire)
 
 //=======================================================================
 //function : SplitWire
-//purpose  : auxilary - try to split wire (it is needed if some segments
-//           were removed in ShapeFix_Wire::FixSelfIntersection()
+//purpose  : auxiliary - try to split wire (it is needed if some segments
+//           were removed in ShapeFix_Wire::FixSelfIntersection() )
 //=======================================================================
 static Standard_Boolean SplitWire(const TopoDS_Face &face, const TopoDS_Wire& wire,
                                   TopTools_SequenceOfShape& aResWires)
@@ -348,7 +349,7 @@ static Standard_Boolean SplitWire(const TopoDS_Face &face, const TopoDS_Wire& wi
 
   if(aResWires.Length()>1) {
 #ifdef OCCT_DEBUG
-    std::cout<<"Wire was splitted on "<<aResWires.Length()<<" wires"<< std::endl;
+    std::cout<<"Wire was split on "<<aResWires.Length()<<" wires"<< std::endl;
 #endif
   }
 
@@ -580,7 +581,7 @@ Standard_Boolean ShapeFix_Face::Perform()
         TopTools_SequenceOfShape aLoopWires;
         if(NeedFix ( myFixLoopWiresMode) && FixLoopWire(aLoopWires)) {
           if (aLoopWires.Length() > 1)
-            SendWarning ( wire, Message_Msg ( "FixAdvFace.FixLoopWire.MSG0" ) );// Wire was splitted on several wires
+            SendWarning ( wire, Message_Msg ( "FixAdvFace.FixLoopWire.MSG0" ) );// Wire was split on several wires
           myStatus |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE7 );
           fixed = Standard_True;
           Standard_Integer k=1;
@@ -800,9 +801,9 @@ static Standard_Real FindBestInterval (TColgp_SequenceOfPnt2d &intervals)
 
 //=======================================================================
 //function : FixAddNaturalBound
-//purpose  : 
+//purpose  :
 //=======================================================================
-// Detect missing natural bounary on spherical surfaces and add it if 
+// Detect missing natural boundary on spherical surfaces and add it if
 // necessary
 //pdn 981202: add natural bounds if missing (on sphere only)
 //:abv 28.08.01: rewritten and extended for toruses
@@ -855,10 +856,10 @@ Standard_Boolean ShapeFix_Face::FixAddNaturalBound()
   }
 
   // check if surface is double-closed and fix is needed
-  if ( !IsSurfaceUVPeriodic (mySurf->Surface()) || ShapeAnalysis::IsOuterBound (myFace) ) 
+  if ( !IsSurfaceUVPeriodic (mySurf->Adaptor3d()) || ShapeAnalysis::IsOuterBound (myFace) ) 
     return Standard_False;
 
-  // Collect informations on free intervals in U and V
+  // Collect information on free intervals in U and V
   TColgp_SequenceOfPnt2d intU, intV, centers;
   Standard_Real SUF, SUL, SVF, SVL;
   mySurf->Bounds(SUF, SUL, SVF, SVL);
@@ -866,6 +867,7 @@ Standard_Boolean ShapeFix_Face::FixAddNaturalBound()
   intV.Append ( gp_Pnt2d(SVF, SVL) );
   Standard_Integer nb = ws.Length();
   Standard_Integer i;
+  
   for ( i=1; i <= nb; i ++) {
     Standard_Real Umin, Vmin, Umax, Vmax;
 //     Bnd_Box2d B;
@@ -877,12 +879,13 @@ Standard_Boolean ShapeFix_Face::FixAddNaturalBound()
     BRep_Builder aB;
     aB.Add( aWireFace, aw );
     ShapeAnalysis::GetFaceUVBounds(aWireFace, Umin, Umax, Vmin, Vmax);
+    
     // PTV 01.11.2002 ACIS907, OCC921 end
     if ( mySurf->IsUClosed() ) CutInterval ( intU, gp_Pnt2d(Umin,Umax), SUL-SUF );
     if ( mySurf->IsVClosed() ) CutInterval ( intV, gp_Pnt2d(Vmin,Vmax), SVL-SVF );
     centers.Append ( gp_Pnt2d ( 0.5*(Umin+Umax), 0.5*(Vmin+Vmax) ) );
   }
-
+   
   // find best interval and thus compute shift
   gp_Pnt2d shift(0.,0.);
   if ( mySurf->IsUClosed() ) shift.SetX ( FindBestInterval ( intU ) );
@@ -1084,8 +1087,8 @@ Standard_Boolean ShapeFix_Face::FixOrientation(TopTools_DataMapOfShapeListOfShap
   // if no wires, just do nothing
   if ( nb <= 0) return Standard_False;
   Standard_Integer nbInternal=0;
-  Standard_Boolean isAddNaturalBounds = (NeedFix (myFixAddNaturalBoundMode) && 
-                                         IsSurfaceUVPeriodic (mySurf->Surface()));
+
+  Standard_Boolean isAddNaturalBounds = (NeedFix (myFixAddNaturalBoundMode) && IsSurfaceUVPeriodic(mySurf->Adaptor3d()));
   TColStd_SequenceOfInteger aSeqReversed;
   // if wire is only one, check its orientation
   if ( nb == 1 ) {
@@ -1095,19 +1098,17 @@ Standard_Boolean ShapeFix_Face::FixOrientation(TopTools_DataMapOfShapeListOfShap
     TopoDS_Face af = TopoDS::Face ( dummy );
     af.Orientation ( TopAbs_FORWARD );
     B.Add (af,ws.Value(1));
+    
     if ((myFixAddNaturalBoundMode != 1 ||
-         !IsSurfaceUVPeriodic (mySurf->Surface())    ) &&
-        !ShapeAnalysis::IsOuterBound (af)                )
+      !IsSurfaceUVPeriodic(mySurf->Adaptor3d())) &&
+      !ShapeAnalysis::IsOuterBound(af))
     {
-      Handle(ShapeExtend_WireData) sbdw = 
-        new ShapeExtend_WireData (TopoDS::Wire(ws.Value(1)));
-      sbdw->Reverse ( myFace );
-      ws.SetValue ( 1, sbdw->Wire() );
-      SendWarning ( sbdw->Wire(), Message_Msg ( "FixAdvFace.FixOrientation.MSG5" ) );// Wire on face was reversed
+      Handle(ShapeExtend_WireData) sbdw =
+        new ShapeExtend_WireData(TopoDS::Wire(ws.Value(1)));
+      sbdw->Reverse(myFace);
+      ws.SetValue(1, sbdw->Wire());
+      SendWarning(sbdw->Wire(), Message_Msg("FixAdvFace.FixOrientation.MSG5"));// Wire on face was reversed
       done = Standard_True;
-#ifdef OCCT_DEBUG
-      std::cout<<"Wire reversed"<<std::endl; // mise au point !
-#endif
     }
   }
   // in case of several wires, perform complex analysis
@@ -1318,7 +1319,7 @@ Standard_Boolean ShapeFix_Face::FixOrientation(TopTools_DataMapOfShapeListOfShap
         MW.Bind(aw,IntWires);
         if(sta==TopAbs_OUT) {
           NbOuts++;
-          if(staout==TopAbs_IN) {
+          if(staout==TopAbs_IN ) {
             // wire is OUT but InfinitePoint is IN => need to reverse
             ShapeExtend_WireData sewd (aw);
             sewd.Reverse(myFace);
@@ -1418,7 +1419,7 @@ Standard_Boolean ShapeFix_Face::FixOrientation(TopTools_DataMapOfShapeListOfShap
 
 //=======================================================================
 //function : CheckWire
-//purpose  : auxilary for FixMissingSeam
+//purpose  : auxiliary for FixMissingSeam
 //=======================================================================
 //:i7 abv 18 Sep 98: ProSTEP TR9 r0501-ug.stp: algorithm of fixing missing seam changed
 // test whether the wire is opened on period of periodical surface
@@ -1674,7 +1675,7 @@ Standard_Boolean ShapeFix_Face::FixMissingSeam()
   B.Add ( S, w2 );
   ShapeAnalysis::GetFaceUVBounds (TopoDS::Face(S), m2[0][0], m2[0][1], m2[1][0], m2[1][1]);
    
-  // For the case when surface is closed only in one direction it is necesary to check
+  // For the case when surface is closed only in one direction it is necessary to check
   // validity of orientation of the open wires in parametric space. 
   // In case of U closed surface wire with minimal V coordinate should be directed in positive direction by U
   // In case of V closed surface wire with minimal U coordinate should be directed in negative direction by V
@@ -1863,13 +1864,56 @@ Standard_Boolean ShapeFix_Face::FixMissingSeam()
   mySurf = new ShapeAnalysis_Surface ( RTS );
 
   myResult = CompShell.Result();
-//  if ( myFace.Orientation() == TopAbs_REVERSED ) res.Reverse();
+ 
   Context()->Replace ( myFace, myResult );
+
+  // Remove small wires and / or faces that can be generated by ComposeShell
+  // (see tests bugs step bug30052_4, de step_3 E6)
+  Standard_Integer nbFaces = 0;
+  TopExp_Explorer expF ( myResult, TopAbs_FACE );
+  for (; expF.More(); expF.Next() )
+  {
+    TopoDS_Face aFace = TopoDS::Face(expF.Value());
+    TopExp_Explorer aExpW(aFace, TopAbs_WIRE);
+    Standard_Integer nbWires = 0;
+    for( ;aExpW.More(); aExpW.Next() )
+    {
+      ShapeFix_Wire aSfw(TopoDS::Wire(aExpW.Value()), aFace, Precision());
+      aSfw.SetContext(Context());
+      if(aSfw.NbEdges())
+        aSfw.FixSmall (Standard_True, Precision());
+      if(!aSfw.NbEdges())
+      {
+        Context()->Remove(aExpW.Value());
+        continue;
+      }
+      nbWires++;
+    }
+    if(!nbWires)
+    {
+      Context()->Remove(aFace);
+      continue;
+    }
+    nbFaces++;
+  }
+   
+  myResult = Context()->Apply(myResult);
   for (TopExp_Explorer exp ( myResult, TopAbs_FACE ); exp.More(); exp.Next() ) {
-    myFace = TopoDS::Face ( exp.Current() );
+    myFace = TopoDS::Face ( Context()->Apply(exp.Current() ));
+    if( myFace.IsNull())
+      continue;
+    if(nbFaces > 1)
+    {
+      FixSmallAreaWire(Standard_True);
+      TopoDS_Shape aShape = Context()->Apply(myFace);
+      if(aShape.IsNull() )
+        continue;
+      myFace = TopoDS::Face(aShape);
+    }
     BRepTools::Update(myFace); //:p4
   }
-
+  myResult = Context()->Apply(myResult);
+  
   SendWarning ( Message_Msg ( "FixAdvFace.FixMissingSeam.MSG0" ) );// Missing seam-edge added
   return Standard_True;
 }
@@ -2152,7 +2196,7 @@ Standard_Boolean ShapeFix_Face::FixLoopWire(TopTools_SequenceOfShape& aResWires)
   if(isDone && aResWires.Length() >1)
   {
 #ifdef OCCT_DEBUG
-    std::cout<<"Wire was splitted on "<<aResWires.Length()<<" wires"<< std::endl;
+    std::cout<<"Wire was split on "<<aResWires.Length()<<" wires"<< std::endl;
 #endif
   }
 

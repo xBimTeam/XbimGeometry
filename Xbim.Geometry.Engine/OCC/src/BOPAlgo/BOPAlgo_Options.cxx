@@ -15,11 +15,13 @@
 
 #include <BOPAlgo_Options.hxx>
 #include <Message_MsgFile.hxx>
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressScope.hxx>
 #include <NCollection_BaseAllocator.hxx>
+#include <TCollection_AsciiString.hxx>
 #include <Precision.hxx>
 #include <Standard_NotImplemented.hxx>
 #include <Standard_ProgramError.hxx>
+#include <BOPAlgo_Alerts.hxx>
 
 namespace
 {
@@ -126,28 +128,13 @@ void BOPAlgo_Options::SetFuzzyValue(const Standard_Real theFuzz)
   myFuzzyValue = Max(theFuzz, Precision::Confusion());
 }
 
+Standard_Boolean BOPAlgo_Options::UserBreak(const Message_ProgressScope& thePS)
+{
+  if (thePS.UserBreak())
+  {
+    AddError(new BOPAlgo_AlertUserBreak);
+    return Standard_True;
+  }
+  return Standard_False;
+}
 
-//=======================================================================
-//function : SetProgressIndicator
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Options::SetProgressIndicator
-  (const Handle(Message_ProgressIndicator)& theObj)
-{
-  if (!theObj.IsNull()) {
-    myProgressIndicator = theObj;
-  }
-}
-//=======================================================================
-//function : UserBreak
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Options::UserBreak() const
-{
-  if (myProgressIndicator.IsNull()) {
-    return;
-  }
-  if (myProgressIndicator->UserBreak()) {
-    throw Standard_NotImplemented("BOPAlgo_Options::UserBreak(), method is not implemented");
-  }
-}

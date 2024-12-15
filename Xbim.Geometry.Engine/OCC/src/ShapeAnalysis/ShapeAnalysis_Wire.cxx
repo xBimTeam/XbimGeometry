@@ -44,13 +44,13 @@
 #include <GCPnts_AbscissaPoint.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <gp_Pnt2d.hxx>
 #include <GProp_GProps.hxx>
 #include <IntRes2d_Domain.hxx>
@@ -807,7 +807,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckDegenerated (const Standard_Integer nu
   //pdn allows to insert two sequences of degenerated edges (on separate bounds of surfaces)
   if ( n1 != n2 && BRep_Tool::Degenerated ( E1 ) && 
        ! sae.HasPCurve ( E1, Face() ) ) {
-    //:abv 13.05.02: OCC320 - fail (to remove edge) if two consequtive degenerated edges w/o pcurves
+    //:abv 13.05.02: OCC320 - fail (to remove edge) if two consecutive degenerated edges w/o pcurves
     if ( BRep_Tool::Degenerated ( E2 ) )
       myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_FAIL2);
     return Standard_False;
@@ -931,7 +931,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckDegenerated (const Standard_Integer nu
   //#84 rln 18.03.99 if pcurve is not degenerate anymore, the fix is postponned
   //to ShapeFix_Wire::FixLacking
   if ( ! mySurf->IsDegenerated ( p2d1, p2d2, precVtx, 10. ) ) { //:s1 abv 22 Apr 99: PRO7226 #489490 //smh#9
-    //:abv 24.05.02: OCC320 - fail (to remove edge) if two consequtive degenerated edges w/o pcurves
+    //:abv 24.05.02: OCC320 - fail (to remove edge) if two consecutive degenerated edges w/o pcurves
     if ( BRep_Tool::Degenerated ( E2 ) )
       myStatus |= ShapeExtend::EncodeStatus (ShapeExtend_FAIL2);
     return Standard_False;
@@ -940,7 +940,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckDegenerated (const Standard_Integer nu
   //added by rln 18/12/97 CSR# CTS18544 entity 13638
   //the situation when degenerated edge already exists but flag is not set
   //(i.e. the parametric space is closed)
-  GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+  GeomAdaptor_Surface& Ads = *mySurf->Adaptor3d();
   Standard_Real max = Max ( Ads.UResolution(myPrecision), 
 			    Ads.VResolution(myPrecision) );
   if ( p2d1.Distance (p2d2) /*Abs (par1 - par2)*/ <= max + gp::Resolution() ) return Standard_False;
@@ -1015,7 +1015,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckDegenerated (const Standard_Integer nu
   gp_Pnt2d p1 = C1->Value (ul1);
   gp_Pnt2d p2 = C2->Value (uf2);
   myMin2d = myMax2d = p1.Distance (p2);
-  GeomAdaptor_Surface& SA = mySurf->Adaptor3d()->ChangeSurface();
+  GeomAdaptor_Surface& SA = *mySurf->Adaptor3d();
   if (myMin2d > (Max (SA.UResolution (myPrecision), SA.VResolution (myPrecision)) + Precision::PConfusion()))
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE1);
   return LastCheckStatus (ShapeExtend_DONE);
@@ -1044,8 +1044,8 @@ Standard_Boolean ShapeAnalysis_Wire::CheckDegenerated (const Standard_Integer nu
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_FAIL1);
     return Standard_False;
   }
-  Handle(Geom2dAdaptor_HCurve) AC = new Geom2dAdaptor_HCurve(pc,pcuf,pcul);
-  Handle(GeomAdaptor_HSurface) AS = new GeomAdaptor_HSurface(mySurf->Surface());
+  Handle(Geom2dAdaptor_Curve) AC = new Geom2dAdaptor_Curve(pc,pcuf,pcul);
+  Handle(GeomAdaptor_Surface) AS = new GeomAdaptor_Surface(mySurf->Surface());
   Adaptor3d_CurveOnSurface ACS(AC,AS);
   gp_Pnt cpnt, pcpnt;
   Standard_Integer nbp = 45;
@@ -1235,7 +1235,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckIntersectingEdges (const Standard_Inte
 
   //:64 abv 25 Dec 97: Attention!
   // Since Intersection algorithm is not symmetrical, for consistency with BRepCheck 
-  // edge with lower order number shoud be intersecting with edge with higher one
+  // edge with lower order number should be intersecting with edge with higher one
   // i.e., for intersection of last and first edges, they should go in reversed order
   // Example: entity #38285 from bug CSR #CTS17806
   // NOTE: Tr1 and Tr2 are not reordered because they are used in the same manner
@@ -1300,7 +1300,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckIntersectingEdges (const Standard_Inte
       gp_Pnt2d end2 = Crv2->Value ( isForward2 ? a2 : b2 );
 //:l0      Standard_Real distab2 = mySurf->Value ( end1 ).SquareDistance ( mySurf->Value ( end2 ) );
       //:l0: test like in BRepCheck
-      GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+      GeomAdaptor_Surface& Ads = *mySurf->Adaptor3d();
       Standard_Real tol2d = 2 * Max ( Ads.UResolution(tol), Ads.VResolution(tol) );
       isLacking = ( end1.SquareDistance(end2) >= tol2d * tol2d );
     }
@@ -1515,7 +1515,7 @@ Standard_Boolean ShapeAnalysis_Wire::CheckLacking (const Standard_Integer num,
   // test like in BRepCheck
   Standard_Real tol = Max ( BRep_Tool::Tolerance ( V1 ), BRep_Tool::Tolerance ( V2 ) );
   tol = ( Tolerance > gp::Resolution() && Tolerance < tol ? Tolerance : tol );
-  GeomAdaptor_Surface& Ads = mySurf->Adaptor3d()->ChangeSurface();
+  GeomAdaptor_Surface& Ads = *mySurf->Adaptor3d();
   Standard_Real tol2d = 2 * Max ( Ads.UResolution(tol), Ads.VResolution(tol) );
   if ( // tol2d < gp::Resolution() || //#2 smh 26.03.99 S4163 Zero divide
        myMax2d < tol2d * tol2d ) return Standard_False;
@@ -1659,12 +1659,12 @@ Standard_Boolean ShapeAnalysis_Wire::CheckNotchedEdges(const Standard_Integer nu
   if ( Abs ( v2.Angle ( v1 ) ) > 0.1 || p2d1.Distance(p2d2) > Tolerance)
     return Standard_False;
   
-  Handle(Geom2dAdaptor_HCurve) AC2d1  = new Geom2dAdaptor_HCurve(c2d1,a1,b1);
-  Handle(GeomAdaptor_HSurface) AdS1 = new GeomAdaptor_HSurface(new Geom_Plane(gp_Pln()));
+  Handle(Geom2dAdaptor_Curve) AC2d1  = new Geom2dAdaptor_Curve(c2d1,a1,b1);
+  Handle(GeomAdaptor_Surface) AdS1 = new GeomAdaptor_Surface(new Geom_Plane(gp_Pln()));
   Adaptor3d_CurveOnSurface Ad1(AC2d1,AdS1);
   
-  Handle(Geom2dAdaptor_HCurve) AC2d2  = new Geom2dAdaptor_HCurve(c2d2,a2,b2);
-  Handle(GeomAdaptor_HSurface) AdS2 = new GeomAdaptor_HSurface(new Geom_Plane(gp_Pln()));
+  Handle(Geom2dAdaptor_Curve) AC2d2  = new Geom2dAdaptor_Curve(c2d2,a2,b2);
+  Handle(GeomAdaptor_Surface) AdS2 = new GeomAdaptor_Surface(new Geom_Plane(gp_Pln()));
   Adaptor3d_CurveOnSurface Ad2(AC2d2,AdS2);
   
   Adaptor3d_CurveOnSurface longAD, shortAD;

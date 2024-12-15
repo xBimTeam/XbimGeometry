@@ -14,17 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Surface.hxx>
+
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
+#include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_Surface.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Cone.hxx>
@@ -40,6 +39,8 @@
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_OutOfRange.hxx>
 #include <TopoDS_Face.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepAdaptor_Surface, Adaptor3d_Surface)
 
 //=======================================================================
 //function : BRepAdaptor_Surface
@@ -62,6 +63,24 @@ BRepAdaptor_Surface::BRepAdaptor_Surface(const TopoDS_Face& F,
 }
 
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Surface) BRepAdaptor_Surface::ShallowCopy() const
+{
+  Handle(BRepAdaptor_Surface) aCopy = new BRepAdaptor_Surface();
+
+  const Handle(Adaptor3d_Surface) aSurface = mySurf.ShallowCopy();
+  const GeomAdaptor_Surface& aGeomSurface = *(Handle(GeomAdaptor_Surface)::DownCast(aSurface));
+  aCopy->mySurf = aGeomSurface;
+
+  aCopy->myTrsf = myTrsf;
+  aCopy->myFace = myFace;
+
+  return aCopy;
+}
 //=======================================================================
 //function : Initialize
 //purpose  : 
@@ -170,14 +189,13 @@ void BRepAdaptor_Surface::VIntervals(TColStd_Array1OfReal& T,
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HSurface) BRepAdaptor_Surface::UTrim
+Handle(Adaptor3d_Surface) BRepAdaptor_Surface::UTrim
 (const Standard_Real First,
  const Standard_Real Last ,
  const Standard_Real Tol   ) const 
 {
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
-  HS->ChangeSurface().Load
-    (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
+  HS->Load (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
   return HS->UTrim(First,Last,Tol);
 }
 
@@ -187,14 +205,13 @@ Handle(Adaptor3d_HSurface) BRepAdaptor_Surface::UTrim
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HSurface) BRepAdaptor_Surface::VTrim
+Handle(Adaptor3d_Surface) BRepAdaptor_Surface::VTrim
 (const Standard_Real First,
  const Standard_Real Last, 
  const Standard_Real Tol) const 
 {
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
-  HS->ChangeSurface().Load
-    (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
+  HS->Load (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
   return HS->VTrim(First,Last,Tol);
 }
 
@@ -408,11 +425,10 @@ gp_Dir BRepAdaptor_Surface::Direction() const
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HCurve) BRepAdaptor_Surface::BasisCurve() const 
+Handle(Adaptor3d_Curve) BRepAdaptor_Surface::BasisCurve() const 
 {
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
-  HS->ChangeSurface().Load
-    (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
+  HS->Load (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
 
   return HS->BasisCurve();
 }
@@ -423,11 +439,10 @@ Handle(Adaptor3d_HCurve) BRepAdaptor_Surface::BasisCurve() const
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HSurface) BRepAdaptor_Surface::BasisSurface() const 
+Handle(Adaptor3d_Surface) BRepAdaptor_Surface::BasisSurface() const 
 {  
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
-  HS->ChangeSurface().Load
-    (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
+  HS->Load (Handle(Geom_Surface)::DownCast(mySurf.Surface()->Transformed(myTrsf)));
   return HS->BasisSurface();
 }
 

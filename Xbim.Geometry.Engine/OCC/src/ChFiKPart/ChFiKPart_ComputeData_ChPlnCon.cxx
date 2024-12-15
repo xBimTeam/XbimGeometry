@@ -15,7 +15,7 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <ChFiDS_Spine.hxx>
 #include <ChFiDS_SurfData.hxx>
 #include <ChFiKPart_ComputeData.hxx>
@@ -229,7 +229,7 @@ Standard_Boolean ChFiKPart_MakeChamfer(TopOpeBRepDS_DataStructure& DStr,
     // changes due to the fact the parameters of the chamfer must go increasing
     // from surface S1 to surface S2
   if ( (dedans && !plandab) || (!dedans && plandab) ) {
-    gcon->VReverse();// be carefull : the SemiAngle was changed
+    gcon->VReverse();// be careful : the SemiAngle was changed
     ChamfAx3 = gcon->Position();
     SemiAngl = gcon->SemiAngle();
   }

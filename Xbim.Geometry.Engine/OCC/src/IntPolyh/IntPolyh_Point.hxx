@@ -17,14 +17,7 @@
 #ifndef _IntPolyh_Point_HeaderFile
 #define _IntPolyh_Point_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
-class Adaptor3d_HSurface;
+#include <Adaptor3d_Surface.hxx>
 
 //! The class represents the point on the surface with
 //! both 3D and 2D points.
@@ -78,19 +71,7 @@ public:
   {
     return myPOC;
   }
-  //! Assignment operator
-  void Equal (const IntPolyh_Point& Pt)
-  {
-    myX = Pt.myX;
-    myY = Pt.myY;
-    myZ = Pt.myZ;
-    myU = Pt.myU;
-    myV = Pt.myV;
-  }
-  void operator = (const IntPolyh_Point& Pt)
-  {
-    Equal(Pt);
-  }
+
   //! Sets the point
   void Set (const Standard_Real x,
             const Standard_Real y,
@@ -137,7 +118,7 @@ public:
     myPOC = ii;
   }
   //! Creates middle point from P1 and P2 and stores it to this
-  Standard_EXPORT void Middle (const Handle(Adaptor3d_HSurface)& MySurface, const IntPolyh_Point& P1, const IntPolyh_Point& P2);
+  Standard_EXPORT void Middle (const Handle(Adaptor3d_Surface)& MySurface, const IntPolyh_Point& P1, const IntPolyh_Point& P2);
   //! Addition
   Standard_EXPORT IntPolyh_Point Add (const IntPolyh_Point& P1) const;
   IntPolyh_Point operator + (const IntPolyh_Point& P1) const

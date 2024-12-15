@@ -24,8 +24,6 @@
 #include <Standard_Transient.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
-class Standard_DomainError;
-class TopLoc_Location;
 class Geom_Surface;
 class Poly_Triangulation;
 class Geom_Curve;
@@ -143,6 +141,9 @@ public:
   
   //! Return a copy of this representation.
   Standard_EXPORT virtual Handle(BRep_CurveRepresentation) Copy() const = 0;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
 

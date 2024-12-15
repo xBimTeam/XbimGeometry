@@ -14,13 +14,15 @@
 
 // JCV 08/01/90 Modifs suite a l'introduction des classes XY et Mat2d dans gp
 
-#include <gp_Ax2d.hxx>
 #include <gp_Dir2d.hxx>
+
+#include <gp_Ax2d.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec2d.hxx>
 #include <gp_XY.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_DomainError.hxx>
+#include <Standard_Dump.hxx>
 #include <Standard_OutOfRange.hxx>
 
 Standard_Real gp_Dir2d::Angle (const gp_Dir2d& Other) const
@@ -101,3 +103,7 @@ gp_Dir2d gp_Dir2d::Mirrored (const gp_Ax2d& A) const
   return V;
 }
 
+void gp_Dir2d::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
+{
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "gp_Dir2d", 2, coord.X(), coord.Y())
+}

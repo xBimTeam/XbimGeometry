@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using Xbim.Common;
+using Xbim.Common.Configuration;
 
 namespace Xbim.Geometry.Engine.Interop
 {
@@ -17,7 +18,7 @@ namespace Xbim.Geometry.Engine.Interop
           
         static XbimCustomAssemblyResolver()
         {
-            _logger = XbimLogging.CreateLogger<XbimCustomAssemblyResolver>();
+            _logger = XbimServices.Current.CreateLogger<XbimCustomAssemblyResolver>();
         }
 
         internal static Assembly ResolverHandler(object sender, ResolveEventArgs args)

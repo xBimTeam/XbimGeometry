@@ -15,18 +15,10 @@
 #ifndef _gp_XY_HeaderFile
 #define _gp_XY_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_ConstructionError;
-class Standard_OutOfRange;
-class gp_Mat2d;
-
-
+#include <gp.hxx>
+#include <gp_Mat2d.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <Standard_OutOfRange.hxx>
 
 //! This class describes a cartesian coordinate entity in 2D
 //! space {X,Y}. This class is non persistent. This entity used
@@ -40,258 +32,358 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
   //! Creates XY object with zero coordinates (0,0).
-    gp_XY();
-  
+  gp_XY()
+  : x (0.),
+    y (0.)
+  {}
+
   //! a number pair defined by the XY coordinates
-    gp_XY(const Standard_Real X, const Standard_Real Y);
-  
+  gp_XY (const Standard_Real theX, const Standard_Real theY)
+  : x (theX),
+    y (theY)
+  {}
 
-  //! modifies the coordinate of range Index
-  //! Index = 1 => X is modified
-  //! Index = 2 => Y is modified
-  //! Raises OutOfRange if Index != {1, 2}.
-    void SetCoord (const Standard_Integer Index, const Standard_Real Xi);
-  
+  //! modifies the coordinate of range theIndex
+  //! theIndex = 1 => X is modified
+  //! theIndex = 2 => Y is modified
+  //! Raises OutOfRange if theIndex != {1, 2}.
+  inline void SetCoord (const Standard_Integer theIndex, const Standard_Real theXi)
+  {
+    Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 2, NULL);
+    (&x)[theIndex - 1] = theXi;
+  }
+
   //! For this number pair, assigns
-  //! the values X and Y to its coordinates
-    void SetCoord (const Standard_Real X, const Standard_Real Y);
-  
-  //! Assigns the given value to the X coordinate of this number pair.
-    void SetX (const Standard_Real X);
-  
-  //! Assigns the given value to the Y  coordinate of this number pair.
-    void SetY (const Standard_Real Y);
-  
+  //! the values theX and theY to its coordinates
+  inline void SetCoord (const Standard_Real theX, const Standard_Real theY)
+  {
+    x = theX;
+    y = theY;
+  }
 
-  //! returns the coordinate of range Index :
-  //! Index = 1 => X is returned
-  //! Index = 2 => Y is returned
-  //! Raises OutOfRange if Index != {1, 2}.
-    Standard_Real Coord (const Standard_Integer Index) const;
-  
-    Standard_Real& ChangeCoord (const Standard_Integer theIndex);
-  
+  //! Assigns the given value to the X coordinate of this number pair.
+  void SetX (const Standard_Real theX) { x = theX; }
+
+  //! Assigns the given value to the Y  coordinate of this number pair.
+  void SetY (const Standard_Real theY) { y = theY; }
+
+  //! returns the coordinate of range theIndex :
+  //! theIndex = 1 => X is returned
+  //! theIndex = 2 => Y is returned
+  //! Raises OutOfRange if theIndex != {1, 2}.
+  inline Standard_Real Coord (const Standard_Integer theIndex) const
+  {
+    Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 2, NULL);
+    return (&x)[theIndex - 1];
+  }
+
+  inline Standard_Real& ChangeCoord (const Standard_Integer theIndex)
+  {
+    Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 2, NULL);
+    return (&x)[theIndex - 1];
+  }
+
   //! For this number pair, returns its coordinates X and Y.
-    void Coord (Standard_Real& X, Standard_Real& Y) const;
-  
+  inline void Coord (Standard_Real& theX, Standard_Real& theY) const
+  {
+    theX = x;
+    theY = y;
+  }
+
   //! Returns the X coordinate of this number pair.
-    Standard_Real X() const;
-  
+  Standard_Real X() const { return x; }
+
   //! Returns the Y coordinate of this number pair.
-    Standard_Real Y() const;
-  
+  Standard_Real Y() const { return y; }
+
   //! Computes Sqrt (X*X + Y*Y) where X and Y are the two coordinates of this number pair.
-    Standard_Real Modulus() const;
-  
+  Standard_Real Modulus() const { return sqrt (x * x + y * y); }
+
   //! Computes X*X + Y*Y where X and Y are the two coordinates of this number pair.
-    Standard_Real SquareModulus() const;
-  
+  Standard_Real SquareModulus() const { return x * x + y * y; }
 
   //! Returns true if the coordinates of this number pair are
   //! equal to the respective coordinates of the number pair
-  //! Other, within the specified tolerance Tolerance. I.e.:
-  //! abs(<me>.X() - Other.X()) <= Tolerance and
-  //! abs(<me>.Y() - Other.Y()) <= Tolerance and
+  //! theOther, within the specified tolerance theTolerance. I.e.:
+  //! abs(<me>.X() - theOther.X()) <= theTolerance and
+  //! abs(<me>.Y() - theOther.Y()) <= theTolerance and
   //! computations
-  Standard_EXPORT Standard_Boolean IsEqual (const gp_XY& Other, const Standard_Real Tolerance) const;
-  
-  //! Computes the sum of this number pair and number pair Other
-  //! <me>.X() = <me>.X() + Other.X()
-  //! <me>.Y() = <me>.Y() + Other.Y()
-    void Add (const gp_XY& Other);
-  void operator += (const gp_XY& Other)
-{
-  Add(Other);
-}
-  
-  //! Computes the sum of this number pair and number pair Other
-  //! new.X() = <me>.X() + Other.X()
-  //! new.Y() = <me>.Y() + Other.Y()
-  Standard_NODISCARD gp_XY Added (const gp_XY& Other) const;
-  Standard_NODISCARD gp_XY operator + (const gp_XY& Other) const
-{
-  return Added(Other);
-}
-  
+  Standard_EXPORT Standard_Boolean IsEqual (const gp_XY& theOther, const Standard_Real theTolerance) const;
 
-  //! Real D = <me>.X() * Other.Y() - <me>.Y() * Other.X()
-  Standard_NODISCARD Standard_Real Crossed (const gp_XY& Right) const;
-  Standard_NODISCARD Standard_Real operator ^ (const gp_XY& Right) const
-{
-  return Crossed(Right);
-}
-  
+  //! Computes the sum of this number pair and number pair theOther
+  //! @code
+  //! <me>.X() = <me>.X() + theOther.X()
+  //! <me>.Y() = <me>.Y() + theOther.Y()
+  inline void Add (const gp_XY& theOther)
+  {
+    x += theOther.x;
+    y += theOther.y;
+  }
+
+  void operator+= (const gp_XY& theOther) { Add (theOther); }
+
+  //! Computes the sum of this number pair and number pair theOther
+  //! @code
+  //! new.X() = <me>.X() + theOther.X()
+  //! new.Y() = <me>.Y() + theOther.Y()
+  //! @endcode
+  Standard_NODISCARD gp_XY Added (const gp_XY& theOther) const
+  {
+    return gp_XY (x + theOther.X(), y + theOther.Y());
+  }
+
+  Standard_NODISCARD gp_XY operator+ (const gp_XY& theOther) const { return Added (theOther); }
+
+  //! @code
+  //! double D = <me>.X() * theOther.Y() - <me>.Y() * theOther.X()
+  //! @endcode
+  Standard_NODISCARD Standard_Real Crossed (const gp_XY& theOther) const { return x * theOther.y - y * theOther.x; }
+
+  Standard_NODISCARD Standard_Real operator^ (const gp_XY& theOther) const { return Crossed (theOther); }
 
   //! computes the magnitude of the cross product between <me> and
-  //! Right. Returns || <me> ^ Right ||
-    Standard_Real CrossMagnitude (const gp_XY& Right) const;
-  
+  //! theRight. Returns || <me> ^ theRight ||
+  inline Standard_Real CrossMagnitude (const gp_XY& theRight) const
+  {
+    Standard_Real aVal = x * theRight.y - y * theRight.x;
+    return aVal < 0 ? -aVal : aVal;
+  }
 
   //! computes the square magnitude of the cross product between <me> and
-  //! Right. Returns || <me> ^ Right ||**2
-    Standard_Real CrossSquareMagnitude (const gp_XY& Right) const;
-  
+  //! theRight. Returns || <me> ^ theRight ||**2
+  inline Standard_Real CrossSquareMagnitude (const gp_XY& theRight) const
+  {
+    Standard_Real aZresult = x * theRight.y - y * theRight.x;
+    return aZresult * aZresult;
+  }
+
   //! divides <me> by a real.
-    void Divide (const Standard_Real Scalar);
-  void operator /= (const Standard_Real Scalar)
-{
-  Divide(Scalar);
-}
-  
+  void Divide (const Standard_Real theScalar)
+  {
+    x /= theScalar;
+    y /= theScalar;
+  }
+
+  void operator /= (const Standard_Real theScalar) { Divide (theScalar); }
+
   //! Divides <me> by a real.
-  Standard_NODISCARD gp_XY Divided (const Standard_Real Scalar) const;
-  Standard_NODISCARD gp_XY operator / (const Standard_Real Scalar) const
-{
-  return Divided(Scalar);
-}
-  
-  //! Computes the scalar product between <me> and Other
-    Standard_Real Dot (const gp_XY& Other) const;
-  Standard_Real operator * (const gp_XY& Other) const
-{
-  return Dot(Other);
-}
-  
+  Standard_NODISCARD gp_XY Divided (const Standard_Real theScalar) const
+  {
+    return gp_XY (x / theScalar, y / theScalar);
+  }
 
-  //! <me>.X() = <me>.X() * Scalar;
-  //! <me>.Y() = <me>.Y() * Scalar;
-    void Multiply (const Standard_Real Scalar);
-  void operator *= (const Standard_Real Scalar)
-{
-  Multiply(Scalar);
-}
-  
+  Standard_NODISCARD gp_XY operator/ (const Standard_Real theScalar) const { return Divided (theScalar); }
 
-  //! <me>.X() = <me>.X() * Other.X();
-  //! <me>.Y() = <me>.Y() * Other.Y();
-    void Multiply (const gp_XY& Other);
-  void operator *= (const gp_XY& Other)
-{
-  Multiply(Other);
-}
-  
-  //! <me> = Matrix * <me>
-    void Multiply (const gp_Mat2d& Matrix);
-  void operator *= (const gp_Mat2d& Matrix)
-{
-  Multiply(Matrix);
-}
-  
+  //! Computes the scalar product between <me> and theOther
+  Standard_Real Dot (const gp_XY& theOther) const { return x * theOther.x + y * theOther.y; }
 
-  //! New.X() = <me>.X() * Scalar;
-  //! New.Y() = <me>.Y() * Scalar;
-  Standard_NODISCARD gp_XY Multiplied (const Standard_Real Scalar) const;
-  Standard_NODISCARD gp_XY operator * (const Standard_Real Scalar) const
-{
-  return Multiplied(Scalar);
-}
-  
+  Standard_Real operator* (const gp_XY& theOther) const { return Dot (theOther); }
 
-  //! new.X() = <me>.X() * Other.X();
-  //! new.Y() = <me>.Y() * Other.Y();
-  Standard_NODISCARD gp_XY Multiplied (const gp_XY& Other) const;
-  
-  //! New = Matrix * <me>
-  Standard_NODISCARD gp_XY Multiplied (const gp_Mat2d& Matrix) const;
-  Standard_NODISCARD gp_XY operator * (const gp_Mat2d& Matrix) const
-{
-  return Multiplied(Matrix);
-}
-  
+  //! @code
+  //! <me>.X() = <me>.X() * theScalar;
+  //! <me>.Y() = <me>.Y() * theScalar;
+  void Multiply (const Standard_Real theScalar)
+  {
+    x *= theScalar;
+    y *= theScalar;
+  }
 
+  void operator*= (const Standard_Real theScalar) { Multiply (theScalar); }
+
+  //! @code
+  //! <me>.X() = <me>.X() * theOther.X();
+  //! <me>.Y() = <me>.Y() * theOther.Y();
+  void Multiply (const gp_XY& theOther)
+  {
+    x *= theOther.x;
+    y *= theOther.y;
+  }
+
+  void operator*= (const gp_XY& theOther) { Multiply (theOther); }
+
+  //! <me> = theMatrix * <me>
+  void Multiply (const gp_Mat2d& theMatrix);
+
+  void operator*= (const gp_Mat2d& theMatrix) { Multiply (theMatrix); }
+
+  //! @code
+  //! New.X() = <me>.X() * theScalar;
+  //! New.Y() = <me>.Y() * theScalar;
+  Standard_NODISCARD gp_XY Multiplied (const Standard_Real theScalar) const { return gp_XY (x * theScalar, y * theScalar); }
+
+  Standard_NODISCARD gp_XY operator*  (const Standard_Real theScalar) const { return Multiplied (theScalar); }
+  //! @code
+  //! new.X() = <me>.X() * theOther.X();
+  //! new.Y() = <me>.Y() * theOther.Y();
+  Standard_NODISCARD gp_XY Multiplied (const gp_XY& theOther) const { return gp_XY (x * theOther.X(), y * theOther.Y()); }
+
+  //! New = theMatrix * <me>
+  //! @endcode
+  Standard_NODISCARD gp_XY Multiplied (const gp_Mat2d& theMatrix) const
+  {
+    return gp_XY (theMatrix.Value (1, 1) * x + theMatrix.Value (1, 2) * y,
+                  theMatrix.Value (2, 1) * x + theMatrix.Value (2, 2) * y);
+  }
+
+  Standard_NODISCARD gp_XY operator*  (const gp_Mat2d& theMatrix) const { return Multiplied (theMatrix); }
+  //! @code
   //! <me>.X() = <me>.X()/ <me>.Modulus()
   //! <me>.Y() = <me>.Y()/ <me>.Modulus()
+  //! @endcode
   //! Raises ConstructionError if <me>.Modulus() <= Resolution from gp
-    void Normalize();
-  
+  void Normalize();
 
+  //! @code
   //! New.X() = <me>.X()/ <me>.Modulus()
   //! New.Y() = <me>.Y()/ <me>.Modulus()
+  //! @endcode
   //! Raises ConstructionError if <me>.Modulus() <= Resolution from gp
-    Standard_NODISCARD gp_XY Normalized() const;
-  
+  Standard_NODISCARD gp_XY Normalized() const
+  {
+    Standard_Real aD = Modulus();
+    Standard_ConstructionError_Raise_if (aD <= gp::Resolution(), "gp_XY::Normalized() - vector has zero norm");
+    return gp_XY (x / aD, y / aD);
+  }
 
+  //! @code
   //! <me>.X() = -<me>.X()
   //! <me>.Y() = -<me>.Y()
-    void Reverse();
-  
+  inline void Reverse()
+  {
+    x = -x;
+    y = -y;
+  }
 
+  //! @code
   //! New.X() = -<me>.X()
   //! New.Y() = -<me>.Y()
-    Standard_NODISCARD gp_XY Reversed() const;
-  Standard_NODISCARD gp_XY operator -() const
-{
-  return Reversed();
-}
-  
+  Standard_NODISCARD gp_XY Reversed() const
+  {
+    gp_XY aCoord2D = *this;
+    aCoord2D.Reverse();
+    return aCoord2D;
+  }
+
+  Standard_NODISCARD gp_XY operator-() const { return Reversed(); }
 
   //! Computes  the following linear combination and
   //! assigns the result to this number pair:
-  //! A1 * XY1 + A2 * XY2
-    void SetLinearForm (const Standard_Real A1, const gp_XY& XY1, const Standard_Real A2, const gp_XY& XY2);
-  
+  //! @code
+  //! theA1 * theXY1 + theA2 * theXY2
+  inline void SetLinearForm (const Standard_Real theA1, const gp_XY& theXY1,
+                             const Standard_Real theA2, const gp_XY& theXY2)
+  {
+    x = theA1 * theXY1.x + theA2 * theXY2.x;
+    y = theA1 * theXY1.y + theA2 * theXY2.y;
+  }
 
   //! --  Computes  the following linear combination and
   //! assigns the result to this number pair:
-  //! A1 * XY1 + A2 * XY2 + XY3
-    void SetLinearForm (const Standard_Real A1, const gp_XY& XY1, const Standard_Real A2, const gp_XY& XY2, const gp_XY& XY3);
-  
+  //! @code
+  //! theA1 * theXY1 + theA2 * theXY2 + theXY3
+  inline void SetLinearForm (const Standard_Real theA1, const gp_XY& theXY1,
+                             const Standard_Real theA2, const gp_XY& theXY2,
+                             const gp_XY& theXY3)
+  {
+    x = theA1 * theXY1.x + theA2 * theXY2.x + theXY3.x;
+    y = theA1 * theXY1.y + theA2 * theXY2.y + theXY3.y;
+  }
 
   //! Computes  the following linear combination and
   //! assigns the result to this number pair:
-  //! A1 * XY1 + XY2
-    void SetLinearForm (const Standard_Real A1, const gp_XY& XY1, const gp_XY& XY2);
-  
+  //! @code
+  //! theA1 * theXY1 + theXY2
+  inline void SetLinearForm (const Standard_Real theA1, const gp_XY& theXY1,
+                             const gp_XY& theXY2)
+  {
+    x = theA1 * theXY1.x + theXY2.x;
+    y = theA1 * theXY1.y + theXY2.y;
+  }
 
   //! Computes  the following linear combination and
   //! assigns the result to this number pair:
-  //! XY1 + XY2
-    void SetLinearForm (const gp_XY& XY1, const gp_XY& XY2);
-  
+  //! @code
+  //! theXY1 + theXY2
+  inline void SetLinearForm (const gp_XY& theXY1,
+                             const gp_XY& theXY2)
+  {
+    x = theXY1.x + theXY2.x;
+    y = theXY1.y + theXY2.y;
+  }
 
-  //! <me>.X() = <me>.X() - Other.X()
-  //! <me>.Y() = <me>.Y() - Other.Y()
-    void Subtract (const gp_XY& Right);
-  void operator -= (const gp_XY& Right)
-{
-  Subtract(Right);
-}
-  
+  //! @code
+  //! <me>.X() = <me>.X() - theOther.X()
+  //! <me>.Y() = <me>.Y() - theOther.Y()
+  inline void Subtract (const gp_XY& theOther)
+  {
+    x -= theOther.x;
+    y -= theOther.y;
+  }
 
-  //! new.X() = <me>.X() - Other.X()
-  //! new.Y() = <me>.Y() - Other.Y()
-  Standard_NODISCARD gp_XY Subtracted (const gp_XY& Right) const;
-  Standard_NODISCARD gp_XY operator - (const gp_XY& Right) const
-{
-  return Subtracted(Right);
-}
+  void operator-= (const gp_XY& theOther) { Subtract (theOther); }
 
+  //! @code
+  //! new.X() = <me>.X() - theOther.X()
+  //! new.Y() = <me>.Y() - theOther.Y()
+  //! @endcode
+  Standard_NODISCARD gp_XY Subtracted (const gp_XY& theOther) const
+  {
+    gp_XY aCoord2D = *this;
+    aCoord2D.Subtract (theOther);
+    return aCoord2D;
+  }
 
-
-
-protected:
-
-
-
-
+  Standard_NODISCARD gp_XY operator-  (const gp_XY& theOther) const { return Subtracted (theOther); }
 
 private:
-
-
 
   Standard_Real x;
   Standard_Real y;
 
-
 };
 
+//=======================================================================
+//function :  Multiply
+// purpose :
+//=======================================================================
+inline void gp_XY::Multiply (const gp_Mat2d& theMatrix)
+{
+  Standard_Real aXresult = theMatrix.Value (1, 1) * x + theMatrix.Value (1, 2) * y;
+  y = theMatrix.Value (2, 1) * x + theMatrix.Value (2, 2) * y;
+  x = aXresult;
+}
 
-#include <gp_XY.lxx>
+//=======================================================================
+//function :  Normalize
+// purpose :
+//=======================================================================
+inline void gp_XY::Normalize()
+{
+  Standard_Real aD = Modulus();
+  Standard_ConstructionError_Raise_if (aD <= gp::Resolution(), "gp_XY::Normalize() - vector has zero norm");
+  x = x / aD;
+  y = y / aD;
+}
 
+//=======================================================================
+//function :  operator*
+// purpose :
+//=======================================================================
+inline gp_XY operator* (const gp_Mat2d& theMatrix,
+                        const gp_XY&    theCoord1)
+{
+  return theCoord1.Multiplied (theMatrix);
+}
 
-
-
+//=======================================================================
+//function :  operator*
+// purpose :
+//=======================================================================
+inline gp_XY operator* (const Standard_Real theScalar,
+                        const gp_XY&        theCoord1)
+{
+  return theCoord1.Multiplied (theScalar);
+}
 
 #endif // _gp_XY_HeaderFile

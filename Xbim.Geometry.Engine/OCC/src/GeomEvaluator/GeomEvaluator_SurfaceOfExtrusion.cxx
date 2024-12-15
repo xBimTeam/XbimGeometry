@@ -14,7 +14,7 @@
 
 #include <GeomEvaluator_SurfaceOfExtrusion.hxx>
 
-#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(GeomEvaluator_SurfaceOfExtrusion,GeomEvaluator_Surface)
 
@@ -27,7 +27,7 @@ GeomEvaluator_SurfaceOfExtrusion::GeomEvaluator_SurfaceOfExtrusion(
 }
 
 GeomEvaluator_SurfaceOfExtrusion::GeomEvaluator_SurfaceOfExtrusion(
-        const Handle(Adaptor3d_HCurve)& theBase, const gp_Dir& theExtrusionDir)
+        const Handle(Adaptor3d_Curve)& theBase, const gp_Dir& theExtrusionDir)
   : GeomEvaluator_Surface(),
     myBaseAdaptor(theBase),
     myDirection(theExtrusionDir)
@@ -117,5 +117,20 @@ gp_Vec GeomEvaluator_SurfaceOfExtrusion::DN(
   else if (theDerU == 0 && theDerV == 1)
     aResult = gp_Vec(myDirection);
   return aResult;
+}
+
+Handle(GeomEvaluator_Surface) GeomEvaluator_SurfaceOfExtrusion::ShallowCopy() const
+{
+  Handle(GeomEvaluator_SurfaceOfExtrusion) aCopy;
+  if (!myBaseAdaptor.IsNull())
+  {
+    aCopy = new GeomEvaluator_SurfaceOfExtrusion(myBaseAdaptor->ShallowCopy(), myDirection);
+  }
+  else
+  {
+    aCopy = new GeomEvaluator_SurfaceOfExtrusion(myBaseCurve, myDirection);
+  }
+
+  return aCopy;
 }
 

@@ -14,8 +14,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <BRepFill_Draft.hxx>
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <Adaptor3d_Surface.hxx>
 #include <Bnd_Box.hxx>
 #include <BndLib_Add3dCurve.hxx>
@@ -31,7 +32,6 @@
 #include <BRepClass3d_SolidClassifier.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <BRepFill_DataMapOfShapeHArray2OfShape.hxx>
-#include <BRepFill_Draft.hxx>
 #include <BRepFill_DraftLaw.hxx>
 #include <BRepFill_SectionLaw.hxx>
 #include <BRepFill_ShapeLaw.hxx>
@@ -47,7 +47,6 @@
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomFill_LocationDraft.hxx>
 #include <GeomLProp_SLProps.hxx>
@@ -189,7 +188,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
   Nb++; // Number of points
 
   TColgp_Array1OfPnt Pnts(1, Nb);
-  Handle(Adaptor3d_HCurve) AC;
+  Handle(Adaptor3d_Curve) AC;
   gp_XYZ Bary(0.,0.,0.);
   
   for (ii=1; ii<=Nb; ii++) {
@@ -286,7 +285,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
     TopExp::Vertices(myWire, Vf, Vl);
     if (Vf.IsSame(Vl)) myWire.Closed(Standard_True);
   }
-#if DRAW
+#ifdef DRAW
   if (Affich) {
     DBRep::Set("TheWire", myWire);
   }
@@ -426,7 +425,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
   Handle(Geom_Plane) Plan = new (Geom_Plane)(Pt, myDir);
   Surf = new (Geom_RectangularTrimmedSurface) (Plan,-L, L, -L, L); 
 
-#if DRAW
+#ifdef DRAW
   if (Affich) {
     char* Temp = "ThePlan" ;
     DrawTrSurf::Set(Temp, Surf);
@@ -487,7 +486,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
   Handle(Geom_Curve) TC = new (Geom_TrimmedCurve) (L, 0, Length);
 
 
-#if DRAW
+#ifdef DRAW
   if (Affich > 2) {
      TC = new (Geom_Circle) (gp::XOY(), Length);
   }
@@ -723,7 +722,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
     TopTools_ListOfShape aLO, aLT;
     aLO.Append(Sol1);
     aLT.Append(Sol2);
-    aBuilder.BuildBOP(aLO, aLT, BOPAlgo_CUT);
+    aBuilder.BuildBOP(aLO, aLT, BOPAlgo_CUT, Message_ProgressRange());
     if (!aBuilder.HasErrors())
     {
       TopoDS_Solid aCutMin;
@@ -770,7 +769,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
 
         aLO.Clear();
         aLO.Append(aCutMin);
-        aGluer.BuildBOP(aLO, State1, aLT, State2);
+        aGluer.BuildBOP(aLO, State1, aLT, State2, Message_ProgressRange());
 
         if (!aGluer.HasErrors())
         {
@@ -792,7 +791,7 @@ static Standard_Boolean GoodOrientation(const Bnd_Box& B,
     aLO.Append(Sol1);
     aLT.Append(Sol2);
 
-    aBuilder.BuildBOP(aLO, State1, aLT, State2);
+    aBuilder.BuildBOP(aLO, State1, aLT, State2, Message_ProgressRange());
     if (aBuilder.HasErrors())
       return Standard_False;
 

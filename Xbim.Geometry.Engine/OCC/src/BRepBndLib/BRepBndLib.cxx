@@ -34,8 +34,8 @@
 #include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <BRepTools.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_BezierSurface.hxx>
@@ -88,16 +88,10 @@ void BRepBndLib::Add(const TopoDS_Shape& S, Bnd_Box& B, Standard_Boolean useTria
     const TopoDS_Face& F = TopoDS::Face(ex.Current());
     const Handle(Poly_Triangulation)& T = BRep_Tool::Triangulation(F, l);
     const Handle(Geom_Surface)& GS = BRep_Tool::Surface (F, aDummyLoc);
-    if ((useTriangulation || GS.IsNull()) && !T.IsNull())
+    if ((useTriangulation || GS.IsNull()) && !T.IsNull() && T->MinMax (B, l))
     {
-      nbNodes = T->NbNodes();
-      const TColgp_Array1OfPnt& Nodes = T->Nodes();
-      for (i = 1; i <= nbNodes; i++) {
-        if (l.IsIdentity()) B.Add(Nodes(i));
-        else B.Add(Nodes(i).Transformed(l));
-      }
       //       B.Enlarge(T->Deflection());
-      B.Enlarge(T->Deflection() + BRep_Tool::Tolerance(F));
+      B.Enlarge (T->Deflection() + BRep_Tool::Tolerance (F));
     } else
     {
       if (!GS.IsNull()) {
@@ -137,14 +131,14 @@ void BRepBndLib::Add(const TopoDS_Shape& S, Bnd_Box& B, Standard_Boolean useTria
   {
     const TopoDS_Edge& E = TopoDS::Edge(ex.Current());
     Handle(Poly_Polygon3D) P3d = BRep_Tool::Polygon3D(E, l);
-    if (!P3d.IsNull())
+    if (!P3d.IsNull() && P3d->NbNodes() > 0)
     {
       const TColgp_Array1OfPnt& Nodes = P3d->Nodes();
       nbNodes = P3d->NbNodes();
       for (i = 1; i <= nbNodes; i++)
       {
-        if (l.IsIdentity()) B.Add(Nodes(i));
-        else B.Add(Nodes(i).Transformed(l));
+        if (l.IsIdentity()) B.Add(Nodes[i]);
+        else B.Add(Nodes[i].Transformed(l));
       }
       //       B.Enlarge(P3d->Deflection());
       B.Enlarge(P3d->Deflection() + BRep_Tool::Tolerance(E));
@@ -152,15 +146,23 @@ void BRepBndLib::Add(const TopoDS_Shape& S, Bnd_Box& B, Standard_Boolean useTria
     else
     {
       BRep_Tool::PolygonOnTriangulation(E, Poly, T, l);
-      if (useTriangulation && !Poly.IsNull())
+      if (useTriangulation && !Poly.IsNull() && !T.IsNull() && T->NbNodes() > 0)
       {
         const TColStd_Array1OfInteger& Indices = Poly->Nodes();
-        const TColgp_Array1OfPnt& Nodes = T->Nodes();
         nbNodes = Indices.Length();
-        for (i = 1; i <= nbNodes; i++)
+        if (l.IsIdentity())
         {
-          if (l.IsIdentity()) B.Add(Nodes(Indices(i)));
-          else B.Add(Nodes(Indices(i)).Transformed(l));
+          for (i = 1; i <= nbNodes; i++)
+          {
+            B.Add (T->Node (Indices[i]));
+          }
+        }
+        else
+        {
+          for (i = 1; i <= nbNodes; i++)
+          {
+            B.Add (T->Node (Indices[i]).Transformed (l));
+          }
         }
         // 	B.Enlarge(T->Deflection());
         B.Enlarge(Poly->Deflection() + BRep_Tool::Tolerance(E));
@@ -237,20 +239,14 @@ void BRepBndLib::AddOptimal(const TopoDS_Shape& S, Bnd_Box& B,
     const TopoDS_Face& F = TopoDS::Face(ex.Current());
     T = BRep_Tool::Triangulation(F, l);
     Bnd_Box aLocBox;
-    if (useTriangulation && !T.IsNull())
+    if (useTriangulation && !T.IsNull() && T->MinMax (aLocBox, l))
     {
-      nbNodes = T->NbNodes();
-      const TColgp_Array1OfPnt& Nodes = T->Nodes();
-      for (i = 1; i <= nbNodes; i++) {
-        if (l.IsIdentity()) aLocBox.Add(Nodes(i));
-        else aLocBox.Add(Nodes(i).Transformed(l));
-      }
       //       B.Enlarge(T->Deflection());
       aLocBox.Enlarge(T->Deflection() + BRep_Tool::Tolerance(F));
       Standard_Real xmin, ymin, zmin, xmax, ymax, zmax;
       aLocBox.Get(xmin, ymin, zmin, xmax, ymax, zmax);
       B.Update(xmin, ymin, zmin, xmax, ymax, zmax);
-    } 
+    }
     else
     {
       const Handle(Geom_Surface)& GS = BRep_Tool::Surface(F, l);
@@ -310,9 +306,13 @@ void BRepBndLib::AddOptimal(const TopoDS_Shape& S, Bnd_Box& B,
                           Tol);
           }
         }
-        Standard_Real xmin, ymin, zmin, xmax, ymax, zmax;
-        aLocBox.Get(xmin, ymin, zmin, xmax, ymax, zmax);
-        B.Update(xmin, ymin, zmin, xmax, ymax, zmax);
+
+        if (!aLocBox.IsVoid())
+        {
+          Standard_Real xmin, ymin, zmin, xmax, ymax, zmax;
+          aLocBox.Get(xmin, ymin, zmin, xmax, ymax, zmax);
+          B.Update(xmin, ymin, zmin, xmax, ymax, zmax);
+        }
       }
     }
   }
@@ -326,14 +326,14 @@ void BRepBndLib::AddOptimal(const TopoDS_Shape& S, Bnd_Box& B,
     const TopoDS_Edge& E = TopoDS::Edge(ex.Current());
     Bnd_Box aLocBox;
     Handle(Poly_Polygon3D) P3d = BRep_Tool::Polygon3D(E, l);
-    if (useTriangulation && (!P3d.IsNull()))
+    if (useTriangulation && !P3d.IsNull() && P3d->NbNodes() > 0)
     {
       const TColgp_Array1OfPnt& Nodes = P3d->Nodes();
       nbNodes = P3d->NbNodes();
       for (i = 1; i <= nbNodes; i++)
       {
-        if (l.IsIdentity()) aLocBox.Add(Nodes(i));
-        else aLocBox.Add(Nodes(i).Transformed(l));
+        if (l.IsIdentity()) aLocBox.Add(Nodes[i]);
+        else aLocBox.Add(Nodes[i].Transformed(l));
       }
       Standard_Real Tol = useShapeTolerance?  BRep_Tool::Tolerance(E) : 0.;
       aLocBox.Enlarge(P3d->Deflection() + Tol);
@@ -341,15 +341,20 @@ void BRepBndLib::AddOptimal(const TopoDS_Shape& S, Bnd_Box& B,
     else
     {
       BRep_Tool::PolygonOnTriangulation(E, Poly, T, l);
-      if (useTriangulation && !Poly.IsNull())
+      if (useTriangulation && !Poly.IsNull() && !T.IsNull() && T->NbNodes() > 0)
       {
         const TColStd_Array1OfInteger& Indices = Poly->Nodes();
-        const TColgp_Array1OfPnt& Nodes = T->Nodes();
         nbNodes = Indices.Length();
         for (i = 1; i <= nbNodes; i++)
         {
-          if (l.IsIdentity()) aLocBox.Add(Nodes(Indices(i)));
-          else aLocBox.Add(Nodes(Indices(i)).Transformed(l));
+          if (l.IsIdentity())
+          {
+            aLocBox.Add (T->Node (Indices[i]));
+          }
+          else
+          {
+            aLocBox.Add (T->Node (Indices[i]).Transformed (l));
+          }
         }
         Standard_Real Tol = useShapeTolerance?  BRep_Tool::Tolerance(E) : 0.;
         aLocBox.Enlarge(Poly->Deflection() + Tol);
@@ -402,7 +407,7 @@ Standard_Boolean CanUseEdges(const Adaptor3d_Surface& BS)
   }
   else if(aST == GeomAbs_SurfaceOfRevolution)
   {
-    const Handle(Adaptor3d_HCurve)& aBC = BS.BasisCurve();
+    const Handle(Adaptor3d_Curve)& aBC = BS.BasisCurve();
     if(aBC->GetType() == GeomAbs_Line)
     {
       return Standard_True;
@@ -414,8 +419,8 @@ Standard_Boolean CanUseEdges(const Adaptor3d_Surface& BS)
   }
   else if(aST == GeomAbs_OffsetSurface)
   {
-    const Handle(Adaptor3d_HSurface)& aS = BS.BasisSurface();
-    return CanUseEdges(aS->Surface());
+    const Handle(Adaptor3d_Surface)& aS = BS.BasisSurface();
+    return CanUseEdges (*aS);
   }
   else if(aST == GeomAbs_BSplineSurface)
   {
@@ -653,7 +658,7 @@ Standard_Boolean IsModifySize(const BRepAdaptor_Surface& theBS,
   {
     if(anExtr.NbExt() > 0)
     {
-      Standard_Integer i, imin = 0;;
+      Standard_Integer i, imin = 0;
       Standard_Real dmin = RealLast();
       Standard_Real uextr = 0., vextr = 0.;
       Extrema_POnSurf P1, P2;
@@ -702,6 +707,16 @@ void AdjustFaceBox(const BRepAdaptor_Surface& BS,
                    Bnd_Box& FaceBox,
                    const Bnd_Box& EdgeBox, const Standard_Real Tol)
 {
+  if (EdgeBox.IsVoid())
+  {
+    return;
+  }
+  if (FaceBox.IsVoid())
+  {
+    FaceBox = EdgeBox;
+    return;
+  }
+
   Standard_Real fxmin, fymin, fzmin, fxmax, fymax, fzmax;
   Standard_Real exmin, eymin, ezmin, exmax, eymax, ezmax;
   //

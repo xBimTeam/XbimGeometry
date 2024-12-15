@@ -17,6 +17,7 @@
 #ifndef _Bnd_Box2d_HeaderFile
 #define _Bnd_Box2d_HeaderFile
 
+#include <gp_Lin2d.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
@@ -25,7 +26,6 @@
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_ConstructionError;
 class gp_Dir2d;
 class gp_Trsf2d;
 
@@ -160,7 +160,7 @@ public:
   //! Applying a geometric transformation (for example, a
   //! rotation) to a bounding box generally increases its
   //! dimensions. This is not optimal for algorithms which use it.
-  Standard_EXPORT Standard_NODISCARD Bnd_Box2d Transformed (const gp_Trsf2d& T) const;
+  Standard_NODISCARD Standard_EXPORT Bnd_Box2d Transformed (const gp_Trsf2d& T) const;
   
   //! Adds the 2d box <Other> to <me>.
   Standard_EXPORT void Add (const Bnd_Box2d& Other);
@@ -182,7 +182,13 @@ public:
   
   //! Returns True if the 2d pnt <P> is out <me>.
   Standard_EXPORT Standard_Boolean IsOut (const gp_Pnt2d& P) const;
+
+  //! Returns True if the line doesn't intersect the box.
+  Standard_EXPORT Standard_Boolean IsOut(const gp_Lin2d& theL) const;
   
+  //! Returns True if the segment doesn't intersect the box.
+  Standard_EXPORT Standard_Boolean IsOut(const gp_Pnt2d& theP0, const gp_Pnt2d& theP1) const;
+
   //! Returns True if <Box2d> is out <me>.
   Standard_EXPORT Standard_Boolean IsOut (const Bnd_Box2d& Other) const;
   

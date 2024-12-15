@@ -27,9 +27,22 @@
 #include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 
-Extrema_ExtSS::Extrema_ExtSS() 
+Extrema_ExtSS::Extrema_ExtSS()
+: myS2(NULL),
+  myDone(Standard_False),
+  myIsPar(Standard_False),
+  myuinf1(0.0),
+  myusup1(0.0),
+  myvinf1(0.0),
+  myvsup1(0.0),
+  myuinf2(0.0),
+  myusup2(0.0),
+  myvinf2(0.0),
+  myvsup2(0.0),
+  mytolS1(0.0),
+  mytolS2(0.0),
+  myStype(GeomAbs_OtherSurface)
 {
-  myDone = Standard_False;
 }
 
 Extrema_ExtSS::Extrema_ExtSS(const Adaptor3d_Surface&     S1,
@@ -75,7 +88,7 @@ void Extrema_ExtSS::Initialize(const Adaptor3d_Surface&  S2,
 			       const Standard_Real Vsup2,
 			       const Standard_Real TolS2)
 {
-  myS2 = (Adaptor3d_SurfacePtr)&S2;
+  myS2 = &S2;
   myIsPar = Standard_False;
   myuinf2  = Uinf2;
   myusup2  = Usup2;

@@ -14,6 +14,7 @@
 // commercial license or contractual agreement.
 
 #include <BRepMesh_ModelPreProcessor.hxx>
+#include <BRepMesh_Deflection.hxx>
 #include <BRepMesh_ShapeTool.hxx>
 #include <BRep_Tool.hxx>
 #include <IMeshData_Model.hxx>
@@ -22,6 +23,9 @@
 #include <IMeshData_PCurve.hxx>
 #include <OSD_Parallel.hxx>
 #include <BRepMesh_ConeRangeSplitter.hxx>
+#include <Poly_TriangulationParameters.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ModelPreProcessor, IMeshTools_ModelAlgo)
 
 namespace
 {
@@ -30,8 +34,10 @@ namespace
   {
   public:
     //! Constructor
-    TriangulationConsistency(const Handle(IMeshData_Model)& theModel)
+    TriangulationConsistency(const Handle(IMeshData_Model)& theModel,
+                             const Standard_Boolean theAllowQualityDecrease)
       : myModel (theModel)
+      , myAllowQualityDecrease (theAllowQualityDecrease)
     {
     }
 
@@ -39,7 +45,8 @@ namespace
     void operator()(const Standard_Integer theFaceIndex) const
     {
       const IMeshData::IFaceHandle& aDFace = myModel->GetFace(theFaceIndex);
-      if (aDFace->IsSet(IMeshData_Outdated))
+      if (aDFace->IsSet(IMeshData_Outdated) ||
+          aDFace->GetFace().IsNull())
       {
         return;
       }
@@ -50,25 +57,30 @@ namespace
 
       if (!aTriangulation.IsNull())
       {
+        // If there is an info about initial parameters, use it due to deflection kept
+        // by Poly_Triangulation is generally an estimation upon generated mesh and can
+        // be either less or even greater than specified value.
+        const Handle(Poly_TriangulationParameters)& aSourceParams = aTriangulation->Parameters();
+        const Standard_Real aDeflection = (!aSourceParams.IsNull() && aSourceParams->HasDeflection()) ?
+          aSourceParams->Deflection() : aTriangulation->Deflection();
+
         Standard_Boolean isTriangulationConsistent = 
-          aTriangulation->Deflection() < 1.1 * aDFace->GetDeflection();
+          BRepMesh_Deflection::IsConsistent (aDeflection,
+                                             aDFace->GetDeflection(),
+                                             myAllowQualityDecrease);
 
         if (isTriangulationConsistent)
         {
           // #25080: check that indices of links forming triangles are in range.
-          const Standard_Integer aNodesNb = aTriangulation->NbNodes();
-          const Poly_Array1OfTriangle& aTriangles = aTriangulation->Triangles();
-
-          Standard_Integer i = aTriangles.Lower();
-          for (; i <= aTriangles.Upper() && isTriangulationConsistent; ++i)
+          for (Standard_Integer i = 1; i <= aTriangulation->NbTriangles() && isTriangulationConsistent; ++i)
           {
-            const Poly_Triangle& aTriangle = aTriangles(i);
+            const Poly_Triangle aTriangle = aTriangulation->Triangle (i);
 
             Standard_Integer aNode[3];
             aTriangle.Get(aNode[0], aNode[1], aNode[2]);
             for (Standard_Integer j = 0; j < 3 && isTriangulationConsistent; ++j)
             {
-              isTriangulationConsistent = (aNode[j] >= 1 && aNode[j] <= aNodesNb);
+              isTriangulationConsistent = (aNode[j] >= 1 && aNode[j] <= aTriangulation->NbNodes());
             }
           }
         }
@@ -88,6 +100,7 @@ namespace
   private:
 
     Handle(IMeshData_Model) myModel;
+    Standard_Boolean myAllowQualityDecrease; //!< Flag used for consistency check
   };
 
   //! Adds additional points to seam edges on specific surfaces.
@@ -106,7 +119,7 @@ namespace
     void operator()(const Standard_Integer theFaceIndex) const
     {
       const IMeshData::IFaceHandle& aDFace = myModel->GetFace(theFaceIndex);
-      if (aDFace->GetSurface()->GetType() != GeomAbs_Cone)
+      if (aDFace->GetSurface()->GetType() != GeomAbs_Cone || aDFace->IsSet(IMeshData_Failure))
       {
         return;
       }
@@ -115,12 +128,12 @@ namespace
       for (Standard_Integer aEdgeIdx = 0; aEdgeIdx < aDWire->EdgesNb() - 1; ++aEdgeIdx)
       {
         const IMeshData::IEdgePtr& aDEdge = aDWire->GetEdge (aEdgeIdx);
-        
+
         if (aDEdge->GetPCurve(aDFace.get(), TopAbs_FORWARD) != aDEdge->GetPCurve(aDFace.get(), TopAbs_REVERSED))
         {
           if (aDEdge->GetCurve()->ParametersNb() == 2)
           {
-            if (splitEdge (aDEdge, Abs (getConeStep (aDFace))))
+            if (splitEdge (aDEdge, aDFace, Abs (getConeStep (aDFace))))
             {
               TopLoc_Location aLoc;
               const Handle (Poly_Triangulation)& aTriangulation =
@@ -133,7 +146,7 @@ namespace
             }
           }
           return;
-        } 
+        }
       }
     }
 
@@ -164,49 +177,90 @@ namespace
       return aSteps.second;
     } 
 
-    //! Splits 3D and all pcurves accoring using the specified step.
-    Standard_Boolean splitEdge(const IMeshData::IEdgePtr& theDEdge,
-                               const Standard_Real        theDU) const
+    //! Splits 3D and all pcurves accordingly using the specified step.
+    Standard_Boolean splitEdge(const IMeshData::IEdgePtr&    theDEdge,
+                               const IMeshData::IFaceHandle& theDFace,
+                               const Standard_Real           theDU) const
     {
-      if (!splitCurve<gp_XYZ> (theDEdge->GetCurve (), theDU))
+      TopoDS_Edge aE = theDEdge->GetEdge();
+      const TopoDS_Face& aF = theDFace->GetFace();
+
+      Standard_Real aFParam, aLParam;
+
+      Handle(Geom_Curve) aHC = BRep_Tool::Curve (aE, aFParam, aLParam);
+
+      const IMeshData::IPCurveHandle& aIPC1 = theDEdge->GetPCurve(0);
+      const IMeshData::IPCurveHandle& aIPC2 = theDEdge->GetPCurve(1);
+
+      // Calculate the step by parameter of the curve.
+      const gp_Pnt2d& aFPntOfIPC1 = aIPC1->GetPoint (0);
+      const gp_Pnt2d& aLPntOfIPC1 = aIPC1->GetPoint (aIPC1->ParametersNb() - 1);
+      const Standard_Real aMod = Abs (aFPntOfIPC1.Y() - aLPntOfIPC1.Y());
+
+      if (aMod < gp::Resolution())
       {
         return Standard_False;
       }
 
-      for (Standard_Integer aPCurveIdx = 0; aPCurveIdx < theDEdge->PCurvesNb(); ++aPCurveIdx)
+      const Standard_Real aDT = Abs (aLParam - aFParam) / aMod * theDU;
+
+      if (!splitCurve<gp_Pnt> (aHC, theDEdge->GetCurve(), aDT))
       {
-        splitCurve<gp_XY> (theDEdge->GetPCurve (aPCurveIdx), theDU);
+        return Standard_False;
       }
+
+      // Define two pcurves of the seam-edge.
+      Handle(Geom2d_Curve) aPC1, aPC2;
+      Standard_Real af, al;
+
+      aE.Orientation (TopAbs_FORWARD);
+      aPC1 = BRep_Tool::CurveOnSurface (aE, aF, af, al);
+
+      aE.Orientation (TopAbs_REVERSED);
+      aPC2 = BRep_Tool::CurveOnSurface (aE, aF, af, al);
+
+      if (aPC1.IsNull() || aPC2.IsNull())
+      {
+        return Standard_False;
+      }
+
+      // Select the correct pcurve of the seam-edge.
+      const gp_Pnt2d& aFPntOfPC1 = aPC1->Value (aPC1->FirstParameter());
+
+      if (Abs (aLPntOfIPC1.X() - aFPntOfPC1.X()) > Precision::Confusion())
+      {
+        std::swap (aPC1, aPC2);
+      }
+
+      splitCurve<gp_Pnt2d> (aPC1, aIPC1, aDT);
+      splitCurve<gp_Pnt2d> (aPC2, aIPC2, aDT);
 
       return Standard_True;
     }
 
     //! Splits the given curve using the specified step.
-    template<class PointType, class Curve>
-    Standard_Boolean splitCurve(Curve& theCurve, const Standard_Real theDU) const
+    template<class PointType, class GeomCurve, class Curve>
+    Standard_Boolean splitCurve(GeomCurve&          theGeomCurve, 
+                                Curve&              theCurve, 
+                                const Standard_Real theDT) const
     {
       Standard_Boolean isUpdated = Standard_False;
-      PointType aDir = theCurve->GetPoint(theCurve->ParametersNb() - 1).Coord() - theCurve->GetPoint(0).Coord();
-      const Standard_Real aModulus = aDir.Modulus();
-      if (aModulus < gp::Resolution())
-      {
-        return isUpdated;
-      }
-      aDir /= aModulus;
 
-      const Standard_Real    aLastParam = theCurve->GetParameter(theCurve->ParametersNb() - 1);
-      const Standard_Boolean isReversed = theCurve->GetParameter(0) > aLastParam;  
+      const Standard_Real   aFirstParam = theCurve->GetParameter (0);
+      const Standard_Real    aLastParam = theCurve->GetParameter (theCurve->ParametersNb() - 1);
+      const Standard_Boolean isReversed = aFirstParam > aLastParam;
+
       for (Standard_Integer aPointIdx = 1; ; ++aPointIdx)
       {
-        const Standard_Real aCurrParam = theCurve->GetParameter(0) + aPointIdx * theDU * (isReversed ? -1.0 : 1.0); 
-        if (( isReversed &&  (aCurrParam < aLastParam)) ||
-            (!isReversed && !(aCurrParam < aLastParam)))
+        const Standard_Real aCurrParam = aFirstParam + aPointIdx * theDT * (isReversed ? -1.0 : 1.0);
+        if (( isReversed &&  (aCurrParam - aLastParam < Precision::PConfusion())) ||
+            (!isReversed && !(aCurrParam - aLastParam < - Precision::PConfusion())))
         {
           break;
         }
 
-        theCurve->InsertPoint(theCurve->ParametersNb() - 1,
-          theCurve->GetPoint(0).Translated (aDir * aPointIdx * theDU),
+        theCurve->InsertPoint (theCurve->ParametersNb() - 1,
+          theGeomCurve->Value (aCurrParam),
           aCurrParam);
 
         isUpdated = Standard_True;
@@ -244,15 +298,19 @@ BRepMesh_ModelPreProcessor::~BRepMesh_ModelPreProcessor()
 //=======================================================================
 Standard_Boolean BRepMesh_ModelPreProcessor::performInternal(
   const Handle(IMeshData_Model)& theModel,
-  const IMeshTools_Parameters&   theParameters)
+  const IMeshTools_Parameters&   theParameters,
+  const Message_ProgressRange&   theRange)
 {
+  (void )theRange;
   if (theModel.IsNull())
   {
     return Standard_False;
   }
 
-  OSD_Parallel::For(0, theModel->FacesNb(), SeamEdgeAmplifier(theModel, theParameters), !theParameters.InParallel);
-  OSD_Parallel::For(0, theModel->FacesNb(), TriangulationConsistency(theModel),         !theParameters.InParallel);
+  const Standard_Integer aFacesNb    = theModel->FacesNb();
+  const Standard_Boolean isOneThread = !theParameters.InParallel;
+  OSD_Parallel::For(0, aFacesNb, SeamEdgeAmplifier        (theModel, theParameters),                      isOneThread);
+  OSD_Parallel::For(0, aFacesNb, TriangulationConsistency (theModel, theParameters.AllowQualityDecrease), isOneThread);
 
   // Clean edges and faces from outdated polygons.
   Handle(NCollection_IncAllocator) aTmpAlloc(new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE));

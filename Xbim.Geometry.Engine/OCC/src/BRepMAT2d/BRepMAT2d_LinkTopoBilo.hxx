@@ -26,15 +26,13 @@
 #include <TopoDS_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_ConstructionError;
 class BRepMAT2d_Explorer;
 class BRepMAT2d_BisectingLocus;
-class TopoDS_Shape;
 class MAT_BasicElt;
 class TopoDS_Wire;
 
 
-//! Constucts links between the Wire or the Face of the explorer and
+//! Constructs links between the Wire or the Face of the explorer and
 //! the BasicElts contained in the bisecting locus.
 class BRepMAT2d_LinkTopoBilo 
 {

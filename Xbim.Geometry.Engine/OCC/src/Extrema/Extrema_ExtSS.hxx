@@ -21,17 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Adaptor3d_SurfacePtr.hxx>
-#include <Standard_Boolean.hxx>
 #include <Extrema_ExtElSS.hxx>
 #include <Extrema_SequenceOfPOnSurf.hxx>
 #include <Standard_Real.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <GeomAbs_SurfaceType.hxx>
 #include <Standard_Integer.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class Standard_TypeMismatch;
 class Adaptor3d_Surface;
 class Extrema_POnSurf;
 
@@ -65,7 +60,7 @@ public:
   //! Returns True if the distances are found.
   Standard_EXPORT Standard_Boolean IsDone() const;
   
-  //! Returns True if the curve is on a parallel surface.
+  //! Returns True if the surfaces are parallel
   Standard_EXPORT Standard_Boolean IsParallel() const;
   
   //! Returns the number of extremum distances.
@@ -77,22 +72,9 @@ public:
   //! Returns the point of the Nth resulting distance.
   Standard_EXPORT void Points (const Standard_Integer N, Extrema_POnSurf& P1, Extrema_POnSurf& P2) const;
 
-
-
-
-protected:
-
-
-
-
-
 private:
 
-  
-  Standard_EXPORT Adaptor3d_SurfacePtr Bidon() const;
-
-
-  Adaptor3d_SurfacePtr myS2;
+  const Adaptor3d_Surface* myS2;
   Standard_Boolean myDone;
   Standard_Boolean myIsPar;
   Extrema_ExtElSS myExtElSS;
@@ -111,13 +93,6 @@ private:
   TColStd_SequenceOfReal mySqDist;
   GeomAbs_SurfaceType myStype;
 
-
 };
-
-
-
-
-
-
 
 #endif // _Extrema_ExtSS_HeaderFile

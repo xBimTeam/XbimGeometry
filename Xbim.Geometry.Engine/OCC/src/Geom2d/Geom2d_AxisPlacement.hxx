@@ -23,11 +23,9 @@
 #include <gp_Ax2d.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Standard_Real.hxx>
-class gp_Ax2d;
 class gp_Pnt2d;
 class gp_Dir2d;
 class gp_Trsf2d;
-class Geom2d_Geometry;
 
 
 class Geom2d_AxisPlacement;
@@ -64,7 +62,7 @@ public:
   //! Note:
   //! - Reverse assigns the result to this axis, while
   //! - Reversed creates a new one.
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_AxisPlacement) Reversed() const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_AxisPlacement) Reversed() const;
   
   //! Changes the complete definition of the axis placement.
   Standard_EXPORT void SetAxis (const gp_Ax2d& A);

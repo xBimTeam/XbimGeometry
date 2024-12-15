@@ -17,31 +17,22 @@
 #ifndef _Approx_CurvilinearParameter_HeaderFile
 #define _Approx_CurvilinearParameter_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_OStream.hxx>
-class Geom_BSplineCurve;
-class Geom2d_BSplineCurve;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
-class Adaptor3d_HCurve;
-class Adaptor2d_HCurve2d;
-class Adaptor3d_HSurface;
 
-
-//! Approximation of a Curve to make its parameter be its
-//! curvilinear  abscissa
+//! Approximation of a Curve to make its parameter be its curvilinear abscissa.
 //! If the curve is a curve on a surface S, C2D is the corresponding Pcurve,
-//! we considere the curve is given by its representation S(C2D(u))
-//! If the curve is a curve on 2 surfaces S1 and S2 and C2D1 C2D2 are
-//! the two corresponding Pcurve, we considere the curve is given
-//! by its representation  1/2(S1(C2D1(u) + S2 (C2D2(u)))
+//! we consider the curve is given by its representation
+//! @code
+//!   S(C2D(u))
+//! @endcode
+//! If the curve is a curve on 2 surfaces S1 and S2 and C2D1 C2D2 are the two corresponding Pcurve,
+//! we consider the curve is given by its representation
+//! @code
+//!   1/2(S1(C2D1(u) + S2(C2D2(u)))
+//! @endcode
 class Approx_CurvilinearParameter 
 {
 public:
@@ -50,13 +41,13 @@ public:
 
   
   //! case of a free 3D curve
-  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor3d_HCurve)& C3D, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
+  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor3d_Curve)& C3D, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
   
   //! case of a curve on one surface
-  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor2d_HCurve2d)& C2D, const Handle(Adaptor3d_HSurface)& Surf, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
+  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor2d_Curve2d)& C2D, const Handle(Adaptor3d_Surface)& Surf, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
   
   //! case of a curve on two surfaces
-  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor2d_HCurve2d)& C2D1, const Handle(Adaptor3d_HSurface)& Surf1, const Handle(Adaptor2d_HCurve2d)& C2D2, const Handle(Adaptor3d_HSurface)& Surf2, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
+  Standard_EXPORT Approx_CurvilinearParameter(const Handle(Adaptor2d_Curve2d)& C2D1, const Handle(Adaptor3d_Surface)& Surf1, const Handle(Adaptor2d_Curve2d)& C2D2, const Handle(Adaptor3d_Surface)& Surf2, const Standard_Real Tol, const GeomAbs_Shape Order, const Standard_Integer MaxDegree, const Standard_Integer MaxSegments);
   
   Standard_EXPORT Standard_Boolean IsDone() const;
   
@@ -85,20 +76,11 @@ public:
   //! print the maximum errors(s)
   Standard_EXPORT void Dump (Standard_OStream& o) const;
 
-
-
-
-protected:
-
-
-
-
-
 private:
 
-  
-  Standard_EXPORT static void ToleranceComputation (const Handle(Adaptor2d_HCurve2d)& C2D, const Handle(Adaptor3d_HSurface)& S, const Standard_Integer MaxNumber, const Standard_Real Tol, Standard_Real& TolV, Standard_Real& TolW);
+  Standard_EXPORT static void ToleranceComputation (const Handle(Adaptor2d_Curve2d)& C2D, const Handle(Adaptor3d_Surface)& S, const Standard_Integer MaxNumber, const Standard_Real Tol, Standard_Real& TolV, Standard_Real& TolW);
 
+private:
 
   Standard_Integer myCase;
   Standard_Boolean myDone;
@@ -110,13 +92,6 @@ private:
   Handle(Geom2d_BSplineCurve) myCurve2d2;
   Standard_Real myMaxError2d2;
 
-
 };
-
-
-
-
-
-
 
 #endif // _Approx_CurvilinearParameter_HeaderFile

@@ -72,7 +72,7 @@ static Standard_Boolean IsSingular( const gp_Vec& theDU,
 //              Condition
 //                  Tg=theDU*theTg2D.X()+theDV*theTg2D.Y()  
 //            has to be satisfied strictly.
-//              More over, vector Tg has to be NORMALYZED
+//              More over, vector Tg has to be NORMALIZED
 //            (if theIsTo3DTgCompute == TRUE then new computed vector will
 //            always have magnitude 1.0).
 //=======================================================================
@@ -86,7 +86,7 @@ static Standard_Boolean SingularProcessing( const gp_Vec& theDU,
 {
   //Attention: @ \sin theAngTol \approx theAngTol @ (for cross-product)
 
-  //Really, vector theTg3D has to be normalyzed (if theIsTo3DTgCompute == FALSE).
+  //Really, vector theTg3D has to be normalized (if theIsTo3DTgCompute == FALSE).
   const Standard_Real aSQTan = theTg3D.SquareMagnitude();
 
   const Standard_Real aSqMagnDU = theDU.SquareMagnitude(),
@@ -113,7 +113,7 @@ static Standard_Boolean SingularProcessing( const gp_Vec& theDU,
     
     if(theIsTo3DTgCompute)
     {
-      //theTg3D will be normalyzed. Its magnitude is
+      //theTg3D will be normalized. Its magnitude is
       const Standard_Real aTgMagn = 1.0;
 
       const Standard_Real aNorm = sqrt(aSqMagnDV);
@@ -156,7 +156,7 @@ static Standard_Boolean SingularProcessing( const gp_Vec& theDU,
     
     if(theIsTo3DTgCompute)
     {
-      //theTg3D will be normalyzed. Its magnitude is
+      //theTg3D will be normalized. Its magnitude is
       const Standard_Real aTgMagn = 1.0;
 
       const Standard_Real aNorm = sqrt(aSqMagnDU);
@@ -286,7 +286,7 @@ static Standard_Boolean SingularProcessing( const gp_Vec& theDU,
 //              Condition
 //                  Tg=theDU*theTg2D.X()+theDV*theTg2D.Y()  
 //            has to be satisfied strictly.
-//              More over, vector Tg has always to be NORMALYZED.
+//              More over, vector Tg has always to be NORMALIZED.
 //=======================================================================
 static Standard_Boolean NonSingularProcessing(const gp_Vec& theDU,
                                               const gp_Vec& theDV,
@@ -329,20 +329,26 @@ static Standard_Boolean NonSingularProcessing(const gp_Vec& theDU,
 //--------------------------------------------------------------------------------
 ApproxInt_ImpPrmSvSurfaces::ApproxInt_ImpPrmSvSurfaces( const TheISurface& ISurf
 						       ,const ThePSurface& PSurf):
+       MyIsTangent(Standard_False),
        MyHasBeenComputed(Standard_False),
+       MyIsTangentbis(Standard_False),
        MyHasBeenComputedbis(Standard_False),
        MyImplicitFirst(Standard_True),
        MyZerImpFunc(PSurf,ISurf)
 { 
+  SetUseSolver(Standard_True);
 }
 //--------------------------------------------------------------------------------
 ApproxInt_ImpPrmSvSurfaces::ApproxInt_ImpPrmSvSurfaces( const ThePSurface& PSurf
 						       ,const TheISurface& ISurf):
+       MyIsTangent(Standard_False),
        MyHasBeenComputed(Standard_False),
+       MyIsTangentbis(Standard_False),
        MyHasBeenComputedbis(Standard_False),
        MyImplicitFirst(Standard_False),
        MyZerImpFunc(PSurf,ISurf)
 { 
+  SetUseSolver(Standard_True);
 }
 //--------------------------------------------------------------------------------
 void ApproxInt_ImpPrmSvSurfaces::Pnt(const Standard_Real u1,
@@ -513,15 +519,21 @@ Standard_Boolean ApproxInt_ImpPrmSvSurfaces::Compute( Standard_Real& u1,
     return(Standard_False);
   }
 
+  Standard_Boolean aRsnldIsDone = Standard_False;
   Standard_Real PourTesterU = X(1);
   Standard_Real PourTesterV = X(2);
-
-  math_FunctionSetRoot  Rsnld(MyZerImpFunc);
-  Rsnld.SetTolerance(Tolerance);
-  Rsnld.Perform(MyZerImpFunc,X,BornInf,BornSup);
-  if(Rsnld.IsDone()) { 
+  if (GetUseSolver())
+  {
+    math_FunctionSetRoot  Rsnld(MyZerImpFunc);
+    Rsnld.SetTolerance(Tolerance);
+    Rsnld.Perform(MyZerImpFunc, X, BornInf, BornSup);
+    aRsnldIsDone = Rsnld.IsDone();
+    if (aRsnldIsDone)
+      Rsnld.Root(X);
+  }
+  if(aRsnldIsDone || !GetUseSolver()) 
+  {
     MyHasBeenComputed = Standard_True;
-    Rsnld.Root(X);
     
     Standard_Real DistAvantApresU = Abs(PourTesterU-X(1));
     Standard_Real DistAvantApresV = Abs(PourTesterV-X(2));
@@ -609,7 +621,7 @@ Standard_Boolean ApproxInt_ImpPrmSvSurfaces::Compute( Standard_Real& u1,
         aNormalPrm.Divide(sqrt(aSQMagnPrm));
       }
 
-      //Analogicaly for implicit surface
+      //Analogically for implicit surface
       if(aSQMagnImp < aNullValue)
       {
         isImpSingular = Standard_True;
@@ -645,7 +657,7 @@ Standard_Boolean ApproxInt_ImpPrmSvSurfaces::Compute( Standard_Real& u1,
         //(3D- and 2D-tangents are still not defined)
 
         //Ask to pay attention to the fact that here
-        //aNormalImp and aNormalPrm are normalyzed.
+        //aNormalImp and aNormalPrm are normalized.
         //Therefore, @ \left \| \vec{Tg} \right \| = 0.0 @
         //if and only if (aNormalImp || aNormalPrm).
         Tg = aNormalImp.Crossed(aNormalPrm);
@@ -660,7 +672,7 @@ Standard_Boolean ApproxInt_ImpPrmSvSurfaces::Compute( Standard_Real& u1,
         return Standard_False;
       }
 
-      //Normalyze Tg vector
+      //Normalize Tg vector
       Tg.Divide(sqrt(aSQMagnTg));
       MyTg = Tg;
 
@@ -903,10 +915,15 @@ ApproxInt_ImpPrmSvSurfaces::FillInitialVectorOfSolution(const Standard_Real u1,
   //----------------------------------------------------
   //Make a small step from boundaries in order to avoid
   //finding "outboundaried" solution (Rsnld -> NotDone).
-  if(X(1)-0.0000000001 <= binfu) X(1)=X(1)+0.0000001;
-  if(X(1)+0.0000000001 >= bsupu) X(1)=X(1)-0.0000001;
-  if(X(2)-0.0000000001 <= binfv) X(2)=X(2)+0.0000001;
-  if(X(2)+0.0000000001 >= bsupv) X(2)=X(2)-0.0000001;
+  if (GetUseSolver())
+  {
+    Standard_Real du = Max(Precision::Confusion(), ThePSurfaceTool::UResolution(aPSurf, Precision::Confusion()));
+    Standard_Real dv = Max(Precision::Confusion(), ThePSurfaceTool::VResolution(aPSurf, Precision::Confusion()));
+    if (X(1) - 0.0000000001 <= binfu) X(1) = X(1) + du;
+    if (X(1) + 0.0000000001 >= bsupu) X(1) = X(1) - du;
+    if (X(2) - 0.0000000001 <= binfv) X(2) = X(2) + dv;
+    if (X(2) + 0.0000000001 >= bsupv) X(2) = X(2) - dv;
+  }
   
   return Standard_True;
 }

@@ -27,7 +27,6 @@
 class Geom2d_Curve;
 class Geom_Surface;
 class TopLoc_Location;
-class gp_Pnt2d;
 class BRep_CurveRepresentation;
 
 
@@ -77,6 +76,9 @@ public:
   //! Recomputes any derived data after a modification.
   //! This is called when the range is modified.
   Standard_EXPORT virtual void Update() Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

@@ -35,10 +35,9 @@
 //                              consecutives   
 // Traitement des coins  		 
 
-#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor2d_Curve2d.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_HCurveOnSurface.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <Adaptor3d_TopolTool.hxx>
 #include <AppBlend_Approx.hxx>
 #include <Blend_CurvPointFuncInv.hxx>
@@ -51,8 +50,8 @@
 #include <Bnd_Box2d.hxx>
 #include <BndLib_Add2dCurve.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Curve2d.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo_NormalProjection.hxx>
 #include <BRepBlend_Line.hxx>
 #include <BRepLib_MakeEdge.hxx>
@@ -64,7 +63,7 @@
 #include <ChFiDS_CommonPoint.hxx>
 #include <ChFiDS_FaceInterference.hxx>
 #include <ChFiDS_HData.hxx>
-#include <ChFiDS_HElSpine.hxx>
+#include <ChFiDS_ElSpine.hxx>
 #include <ChFiDS_ListIteratorOfListOfStripe.hxx>
 #include <ChFiDS_Regul.hxx>
 #include <ChFiDS_SequenceOfSurfData.hxx>
@@ -80,7 +79,7 @@
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dLProp_CLProps2d.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
@@ -88,7 +87,7 @@
 #include <Geom_Line.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomAdaptor.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomInt_IntSS.hxx>
 #include <GeomLib.hxx>
 #include <GeomPlate_BuildPlateSurface.hxx>
@@ -144,6 +143,7 @@
 #include <TopOpeBRepDS_Transition.hxx>
 #include <TopTools_Array2OfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <ChFi3d.hxx>
 
 // performances 
 #ifdef OCCT_DEBUG
@@ -290,6 +290,9 @@ static void cherche_edge1 (const TopoDS_Face & F1,
       {Edge=Ecur1;trouve=Standard_True;}
     }
   }
+  if (Edge.IsNull()) {
+    throw Standard_ConstructionError ("Failed to find edge");
+  }
 }
 
 //=======================================================================
@@ -348,6 +351,10 @@ static void CurveHermite (const TopOpeBRepDS_DataStructure& DStr,
     else  ilin=CDicplus->SetOfSurfData()->Value(icplus)->InterferenceOnS2().LineIndex();
     c2=DStr.Curve(ilin ).Curve();
   }
+  if (c1.IsNull()) 
+    throw Standard_ConstructionError ("Failed to get 3D curve of edge");
+  if (c2.IsNull()) 
+    throw Standard_ConstructionError ("Failed to get 3D curve of edge");
   c1->D1(picmoins,p01,d11);
   c2->D1(picplus,p02,d12);
   Standard_Integer size = 4;
@@ -413,8 +420,12 @@ static void CurveHermite (const TopOpeBRepDS_DataStructure& DStr,
             }
             Eproj.Append(E1);
             proj1=BRep_Tool::CurveOnSurface(E1,F,up1,up2);
+            if (proj1.IsNull()) 
+              throw Standard_ConstructionError ("Failed to get p-curve of edge");
             proj2d.Append(new Geom2d_TrimmedCurve(proj1,up1,up2));
             proj1c=BRep_Tool::Curve(E1,up1,up2);
+            if (proj1c.IsNull()) 
+              throw Standard_ConstructionError ("Failed to get 3D curve of edge");
             cproj.Append(new Geom_TrimmedCurve(proj1c,up1,up2));
             if (error>BRep_Tool::Tolerance(E1)) error=BRep_Tool::Tolerance(E1);
           }
@@ -493,7 +504,7 @@ static void CalculDroite(const gp_Pnt2d & p2d1,
 //purpose  : calcule a batten between curves 2d  curv2d1 and curv2d2 at points p2d1 and p2d2  
 //=======================================================================
 
-static void CalculBatten (const Handle (GeomAdaptor_HSurface) ASurf, 
+static void CalculBatten (const Handle (GeomAdaptor_Surface) ASurf, 
                           const TopoDS_Face Face ,
                           const Standard_Real xdir,
                           const Standard_Real  ydir,
@@ -718,8 +729,8 @@ static void PerformTwoCornerSameExt(TopOpeBRepDS_DataStructure& DStr,
   Parfin(1)= pfi12.X();Parfin(2) = pfi12.Y();
   Parfin(3)= pfi22.X();Parfin(4) = pfi22.Y();
 
-  Handle(GeomAdaptor_HSurface) HS1= ChFi3d_BoundSurf(DStr,Fd1,1,2);
-  Handle(GeomAdaptor_HSurface) HS2= ChFi3d_BoundSurf(DStr,Fd2,1,2);
+  Handle(GeomAdaptor_Surface) HS1= ChFi3d_BoundSurf(DStr,Fd1,1,2);
+  Handle(GeomAdaptor_Surface) HS2= ChFi3d_BoundSurf(DStr,Fd2,1,2);
   trouve=Standard_False;
   if (ChFi3d_ComputeCurves(HS1,HS2,Pardeb,Parfin,cint,
 			   C2dint1,C2dint2,1.e-4,1.e-5,tol)){
@@ -1138,7 +1149,8 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
       nbcouture++;
     }
     else ChFi3d_cherche_edge(V1,Evive,Fcur,Enext,VV);
-    if (Enext.IsNull())throw Standard_Failure("PerformMoreThreeCorner: pb in the parsing of edges and faces");
+    if (Enext.IsNull())
+      throw Standard_ConstructionError ("PerformMoreThreeCorner: pb in the parsing of edges and faces");
     if (Enext.IsSame(edgelibre1)|| Enext.IsSame(edgelibre2)) {
       CD.SetValue(ii, cdbid);
       Index.SetValue(ii, 0);
@@ -1261,7 +1273,7 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 //  Modified by Sergey KHROMOV - Fri Dec 21 18:11:02 2001 Begin
 // 	regul.SetValue(ic,BRep_Tool::Continuity(TopoDS::Edge(Evive.Value(ic)),F1,F2)
 // 		     !=GeomAbs_C0); 
-	regul.SetValue(ic, ChFi3d_isTangentFaces(TopoDS::Edge(Evive.Value(ic)),F1,F2)); 
+	regul.SetValue(ic, ChFi3d::IsTangentFaces(TopoDS::Edge(Evive.Value(ic)),F1,F2)); 
 //  Modified by Sergey KHROMOV - Fri Dec 21 18:11:07 2001 End
       }
     }
@@ -2050,8 +2062,18 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
   } 
 
 // declaration for plate 
-  GeomPlate_BuildPlateSurface PSurf(3,10,3,tol2d,tolesp,angular);
-
+  //GeomPlate_BuildPlateSurface PSurf(3,10,3,tol2d,tolesp,angular);
+  //
+  //Sence of Plate parameters and their preferable values :
+  // degree is total order of ordinary or mixed derivatives:
+  // dS/dU, dS/dV have degree 1, d2S/dU2, d2S/dV2, d2S/(dUdV) have degree 2
+  // nbiter - number of iterations, when surface from previous iteration uses as initial surface for next one
+  // practically this process does not converge, using "bad" initial surface leads to much more "bad" solution.
+  // constr is order of constraint: 0 - G0, 1 - G1 ...
+  // Using constraint order > 0 very often causes  unpredicable undulations of solution
+  Standard_Integer degree = 3, nbcurvpnt = 10, nbiter = 1;
+  Standard_Integer constr = 1; //G1
+  GeomPlate_BuildPlateSurface PSurf(degree, nbcurvpnt, nbiter, tol2d, tolesp, angular);
 // calculation of curves on surface for each stripe 
   for (ic=0;ic<nedge;ic++) {
     gp_Pnt2d p2d1, p2d2;
@@ -2063,8 +2085,8 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
       Calcul_P2dOnSurf(CD.Value(ic),jf.Value(ic),i.Value(ic,icplus),p.Value(ic,icplus),p2d2);
 //      if (i[ic][icplus]!=  i[ic][icmoins]) std::cout<<"probleme surface"<<std::endl;
       indice= SurfIndex(CD, ic, i.Value(ic,icplus), ChFiSURFACE);
-      Handle (GeomAdaptor_HSurface) Asurf =
-	new GeomAdaptor_HSurface(DStr.Surface(indice).Surface());
+      Handle (GeomAdaptor_Surface) Asurf =
+	new GeomAdaptor_Surface(DStr.Surface(indice).Surface());
       // calculation of curve 2d  
       xdir= p2d2.X()-p2d1.X();  
       ydir= p2d2.Y()-p2d1.Y();
@@ -2072,13 +2094,14 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
       gp_Dir2d dir (xdir, ydir);
       Handle(Geom2d_Line) l= new Geom2d_Line (p2d1 ,dir);
       Handle (Geom2d_Curve) pcurve = new  Geom2d_TrimmedCurve(l,0,l0); 
-      Handle (Geom2dAdaptor_HCurve) Acurv = new Geom2dAdaptor_HCurve(pcurve);
+      Handle (Geom2dAdaptor_Curve) Acurv = new Geom2dAdaptor_Curve(pcurve);
       Adaptor3d_CurveOnSurface  CurvOnS (Acurv,Asurf);
-      Handle(Adaptor3d_HCurveOnSurface) HCons =
-	new Adaptor3d_HCurveOnSurface(CurvOnS);
-      Order.SetValue(ic,1);
-      Handle(GeomPlate_CurveConstraint) Cont = 
-	new GeomPlate_CurveConstraint(HCons,Order.Value(ic),10,tolesp,angular,0.1);
+      Handle(Adaptor3d_CurveOnSurface) HCons =
+	new Adaptor3d_CurveOnSurface(CurvOnS);
+      //Order.SetValue(ic,1);
+      Order.SetValue(ic, constr);
+      Handle(GeomPlate_CurveConstraint) Cont =
+	new GeomPlate_CurveConstraint(HCons,Order.Value(ic), nbcurvpnt,tolesp,angular,0.1);
       PSurf.Add(Cont);
       
       // calculate indexes of points and of the curve for the DS         
@@ -2216,7 +2239,7 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 	Handle(Geom2d_Curve) curv2d1,curv2d2;
 	Handle (Geom2d_Curve) pcurve;
         Handle (Geom_Curve) curveint;
-	Handle (GeomAdaptor_HSurface) Asurf;
+	Handle (GeomAdaptor_Surface) Asurf;
 	Standard_Real u1bid,u2bid;
 	
 	// return the 1st curve 2d 
@@ -2226,6 +2249,9 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
                                               u1bid,u2bid);
 	else
 	  Calcul_C2dOnFace(CD.Value(ic),jf.Value(ic),i.Value(ic,icplus),curv2d1);
+
+        if (curv2d1.IsNull()) 
+          throw Standard_ConstructionError ("Failed to get p-curve of edge");
 	p2d1 = curv2d1 ->Value(p.Value(ic,icplus));
 	
 	// recuperation de la deuxieme courbe 2d
@@ -2237,12 +2263,14 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 	  jfp = 3 - jf.Value(icplus);
 	  Calcul_C2dOnFace(CD.Value(icplus),jfp,i.Value(icplus,ic),curv2d2);
 	}
+        if (curv2d2.IsNull()) 
+          throw Standard_ConstructionError ("Failed to get p-curve of edge");
 	p2d2 = curv2d2 ->Value(p.Value(icplus,ic));
 
-	Asurf = new GeomAdaptor_HSurface(BRep_Tool::Surface(TopoDS::Face(Fvive.Value(ic,icplus))));
+	Asurf = new GeomAdaptor_Surface(BRep_Tool::Surface(TopoDS::Face(Fvive.Value(ic,icplus))));
 	Standard_Real tolu,tolv,ratio; 
-	tolu=Asurf->Surface().UResolution(1.e-3);
-	tolv=Asurf->Surface().VResolution(1.e-3);
+	tolu=Asurf->UResolution(1.e-3);
+	tolv=Asurf->VResolution(1.e-3);
 	if (tolu>tolv) ratio=tolu/tolv;
 	else ratio=tolv/tolu;
         
@@ -2350,10 +2378,10 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
           }
 
          // construction of borders for Plate 
-         Handle (Geom2dAdaptor_HCurve)  Acurv=new Geom2dAdaptor_HCurve(pcurve);
+         Handle (Geom2dAdaptor_Curve)  Acurv=new Geom2dAdaptor_Curve(pcurve);
          Adaptor3d_CurveOnSurface  CurvOnS (Acurv,Asurf);
-         Handle(Adaptor3d_HCurveOnSurface) HCons =
-           new Adaptor3d_HCurveOnSurface(CurvOnS);
+         Handle(Adaptor3d_CurveOnSurface) HCons =
+           new Adaptor3d_CurveOnSurface(CurvOnS);
 
          // constraints G1 are set if edges ic and icplus are not both alive 
 
@@ -2465,8 +2493,12 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 	  n3d++;
 	  proj=BRep_Tool::CurveOnSurface(TopoDS::Edge(Eproj.Value(nb)),
 					 TopoDS::Face(Fproj.Value(nb)),up1,up2);
+          if (proj.IsNull()) 
+            throw Standard_ConstructionError ("Failed to get p-curve of edge");
 	  proj2d=new Geom2d_TrimmedCurve(proj,up1,up2);
 	  projc=BRep_Tool::Curve(TopoDS::Edge(Eproj.Value(nb)),up1,up2);
+          if (projc.IsNull()) 
+            throw Standard_ConstructionError ("Failed to get 3D curve of edge");
 	  cproj=new Geom_TrimmedCurve(projc,up1,up2);
 	  pardeb=cproj->FirstParameter();
 	  parfin=cproj->LastParameter();
@@ -2482,12 +2514,12 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 	    indpoint2= DStr.AddPoint(tpoint2);
 	    ind=indpoint2;    
 	  }
-	  Handle (GeomAdaptor_HSurface) Asurf;
-	  Asurf = new GeomAdaptor_HSurface(BRep_Tool::Surface
+	  Handle (GeomAdaptor_Surface) Asurf;
+	  Asurf = new GeomAdaptor_Surface(BRep_Tool::Surface
 					   (TopoDS::Face(Fproj.Value(nb))));
-	  Handle (Geom2dAdaptor_HCurve)  Acurv=new Geom2dAdaptor_HCurve(proj2d);
+	  Handle (Geom2dAdaptor_Curve)  Acurv=new Geom2dAdaptor_Curve(proj2d);
 	  Adaptor3d_CurveOnSurface  CurvOnS (Acurv,Asurf);
-	  Handle(Adaptor3d_HCurveOnSurface) HCons =new Adaptor3d_HCurveOnSurface(CurvOnS);
+	  Handle(Adaptor3d_CurveOnSurface) HCons =new Adaptor3d_CurveOnSurface(CurvOnS);
 	  Order.SetValue(n3d,1);
 	  Handle(GeomPlate_CurveConstraint) Cont =
 	    new GeomPlate_CurveConstraint(HCons,Order.Value(n3d),10,tolesp,angular,0.1);
@@ -2595,12 +2627,12 @@ void  ChFi3d_Builder::PerformMoreThreeCorner(const Standard_Integer Jndex,
 	}       
 	ufirst=ctrim->FirstParameter();
 	ulast=ctrim->LastParameter();
-	Handle (GeomAdaptor_HSurface) Asurf;
-	Asurf = new GeomAdaptor_HSurface(BRep_Tool::Surface
+	Handle (GeomAdaptor_Surface) Asurf;
+	Asurf = new GeomAdaptor_Surface(BRep_Tool::Surface
 					 (TopoDS::Face(Fvive.Value(ic,icplus))));
-	Handle (Geom2dAdaptor_HCurve)  Acurv=new Geom2dAdaptor_HCurve(ctrim2d);
+	Handle (Geom2dAdaptor_Curve)  Acurv=new Geom2dAdaptor_Curve(ctrim2d);
 	Adaptor3d_CurveOnSurface  CurvOnS (Acurv,Asurf);
-	Handle(Adaptor3d_HCurveOnSurface) HCons =new Adaptor3d_HCurveOnSurface(CurvOnS);
+	Handle(Adaptor3d_CurveOnSurface) HCons =new Adaptor3d_CurveOnSurface(CurvOnS);
 	Order.SetValue(n3d,0);
 	Handle(GeomPlate_CurveConstraint) Cont =
 	  new GeomPlate_CurveConstraint(HCons,Order.Value(n3d),10,tolesp,angular,0.1);

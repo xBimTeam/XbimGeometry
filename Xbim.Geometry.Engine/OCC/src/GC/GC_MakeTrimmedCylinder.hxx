@@ -24,11 +24,9 @@
 #include <GC_Root.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 
-class StdFail_NotDone;
 class gp_Pnt;
 class gp_Circ;
 class gp_Ax1;
-class gp_Cylinder;
 
 
 //! Implements construction algorithms for a trimmed
@@ -47,7 +45,7 @@ public:
 
   
   //! Make a cylindricalSurface <Cyl> from Geom
-  //! Its axis is is <P1P2> and its radius is the distance
+  //! Its axis is <P1P2> and its radius is the distance
   //! between <P3> and <P1P2>.
   //! The height is the distance between P1 and P2.
   Standard_EXPORT GC_MakeTrimmedCylinder(const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3);

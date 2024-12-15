@@ -77,9 +77,17 @@ static Standard_Boolean DiscretPar(const Standard_Real     DU,
 //purpose  :
 //=============================================================================
 Bisector_BisecCC::Bisector_BisecCC()
+: sign1(0.0),
+  sign2(0.0),
+  currentInterval(0),
+  shiftParameter(0.0),
+  distMax(0.0),
+  isEmpty(Standard_True),
+  isConvex1(Standard_False),
+  isConvex2(Standard_False),
+  extensionStart(Standard_False),
+  extensionEnd(Standard_False)
 {
-  shiftParameter = 0;
-  isEmpty        = Standard_False;
 }
 
 //=============================================================================
@@ -558,7 +566,7 @@ static Standard_Real Curvature (const Handle(Geom2d_Curve)& C,
   gp_Vec2d      D1,D2;
   gp_Pnt2d      P;
   C->D2(U,P,D1,D2);
-  Standard_Real Norm2 = D1.SquareMagnitude();;
+  Standard_Real Norm2 = D1.SquareMagnitude();
   if (Norm2 < Tol) {
     K1 = 0.0;
   }

@@ -42,7 +42,7 @@
 #include <gp_Pnt.hxx>
 #include <Geom_Plane.hxx>
 #include <ShapeFix_Edge.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <ShapeAnalysis_Surface.hxx>
@@ -52,7 +52,7 @@
 #include <ShapeFix_Wire.hxx>
 #include <ShapeFix_Face.hxx>
 #include <TopoDS_Iterator.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <BRepLib.hxx>
 
@@ -67,7 +67,7 @@
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopExp.hxx>
 
-#include <Message_ProgressSentry.hxx>
+#include <Message_ProgressScope.hxx>
 #include <Message_Msg.hxx>
 #include <ShapeExtend_BasicMsgRegistrator.hxx>
 
@@ -79,7 +79,7 @@
 Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
                                          const Standard_Boolean enforce,
                                          const Standard_Real preci,
-                                         const Handle(Message_ProgressIndicator)& theProgress,
+                                         const Message_ProgressRange& theProgress,
                                          const Handle(ShapeExtend_BasicMsgRegistrator)& theMsgReg)
 {
   // Calculate number of edges
@@ -106,16 +106,16 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
   Message_Msg doneMsg("FixEdge.SameParameter.MSG0");
 
   // Start progress scope (no need to check if progress exists -- it is safe)
-  Message_ProgressSentry aPSentryForSameParam(theProgress, "Fixing same parameter problem", 0, 2, 1);
+  Message_ProgressScope aPSForSameParam(theProgress, "Fixing same parameter problem", 2);
 
   {
     // Start progress scope (no need to check if progress exists -- it is safe)
-    Message_ProgressSentry aPSentry(theProgress, "Fixing edge", 0, aNbEdges, 1);
+    Message_ProgressScope aPS (aPSForSameParam.Next(), "Fixing edge", aNbEdges);
 
     while ( ex.More() )
     {
       TopoDS_Edge E;
-      while ( ex.More() && aPSentry.More() )
+      while ( ex.More() && aPS.More() )
       {
         numedge ++;
         int ierr = 0;
@@ -161,25 +161,23 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
         }
 
         // Complete step in current progress scope
-        aPSentry.Next();     
+        aPS.Next();     
       } // -- end while
 
       // Halt algorithm in case of user's abort
-      if ( !aPSentry.More() )
+      if ( !aPS.More() )
         return Standard_False;
     }
 
   }
-  // Switch to "Update tolerances" step
-  aPSentryForSameParam.Next();
 
   {
     // Start progress scope (no need to check if progress exists -- it is safe)
-    Message_ProgressSentry aPSentry(theProgress, "Update tolerances", 0, aNbFaces, 1);
+    Message_ProgressScope aPS (aPSForSameParam.Next(), "Update tolerances", aNbFaces);
 
     //:i2 abv 21 Aug 98: ProSTEP TR8 Motor.rle face 710:
     // Update tolerance of edges on planes (no pcurves are stored)
-    for ( TopExp_Explorer exp ( shape, TopAbs_FACE ); exp.More() && aPSentry.More(); exp.Next(), aPSentry.Next() )
+    for ( TopExp_Explorer exp ( shape, TopAbs_FACE ); exp.More() && aPS.More(); exp.Next(), aPS.Next() )
     {
       TopoDS_Face face = TopoDS::Face ( exp.Current() );
       Handle(Geom_Surface) Surf = BRep_Tool::Surface ( face );
@@ -194,7 +192,7 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
            continue;
       }
 
-      Handle(GeomAdaptor_HSurface) AS = new GeomAdaptor_HSurface ( plane );
+      Handle(GeomAdaptor_Surface) AS = new GeomAdaptor_Surface ( plane );
       for ( TopExp_Explorer ed ( face, TopAbs_EDGE ); ed.More(); ed.Next() ) {
         TopoDS_Edge edge = TopoDS::Edge ( ed.Current() );
         Standard_Real f, l;
@@ -202,9 +200,9 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
         if ( crv.IsNull() )
           continue;
   	
-        Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface ( edge, face, f, l );;
+        Handle(Geom2d_Curve) c2d = BRep_Tool::CurveOnSurface ( edge, face, f, l );
         if ( c2d.IsNull() ) continue;
-        Handle(Geom2dAdaptor_HCurve) GHPC = new Geom2dAdaptor_HCurve ( c2d, f, l );
+        Handle(Geom2dAdaptor_Curve) GHPC = new Geom2dAdaptor_Curve ( c2d, f, l );
         Adaptor3d_CurveOnSurface ACS(GHPC,AS);
   	
         Standard_Real tol0 = BRep_Tool::Tolerance(edge);
@@ -238,11 +236,10 @@ Standard_Boolean ShapeFix::SameParameter(const TopoDS_Shape& shape,
           }
         }
       }
-
-      // Halt algorithm in case of user's abort
-      if ( !aPSentry.More() )
-        return Standard_False;
     }
+    // Halt algorithm in case of user's abort
+    if (!aPS.More())
+      return Standard_False;
   }
 
   if (!status) {
@@ -300,7 +297,7 @@ TopoDS_Shape ShapeFix::RemoveSmallEdges (TopoDS_Shape& Shape,
 
 //=======================================================================
 //function : ReplaceVertex
-//purpose  : auxilary for FixVertexPosition
+//purpose  : auxiliary for FixVertexPosition
 //=======================================================================
 static TopoDS_Edge ReplaceVertex(const TopoDS_Edge& theEdge,
                                  const gp_Pnt theP,
@@ -330,7 +327,7 @@ static TopoDS_Edge ReplaceVertex(const TopoDS_Edge& theEdge,
 
 //=======================================================================
 //function : getNearPoint
-//purpose  : auxilary for FixVertexPosition
+//purpose  : auxiliary for FixVertexPosition
 //=======================================================================
 static Standard_Real getNearPoint(const TColgp_SequenceOfPnt& aSeq1,
                                   const TColgp_SequenceOfPnt& aSeq2,
@@ -363,7 +360,7 @@ static Standard_Real getNearPoint(const TColgp_SequenceOfPnt& aSeq1,
 
 //=======================================================================
 //function : getNearestEdges
-//purpose  : auxilary for FixVertexPosition
+//purpose  : auxiliary for FixVertexPosition
 //=======================================================================
 static Standard_Boolean getNearestEdges(TopTools_ListOfShape& theLEdges,
                                         const TopoDS_Vertex theVert,

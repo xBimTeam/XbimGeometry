@@ -22,7 +22,6 @@
 
 #include <Standard_Transient.hxx>
 #include <Standard_Real.hxx>
-class Standard_ConstructionError;
 class gp_Pnt2d;
 class gp_Ax2d;
 class gp_Vec2d;
@@ -78,7 +77,7 @@ public:
   //! Scales a Geometry. S is the scaling value.
   Standard_EXPORT void Scale (const gp_Pnt2d& P, const Standard_Real S);
   
-  //! Translates a Geometry.  V is the vector of the tanslation.
+  //! Translates a Geometry.  V is the vector of the translation.
   Standard_EXPORT void Translate (const gp_Vec2d& V);
   
   //! Translates a Geometry from the point P1 to the point P2.
@@ -94,21 +93,24 @@ public:
   //! itself. A copy of the object is returned.
   Standard_EXPORT virtual void Transform (const gp_Trsf2d& T) = 0;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Mirrored (const gp_Pnt2d& P) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Mirrored (const gp_Pnt2d& P) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Mirrored (const gp_Ax2d& A) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Mirrored (const gp_Ax2d& A) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Rotated (const gp_Pnt2d& P, const Standard_Real Ang) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Rotated (const gp_Pnt2d& P, const Standard_Real Ang) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Scaled (const gp_Pnt2d& P, const Standard_Real S) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Scaled (const gp_Pnt2d& P, const Standard_Real S) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Transformed (const gp_Trsf2d& T) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Transformed (const gp_Trsf2d& T) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Translated (const gp_Vec2d& V) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Translated (const gp_Vec2d& V) const;
   
-  Standard_EXPORT Standard_NODISCARD Handle(Geom2d_Geometry) Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2) const;
+  Standard_NODISCARD Standard_EXPORT Handle(Geom2d_Geometry) Translated (const gp_Pnt2d& P1, const gp_Pnt2d& P2) const;
   
   Standard_EXPORT virtual Handle(Geom2d_Geometry) Copy() const = 0;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
 

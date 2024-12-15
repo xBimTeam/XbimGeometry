@@ -14,23 +14,23 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <BRepFill_Filling.hxx>
 
 #include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_HCurveOnSurface.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_CurveRepresentation.hxx>
 #include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRep_TVertex.hxx>
-#include <BRepAdaptor_HCurve.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Curve2d.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepFill_CurveConstraint.hxx>
 #include <BRepFill_EdgeFaceAndOrder.hxx>
 #include <BRepFill_FaceAndOrder.hxx>
-#include <BRepFill_Filling.hxx>
 #include <BRepLib.hxx>
+#include <BRepLib_MakeVertex.hxx>
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeEdge2d.hxx>
 #include <BRepLib_MakeFace.hxx>
@@ -39,9 +39,9 @@
 #include <BRepTools_WireExplorer.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom_BSplineSurface.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <GeomPlate_CurveConstraint.hxx>
 #include <GeomPlate_MakeApprox.hxx>
@@ -234,8 +234,6 @@ Standard_Integer BRepFill_Filling::Add( const TopoDS_Edge& anEdge,
   if (IsBound)
     {
       myBoundary.Append( EdgeFaceAndOrder );
-      TopTools_ListOfShape EmptyList;
-      myOldNewMap.Bind(anEdge, EmptyList);
       return myBoundary.Length();
     }
   else
@@ -258,8 +256,6 @@ Standard_Integer BRepFill_Filling::Add( const TopoDS_Edge& anEdge,
   if (IsBound)
     {
       myBoundary.Append( EdgeFaceAndOrder );
-      TopTools_ListOfShape EmptyList;
-      myOldNewMap.Bind(anEdge, EmptyList);
       return myBoundary.Length();
     }
   else
@@ -301,10 +297,10 @@ Standard_Integer BRepFill_Filling::Add( const Standard_Real U,
 				        const TopoDS_Face& Support,
 				        const GeomAbs_Shape Order )
 {
-  Handle( BRepAdaptor_HSurface ) HSurf = new BRepAdaptor_HSurface();
-  HSurf->ChangeSurface().Initialize( Support );
+  Handle( BRepAdaptor_Surface ) HSurf = new BRepAdaptor_Surface();
+  HSurf->Initialize( Support );
   Handle( GeomPlate_PointConstraint ) aPC = 
-    new GeomPlate_PointConstraint( U, V, BRep_Tool::Surface( HSurf->ChangeSurface().Face() ), Order,
+    new GeomPlate_PointConstraint( U, V, BRep_Tool::Surface( HSurf->Face() ), Order,
 				   myTol3d, myTolAng, myTolCurv );
   myPoints.Append( aPC );
   return (myBoundary.Length() + myFreeConstraints.Length() + myConstraints.Length() + myPoints.Length());
@@ -331,9 +327,9 @@ void BRepFill_Filling::AddConstraints( const BRepFill_SequenceOfEdgeFaceAndOrder
       
       if (CurFace.IsNull()) {
 	if (CurOrder == GeomAbs_C0) {
-	  Handle( BRepAdaptor_HCurve ) HCurve = new BRepAdaptor_HCurve();
-	  HCurve->ChangeCurve().Initialize( CurEdge );
-	  const Handle(Adaptor3d_HCurve)& aHCurve = HCurve; // to avoid ambiguity
+	  Handle( BRepAdaptor_Curve ) HCurve = new BRepAdaptor_Curve();
+	  HCurve->Initialize( CurEdge );
+	  const Handle(Adaptor3d_Curve)& aHCurve = HCurve; // to avoid ambiguity
 	  Constr = new BRepFill_CurveConstraint(aHCurve,
 						CurOrder,
 						myNbPtsOnCur,
@@ -352,11 +348,11 @@ void BRepFill_Filling::AddConstraints( const BRepFill_SequenceOfEdgeFaceAndOrder
 	  }
 	  Surface = Handle(Geom_Surface)::DownCast(Surface->Copy());
 	  Surface->Transform(loc.Transformation());
-	  Handle( GeomAdaptor_HSurface ) Surf = new GeomAdaptor_HSurface(Surface);
-	  Handle( Geom2dAdaptor_HCurve ) Curve2d = new Geom2dAdaptor_HCurve(C2d);
+	  Handle( GeomAdaptor_Surface ) Surf = new GeomAdaptor_Surface(Surface);
+	  Handle( Geom2dAdaptor_Curve ) Curve2d = new Geom2dAdaptor_Curve(C2d);
 	  
 	  Adaptor3d_CurveOnSurface CurvOnSurf( Curve2d, Surf );
-	  Handle (Adaptor3d_HCurveOnSurface) HCurvOnSurf = new Adaptor3d_HCurveOnSurface( CurvOnSurf );
+	  Handle (Adaptor3d_CurveOnSurface) HCurvOnSurf = new Adaptor3d_CurveOnSurface( CurvOnSurf );
 	  
 	  Constr = new GeomPlate_CurveConstraint(HCurvOnSurf,
 						 CurOrder,
@@ -368,15 +364,15 @@ void BRepFill_Filling::AddConstraints( const BRepFill_SequenceOfEdgeFaceAndOrder
       }
       else
 	{
-	  Handle( BRepAdaptor_HSurface ) Surf = new BRepAdaptor_HSurface();
-	  Surf->ChangeSurface().Initialize( CurFace );
-	  Handle( BRepAdaptor_HCurve2d ) Curve2d = new BRepAdaptor_HCurve2d();
-	  Curve2d->ChangeCurve2d().Initialize( CurEdge, CurFace );
+	  Handle( BRepAdaptor_Surface ) Surf = new BRepAdaptor_Surface();
+	  Surf->Initialize( CurFace );
+	  Handle( BRepAdaptor_Curve2d ) Curve2d = new BRepAdaptor_Curve2d();
+	  Curve2d->Initialize( CurEdge, CurFace );
 	  // If CurEdge has no 2d representation on CurFace,
 	  // there will be exception "Attempt to access to null object"
 	  // in this initialization (null pcurve).
 	  Adaptor3d_CurveOnSurface CurvOnSurf( Curve2d, Surf );
-	  Handle (Adaptor3d_HCurveOnSurface) HCurvOnSurf = new Adaptor3d_HCurveOnSurface( CurvOnSurf );
+	  Handle (Adaptor3d_CurveOnSurface) HCurvOnSurf = new Adaptor3d_CurveOnSurface( CurvOnSurf );
 
 	  Constr = new BRepFill_CurveConstraint( HCurvOnSurf,
 						 CurOrder,
@@ -396,7 +392,7 @@ void BRepFill_Filling::AddConstraints( const BRepFill_SequenceOfEdgeFaceAndOrder
 	      Constr->SetCurve2dOnSurf( Curve2d );
 	    }
 	}
-      myBuilder.Add( Constr );
+      myBuilder->Add( Constr );
     }
 }
 
@@ -460,7 +456,9 @@ void BRepFill_Filling::BuildWires( TopTools_ListOfShape& EdgeList, TopTools_List
                     aDist < BRep_Tool::Tolerance(V_edge[j]))
                 {
                   MW.Add(CurEdge);
-                  myOldNewMap(CurEdge).Append(MW.Edge());
+                  TopoDS_Edge NewEdge = MW.Edge();
+                  myOldNewMap.Bind(CurEdge.Oriented(TopAbs_FORWARD),
+                                   NewEdge.Oriented(TopAbs_FORWARD));
                   EdgeList.Remove(Itl);
                   found = Standard_True;
                   break;
@@ -572,10 +570,8 @@ void BRepFill_Filling::FindExtremitiesOfHoles(const TopTools_ListOfShape& WireLi
 //======================================================================
 void BRepFill_Filling::Build()
 {
-  GeomPlate_BuildPlateSurface thebuild( myDegree, myNbPtsOnCur, myNbIter,
-                                        myTol2d, myTol3d, myTolAng, myTolCurv, myAnisotropie );
-
-  myBuilder = thebuild;
+  myBuilder.reset (new GeomPlate_BuildPlateSurface (myDegree, myNbPtsOnCur, myNbIter,
+                                                    myTol2d, myTol3d, myTolAng, myTolCurv, myAnisotropie));
   TopoDS_Edge CurEdge;
   TopoDS_Face CurFace;
   Standard_Integer i, j;
@@ -598,9 +594,9 @@ void BRepFill_Filling::Build()
       Standard_Real U1, V1, U2, V2;
 
       CurFace = myFreeConstraints(j).myFace;
-      Handle( BRepAdaptor_HSurface ) HSurf = new BRepAdaptor_HSurface();
-      HSurf->ChangeSurface().Initialize( CurFace );
-      Handle( Geom_Surface ) CurSurface = BRep_Tool::Surface( HSurf->ChangeSurface().Face() );
+      Handle( BRepAdaptor_Surface ) HSurf = new BRepAdaptor_Surface();
+      HSurf->Initialize( CurFace );
+      Handle( Geom_Surface ) CurSurface = BRep_Tool::Surface( HSurf->Face() );
       //BRepTopAdaptor_FClass2d Classifier( CurFace, Precision::Confusion() );
 	  
       for (i = 1; i <= VerSeq.Length(); i += 2)
@@ -649,31 +645,35 @@ void BRepFill_Filling::Build()
   //Load initial surface to myBuilder if it is given
   if (myIsInitFaceGiven)
     {
-      Handle( BRepAdaptor_HSurface ) HSurfInit = new BRepAdaptor_HSurface();
-      HSurfInit->ChangeSurface().Initialize( myInitFace );
-      myBuilder.LoadInitSurface( BRep_Tool::Surface( HSurfInit->ChangeSurface().Face() ) );
+      Handle( BRepAdaptor_Surface ) HSurfInit = new BRepAdaptor_Surface();
+      HSurfInit->Initialize( myInitFace );
+      myBuilder->LoadInitSurface( BRep_Tool::Surface( HSurfInit->Face() ) );
     }
 
   //Adding constraints to myBuilder
   AddConstraints( myBoundary );
-  myBuilder.SetNbBounds( myBoundary.Length() );
+  myBuilder->SetNbBounds( myBoundary.Length() );
   AddConstraints( myConstraints );
   for (i = 1; i <= myPoints.Length(); i++)
-    myBuilder.Add( myPoints(i) );
+  {
+    myBuilder->Add (myPoints (i));
+  }
 
-  myBuilder.Perform();
-  if (myBuilder.IsDone())
+  myBuilder->Perform();
+  if (myBuilder->IsDone())
+  {
     myIsDone = Standard_True;
+  }
   else
-    {
-      myIsDone = Standard_False;
-      return;
-    }
+  {
+    myIsDone = Standard_False;
+    return;
+  }
 
-  Handle( GeomPlate_Surface ) GPlate = myBuilder.Surface();
-  Handle( Geom_BSplineSurface ) Surface;
+  Handle(GeomPlate_Surface) GPlate = myBuilder->Surface();
+  Handle(Geom_BSplineSurface) Surface;
   // Approximation
-  Standard_Real dmax = 1.1 * myBuilder.G0Error(); //???????????
+  Standard_Real dmax = 1.1 * myBuilder->G0Error(); //???????????
   //Standard_Real dmax = myTol3d;
   if (! myIsInitFaceGiven)
     {
@@ -681,9 +681,9 @@ void BRepFill_Filling::Build()
 
      TColgp_SequenceOfXY S2d;
      TColgp_SequenceOfXYZ S3d;
-     myBuilder.Disc2dContour(4,S2d);
-     myBuilder.Disc3dContour(4,0,S3d);
-     seuil = Max( myTol3d, 10*myBuilder.G0Error() ); //????????
+     myBuilder->Disc2dContour (4, S2d);
+     myBuilder->Disc3dContour (4, 0, S3d);
+     seuil = Max (myTol3d, 10 * myBuilder->G0Error()); //????????
      GeomPlate_PlateG0Criterion Criterion( S2d, S3d, seuil );
      GeomPlate_MakeApprox Approx( GPlate, Criterion, myTol3d, myMaxSegments, myMaxDeg );
      Surface = Approx.Surface();
@@ -698,31 +698,53 @@ void BRepFill_Filling::Build()
 
   //Build the final wire and final face
   TopTools_ListOfShape FinalEdges;
-  Handle(TColGeom2d_HArray1OfCurve) CurvesOnPlate = myBuilder.Curves2d();
+  Handle(TColGeom2d_HArray1OfCurve) CurvesOnPlate = myBuilder->Curves2d();
   BRep_Builder BB;
   for (i = 1; i <= myBoundary.Length(); i++)
   {
     const TopoDS_Edge& InitEdge = myBoundary(i).myEdge;
     TopoDS_Edge anEdge = InitEdge;
-    if (!myOldNewMap(anEdge).IsEmpty())
-      anEdge = TopoDS::Edge( myOldNewMap(anEdge).First() );
+    anEdge.Orientation(TopAbs_FORWARD);
+    if (myOldNewMap.IsBound(anEdge))
+      anEdge = TopoDS::Edge(myOldNewMap(anEdge));
+    
     Handle(Geom2d_Curve) aCurveOnPlate = CurvesOnPlate->Value(i);
 
     TopoDS_Edge NewEdge = TopoDS::Edge(anEdge.EmptyCopied());
 
-    TopoDS_Vertex V1, V2;
-    TopExp::Vertices(anEdge, V1, V2, Standard_True); //with orientation
-    BB.UpdateVertex(V1, dmax);
-    BB.UpdateVertex(V2, dmax);
-    BB.Add(NewEdge, V1);
-    BB.Add(NewEdge, V2);
+    TopoDS_Vertex V1, V2, NewV1, NewV2;
+    TopExp::Vertices(anEdge, V1, V2);
+
+    if (myOldNewMap.IsBound(V1))
+      NewV1 = TopoDS::Vertex(myOldNewMap(V1));
+    else
+    {
+      gp_Pnt aPnt = BRep_Tool::Pnt(V1);
+      NewV1 = BRepLib_MakeVertex(aPnt);
+      BB.UpdateVertex(NewV1, dmax);
+      myOldNewMap.Bind(V1.Oriented(TopAbs_FORWARD), NewV1);
+    }
+
+    if (myOldNewMap.IsBound(V2))
+      NewV2 = TopoDS::Vertex(myOldNewMap(V2));
+    else
+    {
+      gp_Pnt aPnt = BRep_Tool::Pnt(V2);
+      NewV2 = BRepLib_MakeVertex(aPnt);
+      BB.UpdateVertex(NewV2, dmax);
+      myOldNewMap.Bind(V2.Oriented(TopAbs_FORWARD), NewV2);
+    }
+
+    NewV1.Orientation(TopAbs_FORWARD);
+    BB.Add(NewEdge, NewV1);
+    NewV2.Orientation(TopAbs_REVERSED);
+    BB.Add(NewEdge, NewV2);
     TopLoc_Location Loc;
     BB.UpdateEdge(NewEdge, aCurveOnPlate, Surface, Loc, dmax);
     //BRepLib::SameRange(NewEdge);
     BRepLib::SameParameter(NewEdge, dmax, Standard_True);
     FinalEdges.Append(NewEdge);
-    myOldNewMap(InitEdge).Clear();
-    myOldNewMap(InitEdge).Append(NewEdge);
+    myOldNewMap.Bind(InitEdge.Oriented(TopAbs_FORWARD), NewEdge.Oriented(TopAbs_FORWARD));
   }
   
   TopoDS_Wire FinalWire = WireFromList(FinalEdges);
@@ -768,7 +790,7 @@ TopoDS_Face BRepFill_Filling::Face() const
 //==========================================================================
 Standard_Real BRepFill_Filling::G0Error() const
 {
-  return myBuilder.G0Error();
+  return myBuilder->G0Error();
 }
 
 //=======================================================================
@@ -778,7 +800,7 @@ Standard_Real BRepFill_Filling::G0Error() const
 //======================================================================
 Standard_Real BRepFill_Filling::G1Error() const
 {
-  return myBuilder.G1Error();
+  return myBuilder->G1Error();
 }
 
 //=======================================================================
@@ -788,7 +810,7 @@ Standard_Real BRepFill_Filling::G1Error() const
 //======================================================================
 Standard_Real BRepFill_Filling::G2Error() const
 {
-  return myBuilder.G2Error();
+  return myBuilder->G2Error();
 }
 
 //==========================================================================
@@ -798,7 +820,7 @@ Standard_Real BRepFill_Filling::G2Error() const
 //==========================================================================
 Standard_Real BRepFill_Filling::G0Error( const Standard_Integer Index )
 {
-  return myBuilder.G0Error( Index );
+  return myBuilder->G0Error (Index);
 }
 
 //==========================================================================
@@ -808,7 +830,7 @@ Standard_Real BRepFill_Filling::G0Error( const Standard_Integer Index )
 //==========================================================================
 Standard_Real BRepFill_Filling::G1Error( const Standard_Integer Index )
 {
-  return myBuilder.G1Error( Index );
+  return myBuilder->G1Error (Index);
 }
 
 //==========================================================================
@@ -818,5 +840,5 @@ Standard_Real BRepFill_Filling::G1Error( const Standard_Integer Index )
 //==========================================================================
 Standard_Real BRepFill_Filling::G2Error( const Standard_Integer Index )
 {
-  return myBuilder.G2Error( Index );
+  return myBuilder->G2Error (Index);
 }

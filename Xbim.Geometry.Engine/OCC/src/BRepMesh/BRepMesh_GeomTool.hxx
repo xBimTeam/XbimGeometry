@@ -14,21 +14,15 @@
 #ifndef _BRepMesh_GeomTool_HeaderFile
 #define _BRepMesh_GeomTool_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Macro.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <GCPnts_TangentialDeflection.hxx>
 #include <GeomAbs_IsoType.hxx>
 #include <TopoDS_Edge.hxx>
 #include <Precision.hxx>
 
 class BRepAdaptor_Curve;
-class BRepAdaptor_HSurface;
-class gp_Pnt;
 class gp_Pnt2d;
-class gp_Dir;
 class BRepMesh_DefaultRangeSplitter;
-class Adaptor3d_HSurface;
 
 //! Tool class accumulating common geometrical functions as well as 
 //! functionality using shape geometry to produce data necessary for 
@@ -61,7 +55,7 @@ public:
   //! @param theLastParam last parameter of the curve.
   //! @param theLinDeflection linear deflection.
   //! @param theAngDeflection angular deflection.
-  //! @param theMinPointsNb minimum nuber of points to be produced.
+  //! @param theMinPointsNb minimum number of points to be produced.
   Standard_EXPORT BRepMesh_GeomTool(
     const BRepAdaptor_Curve& theCurve,
     const Standard_Real      theFirstParam,
@@ -81,9 +75,9 @@ public:
   //! @param theLastParam last parameter of the curve.
   //! @param theLinDeflection linear deflection.
   //! @param theAngDeflection angular deflection.
-  //! @param theMinPointsNb minimum nuber of points to be produced.
+  //! @param theMinPointsNb minimum number of points to be produced.
   Standard_EXPORT BRepMesh_GeomTool(
-    const Handle(BRepAdaptor_HSurface)& theSurface,
+    const Handle(BRepAdaptor_Surface)& theSurface,
     const GeomAbs_IsoType               theIsoType,
     const Standard_Real                 theParamIso,
     const Standard_Real                 theFirstParam,
@@ -99,15 +93,15 @@ public:
   //! @param theIsReplace if TRUE replaces existing point lying within 
   //! parameteric tolerance of the given point.
   //! @return index of new added point or found with parametric tolerance
-  inline Standard_Integer AddPoint(const gp_Pnt&           thePoint,
-                                   const Standard_Real     theParam,
-                                   const Standard_Boolean  theIsReplace = Standard_True)
+  Standard_Integer AddPoint(const gp_Pnt&           thePoint,
+                            const Standard_Real     theParam,
+                            const Standard_Boolean  theIsReplace = Standard_True)
   {
     return myDiscretTool.AddPoint(thePoint, theParam, theIsReplace);
   }
   
   //! Returns number of discretization points.
-  inline Standard_Integer NbPoints() const
+  Standard_Integer NbPoints() const
   {
     return myDiscretTool.NbPoints();
   }
@@ -134,7 +128,7 @@ public:
   //! @param theUV[out] discretization point in parametric space of the surface.
   //! @return TRUE on success, FALSE elsewhere.
   Standard_EXPORT Standard_Boolean Value(const Standard_Integer              theIndex,
-                                         const Handle(BRepAdaptor_HSurface)& theSurface,
+                                         const Handle(BRepAdaptor_Surface)& theSurface,
                                          Standard_Real&                      theParam,
                                          gp_Pnt&                             thePoint,
                                          gp_Pnt2d&                           theUV) const;
@@ -150,7 +144,7 @@ public: //! @name static API
   //! @param[out] theNormal normal vector at the point specified by the parameters.
   //! @return FALSE if the normal can not be computed, TRUE elsewhere.
   Standard_EXPORT static Standard_Boolean Normal(
-    const Handle(BRepAdaptor_HSurface)& theSurface,
+    const Handle(BRepAdaptor_Surface)& theSurface,
     const Standard_Real                 theParamU,
     const Standard_Real                 theParamV,
     gp_Pnt&                             thePoint,
@@ -223,7 +217,7 @@ public: //! @name static API
   // For linear parametric direction we fall back to the initial vertex count:
   // cells_count = 2 ^ log10 ( initial_vertex_count )
   Standard_EXPORT static std::pair<Standard_Integer, Standard_Integer> CellsCount (
-    const Handle (Adaptor3d_HSurface)&   theSurface,
+    const Handle (Adaptor3d_Surface)&   theSurface,
     const Standard_Integer               theVerticesNb,
     const Standard_Real                  theDeflection,
     const BRepMesh_DefaultRangeSplitter* theRangeSplitter);

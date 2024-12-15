@@ -21,13 +21,12 @@
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
+#include <Standard_OStream.hxx>
 
 class GccEnt_QualifiedLin;
 class gp_Lin2d;
 class GccEnt_QualifiedCirc;
 class gp_Circ2d;
-class GccEnt_QualifiedLin;
-class GccEnt_QualifiedCirc;
 
 
 //! This package provides an implementation of the qualified

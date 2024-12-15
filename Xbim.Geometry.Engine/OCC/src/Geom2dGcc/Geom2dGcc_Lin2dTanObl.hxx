@@ -29,10 +29,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class GccEnt_BadQualifier;
-class StdFail_NotDone;
-class Geom2dGcc_IsParallel;
-class Standard_OutOfRange;
 class Geom2dGcc_QualifiedCurve;
 class gp_Lin2d;
 class gp_Pnt2d;
@@ -114,7 +110,7 @@ public:
   //! StdFail_NotDone if the construction fails.
   Standard_EXPORT void WhichQualifier (const Standard_Integer Index, GccEnt_Position& Qualif1) const;
   
-  //! Returns informations about the tangency point between the
+  //! Returns information about the tangency point between the
   //! result and the first argument.
   //! ParSol is the intrinsic parameter of the point PntSol on
   //! the solution curv.

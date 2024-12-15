@@ -16,15 +16,14 @@
 
 //  Modified by skv - Thu Sep 30 15:21:07 2004 OCC593
 
+#include <Extrema_GenExtPS.hxx>
+
 #include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
 #include <Adaptor3d_Surface.hxx>
 #include <Bnd_Array1OfSphere.hxx>
 #include <Bnd_HArray1OfSphere.hxx>
 #include <Bnd_Sphere.hxx>
 #include <Extrema_ExtFlag.hxx>
-#include <Extrema_GenExtPS.hxx>
 #include <Extrema_HUBTreeOfSphere.hxx>
 #include <Extrema_POnSurf.hxx>
 #include <Extrema_POnSurfParams.hxx>
@@ -208,7 +207,7 @@ Processing:
         and  RealLast() in case of maximums),
       - table TbSel(0,NbU+1,0,NbV+1) of selection of points for 
         calculation of local extremum (0). When a point will selected,
-	it will not be selectable, as well as the ajacent points 
+	it will not be selectable, as well as the adjacent points
 	(8 at least). The corresponding addresses will be set to 1.
   b.b- Calculation of minimums (or maximums):
        All distances from table TbDist are parsed in a loop:
@@ -217,7 +216,16 @@ Processing:
       - update table TbSel.
 -----------------------------------------------------------------------------*/
 
-Extrema_GenExtPS::Extrema_GenExtPS() 
+Extrema_GenExtPS::Extrema_GenExtPS()
+: myumin(0.0),
+  myusup(0.0),
+  myvmin(0.0),
+  myvsup(0.0),
+  myusample(0),
+  myvsample(0),
+  mytolu(0.0),
+  mytolv(0.0),
+  myS(NULL)
 {
   myDone = Standard_False;
   myInit = Standard_False;
@@ -287,7 +295,7 @@ void Extrema_GenExtPS::Initialize(const Adaptor3d_Surface& S,
                                   const Standard_Real    TolU, 
                                   const Standard_Real    TolV)
 {
-  myS = (Adaptor3d_SurfacePtr)&S;
+  myS = &S;
   myusample = NbU;
   myvsample = NbV;
   mytolu = TolU;
@@ -354,8 +362,10 @@ void Extrema_GenExtPS::GetGridPoints( const Adaptor3d_Surface& theSurf)
 {
   //creation parametric points for BSpline and Bezier surfaces
   //with taking into account of Degree and NbKnots of BSpline or Bezier geometry
-  if(theSurf.GetType() == GeomAbs_OffsetSurface)
-    GetGridPoints(theSurf.BasisSurface()->Surface());
+  if (theSurf.GetType() == GeomAbs_OffsetSurface)
+  {
+    GetGridPoints (*theSurf.BasisSurface());
+  }
   //parametric points for BSpline surfaces
   else if( theSurf.GetType() == GeomAbs_BSplineSurface) 
   {
@@ -390,9 +400,9 @@ void Extrema_GenExtPS::GetGridPoints( const Adaptor3d_Surface& theSurf)
   {
     Handle(TColStd_HArray1OfReal) anArrKnots;
     Standard_Integer aDegree = 0;
-    if(theSurf.BasisCurve()->Curve().GetType() == GeomAbs_BSplineCurve)
+    if(theSurf.BasisCurve()->GetType() == GeomAbs_BSplineCurve)
     {
-      Handle(Geom_BSplineCurve) aBspl = theSurf.BasisCurve()->Curve().BSpline();
+      Handle(Geom_BSplineCurve) aBspl = theSurf.BasisCurve()->BSpline();
       if(!aBspl.IsNull())
       {
         anArrKnots = new TColStd_HArray1OfReal(1,aBspl->NbKnots());
@@ -402,9 +412,9 @@ void Extrema_GenExtPS::GetGridPoints( const Adaptor3d_Surface& theSurf)
       }
 
     }
-    if(theSurf.BasisCurve()->Curve().GetType() == GeomAbs_BezierCurve)
+    if(theSurf.BasisCurve()->GetType() == GeomAbs_BezierCurve)
     {
-      Handle(Geom_BezierCurve) aBez = theSurf.BasisCurve()->Curve().Bezier();
+      Handle(Geom_BezierCurve) aBez = theSurf.BasisCurve()->Bezier();
       if(!aBez.IsNull())
       {
         anArrKnots = new TColStd_HArray1OfReal(1,2);
@@ -540,8 +550,7 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
     }
 
     //If flag was changed and extrema not reinitialized Extrema would fail
-    myPoints = new Extrema_HArray2OfPOnSurfParams
-      (0, myusample + 1, 0, myvsample + 1);
+    myPoints.Resize (0, myusample + 1, 0, myvsample + 1, false);
     // Calculation of distances
   
     for ( NoU = 1 ; NoU <= myusample; NoU++ ) {
@@ -552,28 +561,24 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
 
         aParam.SetElementType(Extrema_Node);
         aParam.SetIndices(NoU, NoV);
-        myPoints->SetValue(NoU, NoV, aParam);
+        myPoints.SetValue(NoU, NoV, aParam);
       }
     }
 
-    myFacePntParams = 
-      new Extrema_HArray2OfPOnSurfParams(0, myusample, 0, myvsample);
-
-    myUEdgePntParams =
-      new Extrema_HArray2OfPOnSurfParams(1, myusample - 1, 1, myvsample);
-    myVEdgePntParams =
-      new Extrema_HArray2OfPOnSurfParams(1, myusample, 1, myvsample - 1);
+    myFacePntParams .Resize (0, myusample,     0, myvsample, false);
+    myUEdgePntParams.Resize (1, myusample - 1, 1, myvsample, false);
+    myVEdgePntParams.Resize (1, myusample,     1, myvsample - 1, false);
 
     // Fill boundary with negative square distance.
     // It is used for computation of Maximum.
     for (NoV = 0; NoV <= myvsample + 1; NoV++) {
-      myPoints->ChangeValue(0, NoV).SetSqrDistance(-1.);
-      myPoints->ChangeValue(myusample + 1, NoV).SetSqrDistance(-1.);
+      myPoints.ChangeValue(0, NoV).SetSqrDistance(-1.);
+      myPoints.ChangeValue(myusample + 1, NoV).SetSqrDistance(-1.);
     }
 
     for (NoU = 1; NoU <= myusample; NoU++) {
-      myPoints->ChangeValue(NoU, 0).SetSqrDistance(-1.);
-      myPoints->ChangeValue(NoU, myvsample + 1).SetSqrDistance(-1.);
+      myPoints.ChangeValue(NoU, 0).SetSqrDistance(-1.);
+      myPoints.ChangeValue(NoU, myvsample + 1).SetSqrDistance(-1.);
     }
     
     myInit = Standard_True;
@@ -583,7 +588,7 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
   // Step 1. Compute distances to nodes.
   for ( NoU = 1 ; NoU <= myusample; NoU++ ) {
     for ( NoV = 1 ; NoV <= myvsample; NoV++) {
-      Extrema_POnSurfParams &aParam = myPoints->ChangeValue(NoU, NoV);
+      Extrema_POnSurfParams &aParam = myPoints.ChangeValue(NoU, NoV);
 
       aParam.SetSqrDistance(thePoint.SquareDistance(aParam.Value()));
     }
@@ -603,24 +608,24 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
     {
       for ( NoV = 1 ; NoV <= myvsample; NoV++)
       {
-        const Extrema_POnSurfParams &aParam0 = myPoints->Value(NoU, NoV);
+        const Extrema_POnSurfParams &aParam0 = myPoints.Value(NoU, NoV);
 
         if (NoU < myusample)
         {
           // Compute parameters to UEdge.
-          const Extrema_POnSurfParams &aParam1 = myPoints->Value(NoU + 1, NoV);
+          const Extrema_POnSurfParams &aParam1 = myPoints.Value(NoU + 1, NoV);
           const Extrema_POnSurfParams &anEdgeParam = ComputeEdgeParameters(Standard_True, aParam0, aParam1, thePoint, aDiffTol);
 
-          myUEdgePntParams->SetValue(NoU, NoV, anEdgeParam);
+          myUEdgePntParams.SetValue(NoU, NoV, anEdgeParam);
         }
 
         if (NoV < myvsample)
         {
           // Compute parameters to VEdge.
-          const Extrema_POnSurfParams &aParam1 = myPoints->Value(NoU, NoV + 1);
+          const Extrema_POnSurfParams &aParam1 = myPoints.Value(NoU, NoV + 1);
           const Extrema_POnSurfParams &anEdgeParam = ComputeEdgeParameters(Standard_False, aParam0, aParam1, thePoint, aDiffTol);
 
-          myVEdgePntParams->SetValue(NoU, NoV, anEdgeParam);
+          myVEdgePntParams.SetValue(NoU, NoV, anEdgeParam);
         }
       }
     }
@@ -636,10 +641,10 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
 
     for ( NoU = 1 ; NoU < myusample; NoU++ ) {
       for ( NoV = 1 ; NoV < myvsample; NoV++) {
-        const Extrema_POnSurfParams &aUE0 = myUEdgePntParams->Value(NoU, NoV);
-        const Extrema_POnSurfParams &aUE1 = myUEdgePntParams->Value(NoU, NoV+1);
-        const Extrema_POnSurfParams &aVE0 = myVEdgePntParams->Value(NoU, NoV);
-        const Extrema_POnSurfParams &aVE1 = myVEdgePntParams->Value(NoU+1, NoV);
+        const Extrema_POnSurfParams &aUE0 = myUEdgePntParams.Value(NoU, NoV);
+        const Extrema_POnSurfParams &aUE1 = myUEdgePntParams.Value(NoU, NoV+1);
+        const Extrema_POnSurfParams &aVE0 = myVEdgePntParams.Value(NoU, NoV);
+        const Extrema_POnSurfParams &aVE1 = myVEdgePntParams.Value(NoU+1, NoV);
 
         aSqrDist01 = aUE0.Value().SquareDistance(aUE1.Value());
         aDiffDist = Abs(aUE0.GetSqrDistance() - aUE1.GetSqrDistance());
@@ -667,7 +672,7 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
           const Extrema_POnSurfParams &aEMin =
             aUEMin.GetSqrDistance() < aVEMin.GetSqrDistance() ? aUEMin : aVEMin;
 
-          myFacePntParams->SetValue(NoU, NoV, aEMin);
+          myFacePntParams.SetValue(NoU, NoV, aEMin);
         } else {
           // Find closest point inside the face.
           Standard_Real aU[2];
@@ -689,20 +694,20 @@ void Extrema_GenExtPS::BuildGrid(const gp_Pnt &thePoint)
           aParam.SetElementType(Extrema_Face);
           aParam.SetSqrDistance(thePoint.SquareDistance(aParam.Value()));
           aParam.SetIndices(NoU, NoV);
-          myFacePntParams->SetValue(NoU, NoV, aParam);
+          myFacePntParams.SetValue(NoU, NoV, aParam);
         }
       }
     }
 
     // Fill boundary with RealLast square distance.
     for (NoV = 0; NoV <= myvsample; NoV++) {
-      myFacePntParams->ChangeValue(0, NoV).SetSqrDistance(RealLast());
-      myFacePntParams->ChangeValue(myusample, NoV).SetSqrDistance(RealLast());
+      myFacePntParams.ChangeValue(0, NoV).SetSqrDistance(RealLast());
+      myFacePntParams.ChangeValue(myusample, NoV).SetSqrDistance(RealLast());
     }
 
     for (NoU = 1; NoU < myusample; NoU++) {
-      myFacePntParams->ChangeValue(NoU, 0).SetSqrDistance(RealLast());
-      myFacePntParams->ChangeValue(NoU, myvsample).SetSqrDistance(RealLast());
+      myFacePntParams.ChangeValue(NoU, 0).SetSqrDistance(RealLast());
+      myFacePntParams.ChangeValue(NoU, myvsample).SetSqrDistance(RealLast());
     }
   }
 }
@@ -821,7 +826,7 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
       for (NoU = 1; NoU < myusample; NoU++) {
         for (NoV = 1; NoV < myvsample; NoV++) {
           const Extrema_POnSurfParams &aParam =
-            myFacePntParams->Value(NoU, NoV);
+            myFacePntParams.Value(NoU, NoV);
 
           isMin = Standard_False;
           anElemType = aParam.GetElementType();
@@ -847,7 +852,7 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
                 (anElemType == Extrema_Node && (iU == 1 || iU == myusample))) {
                 // Check the down face.
                 const Extrema_POnSurfParams &aDownParam =
-                    myFacePntParams->Value(NoU, NoV - 1);
+                    myFacePntParams.Value(NoU, NoV - 1);
 
                 if (aDownParam.GetElementType() == anElemType) {
                   aDownParam.GetIndices(iU2, iV2);
@@ -857,7 +862,7 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
                 (anElemType == Extrema_Node && (iV == 1 || iV == myvsample))) {
                 // Check the right face.
                 const Extrema_POnSurfParams &aRightParam =
-                    myFacePntParams->Value(NoU - 1, NoV);
+                    myFacePntParams.Value(NoU - 1, NoV);
 
                 if (aRightParam.GetElementType() == anElemType) {
                   aRightParam.GetIndices(iU2, iV2);
@@ -869,9 +874,9 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
                 isMin = Standard_True;
 
                 const Extrema_POnSurfParams *anOtherParam[3] =
-                { &myFacePntParams->Value(NoU, NoV - 1),     // Down
-                  &myFacePntParams->Value(NoU - 1, NoV - 1), // Lower-left
-                  &myFacePntParams->Value(NoU - 1, NoV) };   // Left
+                { &myFacePntParams.Value(NoU, NoV - 1),     // Down
+                  &myFacePntParams.Value(NoU - 1, NoV - 1), // Lower-left
+                  &myFacePntParams.Value(NoU - 1, NoV) };   // Left
 
                 for (i = 0; i < 3 && isMin; i++) {
                   if (anOtherParam[i]->GetElementType() == Extrema_Node) {
@@ -900,15 +905,15 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
       {
         for (NoV = 1; NoV <= myvsample; NoV++)
         {
-          const Extrema_POnSurfParams &aParamMain = myPoints->Value(NoU, NoV);
-          const Extrema_POnSurfParams &aParam1 = myPoints->Value(NoU - 1, NoV - 1);
-          const Extrema_POnSurfParams &aParam2 = myPoints->Value(NoU - 1, NoV);
-          const Extrema_POnSurfParams &aParam3 = myPoints->Value(NoU - 1, NoV + 1);
-          const Extrema_POnSurfParams &aParam4 = myPoints->Value(NoU, NoV - 1);
-          const Extrema_POnSurfParams &aParam5 = myPoints->Value(NoU, NoV + 1);
-          const Extrema_POnSurfParams &aParam6 = myPoints->Value(NoU + 1, NoV - 1);
-          const Extrema_POnSurfParams &aParam7 = myPoints->Value(NoU + 1, NoV);
-          const Extrema_POnSurfParams &aParam8 = myPoints->Value(NoU + 1, NoV + 1);
+          const Extrema_POnSurfParams &aParamMain = myPoints.Value(NoU, NoV);
+          const Extrema_POnSurfParams &aParam1 = myPoints.Value(NoU - 1, NoV - 1);
+          const Extrema_POnSurfParams &aParam2 = myPoints.Value(NoU - 1, NoV);
+          const Extrema_POnSurfParams &aParam3 = myPoints.Value(NoU - 1, NoV + 1);
+          const Extrema_POnSurfParams &aParam4 = myPoints.Value(NoU, NoV - 1);
+          const Extrema_POnSurfParams &aParam5 = myPoints.Value(NoU, NoV + 1);
+          const Extrema_POnSurfParams &aParam6 = myPoints.Value(NoU + 1, NoV - 1);
+          const Extrema_POnSurfParams &aParam7 = myPoints.Value(NoU + 1, NoV);
+          const Extrema_POnSurfParams &aParam8 = myPoints.Value(NoU + 1, NoV + 1);
 
           Dist = aParamMain.GetSqrDistance();
 
@@ -922,7 +927,7 @@ void Extrema_GenExtPS::Perform(const gp_Pnt& P)
               (aParam8.GetSqrDistance() <= Dist))
           {
             // Find maximum.
-            FindSolution(P, myPoints->Value(NoU, NoV));
+            FindSolution(P, myPoints.Value(NoU, NoV));
           }
         }
       }

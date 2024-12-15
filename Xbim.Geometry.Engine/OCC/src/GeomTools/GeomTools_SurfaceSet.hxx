@@ -26,8 +26,8 @@
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
 #include <Standard_Boolean.hxx>
-class Message_ProgressIndicator;
-class Standard_OutOfRange;
+#include <Message_ProgressRange.hxx>
+
 class Geom_Surface;
 
 
@@ -60,48 +60,29 @@ public:
   
   //! Writes the content of  me  on the stream <OS> in a
   //! format that can be read back by Read.
-  Standard_EXPORT void Write (Standard_OStream& OS) const;
+  Standard_EXPORT void Write (Standard_OStream& OS,
+                              const Message_ProgressRange& theProgress = Message_ProgressRange()) const;
   
   //! Reads the content of me from the  stream  <IS>. me
   //! is first cleared.
-  Standard_EXPORT void Read (Standard_IStream& IS);
+  Standard_EXPORT void Read (Standard_IStream& IS,
+                             const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! Dumps the surface on the stream,  if compact is True
   //! use the compact format that can be read back.
-  Standard_EXPORT static void PrintSurface (const Handle(Geom_Surface)& S, Standard_OStream& OS, const Standard_Boolean compact = Standard_False);
+  Standard_EXPORT static void PrintSurface (const Handle(Geom_Surface)& S,
+                                            Standard_OStream& OS,
+                                            const Standard_Boolean compact = Standard_False);
   
   //! Reads the surface  from  the stream.  The  surface  is
   //! assumed   to have  been  written  with  the Print
   //! method (compact = True).
   Standard_EXPORT static Handle(Geom_Surface) ReadSurface (Standard_IStream& IS);
-  
-  Standard_EXPORT void SetProgress (const Handle(Message_ProgressIndicator)& PR);
-  
-  Standard_EXPORT Handle(Message_ProgressIndicator) GetProgress() const;
-
-
-
-
-protected:
-
-
-
-
 
 private:
 
-
-
   TColStd_IndexedMapOfTransient myMap;
-  Handle(Message_ProgressIndicator) myProgress;
-
 
 };
-
-
-
-
-
-
 
 #endif // _GeomTools_SurfaceSet_HeaderFile

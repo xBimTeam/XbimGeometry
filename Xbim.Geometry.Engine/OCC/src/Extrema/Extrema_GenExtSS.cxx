@@ -101,6 +101,19 @@ private:
 //purpose  : 
 //=======================================================================
 Extrema_GenExtSS::Extrema_GenExtSS()
+: myu1min(0.0),
+  myu1sup(0.0),
+  myv1min(0.0),
+  myv1sup(0.0),
+  myu2min(0.0),
+  myu2sup(0.0),
+  myv2min(0.0),
+  myv2sup(0.0),
+  myusample(0),
+  myvsample(0),
+  mytol1(0.0),
+  mytol2(0.0),
+  myS2(NULL)
 {
   myDone = Standard_False;
   myInit = Standard_False;
@@ -177,7 +190,7 @@ void Extrema_GenExtSS::Initialize(const Adaptor3d_Surface& S2,
 				  const Standard_Real V2sup, 
 				  const Standard_Real Tol2)
 {
-  myS2 = (Adaptor3d_SurfacePtr)&S2;
+  myS2 = &S2;
   mypoints1 = new TColgp_HArray2OfPnt(0,NbU+1,0,NbV+1);
   mypoints2 = new TColgp_HArray2OfPnt(0,NbU+1,0,NbV+1);
   myusample = NbU;
@@ -451,14 +464,3 @@ const Extrema_POnSurf& Extrema_GenExtSS::PointOnS2(const Standard_Integer N) con
 
   return myF.PointOnS2(N);
 }
-
-//=======================================================================
-//function : Bidon
-//purpose  : 
-//=======================================================================
-
-Adaptor3d_SurfacePtr Extrema_GenExtSS::Bidon() const 
-{
-  return (Adaptor3d_SurfacePtr)0L;
-}
-

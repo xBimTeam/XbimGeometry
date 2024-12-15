@@ -21,7 +21,7 @@
 # define _Standard_Macro_HeaderFile
 
 //! @def Standard_OVERRIDE
-//! Should be used in declarations of virtual methods overriden in the
+//! Should be used in declarations of virtual methods overridden in the
 //! derived classes, to cause compilation error in the case if that virtual 
 //! function disappears or changes its signature in the base class.
 //!
@@ -35,6 +35,18 @@
   #define Standard_OVERRIDE override
 #else
   #define Standard_OVERRIDE
+#endif
+
+//! @def Standard_DELETE
+//! Alias for C++11 keyword "=delete" marking methods to be deleted.
+#if defined(__cplusplus) && (__cplusplus >= 201100L)
+  // part of C++11 standard
+  #define Standard_DELETE =delete
+#elif defined(_MSC_VER) && (_MSC_VER >= 1800)
+  // implemented since VS2013
+  #define Standard_DELETE =delete
+#else
+  #define Standard_DELETE
 #endif
 
 //! @def Standard_FALLTHROUGH
@@ -88,6 +100,17 @@
   #define Standard_UNUSED __attribute__((unused))
 #else
   #define Standard_UNUSED
+#endif
+
+//! @def Standard_NOINLINE
+//! Macro for disallowing function inlining.
+//! Expands to "__attribute__((noinline))" on GCC and CLang.
+#if defined(__clang__) || (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 1)))
+  #define Standard_NOINLINE __attribute__((noinline))
+#elif defined(_MSC_VER)
+  #define Standard_NOINLINE __declspec(noinline)
+#else
+  #define Standard_NOINLINE
 #endif
 
 //! @def Standard_THREADLOCAL
@@ -147,14 +170,14 @@
 #if defined(__ICL) || defined (__INTEL_COMPILER)
   #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:1478))
   #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
-#elif defined(_MSC_VER)
-  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
-  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
-#elif (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)) || defined(__clang__)
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))) || defined(__clang__)
   // available since at least gcc 4.2 (maybe earlier), however only gcc 4.6+ supports this pragma inside the function body
   // CLang also supports this gcc syntax (in addition to "clang diagnostic ignored")
   #define Standard_DISABLE_DEPRECATION_WARNINGS _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
   #define Standard_ENABLE_DEPRECATION_WARNINGS  _Pragma("GCC diagnostic warning \"-Wdeprecated-declarations\"")
+#elif defined(_MSC_VER)
+  #define Standard_DISABLE_DEPRECATION_WARNINGS __pragma(warning(push)) __pragma(warning(disable:4996))
+  #define Standard_ENABLE_DEPRECATION_WARNINGS  __pragma(warning(pop))
 #else
   #define Standard_DISABLE_DEPRECATION_WARNINGS
   #define Standard_ENABLE_DEPRECATION_WARNINGS
@@ -280,5 +303,20 @@
    #undef OCCT_UWP
  #endif
 #endif
+
+//! @def Standard_ATOMIC
+//! Definition of Standard_ATOMIC for C++11 or visual studio that supports it.
+//! Before usage there must be "atomic" included in the following way:
+//! #ifdef Standard_HASATOMIC
+//!   #include <atomic>
+//! #endif
+#if (defined(__cplusplus) && __cplusplus >= 201100L) || (defined(_MSC_VER) && _MSC_VER >= 1800) || \
+    (defined(__GNUC__) && ((__GNUC__ > 4) || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
+  #define Standard_HASATOMIC
+  #define Standard_ATOMIC(theType) std::atomic<theType> 
+#else
+  #define Standard_ATOMIC(theType) theType
+#endif
+
 
 #endif

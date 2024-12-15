@@ -80,20 +80,37 @@ public:
 
   //! Destroys the reference to the underlying shape
   //! stored in this shape. As a result, this shape becomes null.
-  void Nullify() { myTShape.Nullify(); }
+  void Nullify() 
+  { 
+    myTShape.Nullify(); 
+    myLocation.Clear();
+    myOrient = TopAbs_EXTERNAL;
+  }
 
   //! Returns the shape local coordinate system.
   const TopLoc_Location& Location() const { return myLocation; }
 
   //! Sets the shape local coordinate system.
-  void Location (const TopLoc_Location& theLoc) { myLocation = theLoc; }
+  void Location (const TopLoc_Location& theLoc, const Standard_Boolean theRaiseExc = Standard_True)
+  {
+    const gp_Trsf& aTrsf = theLoc.Transformation();
+    if ((Abs(Abs(aTrsf.ScaleFactor()) - 1.) > TopLoc_Location::ScalePrec() || aTrsf.IsNegative()) && theRaiseExc)
+    {
+      //Exception
+      throw Standard_DomainError("Location with scaling transformation is forbidden");
+    }
+    else
+    {
+      myLocation = theLoc;
+    }
+  }
 
   //! Returns a  shape  similar to <me> with   the local
   //! coordinate system set to <Loc>.
-  TopoDS_Shape Located (const TopLoc_Location& theLoc) const
+  TopoDS_Shape Located (const TopLoc_Location& theLoc, const Standard_Boolean theRaiseExc = Standard_True) const
   {
     TopoDS_Shape aShape (*this);
-    aShape.Location (theLoc);
+    aShape.Location (theLoc, theRaiseExc);
     return aShape;
   }
 
@@ -171,13 +188,25 @@ public:
   void Convex (Standard_Boolean theIsConvex) { myTShape->Convex (theIsConvex); }
 
   //! Multiplies the Shape location by thePosition.
-  void Move (const TopLoc_Location& thePosition) { myLocation = thePosition * myLocation; }
+  void Move(const TopLoc_Location& thePosition, const Standard_Boolean theRaiseExc = Standard_True)
+  {
+    const gp_Trsf& aTrsf = thePosition.Transformation();
+    if ((Abs(Abs(aTrsf.ScaleFactor()) - 1.) > TopLoc_Location::ScalePrec() || aTrsf.IsNegative()) && theRaiseExc)
+    {
+      //Exception
+      throw Standard_DomainError("Moving with scaling transformation is forbidden");
+    }
+    else
+    {
+      myLocation = thePosition * myLocation;
+    }
+   }
 
   //! Returns a shape similar to <me> with a location multiplied by thePosition.
-  TopoDS_Shape Moved (const TopLoc_Location& thePosition) const
+  TopoDS_Shape Moved (const TopLoc_Location& thePosition, const Standard_Boolean theRaiseExc = Standard_True) const
   {
     TopoDS_Shape aShape (*this);
-    aShape.Move (thePosition);
+    aShape.Move (thePosition, theRaiseExc);
     return aShape;
   }
 
@@ -281,7 +310,7 @@ public:
   void TShape (const Handle(TopoDS_TShape)& theTShape) { myTShape = theTShape; }
 
   //! Dumps the content of me into the stream
-  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const;
+  Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 private:
 

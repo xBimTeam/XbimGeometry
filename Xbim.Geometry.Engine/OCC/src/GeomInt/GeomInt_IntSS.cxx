@@ -17,7 +17,8 @@
 #include <GeomInt_IntSS.hxx>
 
 #include <Adaptor3d_TopolTool.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
+#include <Extrema_ExtPS.hxx>
 
 //=======================================================================
 //function : Perform
@@ -30,11 +31,11 @@ void GeomInt_IntSS::Perform(const Handle(Geom_Surface)& S1,
                               const Standard_Boolean ApproxS1,
                               const Standard_Boolean ApproxS2)
 {
-  myHS1 = new GeomAdaptor_HSurface(S1);
+  myHS1 = new GeomAdaptor_Surface(S1);
   if (S1==S2)
     myHS2 = myHS1;
   else
-    myHS2 = new GeomAdaptor_HSurface(S2);
+    myHS2 = new GeomAdaptor_Surface(S2);
   InternalPerform(Tol,Approx,ApproxS1,ApproxS2,Standard_False,0.,0.,0.,0.);
 }
 
@@ -51,11 +52,11 @@ void GeomInt_IntSS::Perform(const Handle(Geom_Surface)& S1,
                               const Standard_Boolean ApproxS1,
                               const Standard_Boolean ApproxS2)
 {
-  myHS1 = new GeomAdaptor_HSurface(S1);
+  myHS1 = new GeomAdaptor_Surface(S1);
   if (S1==S2)
     myHS2 = myHS1;
   else
-    myHS2 = new GeomAdaptor_HSurface(S2);
+    myHS2 = new GeomAdaptor_Surface(S2);
   InternalPerform(Tol,Approx,ApproxS1,ApproxS2,Standard_True,U1,V1,U2,V2);
 }
 
@@ -82,7 +83,7 @@ void GeomInt_IntSS::Perform(const Handle(Geom_Surface)& S1,
 
   Standard_Real TolArc = Tol;
   Standard_Real TolTang = Tol;
-  Standard_Real UVMaxStep = 0.001;
+  Standard_Real UVMaxStep = IntPatch_Intersection::DefineUVMaxStep(myHS1, dom1, myHS2, dom2);
   Standard_Real Deflection = 0.1;
 
   myIntersector.SetTolerances(TolArc,TolTang,UVMaxStep,Deflection);
@@ -184,3 +185,4 @@ void GeomInt_IntSS::Perform(const Handle(Geom_Surface)& S1,
   StdFail_NotDone_Raise_if(!myIntersector.IsDone(),"GeomInt_IntSS::LineOnS2");
   return slineS2(Index);
 }
+

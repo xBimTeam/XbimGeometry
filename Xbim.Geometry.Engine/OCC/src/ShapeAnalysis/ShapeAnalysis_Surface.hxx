@@ -17,29 +17,17 @@
 #ifndef _ShapeAnalysis_Surface_HeaderFile
 #define _ShapeAnalysis_Surface_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
 #include <Extrema_ExtPS.hxx>
 #include <GeomAdaptor_Surface.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Bnd_Box.hxx>
-#include <Standard_Transient.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
+
 class Geom_Surface;
-class GeomAdaptor_HSurface;
 class Geom_Curve;
-class gp_Pnt2d;
-class gp_Pnt;
-class Bnd_Box;
 
-
-class ShapeAnalysis_Surface;
 DEFINE_STANDARD_HANDLE(ShapeAnalysis_Surface, Standard_Transient)
 
 //! Complements standard tool Geom_Surface by providing additional
@@ -90,10 +78,10 @@ public:
   
   //! Returns the Adaptor.
   //! Creates it if not yet done.
-  Standard_EXPORT const Handle(GeomAdaptor_HSurface)& Adaptor3d();
+  Standard_EXPORT const Handle(GeomAdaptor_Surface)& Adaptor3d();
   
   //! Returns the Adaptor (may be Null if method Adaptor() was not called)
-    const Handle(GeomAdaptor_HSurface)& TrueAdaptor3d() const;
+    const Handle(GeomAdaptor_Surface)& TrueAdaptor3d() const;
   
   //! Returns 3D distance found by one of the following methods.
   //! IsDegenerated, DegeneratedValues, ProjectDegenerated
@@ -124,7 +112,7 @@ public:
   
   //! Returns the characteristics of the singularity specified by
   //! its rank number <num>.
-  //! That means, that it is not neccessary for <num> to be in the
+  //! That means, that it is not necessary for <num> to be in the
   //! range [1, NbSingularities] but must be not greater than
   //! possible (see ComputeSingularities).
   //! The returned characteristics are:
@@ -204,7 +192,7 @@ public:
   //! computed.
   //! The pcurve (p2d1, p2d2) is considered as degenerate if:
   //! - max distance in 3d is less than <tol>
-  //! - max distance in 2d is at least <ratio> times greather than
+  //! - max distance in 2d is at least <ratio> times greater than
   //! the Resolution computed from max distance in 3d
   //! (max3d < tol && max2d > ratio * Resolution(max3d))
   //! NOTE: <ratio> should be >1 (e.g. 10)
@@ -280,7 +268,7 @@ public:
   //! If <maxpreci> >0. and distance between solution and
   //! P3D is greater than <maxpreci>, that solution is considered
   //! as bad, and ValueOfUV() is used.
-  //! If not succeded, calls ValueOfUV()
+  //! If not succeeded, calls ValueOfUV()
   Standard_EXPORT gp_Pnt2d NextValueOfUV (const gp_Pnt2d& p2dPrev,
                                           const gp_Pnt& P3D,
                                           const Standard_Real preci,
@@ -323,7 +311,7 @@ protected:
 
 
   Handle(Geom_Surface) mySurf;
-  Handle(GeomAdaptor_HSurface) myAdSur;
+  Handle(GeomAdaptor_Surface) myAdSur;
   Extrema_ExtPS myExtPS;
   Standard_Boolean myExtOK;
   Standard_Integer myNbDeg;

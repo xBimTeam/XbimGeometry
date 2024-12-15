@@ -91,7 +91,7 @@ static void ComputeTrsf2d(const Handle(TheWLine)& theline,
 //function : Parameters
 //purpose  :
 //=======================================================================
-static void Parameters(const ApproxInt_TheMultiLine& Line,
+void ApproxInt_Approx::Parameters(const ApproxInt_TheMultiLine& Line,
                        const Standard_Integer firstP,
                        const Standard_Integer lastP,
                        const Approx_ParametrizationType Par,
@@ -358,6 +358,8 @@ void ApproxInt_Approx::Perform(const TheISurface& ISurf,
   ApproxInt_TheImpPrmSvSurfaces myImpPrmSvSurfaces = 
                           isTheQuadFirst? ApproxInt_TheImpPrmSvSurfaces(ISurf, PSurf):
                                           ApproxInt_TheImpPrmSvSurfaces(PSurf, ISurf);
+
+  myImpPrmSvSurfaces.SetUseSolver(Standard_False);
 
   const Standard_Integer nbpntbez = indicemax-indicemin;
   if(nbpntbez < aMinNbPointsForApprox)

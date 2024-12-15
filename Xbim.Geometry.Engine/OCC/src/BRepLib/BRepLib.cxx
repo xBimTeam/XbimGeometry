@@ -17,6 +17,8 @@
 //pmn 26/09/97 Add parameters of approximation in BuildCurve3d
 //  Modified by skv - Thu Jun  3 12:39:19 2004 OCC5898
 
+#include <BRepLib.hxx>
+
 #include <Adaptor3d_CurveOnSurface.hxx>
 #include <AdvApprox_ApproxAFunction.hxx>
 #include <AppParCurves_MultiBSpCurve.hxx>
@@ -34,13 +36,11 @@
 #include <BRep_TFace.hxx>
 #include <BRep_Tool.hxx>
 #include <BRep_TVertex.hxx>
-#include <BRepAdaptor_HCurve.hxx>
-#include <BRepAdaptor_HCurve2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Curve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
-#include <BRepLib.hxx>
 #include <BRepLib_MakeFace.hxx>
 #include <BSplCLib.hxx>
 #include <ElSLib.hxx>
@@ -51,7 +51,6 @@
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom2dConvert.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
@@ -61,8 +60,6 @@
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomLib.hxx>
 #include <GeomLProp_SLProps.hxx>
@@ -309,8 +306,8 @@ static Standard_Integer evaluateMaxSegment(const Standard_Integer aMaxSegment,
 {
   if (aMaxSegment != 0) return aMaxSegment;
 
-  Handle(Adaptor3d_HSurface) aSurf   = aCurveOnSurface.GetSurface();
-  Handle(Adaptor2d_HCurve2d) aCurv2d = aCurveOnSurface.GetCurve();
+  Handle(Adaptor3d_Surface) aSurf   = aCurveOnSurface.GetSurface();
+  Handle(Adaptor2d_Curve2d) aCurv2d = aCurveOnSurface.GetCurve();
 
   Standard_Real aNbSKnots = 0, aNbC2dKnots = 0;
 
@@ -436,10 +433,10 @@ Standard_Boolean  BRepLib::BuildCurve3d(const TopoDS_Edge& AnEdge,
 
       Geom2dAdaptor_Curve     AnAdaptor3dCurve2d (Curve2dPtr, f, l) ;
       GeomAdaptor_Surface     AnAdaptor3dSurface (SurfacePtr) ;
-      Handle(Geom2dAdaptor_HCurve) AnAdaptor3dCurve2dPtr =
-        new Geom2dAdaptor_HCurve(AnAdaptor3dCurve2d) ;
-      Handle(GeomAdaptor_HSurface) AnAdaptor3dSurfacePtr =
-        new GeomAdaptor_HSurface (AnAdaptor3dSurface) ;
+      Handle(Geom2dAdaptor_Curve) AnAdaptor3dCurve2dPtr =
+        new Geom2dAdaptor_Curve(AnAdaptor3dCurve2d) ;
+      Handle(GeomAdaptor_Surface) AnAdaptor3dSurfacePtr =
+        new GeomAdaptor_Surface (AnAdaptor3dSurface) ;
       Adaptor3d_CurveOnSurface  CurveOnSurface( AnAdaptor3dCurve2dPtr,
         AnAdaptor3dSurfacePtr) ;
 
@@ -616,10 +613,10 @@ Standard_Boolean  BRepLib::UpdateEdgeTol(const TopoDS_Edge& AnEdge,
     }
     Geom2dAdaptor_Curve     AnAdaptor3dCurve2d (curve2d_ptr) ;
     GeomAdaptor_Surface     AnAdaptor3dSurface (surface_ptr) ;
-    Handle(Geom2dAdaptor_HCurve) AnAdaptor3dCurve2dPtr =
-      new Geom2dAdaptor_HCurve(AnAdaptor3dCurve2d) ;
-    Handle(GeomAdaptor_HSurface) AnAdaptor3dSurfacePtr =
-      new GeomAdaptor_HSurface (AnAdaptor3dSurface) ;
+    Handle(Geom2dAdaptor_Curve) AnAdaptor3dCurve2dPtr =
+      new Geom2dAdaptor_Curve(AnAdaptor3dCurve2d) ;
+    Handle(GeomAdaptor_Surface) AnAdaptor3dSurfacePtr =
+      new GeomAdaptor_Surface (AnAdaptor3dSurface) ;
     curve_on_surface_reference.Load (AnAdaptor3dCurve2dPtr, AnAdaptor3dSurfacePtr);
     a_sampler.Initialize(curve_on_surface_reference,
       MinToleranceRequested * factor,
@@ -685,10 +682,10 @@ Standard_Boolean  BRepLib::UpdateEdgeTol(const TopoDS_Edge& AnEdge,
             }
             Geom2dAdaptor_Curve     an_adaptor_curve2d (curve2d_ptr) ;
             GeomAdaptor_Surface     an_adaptor_surface(surface_ptr) ;
-            Handle(Geom2dAdaptor_HCurve) an_adaptor_curve2d_ptr =
-              new Geom2dAdaptor_HCurve(an_adaptor_curve2d) ;
-            Handle(GeomAdaptor_HSurface) an_adaptor_surface_ptr =
-              new GeomAdaptor_HSurface (an_adaptor_surface) ;
+            Handle(Geom2dAdaptor_Curve) an_adaptor_curve2d_ptr =
+              new Geom2dAdaptor_Curve(an_adaptor_curve2d) ;
+            Handle(GeomAdaptor_Surface) an_adaptor_surface_ptr =
+              new GeomAdaptor_Surface (an_adaptor_surface) ;
             Adaptor3d_CurveOnSurface a_curve_on_surface(an_adaptor_curve2d_ptr,
               an_adaptor_surface_ptr) ;
 
@@ -786,20 +783,19 @@ static void GetEdgeTol(const TopoDS_Edge& theEdge,
   else
     GP = Handle(Geom_Plane)::DownCast(S);
 
-  Handle(GeomAdaptor_HCurve) HC = new GeomAdaptor_HCurve();
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
+  Handle(GeomAdaptor_Curve) HC = new GeomAdaptor_Curve();
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
 
   TopLoc_Location LC;
   Standard_Real First, Last;
-  GeomAdaptor_Curve& GAC = HC->ChangeCurve();
-  GAC.Load(BRep_Tool::Curve(theEdge,LC,First,Last));
+  HC->Load(BRep_Tool::Curve(theEdge,LC,First,Last));
   LC = L.Predivided(LC);
 
   if (!LC.IsIdentity()) {
     GP = Handle(Geom_Plane)::DownCast(
       GP->Transformed(LC.Transformation()));
   }
-  GeomAdaptor_Surface& GAS = HS->ChangeSurface();
+  GeomAdaptor_Surface& GAS = *HS;
   GAS.Load(GP);
 
   ProjLib_ProjectedCurve Proj(HS,HC);
@@ -1062,9 +1058,9 @@ static Standard_Boolean EvalTol(const Handle(Geom2d_Curve)& pc,
 //function : ComputeTol
 //purpose  : 
 //=======================================================================
-static Standard_Real ComputeTol(const Handle(Adaptor3d_HCurve)& c3d,
-  const Handle(Adaptor2d_HCurve2d)& c2d,
-  const Handle(Adaptor3d_HSurface)& surf,
+static Standard_Real ComputeTol(const Handle(Adaptor3d_Curve)& c3d,
+  const Handle(Adaptor2d_Curve2d)& c2d,
+  const Handle(Adaptor3d_Surface)& surf,
   const Standard_Integer        nbp)
 
 {
@@ -1276,12 +1272,12 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
 
   const Standard_Integer NCONTROL = 22;
 
-  Handle(GeomAdaptor_HCurve) HC = new GeomAdaptor_HCurve();
-  Handle(Geom2dAdaptor_HCurve) HC2d = new Geom2dAdaptor_HCurve();
-  Handle(GeomAdaptor_HSurface) HS = new GeomAdaptor_HSurface();
-  GeomAdaptor_Curve& GAC = HC->ChangeCurve();
-  Geom2dAdaptor_Curve& GAC2d = HC2d->ChangeCurve2d();
-  GeomAdaptor_Surface& GAS = HS->ChangeSurface(); 
+  Handle(GeomAdaptor_Curve) HC = new GeomAdaptor_Curve();
+  Handle(Geom2dAdaptor_Curve) HC2d = new Geom2dAdaptor_Curve();
+  Handle(GeomAdaptor_Surface) HS = new GeomAdaptor_Surface();
+  GeomAdaptor_Curve& GAC = *HC;
+  Geom2dAdaptor_Curve& GAC2d = *HC2d;
+  GeomAdaptor_Surface& GAS = *HS;
 
   // modified by NIZHNY-OCC486  Tue Aug 27 17:15:13 2002 :
   Standard_Boolean m_TrimmedPeriodical = Standard_False;
@@ -1347,15 +1343,13 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
       }
 
       // Eval tol2d to compute SameRange
-      Standard_Real UResol = Max(GAS.UResolution(theTolerance), Precision::PConfusion());
-      Standard_Real VResol = Max(GAS.VResolution(theTolerance), Precision::PConfusion());
-      Standard_Real Tol2d  = Min(UResol, VResol);
+      Standard_Real TolSameRange = Max(GAC.Resolution(theTolerance), Precision::PConfusion());
       for(Standard_Integer i = 0; i < 2; i++){
         Handle(Geom2d_Curve) curPC = PC[i];
         Standard_Boolean updatepc = 0;
         if(curPC.IsNull()) break;
         if(!SameRange){
-          GeomLib::SameRange(Tol2d,
+          GeomLib::SameRange(TolSameRange,
             PC[i],GCurve->First(),GCurve->Last(),
             f3d,l3d,curPC);
 
@@ -1375,13 +1369,17 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
 
         if(GAC2d.GetType() == GeomAbs_BSplineCurve && 
           GAC2d.Continuity() == GeomAbs_C0) {
+            Standard_Real UResol = GAS.UResolution(theTolerance);
+            Standard_Real VResol = GAS.VResolution(theTolerance);
+            Standard_Real TolConf2d = Min(UResol, VResol);
+            TolConf2d = Max(TolConf2d, Precision::PConfusion());
             Handle(Geom2d_BSplineCurve) bs2d = GAC2d.BSpline();
             Handle(Geom2d_BSplineCurve) bs2dsov = bs2d;
             Standard_Real fC0 = bs2d->FirstParameter(), lC0 = bs2d->LastParameter();
             Standard_Boolean repar = Standard_True;
             gp_Pnt2d OriginPoint;
             bs2d->D0(fC0, OriginPoint);
-            Geom2dConvert::C0BSplineToC1BSplineCurve(bs2d, Tol2d);
+            Geom2dConvert::C0BSplineToC1BSplineCurve(bs2d, TolConf2d);
             isBSP = Standard_True; 
 
             if(bs2d->IsPeriodic()) { // -------- IFV, Jan 2000
@@ -1425,7 +1423,7 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
                 }
                 d = sqrt(d)*.1;
 
-                Tol2dbail = Max(Min(Tol2dbail,d),Tol2d);
+                Tol2dbail = Max(Min(Tol2dbail,d), TolConf2d);
 
                 Geom2dConvert::C0BSplineToC1BSplineCurve(bs2d,Tol2dbail);
 
@@ -1531,8 +1529,8 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
                   GAC2d.Load(bs2d,f3d,l3d);
                   curPC = bs2d;
 
-                  if(Abs(bs2d->FirstParameter() - fC0) > Tol2d ||
-                    Abs(bs2d->LastParameter() - lC0) > Tol2d    ) {
+                  if(Abs(bs2d->FirstParameter() - fC0) > TolSameRange ||
+                    Abs(bs2d->LastParameter() - lC0) > TolSameRange) {
                       Standard_Integer NbKnots = bs2d->NbKnots();
                       TColStd_Array1OfReal Knots(1,NbKnots);
                       bs2d->Knots(Knots);
@@ -1554,8 +1552,8 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
         if(goodpc){
           //	  Approx_SameParameter SameP(HC,HC2d,HS,Tolerance);
           Standard_Real aTol = (isANA && isBSP) ? 1.e-7 : theTolerance;
-          const Handle(Adaptor3d_HCurve)& aHCurv = HC; // to avoid ambiguity
-          const Handle(Adaptor2d_HCurve2d)& aHCurv2d = HC2d; // to avoid ambiguity
+          const Handle(Adaptor3d_Curve)& aHCurv = HC; // to avoid ambiguity
+          const Handle(Adaptor2d_Curve2d)& aHCurv2d = HC2d; // to avoid ambiguity
           Approx_SameParameter SameP(aHCurv,aHCurv2d,HS,aTol);
 
           if (SameP.IsSameParameter()) {
@@ -1585,7 +1583,7 @@ TopoDS_Edge BRepLib::SameParameter(const TopoDS_Edge& theEdge,
             //Approx_SameParameter has failed.
             //Consequently, the situation might be,
             //when 3D and 2D-curve do not have same-range.
-            GeomLib::SameRange( Tol2d, PC[i], 
+            GeomLib::SameRange( TolSameRange, PC[i],
                                 GCurve->First(), GCurve->Last(),
                                 f3d,l3d,curPC);
 
@@ -1831,14 +1829,20 @@ void  BRepLib::UpdateInnerTolerances(const TopoDS_Shape& aShape)
   for (Standard_Integer i = 1; i <= EFmap.Extent(); i++)
   {
     TopoDS_Edge anEdge = TopoDS::Edge(EFmap.FindKey(i));
+
+    if (!BRep_Tool::IsGeometric(anEdge))
+    {
+      continue;
+    }
+
     TopoDS_Vertex V1, V2;
     TopExp::Vertices(anEdge, V1, V2);
     Standard_Real fpar, lpar;
     BRep_Tool::Range(anEdge, fpar, lpar);
     Standard_Real TolEdge = BRep_Tool::Tolerance(anEdge);
     gp_Pnt Pnt1, Pnt2;
-    Handle(BRepAdaptor_HCurve) anHCurve = new BRepAdaptor_HCurve();
-    anHCurve->ChangeCurve().Initialize(anEdge);
+    Handle(BRepAdaptor_Curve) anHCurve = new BRepAdaptor_Curve();
+    anHCurve->Initialize(anEdge);
     if (!V1.IsNull())
       Pnt1 = BRep_Tool::Pnt(V1);
     if (!V2.IsNull())
@@ -1847,14 +1851,14 @@ void  BRepLib::UpdateInnerTolerances(const TopoDS_Shape& aShape)
     if (!BRep_Tool::Degenerated(anEdge) &&
         EFmap(i).Extent() > 0)
     {
-      NCollection_Sequence<Handle(Adaptor3d_HCurve)> theRep;
+      NCollection_Sequence<Handle(Adaptor3d_Curve)> theRep;
       theRep.Append(anHCurve);
       TopTools_ListIteratorOfListOfShape itl(EFmap(i));
       for (; itl.More(); itl.Next())
       {
         const TopoDS_Face& aFace = TopoDS::Face(itl.Value());
-        Handle(BRepAdaptor_HCurve) anHCurvOnSurf = new BRepAdaptor_HCurve();
-        anHCurvOnSurf->ChangeCurve().Initialize(anEdge, aFace);
+        Handle(BRepAdaptor_Curve) anHCurvOnSurf = new BRepAdaptor_Curve();
+        anHCurvOnSurf->Initialize(anEdge, aFace);
         theRep.Append(anHCurvOnSurf);
       }
       
@@ -1974,6 +1978,12 @@ public:
     return aDeriv.Transformed(mySurfaceTrsf);
   }
 
+  gp_Dir Normal()
+  {
+    gp_Dir aNormal = mySurfaceProps.Normal();
+    return aNormal.Transformed(mySurfaceTrsf);
+  }
+
   // Calculate principal curvatures, which consist of minimal and maximal normal curvatures and
   // the directions on the tangent plane (principal direction) where the extremums are reached
   void Curvature(gp_Dir& thePrincipalDir1, Standard_Real& theCurvature1,
@@ -1987,6 +1997,12 @@ public:
       theCurvature1 = -theCurvature1;
       theCurvature2 = -theCurvature2;
     }
+    if (mySurfaceTrsf.IsNegative())
+    {
+      theCurvature1 = -theCurvature1;
+      theCurvature2 = -theCurvature2;
+    }
+
     thePrincipalDir1.Transform(mySurfaceTrsf);
     thePrincipalDir2.Transform(mySurfaceTrsf);
   }
@@ -2006,32 +2022,63 @@ private:
 //purpose  : check the angle at the border between two squares.
 //           Two shares should have a shared front edge.
 //=======================================================================
-static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
-                              const TopoDS_Face& F1,
-                              const TopoDS_Face& F2,
-                              const Standard_Real theAngleTol)
+GeomAbs_Shape BRepLib::ContinuityOfFaces(const TopoDS_Edge&  theEdge,
+                                         const TopoDS_Face&  theFace1,
+                                         const TopoDS_Face&  theFace2,
+                                         const Standard_Real theAngleTol)
 {
-  Standard_Boolean isSeam = F1.IsEqual(F2);
+  Standard_Boolean isSeam = theFace1.IsEqual(theFace2);
 
-  TopoDS_Edge E = Ed;
+  TopoDS_Edge anEdgeInFace1, anEdgeInFace2;
+  Handle(Geom2d_Curve) aCurve1, aCurve2;
+  
+  Standard_Real aFirst, aLast;
+  
+  if (!theFace1.IsSame (theFace2) &&
+      BRep_Tool::IsClosed (theEdge, theFace1) &&
+      BRep_Tool::IsClosed (theEdge, theFace2))
+  {
+    //Find the edge in the face 1: this edge will have correct orientation
+    TopoDS_Face aFace1 = theFace1;
+    aFace1.Orientation (TopAbs_FORWARD);
+    TopExp_Explorer anExplo (aFace1, TopAbs_EDGE);
+    for (; anExplo.More(); anExplo.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge (anExplo.Current());
+      if (anEdge.IsSame (theEdge))
+      {
+        anEdgeInFace1 = anEdge;
+        break;
+      }
+    }
+    if (anEdgeInFace1.IsNull())
+      return GeomAbs_C0;
+    
+    aCurve1 = BRep_Tool::CurveOnSurface (anEdgeInFace1, aFace1, aFirst, aLast);
+    TopoDS_Face aFace2 = theFace2;
+    aFace2.Orientation (TopAbs_FORWARD);
+    anEdgeInFace2 = anEdgeInFace1;
+    anEdgeInFace2.Reverse();
+    aCurve2 = BRep_Tool::CurveOnSurface (anEdgeInFace2, aFace2, aFirst, aLast);
+  }
+  else
+  {
+    // Obtaining of pcurves of edge on two faces.
+    anEdgeInFace1 = anEdgeInFace2 = theEdge;
+    aCurve1 = BRep_Tool::CurveOnSurface (anEdgeInFace1, theFace1, aFirst, aLast);
+    //For the case of seam edge
+    if (theFace1.IsSame(theFace2))
+      anEdgeInFace2.Reverse();
+    aCurve2 = BRep_Tool::CurveOnSurface (anEdgeInFace2, theFace2, aFirst, aLast);
+  }
 
-  // Check if pcurves exist on both faces of edge
-  Standard_Real aFirst,aLast;
-  E.Orientation(TopAbs_FORWARD);
-  Handle(Geom2d_Curve) aCurve1 = BRep_Tool::CurveOnSurface(E, F1, aFirst, aLast);
-  if(aCurve1.IsNull())
-    return GeomAbs_C0;
-
-  if (isSeam)
-    E.Orientation(TopAbs_REVERSED);
-  Handle(Geom2d_Curve) aCurve2 = BRep_Tool::CurveOnSurface(E, F2, aFirst, aLast);
-  if(aCurve2.IsNull())
+  if (aCurve1.IsNull() || aCurve2.IsNull())
     return GeomAbs_C0;
 
   TopLoc_Location aLoc1, aLoc2;
-  Handle(Geom_Surface) aSurface1 = BRep_Tool::Surface(F1, aLoc1);
+  Handle(Geom_Surface) aSurface1 = BRep_Tool::Surface (theFace1, aLoc1);
   const gp_Trsf& aSurf1Trsf = aLoc1.Transformation();
-  Handle(Geom_Surface) aSurface2 = BRep_Tool::Surface(F2, aLoc2);
+  Handle(Geom_Surface) aSurface2 = BRep_Tool::Surface (theFace2, aLoc2);
   const gp_Trsf& aSurf2Trsf = aLoc2.Transformation();
 
   if (aSurface1->IsKind(STANDARD_TYPE(Geom_RectangularTrimmedSurface)))
@@ -2048,13 +2095,13 @@ static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
     return GeomAbs_CN;
   }
 
-  SurfaceProperties aSP1(aSurface1, aSurf1Trsf, aCurve1, F1.Orientation() == TopAbs_REVERSED);
-  SurfaceProperties aSP2(aSurface2, aSurf2Trsf, aCurve2, F2.Orientation() == TopAbs_REVERSED);
+  SurfaceProperties aSP1(aSurface1, aSurf1Trsf, aCurve1, theFace1.Orientation() == TopAbs_REVERSED);
+  SurfaceProperties aSP2(aSurface2, aSurf2Trsf, aCurve2, theFace2.Orientation() == TopAbs_REVERSED);
 
   Standard_Real f, l, eps;
-  BRep_Tool::Range(E,f,l);
+  BRep_Tool::Range (theEdge,f,l);
   Extrema_LocateExtPC ext;
-  Handle(BRepAdaptor_HCurve) aHC2;
+  Handle(BRepAdaptor_Curve) aHC2;
 
   eps = (l - f)/100.;
   f += eps; // to avoid calculations on  
@@ -2063,7 +2110,6 @@ static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
   const Standard_Real anAngleTol2 = theAngleTol * theAngleTol;
 
   gp_Vec aDer1, aDer2;
-  gp_Vec aNorm1;
   Standard_Real aSqLen1, aSqLen2;
   gp_Dir aCrvDir1[2], aCrvDir2[2];
   Standard_Real aCrvLen1[2], aCrvLen2[2];
@@ -2091,14 +2137,27 @@ static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
     aDer2 = aSP2.Derivative();
     aSqLen2 = aDer2.SquareMagnitude();
     Standard_Boolean isSmoothSuspect = (aDer1.CrossSquareMagnitude(aDer2) <= anAngleTol2 * aSqLen1 * aSqLen2);
+    if (isSmoothSuspect)
+    {
+      gp_Dir aNormal1 = aSP1.Normal();
+      if (theFace1.Orientation() == TopAbs_REVERSED)
+        aNormal1.Reverse();
+      gp_Dir aNormal2 = aSP2.Normal();
+      if (theFace2.Orientation() == TopAbs_REVERSED)
+        aNormal2.Reverse();
+      
+      if (aNormal1 * aNormal2 < 0.)
+        return GeomAbs_C0;
+    }
+    
     if (!isSmoothSuspect)
     {
       // Refine by projection
       if (aHC2.IsNull())
       {
         // adaptor for pcurve on the second surface
-        aHC2 = new BRepAdaptor_HCurve(BRepAdaptor_Curve(E, F2));
-        ext.Initialize(aHC2->Curve(), f, l, Precision::PConfusion());
+        aHC2 = new BRepAdaptor_Curve (anEdgeInFace2, theFace2);
+        ext.Initialize(*aHC2, f, l, Precision::PConfusion());
       }
       ext.Perform(aSP1.Value(), u);
       if (ext.IsDone() && ext.IsMin())
@@ -2125,7 +2184,7 @@ static GeomAbs_Shape tgtfaces(const TopoDS_Edge& Ed,
 
     // Check conditions for G2 and C2 continuity:
     // * calculate principal curvatures on each surface
-    // * continuity is C2 if directions of principal curvatures are equal on differenct surfaces
+    // * continuity is C2 if directions of principal curvatures are equal on different surfaces
     // * continuity is G2 if directions of principal curvatures are just parallel
     //   and values of curvatures are the same
     aSP1.Curvature(aCrvDir1[0], aCrvLen1[0], aCrvDir1[1], aCrvLen1[1]);
@@ -2293,9 +2352,8 @@ void BRepLib::EncodeRegularity(TopoDS_Edge& E,
   BRep_Builder B;
   if(BRep_Tool::Continuity(E,F1,F2)<=GeomAbs_C0){
     try {
-      GeomAbs_Shape aCont = tgtfaces(E, F1, F2, TolAng);
+      GeomAbs_Shape aCont = ContinuityOfFaces(E, F1, F2, TolAng);
       B.Continuity(E,F1,F2,aCont);
-      
     }
     catch(Standard_Failure const&)
     {
@@ -2338,36 +2396,33 @@ Standard_Boolean BRepLib::
       continue;
     }
 
+    aPT->AddNormals();
     GeomLProp_SLProps aSLP(aSurf, 2, Precision::Confusion());
-    const Standard_Integer anArrDim = 3*aPT->NbNodes();
-    Handle(TShort_HArray1OfShortReal) aNormArr = new TShort_HArray1OfShortReal(1, anArrDim);
-    Standard_Integer anNormInd = aNormArr->Lower();
-    for(Standard_Integer i = aPT->UVNodes().Lower(); i <= aPT->UVNodes().Upper(); i++)
+    for (Standard_Integer i = 1; i <= aPT->NbNodes(); i++)
     {
-      const gp_Pnt2d &aP2d = aPT->UVNodes().Value(i);
+      const gp_Pnt2d aP2d = aPT->UVNode (i);
       aSLP.SetParameters(aP2d.X(), aP2d.Y());
 
-      gp_XYZ aNorm(0.,0.,0.);
       if(!aSLP.IsNormalDefined())
       {
 #ifdef OCCT_DEBUG
         std::cout << "BRepLib::EnsureNormalConsistency(): Cannot find normal!" << std::endl;
 #endif
+        aPT->SetNormal (i, gp_Vec3f (0.0f));
       }
       else
       {
-        aNorm = aSLP.Normal().XYZ();
+        gp_Dir aNorm = aSLP.Normal();
         if (aFace.Orientation() == TopAbs_REVERSED)
+        {
           aNorm.Reverse();
+        }
+        aPT->SetNormal (i, aNorm);
       }
-      aNormArr->ChangeValue(anNormInd++) = static_cast<Standard_ShortReal>(aNorm.X());
-      aNormArr->ChangeValue(anNormInd++) = static_cast<Standard_ShortReal>(aNorm.Y());
-      aNormArr->ChangeValue(anNormInd++) = static_cast<Standard_ShortReal>(aNorm.Z());
     }
 
     aRetVal = Standard_True;
     isNormalsFound = Standard_True;
-    aPT->SetNormals(aNormArr);
   }
 
   if(!isNormalsFound)
@@ -2403,9 +2458,6 @@ Standard_Boolean BRepLib::
     const Handle(Poly_PolygonOnTriangulation)& aPTEF2 = 
                                 BRep_Tool::PolygonOnTriangulation(anEdg, aPT2, aLoc2);
 
-    TShort_Array1OfShortReal& aNormArr1 = aPT1->ChangeNormals();
-    TShort_Array1OfShortReal& aNormArr2 = aPT2->ChangeNormals();
-
     if (aPTEF1->Nodes().Lower() != aPTEF2->Nodes().Lower() || 
         aPTEF1->Nodes().Upper() != aPTEF2->Nodes().Upper()) 
       continue; 
@@ -2417,37 +2469,191 @@ Standard_Boolean BRepLib::
       const Standard_Integer aFNodF1 = aPTEF1->Nodes().Value(anEdgNode);
       const Standard_Integer aFNodF2 = aPTEF2->Nodes().Value(anEdgNode);
 
-      const Standard_Integer aFNorm1FirstIndex = aNormArr1.Lower() + 3*
-                                                    (aFNodF1 - aPT1->Nodes().Lower());
-      const Standard_Integer aFNorm2FirstIndex = aNormArr2.Lower() + 3*
-                                                    (aFNodF2 - aPT2->Nodes().Lower());
-
-      gp_XYZ aNorm1(aNormArr1.Value(aFNorm1FirstIndex),
-                    aNormArr1.Value(aFNorm1FirstIndex+1),
-                    aNormArr1.Value(aFNorm1FirstIndex+2));
-      gp_XYZ aNorm2(aNormArr2.Value(aFNorm2FirstIndex),
-                    aNormArr2.Value(aFNorm2FirstIndex+1),
-                    aNormArr2.Value(aFNorm2FirstIndex+2));
+      gp_Vec3f aNorm1f, aNorm2f;
+      aPT1->Normal (aFNodF1, aNorm1f);
+      aPT2->Normal (aFNodF2, aNorm2f);
+      const gp_XYZ aNorm1 (aNorm1f.x(), aNorm1f.y(), aNorm1f.z());
+      const gp_XYZ aNorm2 (aNorm2f.x(), aNorm2f.y(), aNorm2f.z());
       const Standard_Real aDot = aNorm1 * aNorm2;
-
-      if(aDot > aThresDot)
+      if (aDot > aThresDot)
       {
         gp_XYZ aNewNorm = (aNorm1 + aNorm2).Normalized();
-        aNormArr1.ChangeValue(aFNorm1FirstIndex) =
-          aNormArr2.ChangeValue(aFNorm2FirstIndex) =
-          static_cast<Standard_ShortReal>(aNewNorm.X());
-        aNormArr1.ChangeValue(aFNorm1FirstIndex+1) =
-          aNormArr2.ChangeValue(aFNorm2FirstIndex+1) =
-          static_cast<Standard_ShortReal>(aNewNorm.Y());
-        aNormArr1.ChangeValue(aFNorm1FirstIndex+2) =
-          aNormArr2.ChangeValue(aFNorm2FirstIndex+2) =
-          static_cast<Standard_ShortReal>(aNewNorm.Z());
+        aPT1->SetNormal (aFNodF1, aNewNorm);
+        aPT2->SetNormal (aFNodF2, aNewNorm);
         aRetVal = Standard_True;
       }
     }
   }
 
   return aRetVal;
+}
+
+//=======================================================================
+//function : UpdateDeflection
+//purpose  : 
+//=======================================================================
+namespace
+{
+  //! Tool to estimate deflection of the given UV point
+  //! with regard to its representation in 3D space.
+  struct EvalDeflection
+  {
+    BRepAdaptor_Surface Surface;
+
+    //! Initializes tool with the given face.
+    EvalDeflection (const TopoDS_Face& theFace)
+      : Surface (theFace)
+    {
+    }
+
+    //! Evaluates deflection of the given 2d point from its 3d representation.
+    Standard_Real Eval (const gp_Pnt2d& thePoint2d, const gp_Pnt& thePoint3d)
+    {
+      gp_Pnt aPnt;
+      Surface.D0 (thePoint2d.X (), thePoint2d.Y (), aPnt);
+      return (thePoint3d.XYZ () - aPnt.XYZ ()).SquareModulus ();
+    }
+  };
+
+  //! Represents link of triangulation.
+  struct Link
+  {
+    Standard_Integer Node[2];
+
+    //! Constructor
+    Link (const Standard_Integer theNode1, const Standard_Integer theNode2)
+    {
+      Node[0] = theNode1;
+      Node[1] = theNode2;
+    }
+
+    //! Computes a hash code for the this link
+    Standard_Integer HashCode (const Standard_Integer theUpperBound) const
+    {
+      return ::HashCode (Node[0] + Node[1], theUpperBound);
+    }
+
+    //! Returns true if this link has the same nodes as the other.
+    Standard_Boolean IsEqual (const Link& theOther) const
+    {
+      return ((Node[0] == theOther.Node[0] && Node[1] == theOther.Node[1]) ||
+              (Node[0] == theOther.Node[1] && Node[1] == theOther.Node[0]));
+    }
+
+    //! Alias for IsEqual.
+    Standard_Boolean operator ==(const Link& theOther) const
+    {
+      return IsEqual (theOther);
+    }
+  };
+
+  //! Computes a hash code for the given link
+  inline Standard_Integer HashCode (const Link& theLink, const Standard_Integer theUpperBound)
+  {
+    return theLink.HashCode (theUpperBound);
+  }
+}
+
+void BRepLib::UpdateDeflection (const TopoDS_Shape& theShape)
+{
+  TopExp_Explorer anExpFace (theShape, TopAbs_FACE);
+  for (; anExpFace.More(); anExpFace.Next())
+  {
+    const TopoDS_Face& aFace = TopoDS::Face (anExpFace.Current());
+    const Handle(Geom_Surface) aSurf = BRep_Tool::Surface (aFace);
+    if (aSurf.IsNull())
+    {
+      continue;
+    }
+
+    TopLoc_Location aLoc;
+    const Handle(Poly_Triangulation)& aPT = BRep_Tool::Triangulation (aFace, aLoc);
+    if (aPT.IsNull() || !aPT->HasUVNodes())
+    {
+      continue;
+    }
+
+    // Collect all nodes of degenerative edges and skip elements
+    // build upon them due to huge distortions introduced by passage
+    // from UV space to 3D.
+    NCollection_Map<Standard_Integer> aDegNodes;
+    TopExp_Explorer anExpEdge (aFace, TopAbs_EDGE);
+    for (; anExpEdge.More(); anExpEdge.Next())
+    {
+      const TopoDS_Edge& aEdge = TopoDS::Edge (anExpEdge.Current());
+      if (BRep_Tool::Degenerated (aEdge))
+      {
+        const Handle(Poly_PolygonOnTriangulation)& aPolygon = BRep_Tool::PolygonOnTriangulation (aEdge, aPT, aLoc);
+        if (aPolygon.IsNull ())
+        {
+          continue;
+        }
+
+        for (Standard_Integer aNodeIt = aPolygon->Nodes().Lower(); aNodeIt <= aPolygon->Nodes().Upper(); ++aNodeIt)
+        {
+          aDegNodes.Add (aPolygon->Node (aNodeIt));
+        }
+      }
+    }
+
+    EvalDeflection aTool (aFace);
+    NCollection_Map<Link> aLinks;
+    Standard_Real aSqDeflection = 0.;
+    const gp_Trsf& aTrsf = aLoc.Transformation();
+    for (Standard_Integer aTriIt = 1; aTriIt <= aPT->NbTriangles(); ++aTriIt)
+    {
+      const Poly_Triangle& aTriangle = aPT->Triangle (aTriIt);
+
+      int aNode[3];
+      aTriangle.Get (aNode[0], aNode[1], aNode[2]);
+      if (aDegNodes.Contains (aNode[0]) ||
+          aDegNodes.Contains (aNode[1]) ||
+          aDegNodes.Contains (aNode[2]))
+      {
+        continue;
+      }
+
+      const gp_Pnt aP3d[3] = {
+        aPT->Node (aNode[0]).Transformed (aTrsf),
+        aPT->Node (aNode[1]).Transformed (aTrsf),
+        aPT->Node (aNode[2]).Transformed (aTrsf)
+      };
+
+      const gp_Pnt2d aP2d[3] = {
+        aPT->UVNode (aNode[0]),
+        aPT->UVNode (aNode[1]),
+        aPT->UVNode (aNode[2])
+      };
+
+      // Check midpoint of triangle.
+      const gp_Pnt   aMid3d_t = (aP3d[0].XYZ() + aP3d[1].XYZ() + aP3d[2].XYZ()) / 3.;
+      const gp_Pnt2d aMid2d_t = (aP2d[0].XY () + aP2d[1].XY () + aP2d[2].XY ()) / 3.;
+
+      aSqDeflection = Max (aSqDeflection, aTool.Eval (aMid2d_t, aMid3d_t));
+
+      for (Standard_Integer i = 0; i < 3; ++i)
+      {
+        const Standard_Integer j = (i + 1) % 3;
+        const Link aLink (aNode[i], aNode[j]);
+        if (!aLinks.Add (aLink))
+        {
+          // Do not estimate boundary links due to high distortions at the edge.
+          const gp_Pnt&   aP3d1 = aP3d[i];
+          const gp_Pnt&   aP3d2 = aP3d[j];
+
+          const gp_Pnt2d& aP2d1 = aP2d[i];
+          const gp_Pnt2d& aP2d2 = aP2d[j];
+
+          const gp_Pnt   aMid3d_l = (aP3d1.XYZ() + aP3d2.XYZ()) / 2.;
+          const gp_Pnt2d aMid2d_l = (aP2d1.XY () + aP2d2.XY ()) / 2.;
+
+          aSqDeflection = Max (aSqDeflection, aTool.Eval (aMid2d_l, aMid3d_l));
+        }
+      }
+    }
+
+    aPT->Deflection (Sqrt (aSqDeflection));
+  }
 }
 
 //=======================================================================

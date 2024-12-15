@@ -25,7 +25,6 @@
 #include <Standard_Integer.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Standard_OutOfRange;
 class BRepAdaptor_Curve;
 class gp_Pnt;
 class gp_Vec;
@@ -75,7 +74,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT static void Intervals (const BRepAdaptor_Curve& C, TColStd_Array1OfReal& T, const GeomAbs_Shape S);
 

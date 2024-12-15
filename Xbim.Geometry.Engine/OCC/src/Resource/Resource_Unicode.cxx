@@ -15,14 +15,16 @@
 // commercial license or contractual agreement.
 
 
-#include <NCollection_UtfString.hxx>
-#include <Resource_Big5.h>
 #include <Resource_ConvertUnicode.hxx>
-#include <Resource_GBK.h>
 #include <Resource_Manager.hxx>
 #include <Resource_Unicode.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
+#include <NCollection_UtfString.hxx>
+#include <Standard_NotImplemented.hxx>
+#include "Resource_CodePages.pxx"
+#include "Resource_GBK.pxx"
+#include "Resource_Big5.pxx"
 
 #define isjis(c) (((c)>=0x21 && (c)<=0x7e))
 #define iseuc(c) (((c)>=0xa1 && (c)<=0xfe))
@@ -46,7 +48,7 @@ void Resource_Unicode::ConvertSJISToUnicode(const Standard_CString fromstr,TColl
     if (issjis1(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -78,7 +80,7 @@ void Resource_Unicode::ConvertEUCToUnicode(const Standard_CString fromstr,TColle
     if (iseuc(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -109,7 +111,7 @@ void Resource_Unicode::ConvertGBToUnicode(const Standard_CString fromstr,TCollec
     if (isshift(*currentstr)) {
       
       ph = ((unsigned int) *currentstr);
-      // Be Carefull with first and second !!
+      // Be Careful with first and second !!
 
       currentstr++;
 
@@ -353,14 +355,6 @@ Standard_Boolean Resource_Unicode::ConvertBig5ToUnicode(const Standard_CString f
     }
   }
   return Standard_True;
-}
-
-void Resource_Unicode::ConvertANSIToUnicode(const Standard_CString fromstr,TCollection_ExtendedString& tostr)
-{
-  tostr.Clear();
-
-  TCollection_ExtendedString curext(fromstr);
-  tostr.AssignCat(curext);
 }
 
 Standard_Boolean Resource_Unicode::ConvertUnicodeToSJIS(const TCollection_ExtendedString& fromstr,
@@ -618,9 +612,60 @@ void Resource_Unicode::ConvertFormatToUnicode (const Resource_FormatType theForm
       break;
     }
     case Resource_FormatType_ANSI:
+    {
+      theToStr = TCollection_ExtendedString(theFromStr, Standard_False);
+      break;
+    }
+    case Resource_FormatType_CP1250:
+    case Resource_FormatType_CP1251:
+    case Resource_FormatType_CP1252:
+    case Resource_FormatType_CP1253:
+    case Resource_FormatType_CP1254:
+    case Resource_FormatType_CP1255:
+    case Resource_FormatType_CP1256:
+    case Resource_FormatType_CP1257:
+    case Resource_FormatType_CP1258:
+    case Resource_FormatType_iso8859_1:
+    case Resource_FormatType_iso8859_2:
+    case Resource_FormatType_iso8859_3:
+    case Resource_FormatType_iso8859_4:
+    case Resource_FormatType_iso8859_5:
+    case Resource_FormatType_iso8859_6:
+    case Resource_FormatType_iso8859_7:
+    case Resource_FormatType_iso8859_8:
+    case Resource_FormatType_iso8859_9:
+    case Resource_FormatType_CP850:
+    {
+      const int aCodePageIndex = (int)theFormat - (int)Resource_FormatType_CP1250;
+      const Standard_ExtString aCodePage = THE_CODEPAGES_ANSI[aCodePageIndex];
+      theToStr.Clear();
+      for (const char* anInputPntr = theFromStr; *anInputPntr != '\0'; ++anInputPntr)
+      {
+        unsigned char anInputChar = (unsigned char)(*anInputPntr);
+        Standard_ExtCharacter aRes = (anInputChar & 0x80) != 0
+          ? aCodePage[(0x7f & anInputChar)]
+          : anInputChar;
+        if (aRes == 0)
+        {
+          aRes = '?';
+        }
+        theToStr.AssignCat(aRes);
+      }
+      break;
+    }
+    case Resource_FormatType_Big5:
+    {
+      ConvertBig5ToUnicode(theFromStr, theToStr);
+      break;
+    }
+    case Resource_FormatType_GBK:
+    {
+      ConvertGBKToUnicode(theFromStr, theToStr);
+      break;
+    }
     case Resource_FormatType_UTF8:
     {
-      theToStr = TCollection_ExtendedString (theFromStr, theFormat == Resource_FormatType_UTF8);
+      theToStr = TCollection_ExtendedString (theFromStr, Standard_True);
       break;
     }
     case Resource_FormatType_SystemLocale:
@@ -654,7 +699,64 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToFormat(const Resource_FormatT
     }
     case Resource_FormatType_ANSI:
     {
-      return ConvertUnicodeToANSI (theFromStr, theToStr, theMaxSize);
+      return ConvertUnicodeToANSI(theFromStr, theToStr, theMaxSize);
+    }
+    case Resource_FormatType_CP1250:
+    case Resource_FormatType_CP1251:
+    case Resource_FormatType_CP1252:
+    case Resource_FormatType_CP1253:
+    case Resource_FormatType_CP1254:
+    case Resource_FormatType_CP1255:
+    case Resource_FormatType_CP1256:
+    case Resource_FormatType_CP1257:
+    case Resource_FormatType_CP1258:
+    case Resource_FormatType_iso8859_1:
+    case Resource_FormatType_iso8859_2:
+    case Resource_FormatType_iso8859_3:
+    case Resource_FormatType_iso8859_4:
+    case Resource_FormatType_iso8859_5:
+    case Resource_FormatType_iso8859_6:
+    case Resource_FormatType_iso8859_7:
+    case Resource_FormatType_iso8859_8:
+    case Resource_FormatType_iso8859_9:
+    case Resource_FormatType_CP850:
+    {
+      if (theMaxSize < theFromStr.Length())
+      {
+        return Standard_False;
+      }
+      const int aCodePageIndex = (int)theFormat - (int)Resource_FormatType_CP1250;
+      const Standard_ExtString aCodePage = THE_CODEPAGES_ANSI[aCodePageIndex];
+      for (Standard_Integer aToCharInd = 0; aToCharInd < theMaxSize - 1; ++aToCharInd)
+      {
+        Standard_Boolean isFind = Standard_False;
+        Standard_ExtCharacter aFromChar = theFromStr.Value(aToCharInd + 1);
+        if (aFromChar == 0)
+        {
+          // zero value should be handled explicitly to avoid false conversion by
+          // selected code page that may have unused values (encoded as zero)
+          theToStr[aToCharInd] = '\0';
+        }
+        else
+        {
+          // find the character in the code page
+          for (unsigned char anIndCP = 0; aFromChar != 0 && anIndCP < 128; ++anIndCP)
+          {
+            if (aCodePage[anIndCP] == aFromChar)
+            {
+              theToStr[aToCharInd] = anIndCP | 0x80;
+              isFind = Standard_True;
+            }
+          }
+          // if character is not found, put '?'
+          if (!isFind)
+          {
+            theToStr[aToCharInd] = '?';
+          }
+        }
+      }
+      theToStr[theMaxSize - 1] = '\0';
+      return Standard_True;
     }
     case Resource_FormatType_UTF8:
     {
@@ -669,6 +771,11 @@ Standard_Boolean Resource_Unicode::ConvertUnicodeToFormat(const Resource_FormatT
     {
       const NCollection_Utf16String aString (theFromStr.ToExtString());
       return aString.ToLocale (theToStr, theMaxSize);
+    }
+    case Resource_FormatType_GBK:
+    case Resource_FormatType_Big5:
+    {
+      throw Standard_NotImplemented("Resource_Unicode::ConvertUnicodeToFormat - convert from GBK and Big5 to Unocode is not implemented");
     }
   }
   return Standard_False;

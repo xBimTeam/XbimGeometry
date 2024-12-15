@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Xbim.Common.Configuration;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
@@ -23,10 +24,15 @@ namespace Xbim.Geometry.Engine.Interop.Tests
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
+            XbimServices.Current.ConfigureServices(s =>
+            {
+                s.AddXbimToolkit(builder => builder.AddEsentModel());
+            });
             loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
             logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
+
         [ClassCleanup]
         static public void Cleanup()
         {
@@ -35,9 +41,9 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             logger = null;
         }
 
+
+        // todo: 2021: @SRL this test used to be ignored, but the reason is not clear
         [TestMethod]
-        [Ignore]
-        // // [DeploymentItem(@"TestFiles\Regression\FailingGeom.ifc", "FailingGeom.ifc")]
         public void IfcHalfspace_FailingGeom()
         {
             using (var m = IfcStore.Open("TestFiles\\Regression\\FailingGeom.ifc"))
@@ -61,10 +67,10 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                     IfcCsgTests.GeneralTest(solid);
 
                     Debug.WriteLine(eas.EntityLabel + " ok");
-                    if (eas.EntityLabel == 185243)
-                    {
-                        File.WriteAllText(@"C:\Data\_tmp\185243.v5.brep", solid.ToBRep);
-                    }
+                    //if (eas.EntityLabel == 185243)
+                    //{
+                    //    File.WriteAllText(@"C:\Data\_tmp\185243.v5.brep", solid.ToBRep);
+                    //}
                 }
             }
         }

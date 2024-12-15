@@ -295,7 +295,7 @@ Quantity_Date  OSD_FileNode::CreationMoment(){
 
 // if (Failed()) Perror();
 
- /* Get File Informations */
+ /* Get File Information */
 
  TCollection_AsciiString aBuffer;
  myPath.SystemName ( aBuffer );
@@ -323,7 +323,7 @@ Quantity_Date  OSD_FileNode::AccessMoment(){
 
 // if (Failed()) Perror();
 
- /* Get File Informations */
+ /* Get File Information */
 
  TCollection_AsciiString aBuffer;
  myPath.SystemName ( aBuffer );
@@ -393,7 +393,7 @@ BOOL                 __fastcall _osd_wnt_sd_to_protection (
 #endif
 Standard_Integer     __fastcall _get_file_type ( Standard_CString, HANDLE );
 
-void _osd_wnt_set_error ( OSD_Error&, OSD_WhoAmI, ... );
+void _osd_wnt_set_error ( OSD_Error&, Standard_Integer, ... );
 
 static BOOL __fastcall _get_file_time (const wchar_t*, LPSYSTEMTIME, BOOL );
 static void __fastcall _test_raise ( TCollection_AsciiString, Standard_CString );
@@ -448,7 +448,7 @@ Standard_Boolean OSD_FileNode::Exists ()
 {
   myError.Reset();
 
- Standard_Boolean        retVal = Standard_False;;
+ Standard_Boolean        retVal = Standard_False;
  TCollection_AsciiString fName;
 
  myPath.SystemName ( fName );
@@ -758,7 +758,7 @@ Quantity_Date OSD_FileNode::CreationMoment () {
 
  TEST_RAISE(  "CreationMoment"  );
 
- if (_get_file_time (fNameW.ToWideString(), &stCreationSystemMoment, TRUE))
+ if (_get_file_time (fNameW.ToWideString(), &stCreationSystemMoment, FALSE))
 {
   SYSTEMTIME * aSysTime = &stCreationMoment;
   BOOL aFlag = SystemTimeToTzSpecificLocalTime (NULL,
@@ -825,7 +825,7 @@ Standard_Integer OSD_FileNode::Error () const {
 
 }  // end OSD_FileNode :: Error
 
-void _osd_wnt_set_error ( OSD_Error& err, OSD_WhoAmI who, ... ) {
+void _osd_wnt_set_error ( OSD_Error& err, Standard_Integer who, ... ) {
 
  DWORD              errCode;
 

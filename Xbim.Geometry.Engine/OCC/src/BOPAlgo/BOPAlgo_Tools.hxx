@@ -31,6 +31,7 @@
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <Standard_Integer.hxx>
+#include <Message_ProgressRange.hxx>
 
 class BOPDS_PaveBlock;
 class BOPDS_CommonBlock;
@@ -165,13 +166,6 @@ public:
                                                 const Standard_Real theFuzzyValue,
                                                 TopTools_ListOfListOfShape& theChains);
 
-  //! Collect in the output list recursively all non-compound subshapes of the first level
-  //! of the given shape theS. If a shape presents in the map theMFence it is skipped.
-  //! All shapes put in the output are also added into theMFence.
-  Standard_EXPORT static void TreatCompound(const TopoDS_Shape& theS,
-                                            TopTools_MapOfShape& theMFence,
-                                            TopTools_ListOfShape& theLS);
-
   //! Classifies the faces <theFaces> relatively solids <theSolids>.
   //! The IN faces for solids are stored into output data map <theInParts>.
   //!
@@ -191,7 +185,8 @@ public:
                                             Handle(IntTools_Context)& theContext,
                                             TopTools_IndexedDataMapOfShapeListOfShape& theInParts,
                                             const TopTools_DataMapOfShapeBox& theShapeBoxMap = TopTools_DataMapOfShapeBox(),
-                                            const TopTools_DataMapOfShapeListOfShape& theSolidsIF = TopTools_DataMapOfShapeListOfShape());
+                                            const TopTools_DataMapOfShapeListOfShape& theSolidsIF = TopTools_DataMapOfShapeListOfShape(),
+                                            const Message_ProgressRange& theRange = Message_ProgressRange());
 
   //! Classifies the given parts relatively the given solids and
   //! fills the solids with the parts classified as INTERNAL.
@@ -199,12 +194,26 @@ public:
   //! @param theSolids  - The solids to put internals to
   //! @param theParts   - The parts to classify relatively solids
   //! @param theImages  - Possible images of the parts that has to be classified
-  //! @param theContext - Cashed geometrical tools to speed-up classifications
+  //! @param theContext - cached geometrical tools to speed-up classifications
   Standard_EXPORT static void FillInternals(const TopTools_ListOfShape& theSolids,
                                             const TopTools_ListOfShape& theParts,
                                             const TopTools_DataMapOfShapeListOfShape& theImages,
                                             const Handle(IntTools_Context)& theContext);
 
+  //! Computes the transformation needed to move the objects
+  //! to the given point to increase the quality of computations.
+  //! Returns true if the objects are located far from the given point
+  //! (relatively given criteria), false otherwise.
+  //! @param theBox1 the AABB of the first object
+  //! @param theBox2 the AABB of the second object
+  //! @param theTrsf the computed transformation
+  //! @param thePoint the Point to compute transformation to
+  //! @param theCriteria the Criteria to check whether thranformation is required
+  Standard_EXPORT static Standard_Boolean TrsfToPoint (const Bnd_Box& theBox1,
+                                                       const Bnd_Box& theBox2,
+                                                       gp_Trsf&       theTrsf,
+                                                       const gp_Pnt&  thePoint = gp_Pnt (0.0, 0.0, 0.0),
+                                                       const Standard_Real theCriteria = 1.e+5);
 };
 
 #endif // _BOPAlgo_Tools_HeaderFile

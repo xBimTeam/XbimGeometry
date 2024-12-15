@@ -41,13 +41,13 @@
 //class    : BOPAlgo_VertexEdge
 //purpose  : 
 //=======================================================================
-class BOPAlgo_VertexEdge : public BOPAlgo_Algo {
+class BOPAlgo_VertexEdge : public BOPAlgo_ParallelAlgo {
 
  public:
   DEFINE_STANDARD_ALLOC
 
   BOPAlgo_VertexEdge() : 
-    BOPAlgo_Algo(),
+    BOPAlgo_ParallelAlgo(),
     myIV(-1), myIE(-1), myFlag(-1), myT(-1.), myTolVNew(-1.) {
   };
   //
@@ -111,7 +111,11 @@ class BOPAlgo_VertexEdge : public BOPAlgo_Algo {
   }
   //
   virtual void Perform() {
-    BOPAlgo_Algo::UserBreak();
+    Message_ProgressScope aPS(myProgressRange, NULL, 1);
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     try
     {
       OCC_CATCH_SIGNALS
@@ -142,11 +146,13 @@ typedef NCollection_Vector<BOPAlgo_VertexEdge> BOPAlgo_VectorOfVertexEdge;
 // function: PerformVE
 // purpose: 
 //=======================================================================
-void BOPAlgo_PaveFiller::PerformVE()
+void BOPAlgo_PaveFiller::PerformVE(const Message_ProgressRange& theRange)
 {
   FillShrunkData(TopAbs_VERTEX, TopAbs_EDGE);
   //
   myIterator->Initialize(TopAbs_VERTEX, TopAbs_EDGE);
+  Message_ProgressScope aPS(theRange, NULL, 1);
+
   Standard_Integer iSize = myIterator->ExpectedLength();
   if (!iSize) {
     return; 
@@ -155,6 +161,10 @@ void BOPAlgo_PaveFiller::PerformVE()
   // Prepare pairs for intersection
   BOPDS_IndexedDataMapOfPaveBlockListOfInteger aMVEPairs;
   for (; myIterator->More(); myIterator->Next()) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     Standard_Integer nV, nE;
     myIterator->Value(nV, nE);
     //
@@ -192,7 +202,7 @@ void BOPAlgo_PaveFiller::PerformVE()
     pLV->Append(nV);
   }
   //
-  IntersectVE(aMVEPairs);
+  IntersectVE(aMVEPairs, aPS.Next());
 }
 
 //=======================================================================
@@ -201,6 +211,7 @@ void BOPAlgo_PaveFiller::PerformVE()
 //=======================================================================
 void BOPAlgo_PaveFiller::IntersectVE
   (const BOPDS_IndexedDataMapOfPaveBlockListOfInteger& theVEPairs,
+   const Message_ProgressRange& theRange,
    const Standard_Boolean theAddInterfs)
 {
   Standard_Integer i, aNbVE = theVEPairs.Extent();
@@ -221,10 +232,23 @@ void BOPAlgo_PaveFiller::IntersectVE
   // intersection of the same SD vertex with edge
   NCollection_DataMap<BOPDS_Pair, TColStd_ListOfInteger, BOPDS_PairMapHasher> aDMVSD;
   //
+  Message_ProgressScope aPSOuter(theRange, NULL, 10);
   for (i = 1; i <= aNbVE; ++i) {
+    if (UserBreak(aPSOuter))
+    {
+      return;
+    }
     const Handle(BOPDS_PaveBlock)& aPB = theVEPairs.FindKey(i);
     Standard_Integer nE = aPB->OriginalEdge();
     //
+    TColStd_MapOfInteger aMVPB;
+    const BOPDS_ListOfPaveBlock& aLPB = myDS->PaveBlocks (nE);
+    for (BOPDS_ListOfPaveBlock::Iterator itPB (aLPB); itPB.More(); itPB.Next())
+    {
+      aMVPB.Add (itPB.Value()->Pave1().Index());
+      aMVPB.Add (itPB.Value()->Pave2().Index());
+    }
+
     const TColStd_ListOfInteger& aLV = theVEPairs(i);
     TColStd_ListIteratorOfListOfInteger aItLV(aLV);
     for (; aItLV.More(); aItLV.Next()) {
@@ -233,6 +257,9 @@ void BOPAlgo_PaveFiller::IntersectVE
       Standard_Integer nVSD = nV;
       myDS->HasShapeSD(nV, nVSD);
       //
+      if (aMVPB.Contains (nVSD))
+        continue;
+
       BOPDS_Pair aPair(nVSD, nE);
       TColStd_ListOfInteger* pLI = aDMVSD.ChangeSeek(aPair);
       if (pLI) {
@@ -253,21 +280,35 @@ void BOPAlgo_PaveFiller::IntersectVE
       aVESolver.SetEdge(aE);
       aVESolver.SetPaveBlock(aPB);
       aVESolver.SetFuzzyValue(myFuzzyValue);
-      aVESolver.SetProgressIndicator(myProgressIndicator);
     }
   }
   //
+  aNbVE = aVVE.Length();
+
+  Message_ProgressScope aPS(aPSOuter.Next(9), "Performing Vertex-Edge intersection", aNbVE);
+  for (i = 0; i < aNbVE; i++)
+  {
+    BOPAlgo_VertexEdge& aVESolver = aVVE.ChangeValue(i);
+    aVESolver.SetProgressRange(aPS.Next());
+  }
   // Perform intersection
   //=============================================================
   BOPTools_Parallel::Perform (myRunParallel, aVVE, myContext);
   //=============================================================
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
   //
   // Keep the modified edges for further update
   TColStd_MapOfInteger aMEdges;
   //
   // Analyze intersections
-  aNbVE = aVVE.Length();
   for (i = 0; i < aNbVE; ++i) {
+    if (UserBreak(aPSOuter))
+    {
+      return;
+    }
     const BOPAlgo_VertexEdge& aVESolver = aVVE(i);
     if (aVESolver.Flag() != 0) {
       if (aVESolver.HasErrors())
@@ -287,7 +328,21 @@ void BOPAlgo_PaveFiller::IntersectVE
     Standard_Integer nVx = UpdateVertex(nV, aTolVNew);
     // 2. Create new pave and add it as extra pave to pave block
     //    for further splitting of the edge
-    const Handle(BOPDS_PaveBlock)& aPB = aVESolver.PaveBlock();
+    const BOPDS_ListOfPaveBlock& aLPB = myDS->PaveBlocks (nE);
+    // Find the appropriate one
+    Handle(BOPDS_PaveBlock) aPB;
+    BOPDS_ListOfPaveBlock::Iterator itPB (aLPB);
+    for (; itPB.More(); itPB.Next())
+    {
+      aPB = itPB.Value();
+      Standard_Real aT1, aT2;
+      aPB->Range (aT1, aT2);
+      if (aT > aT1 && aT < aT2)
+        break;
+    }
+    if (!itPB.More())
+      continue;
+
     BOPDS_Pave aPave;
     aPave.SetIndex(nVx);
     aPave.SetParameter(aT);

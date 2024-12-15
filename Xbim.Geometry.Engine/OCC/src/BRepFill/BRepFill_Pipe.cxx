@@ -30,12 +30,12 @@
 #include <BRepLib.hxx>
 #include <BRepLib_MakeVertex.hxx>
 #include <BRepTools_Substitution.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <GeomFill_CorrectedFrenet.hxx>
 #include <GeomFill_CurveAndTrihedron.hxx>
 #include <GeomFill_DiscreteTrihedron.hxx>
@@ -115,9 +115,9 @@ static void UpdateTolFromTopOrBottomPCurve(const TopoDS_Face& aFace,
   if (aCurve.IsNull())
     return;
 
-  Handle(Geom2dAdaptor_HCurve) GAHC2d = new Geom2dAdaptor_HCurve(aPCurve, fpar, lpar);
+  Handle(Geom2dAdaptor_Curve) GAHC2d = new Geom2dAdaptor_Curve(aPCurve, fpar, lpar);
   Handle(Geom_Surface) aSurf = BRep_Tool::Surface(aFace);
-  Handle(GeomAdaptor_HSurface) GAHS = new GeomAdaptor_HSurface(aSurf);
+  Handle(GeomAdaptor_Surface) GAHS = new GeomAdaptor_Surface(aSurf);
   Adaptor3d_CurveOnSurface ConS(GAHC2d, GAHS);
 
   Standard_Real Tol = BRep_Tool::Tolerance(anEdge);
@@ -300,7 +300,7 @@ void BRepFill_Pipe::Perform(const TopoDS_Wire&  Spine,
   RemLoc.Remove(myLast);
   myLast = RemLoc.GetResult();
   
-#if DRAW
+#ifdef DRAW
   if (Affich) {
     DBRep::Set("theprof",  TheProf);
     DBRep::Set("thefirst", myFirst);
@@ -434,7 +434,7 @@ TopoDS_Face BRepFill_Pipe::Face(const TopoDS_Edge& ESpine,
 TopoDS_Edge BRepFill_Pipe::Edge(const TopoDS_Edge&   ESpine,
 				const TopoDS_Vertex& VProfile)
 {
-  Standard_Integer ii, ispin = 0, iprof = 0, count = 0;;
+  Standard_Integer ii, ispin = 0, iprof = 0, count = 0;
 
   // *************************************************
   // Search if VProfile is a Vertex of myProfile
@@ -760,8 +760,11 @@ TopoDS_Shape BRepFill_Pipe::MakeShape(const TopoDS_Shape& S,
     TopoDS_Face F;
     for (ii=InitialLength+1; ii<=myFaces->ColLength(); ii++) {
       for (jj=1; jj<=myFaces->RowLength(); jj++) {
-	F = TopoDS::Face(myFaces->Value(ii, jj));
-	if (!F.IsNull()) B.Add(result, F);
+        if (myFaces->Value(ii, jj).ShapeType() == TopAbs_FACE)
+        {
+          F = TopoDS::Face(myFaces->Value(ii, jj));
+          if (!F.IsNull()) B.Add(result, F);
+        }
       }
     }
 

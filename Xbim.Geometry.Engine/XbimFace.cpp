@@ -95,75 +95,90 @@ namespace Xbim
 				return "Unknown Error";
 			}
 		}
-		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool closed, double tol)
+		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool assumeClosed, double tol)
 		{
+			return RemoveDuplicatePoints(polygon, std::vector<int>(), assumeClosed, tol);
+		}
+
+		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, std::vector<int> handles, bool assumeClosed, double tol)
+		{
+			// todo: 2021: this code loops more than required through the points to ensure all cleanup is performed
+			// a more careful thought about starting indices would speed this up.
+			//
 			tol *= tol;
-			bool isClosed = false;
+			bool firstAndLastPointsCoincide = false;
 			while (true) {
 				bool removed = false;
-				int n = polygon.Length() - (closed ? 0 : 1);
-				for (int i = 1; i <= n; ++i) {
+				int n = polygon.Length();
+				if (!assumeClosed)
+					n--;
+				// indices of polygon are 1-based
+				for (int iCurr = 1; iCurr <= n; ++iCurr) {
 					// wrap around to the first point in case of a closed loop
-					int j = (i % polygon.Length()) + 1;
-					double dist = polygon.Value(i).SquareDistance(polygon.Value(j));
+					int iNext = (iCurr % polygon.Length()) + 1;
+					double dist = polygon.Value(iCurr).SquareDistance(polygon.Value(iNext));
 					if (dist < tol) {
-						if (j == 1 && i == n) //the first and last point are the same
-							isClosed = true;
+						if (iNext == 1 && iCurr == n) //the first and last point are the same
+							firstAndLastPointsCoincide = true;
 						// do not remove the first or last point to
 						// maintain connectivity with other wires
-						if ((closed && j == 1) || (!closed && j == n))
+						if ((assumeClosed && iNext == 1) || (!assumeClosed && iNext == n))
 						{
-							polygon.Remove(i);
-							handles.erase(handles.begin() + i - 1);
+							polygon.Remove(iCurr);
+							if (!handles.empty())
+								handles.erase(handles.begin() + iCurr - 1);
 						}
 						else
 						{
-							polygon.Remove(j);
-							handles.erase(handles.begin() + j - 1);
+							polygon.Remove(iNext);
+							if (!handles.empty())
+								handles.erase(handles.begin() + iNext - 1);
 						}
 						removed = true;
-						break;
+						break; // every time we remove a point the loop is restarted
 					}
 				}
-				if (!removed) break;
+				
+				// at this stage we have removed overlapping points, so we can look for aligned segments
+				// this is still done in the main loop since removing aligned points might result in further
+				// overlapping to be discovered
+				if (!removed)
+				{
+					for (int iCurr = 2; iCurr < n; iCurr++) {
+						// we are not considering first and last and looping around the end if closed
+						gp_Pnt prev = polygon.Value(iCurr - 1);
+						gp_Pnt c = polygon.Value(iCurr);
+						gp_Pnt next = polygon.Value(iCurr + 1);
+						if (AreCollinear(
+							prev,
+							c,
+							next))
+						{
+							polygon.Remove(iCurr);
+							if (!handles.empty())
+								handles.erase(handles.begin() + iCurr - 1);
+							removed = true;
+							break; // every time we remove a point the loop is restarted
+						}
+					}
+				}
+				if (!removed) 
+					break;
 			}
-
-			return isClosed;
+			return firstAndLastPointsCoincide;
 		}
 
-		bool XbimFace::RemoveDuplicatePoints(TColgp_SequenceOfPnt& polygon, bool closed, double tol)
+		bool XbimFace::AreCollinear(const gp_Pnt& prePoint, const gp_Pnt& midPoint, const gp_Pnt& nextPoint)
 		{
-			tol *= tol;
-			bool isClosed = false;
-			while (true) {
-				bool removed = false;
-				int n = polygon.Length() - (closed ? 0 : 1);
-				for (int i = 1; i <= n; ++i) {
-					// wrap around to the first point in case of a closed loop
-					int j = (i % polygon.Length()) + 1;
-					double dist = polygon.Value(i).SquareDistance(polygon.Value(j));
-					if (dist < tol) {
-						if (j == 1 && i == n) //the first and last point are the same
-							isClosed = true;
-						// do not remove the first or last point to
-						// maintain connectivity with other wires
-						if ((closed && j == 1) || (!closed && j == n))
-						{
-							polygon.Remove(i);
-						}
-						else
-						{
-							polygon.Remove(j);
-						}
-						removed = true;
-						break;
-					}
-				}
-				if (!removed) break;
+			gp_Dir dir1 = gp_Dir(midPoint.X() - prePoint.X(), midPoint.Y() - prePoint.Y(), midPoint.Z() - prePoint.Z());
+			gp_Dir dir2 = gp_Dir(nextPoint.X() - midPoint.X(), nextPoint.Y() - midPoint.Y(), nextPoint.Z() - midPoint.Z());
+			if (dir1.IsParallel(dir2, Precision::Angular()))
+			{
+				return true;
 			}
-
-			return isClosed;
+			return false;
 		}
+
 		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n, ILogger^ /*logger*/)
 		{
 			gp_Pln plane(gp_Pnt(l.X, l.Y, l.Z), gp_Dir(n.X, n.Y, n.Z));
@@ -253,7 +268,6 @@ namespace Xbim
 
 		XbimFace::XbimFace(IXbimWire^ wire, bool isPlanar, double precision, int entityLabel, ILogger^ logger)
 		{
-
 			Init(wire, isPlanar, precision, entityLabel, logger);
 		}
 
@@ -261,12 +275,12 @@ namespace Xbim
 		{
 			Init(wire, pointOnFace, faceNormal, logger);
 		}
+
+		// todo: 2021: never used in the internal code... I think it could be obsoleted
 		XbimFace::XbimFace(IIfcFace^ face, ILogger^ logger, bool useVertexMap, TopTools_DataMapOfIntegerShape& vertexMap)
 		{
 			Init(face, logger, useVertexMap, vertexMap);
 		}
-
-
 
 		XbimFace::XbimFace(double x, double y, double tolerance, ILogger^ logger)
 		{
@@ -1049,11 +1063,10 @@ namespace Xbim
 				if (wire->IsValid)
 				{
 					double tolerance = profile->Model->ModelFactors->Precision;
-
 					XbimVector3D n = wire->Normal;
 					if (n.IsInvalid()) //it is not an area
 					{
-						XbimGeometryCreator::LogWarning(logger, profile, "Face cannot be built with a profile that has no area.");
+						XbimGeometryCreator::LogWarning(logger, profile, "Face cannot be built with a profile that has no area (invalid normal).");
 						return;
 					}
 					else
@@ -1232,6 +1245,11 @@ namespace Xbim
 						try //it is possible the inner loop is just a closed wire with zero area when a normal is calculated, this will throw an excpetion and the void is invalid
 						{
 							XbimVector3D n = innerWire->Normal;
+							if (n.IsInvalid())
+							{
+								XbimGeometryCreator::LogWarning(logger, profile, "Invalid void. Inner bound ignored", curve->EntityLabel);
+								continue;
+							}
 							bool needInvert = n.DotProduct(tn) > 0;
 							if (needInvert) //inner wire should be reverse of outer wire
 								innerWire->Reverse();
@@ -1780,35 +1798,37 @@ namespace Xbim
 					//trim 1 and trim 2 will be cartesian points
 					IIfcCartesianPoint^ trim1 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim1));
 					IIfcCartesianPoint^ trim2 = dynamic_cast<IIfcCartesianPoint^>(Enumerable::FirstOrDefault(tc->Trim2));
-					gp_Pnt p1 = XbimConvert::GetPoint3d(trim1);
-					gp_Pnt p2 = XbimConvert::GetPoint3d(trim2);
-					//there are two solutions A, B
-					//calc solution A
-					double radsq = circle->Radius * circle->Radius;
-					double qX = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
-					double x3 = (p1.X() + p2.X()) / 2;
-					double centreX = x3 - Math::Sqrt(radsq - ((qX / 2) * (qX / 2))) * ((p1.Y() - p2.Y()) / qX);
 
-					double qY = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+					if (trim1 != nullptr && trim2 != nullptr) {
 
-					double y3 = (p1.Y() + p2.Y()) / 2;
+						gp_Pnt p1 = XbimConvert::GetPoint3d(trim1);
+						gp_Pnt p2 = XbimConvert::GetPoint3d(trim2);
 
-					double centreY = y3 - Math::Sqrt(radsq - ((qY / 2) * (qY / 2))) * ((p2.X() - p1.X()) / qY);
+						//there are two solutions A, B
+						//calc solution A
+						double radsq = circle->Radius * circle->Radius;
+						double qX = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
+						double x3 = (p1.X() + p2.X()) / 2;
+						double centreX = x3 - Math::Sqrt(radsq - ((qX / 2) * (qX / 2))) * ((p1.Y() - p2.Y()) / qX);
 
+						double qY = Math::Sqrt(((p2.X() - p1.X()) * (p2.X() - p1.X())) + ((p2.Y() - p1.Y()) * (p2.Y() - p1.Y())));
 
+						double y3 = (p1.Y() + p2.Y()) / 2;
 
-					ITransaction^ txn = sLin->Model->BeginTransaction("Fix Centre");
+						double centreY = y3 - Math::Sqrt(radsq - ((qY / 2) * (qY / 2))) * ((p2.X() - p1.X()) / qY);
 
+						ITransaction^ txn = sLin->Model->BeginTransaction("Fix Centre");
 
-					IIfcPlacement^ p = dynamic_cast<IIfcPlacement^>(circle->Position);
+						IIfcPlacement^ p = dynamic_cast<IIfcPlacement^>(circle->Position);
 
-					p->Location->Coordinates[0] = centreX;
-					p->Location->Coordinates[1] = centreY;
-					p->Location->Coordinates[2] = 0;
+						p->Location->Coordinates[0] = centreX;
+						p->Location->Coordinates[1] = centreY;
+						p->Location->Coordinates[2] = 0;
 
-					xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
-					txn->RollBack();
-					isFixed = true;
+						xbasisEdge1 = gcnew XbimEdge(sLin->SweptCurve, logger);
+						txn->RollBack();
+						isFixed = true;
+					}
 				}
 
 

@@ -29,6 +29,10 @@
 //=======================================================================
 
 TopTrans_CurveTransition::TopTrans_CurveTransition ()
+: myCurv(0.0),
+  Init(Standard_False),
+  CurvFirst(0.0),
+  CurvLast(0.0)
 {
 }
 
@@ -82,7 +86,7 @@ void TopTrans_CurveTransition::Compare (const Standard_Real Tole,
       S = O;
   }
 
-  // It is the first comparaison for this complex transition 
+  // It is the first comparison for this complex transition
   if (Init) {
     Init=Standard_False;
     TgtFirst =T;
