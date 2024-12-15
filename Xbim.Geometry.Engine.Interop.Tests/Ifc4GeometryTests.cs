@@ -35,22 +35,12 @@ namespace Xbim.Geometry.Engine.Interop.Tests
             logger = null;
         }
 
-        [TestMethod]
-        public void Github_Issue_281()
-        {
-            using (var m = new MemoryModel(new Ifc4.EntityFactoryIfc4()))
-            {
-                m.LoadStep21("C:\\Users\\ibrah\\source\\repos\\XbimViewerExample\\WpfApp1\\01.ifc");
-                var c = new Xbim3DModelContext(m);
-                c.CreateContext(null, false);
-            }
-        }
+        
 
         [TestMethod]
         public void Can_build_ifcadvancedbrep_with_faulty_surface_orientation()
         {
-            Assert.Inconclusive("File missing");
-            using (var model = MemoryModel.OpenRead(@"ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
+            using (var model = MemoryModel.OpenRead(@"TestFiles\ifcadvancedbrep_with_faulty_surface_orientation.ifc"))
             {
                 //MemoryModel.SetWorkArounds(model.Header, model.ModelFactors as XbimModelFactors);
                 var pfs = model.Instances.OfType<IIfcAdvancedBrep>().FirstOrDefault();

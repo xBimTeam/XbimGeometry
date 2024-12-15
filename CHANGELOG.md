@@ -2,6 +2,39 @@
 
 All notable changes to this project should be documented in this file
 
+## [v5.1.785] 2024-12-15 
+
+Final 5.1 release before v6 (supporting netcore and IFC4.3)
+
+### Changed
+- Updated to OpenCascade 7.5.2
+- Switched to v6 Essentials Dependency Injection & Logging
+### Added
+- Baseline support for IFC4.3 schema (not including new geometries and linear placement)
+- BatchProcessor can now mesh single Breps
+### Removed
+### Fixed
+- Better logging on unmanaged exceptions
+- Fix for #281: Stackoverflow when precision is incorrect on Wires
+- Fixed management of invalid normals
+- Fix for collinear points in profiles
+- Added null check when trimming faces
+- Fix #388 : SurfaceCurveSweptAreaSolid regression
+- Fix: Small scale errors would throw exception
+- Fix managed objects lifetime (@daniilch)
+- Fix: Handle OCC precision issue in BRepTools_WireExplorer (@FrozenKiwi)
+- Fix #370: Premature garbage collection of objects holding native resources (@ChernyshevDS)
+- Fix infinite loop in ShapeUpgrade_UnifySameDomain
+- Security fix: Update Newtonsoft
+- Added workaround for ArchiCAD precision issues
+- Unique region names for many context w/geometries
+- #492 Fix logging when warning about incorrect composite profile
+- fixed up IfcCShapeProfileDef error when values of girth and thickness are the same (@okaharu0795)
+- Fix #447 Incorrect curve parameters when creating XbimCurve for trimmed ellipse (@ChernyshevDS)
+- #512 Fix Memory Access Violation issues (v4 regresion due to use of No_Exceptions)
+	- Fixes major disparity between Debug and Release builds as OCC was not raising Standard_Failure exceptions in Release build: often triggering unmanagaed 'access violation' exceptions
+- #512 Handle invalid AdvancedBreps better when calculating regions
+
 ## [v5.1.239] 2019-06-03
 
 Candidate release for 5.1
