@@ -1,12 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xbim.Common.Configuration;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
@@ -18,28 +13,18 @@ namespace Xbim.Geometry.Engine.Interop.Tests
     {
         
         static private XbimGeometryEngine geomEngine;
-        static private ILoggerFactory loggerFactory;
         static private ILogger logger;
 
         [ClassInitialize]
         static public void Initialise(TestContext context)
         {
-            if (!XbimServices.Current.IsBuilt)
-            {
-                XbimServices.Current.ConfigureServices(s =>
-                {
-                    s.AddXbimToolkit(builder => builder.AddEsentModel());
-                });
-            }
-            loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
             geomEngine = new XbimGeometryEngine();
-            logger = loggerFactory.CreateLogger<Ifc4GeometryTests>();
+            logger = XbimServices.Current.CreateLogger<Ifc4GeometryTests>();
         }
 
         [ClassCleanup]
         static public void Cleanup()
         {
-            loggerFactory = null;
             geomEngine = null;
             logger = null;
         }
