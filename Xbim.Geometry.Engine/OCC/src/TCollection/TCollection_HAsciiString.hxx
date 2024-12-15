@@ -72,17 +72,16 @@ public:
   //! Initializes a HAsciiString with a real value
   Standard_EXPORT TCollection_HAsciiString(const Standard_Real value);
   
-  //! Initializes a HAsciiString with a HAsciiString.
+  //! Initializes a HAsciiString with a AsciiString.
   Standard_EXPORT TCollection_HAsciiString(const TCollection_AsciiString& aString);
   
   //! Initializes a HAsciiString with a HAsciiString.
   Standard_EXPORT TCollection_HAsciiString(const Handle(TCollection_HAsciiString)& aString);
   
-  //! Initializes a HAsciiString with a HAsciiString.
-  //! If replaceNonAscii is non-null charecter, it will be used
+  //! Initializes a HAsciiString with a HExtendedString.
+  //! If replaceNonAscii is non-null character, it will be used
   //! in place of any non-ascii character found in the source string.
-  //! Otherwise, raises OutOfRange exception if at least one character
-  //! in the source string is not in the "Ascii range".
+  //! Otherwise, creates UTF-8 unicode string.
   Standard_EXPORT TCollection_HAsciiString(const Handle(TCollection_HExtendedString)& aString, const Standard_Character replaceNonAscii);
   
   //! Appends <other>  to me.
@@ -257,7 +256,7 @@ public:
   //! string <me>.
   Standard_EXPORT Standard_Boolean IsSameString (const Handle(TCollection_HAsciiString)& S, const Standard_Boolean CaseSensitive) const;
   
-  //! Removes all space characters in the begining of the string
+  //! Removes all space characters in the beginning of the string
   Standard_EXPORT void LeftAdjust();
   
   //! Left justify.
@@ -276,7 +275,7 @@ public:
   //! This is the same functionality as 'strlen' in C.
     Standard_Integer Length() const;
   
-  //! returns an index in the string <me> of the first occurence
+  //! returns an index in the string <me> of the first occurrence
   //! of the string S in the string <me> from the starting index
   //! FromIndex to the ending index ToIndex
   //! returns zero if failure
@@ -290,7 +289,7 @@ public:
   //! 4
   Standard_EXPORT Standard_Integer Location (const Handle(TCollection_HAsciiString)& other, const Standard_Integer FromIndex, const Standard_Integer ToIndex) const;
   
-  //! Returns the index of the nth occurence of the character C
+  //! Returns the index of the nth occurrence of the character C
   //! in the string <me> from the starting index FromIndex to the
   //! ending index ToIndex.
   //! Returns zero if failure.
@@ -306,7 +305,7 @@ public:
   //! Converts <me> to its lower-case equivalent.
   Standard_EXPORT void LowerCase();
   
-  //! Inserts the other string at the begining of the string <me>
+  //! Inserts the other string at the beginning of the string <me>
   //! Example:
   //! before
   //! me = "cde" , S = "ab"
@@ -323,7 +322,7 @@ public:
   //! "3.14159267" returns 3.14159267.
   Standard_EXPORT Standard_Real RealValue() const;
   
-  //! Remove all the occurences of the character C in the string
+  //! Remove all the occurrences of the character C in the string
   //! Example:
   //! before
   //! me = "HellLLo", C = 'L' , CaseSensitive = True
@@ -456,7 +455,7 @@ public:
   Standard_EXPORT Standard_Integer UsefullLength() const;
   
   //! Returns character at position <where> in <me>.
-  //! If <where> is less than zero or greater than the lenght of
+  //! If <where> is less than zero or greater than the length of
   //! <me>, an exception is raised.
   //! Example:
   //! aString contains "Hello"

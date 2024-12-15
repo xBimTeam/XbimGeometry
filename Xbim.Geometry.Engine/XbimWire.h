@@ -78,6 +78,8 @@ namespace Xbim
 			
 			
 		public:
+			// this can throw an exception in debug, if the wire is nonsense (e.g. line) and should just be dropped
+			// in release it might return an invalid normal with Nan components that needs to be checked, using XbimConvert::IsInvalid
 			static gp_Dir NormalDir(const TopoDS_Wire& wire);
 #pragma region destructors
 
@@ -143,7 +145,7 @@ namespace Xbim
 			virtual property IXbimEdgeSet^ Edges {IXbimEdgeSet^ get(); }
 			virtual property IXbimVertexSet^ Vertices {IXbimVertexSet^ get(); }
 			virtual property IEnumerable<XbimPoint3D>^ Points {IEnumerable<XbimPoint3D>^ get(); }
-			//returns the normal of the loop using the Newell's normal algorithm
+			//returns the normal of the loop using the Newell's normal algorithm. WARNING: Always check success via the IsInvalid() method of returned instance.
 			virtual property XbimVector3D Normal {XbimVector3D get(); }
 			virtual property bool IsClosed {bool get() { return IsValid && pWire->Closed() == Standard_True; }; }
 			virtual property bool IsPlanar {bool get(); }

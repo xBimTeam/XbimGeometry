@@ -300,48 +300,37 @@ void Geom_BSplineSurface::ExchangeUV ()
   Standard_Integer LR = poles->LowerRow();
   Standard_Integer UR = poles->UpperRow();
 
-  Handle(TColgp_HArray2OfPnt)   npoles   = 
-    new TColgp_HArray2OfPnt  (LC, UC, LR, UR);
-  Handle(TColStd_HArray2OfReal) nweights = 
-    new TColStd_HArray2OfReal (LC, UC, LR, UR);
-
-  const TColgp_Array2OfPnt   & spoles   = poles->Array2();
-  const TColStd_Array2OfReal & sweights = weights->Array2();
-  
-  TColgp_Array2OfPnt&   snpoles   = npoles->ChangeArray2();
-  TColStd_Array2OfReal& snweights = nweights->ChangeArray2();
-  
-  Standard_Integer i, j;
-  for (i = LC; i <= UC; i++) {
-    for (j = LR; j <= UR; j++) {
-      snpoles   (i,j) = spoles   (j,i);
-      snweights (i,j) = sweights (j,i);
-    }
+  Handle(TColgp_HArray2OfPnt) npoles = new TColgp_HArray2OfPnt (LC, UC, LR, UR);
+  Handle(TColStd_HArray2OfReal) nweights;
+  if (!weights.IsNull())
+  {
+    nweights = new TColStd_HArray2OfReal (LC, UC, LR, UR);
   }
 
+  const TColgp_Array2OfPnt& spoles = poles->Array2();
+  const TColStd_Array2OfReal* sweights = !weights.IsNull() ? &weights->Array2() : NULL;
+  
+  TColgp_Array2OfPnt& snpoles = npoles->ChangeArray2();
+  TColStd_Array2OfReal* snweights = !nweights.IsNull() ? &nweights->ChangeArray2() : NULL;
+  for (Standard_Integer i = LC; i <= UC; i++)
+  {
+    for (Standard_Integer j = LR; j <= UR; j++)
+    {
+      snpoles (i, j) = spoles (j, i);
+      if (snweights != NULL)
+      {
+        snweights->ChangeValue (i, j) = sweights->Value (j, i);
+      }
+    }
+  }
   poles   = npoles;
   weights = nweights;
 
-  Standard_Boolean temp = urational;
-  urational = vrational;
-  vrational = temp;
-
-  temp = uperiodic;
-  uperiodic = vperiodic;
-  vperiodic = temp;
-
-  Standard_Integer tempdeg = udeg;
-  udeg = vdeg;
-  vdeg = tempdeg;
-  
-
-  Handle(TColStd_HArray1OfReal) tempknots = uknots;
-  uknots = vknots;
-  vknots = tempknots;
-
-  Handle(TColStd_HArray1OfInteger) tempmults = umults;
-  umults = vmults;
-  vmults = tempmults;
+  std::swap (urational, vrational);
+  std::swap (uperiodic, vperiodic);
+  std::swap (udeg,   vdeg);
+  std::swap (uknots, vknots);
+  std::swap (umults, vmults);
 
   UpdateUKnots();
   UpdateVKnots();
@@ -619,9 +608,11 @@ void Geom_BSplineSurface::segment(const Standard_Real U1,
   Standard_Integer ToU2 = uknots->Upper();
   BSplCLib::LocateParameter(udeg, uknots->Array1(), umults->Array1(),
                             NewU1, uperiodic, FromU1, ToU2, index1U, U);
+  if (Abs(uknots->Value(index1U + 1) - U) <= EpsU)
+    index1U++;
   BSplCLib::LocateParameter(udeg, uknots->Array1(), umults->Array1(),
                             NewU1 + deltaU, uperiodic, FromU1, ToU2, index2U, U);
-  if (Abs(uknots->Value(index2U + 1) - U) <= EpsU)
+  if (Abs(uknots->Value(index2U + 1) - U) <= EpsU || index2U == index1U)
     index2U++;
 
   Standard_Integer nbuknots = index2U - index1U + 1;
@@ -659,9 +650,11 @@ void Geom_BSplineSurface::segment(const Standard_Real U1,
   Standard_Integer ToV2 = vknots->Upper();
   BSplCLib::LocateParameter(vdeg, vknots->Array1(), vmults->Array1(),
                             NewV1, vperiodic, FromV1, ToV2, index1V, V);
+  if (Abs(vknots->Value(index1V + 1) - V) <= EpsV)
+    index1V++;
   BSplCLib::LocateParameter(vdeg, vknots->Array1(), vmults->Array1(),
                             NewV1 + deltaV, vperiodic, FromV1, ToV2, index2V, V);
-  if (Abs(vknots->Value(index2V + 1) - V) <= EpsV)
+  if (Abs(vknots->Value(index2V + 1) - V) <= EpsV || index2V == index1V)
     index2V++;
 
   Standard_Integer nbvknots = index2V - index1V + 1;
@@ -1272,3 +1265,46 @@ void Geom_BSplineSurface::SetWeightRow
   Rational(Weights, urational, vrational);
 }
 
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Geom_BSplineSurface::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, Geom_BoundedSurface)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, urational)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vrational)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, uperiodic)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vperiodic)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, uknotSet)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vknotSet)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Usmooth)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Vsmooth)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, udeg)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vdeg)
+
+  if (!poles.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, poles->Size())
+  if (!weights.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, weights->Size())
+  if (!ufknots.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, ufknots->Size())
+  if (!vfknots.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vfknots->Size())
+
+  if (!uknots.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, uknots->Size())
+  if (!vknots.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vknots->Size())
+  if (!umults.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, umults->Size())
+  if (!vmults.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vmults->Size())
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, umaxderivinv)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vmaxderivinv)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, maxderivinvok)
+}

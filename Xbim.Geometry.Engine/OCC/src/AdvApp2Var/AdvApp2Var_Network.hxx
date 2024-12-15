@@ -26,7 +26,6 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
-class Standard_NoSuchObject;
 class AdvApp2Var_Patch;
 
 
@@ -46,11 +45,8 @@ public:
   //! if all Patches are approximated Standard_False is returned
   Standard_EXPORT Standard_Boolean FirstNotApprox (Standard_Integer& Index) const;
   
-    AdvApp2Var_Patch& ChangePatch (const Standard_Integer Index);
-  AdvApp2Var_Patch& operator() (const Standard_Integer Index)
-{
-  return ChangePatch(Index);
-}
+  AdvApp2Var_Patch& ChangePatch (const Standard_Integer Index) { return *myNet.Value(Index); }
+  AdvApp2Var_Patch& operator()  (const Standard_Integer Index) { return ChangePatch(Index); }
   
   Standard_EXPORT void UpdateInU (const Standard_Real CuttingValue);
   
@@ -67,38 +63,23 @@ public:
   Standard_EXPORT Standard_Real UParameter (const Standard_Integer Index) const;
   
   Standard_EXPORT Standard_Real VParameter (const Standard_Integer Index) const;
-  
-    const AdvApp2Var_Patch& Patch (const Standard_Integer UIndex, const Standard_Integer VIndex) const;
+
+  const AdvApp2Var_Patch& Patch (const Standard_Integer UIndex, const Standard_Integer VIndex) const
+  {
+    return *myNet.Value ((VIndex-1)*(myUParameters.Length()-1) + UIndex);
+  }
+
   const AdvApp2Var_Patch& operator() (const Standard_Integer UIndex, const Standard_Integer VIndex) const
-{
-  return Patch(UIndex,VIndex);
-}
-
-
-
-
-protected:
-
-
-
-
+  {
+    return Patch(UIndex,VIndex);
+  }
 
 private:
-
-
 
   AdvApp2Var_SequenceOfPatch myNet;
   TColStd_SequenceOfReal myUParameters;
   TColStd_SequenceOfReal myVParameters;
 
-
 };
-
-
-#include <AdvApp2Var_Network.lxx>
-
-
-
-
 
 #endif // _AdvApp2Var_Network_HeaderFile

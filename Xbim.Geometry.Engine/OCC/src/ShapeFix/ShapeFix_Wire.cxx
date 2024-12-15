@@ -43,6 +43,8 @@
 //                one pcurve we make replace pcurve)
 // PTV 26.06.2002  Remove regressions after fix OCC450
 
+#include <ShapeFix_Wire.hxx>
+
 #include <Adaptor3d_CurveOnSurface.hxx>
 #include <Bnd_Array1OfBox2d.hxx>
 #include <Bnd_Box2d.hxx>
@@ -60,7 +62,6 @@
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom2dConvert.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Curve.hxx>
@@ -71,7 +72,6 @@
 #include <Geom_SurfaceOfRevolution.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
@@ -99,7 +99,6 @@
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_IntersectionTool.hxx>
 #include <ShapeFix_SplitTool.hxx>
-#include <ShapeFix_Wire.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
@@ -394,9 +393,9 @@ Standard_Boolean ShapeFix_Wire::Perform()
     
   if (myFixTailMode != 0)
   {
-    Fixed |= FixTails();
-    if (Fixed)
+    if (FixTails())
     {
+      Fixed =Standard_True;
       FixShifted();
     }
   }
@@ -608,7 +607,7 @@ Standard_Boolean ShapeFix_Wire::FixEdgeCurves()
 	  }
 	  if ( seq.Length() >0 ) { // supposed that edge is SP
 #ifdef OCCT_DEBUG
-	    std::cout << "Edge going over singularity detected; splitted" << std::endl;
+	    std::cout << "Edge going over singularity detected; split" << std::endl;
 #endif
       Standard_Boolean isFwd = ( E.Orientation() == TopAbs_FORWARD );
       E.Orientation ( TopAbs_FORWARD );
@@ -1025,7 +1024,7 @@ Standard_Boolean ShapeFix_Wire::FixSelfIntersection()
 	boxes(i) = box;
       }
     }
-    
+
     Standard_Boolean isFail = Standard_False, isDone = Standard_False;
     for(Standard_Integer num1 = 1; num1 < nb-1; num1++) {
       Standard_Integer fin = (num1 == 1 ? nb-1 : nb);
@@ -1036,15 +1035,15 @@ Standard_Boolean ShapeFix_Wire::FixSelfIntersection()
 	  isDone |= LastFixStatus ( ShapeExtend_DONE1 );
 	}
     }
-    
+
     if(isFail)
       myStatusSelfIntersection |= ShapeExtend::EncodeStatus ( ShapeExtend_FAIL3 );
     if(isDone)
       myStatusSelfIntersection |= ShapeExtend::EncodeStatus ( ShapeExtend_DONE5 );
 #ifdef OCCT_DEBUG
     if (StatusSelfIntersection (ShapeExtend_DONE5))
-      std::cout << "Warning: ShapeFix_Wire::FixSelfIntersection: Non ajacent intersection fixed" << std::endl;
-#endif	  
+      std::cout << "Warning: ShapeFix_Wire::FixSelfIntersection: Non adjacent intersection fixed" << std::endl;
+#endif
 */
   }
 
@@ -1421,7 +1420,7 @@ Standard_Boolean ShapeFix_Wire::FixShifted()
   
   ShapeBuild_Edge sbe;
   Standard_Integer nb = sbwd->NbEdges();
-  Standard_Boolean end = (nb == 0), degstop = Standard_False;;
+  Standard_Boolean end = (nb == 0), degstop = Standard_False;
   Standard_Integer stop = nb;
   Standard_Integer degn2 = 0;
   gp_Pnt pdeg;
@@ -1967,8 +1966,8 @@ static Standard_Boolean RemoveLoop (TopoDS_Edge &E, const TopoDS_Face &face,
   //:q1
   TopLoc_Location L;
   Handle(Geom_Surface) S = BRep_Tool::Surface(face, L);
-  Handle(Geom2dAdaptor_HCurve) AC = new Geom2dAdaptor_HCurve(c2d);
-  Handle(GeomAdaptor_HSurface) AS = new GeomAdaptor_HSurface(S);
+  Handle(Geom2dAdaptor_Curve) AC = new Geom2dAdaptor_Curve(c2d);
+  Handle(GeomAdaptor_Surface) AS = new GeomAdaptor_Surface(S);
   
   Adaptor3d_CurveOnSurface ACS(AC,AS);
   gp_Pnt P1(ACS.Value(t1));
@@ -2098,8 +2097,8 @@ static Standard_Boolean RemoveLoop (TopoDS_Edge &E, const TopoDS_Face &face,
 
   TopLoc_Location L;
   Handle (Geom_Surface) S = BRep_Tool::Surface(face, L);
-  Handle (Geom2dAdaptor_HCurve) AC = new Geom2dAdaptor_HCurve(c2d);
-  Handle (GeomAdaptor_HSurface) AS = new GeomAdaptor_HSurface(S); 
+  Handle (Geom2dAdaptor_Curve) AC = new Geom2dAdaptor_Curve(c2d);
+  Handle (GeomAdaptor_Surface) AS = new GeomAdaptor_Surface(S); 
   
   Adaptor3d_CurveOnSurface ACS(AC,AS);
   gp_Pnt P1(ACS.Value(t1));
@@ -2239,7 +2238,7 @@ Standard_Boolean ShapeFix_Wire::FixSelfIntersectingEdge (const Standard_Integer 
 
   if (myRemoveLoopMode<1) {
     for ( Standard_Integer iter=0; iter < 30; iter++ ) { 
-      Standard_Boolean loopRemoved = Standard_False;;
+      Standard_Boolean loopRemoved = Standard_False;
       Standard_Real prevFirst = 0 , prevLast = 0; 
       for ( Standard_Integer i=1; i<=points2d.Length(); i++ ) {
         gp_Pnt pint = points3d.Value(i);
@@ -2355,7 +2354,7 @@ Standard_Boolean ShapeFix_Wire::FixSelfIntersectingEdge (const Standard_Integer 
 
 //=======================================================================
 //function : ComputeLocalDeviation
-//purpose  : auxilary
+//purpose  : auxiliary
 //=======================================================================
 static Standard_Real ComputeLocalDeviation (const TopoDS_Edge &edge, 
 					    const gp_Pnt &pint,const gp_Pnt &pnt,
@@ -2658,7 +2657,7 @@ Standard_Boolean ShapeFix_Wire::FixIntersectingEdges (const Standard_Integer num
 //function : FixIntersectingEdges
 //purpose  : 
 //=======================================================================
-//pdn 17.03.99 fixing non ajacent intersection by increasing tolerance of vertex
+//pdn 17.03.99 fixing non adjacent intersection by increasing tolerance of vertex
 
 Standard_Boolean ShapeFix_Wire::FixIntersectingEdges (const Standard_Integer num1,
 						      const Standard_Integer num2)

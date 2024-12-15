@@ -766,6 +766,21 @@ namespace Xbim
 			}
 			return false;
 		}
+
+		bool XbimConvert::IsInvalid(const gp_Dir& dir, double tolerance)
+		{
+			return (
+				isnan(dir.X())
+				|| isnan(dir.Y())
+				|| isnan(dir.Z())
+				||
+				sqrt(
+					dir.X() * dir.X() +
+					dir.Y() * dir.Y() +
+					dir.Z() * dir.Z()
+					) < tolerance
+				);
+		}
 #pragma warning( pop )
 		/// <summary>
 		/// Calculates the Newell's Normal of the polygon of the loop

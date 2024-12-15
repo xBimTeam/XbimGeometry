@@ -37,17 +37,11 @@
 #include <TColStd_HArray1OfReal.hxx>
 class Geom_Surface;
 class GeomPlate_Surface;
-class Standard_ConstructionError;
-class Standard_RangeError;
 class GeomPlate_CurveConstraint;
 class GeomPlate_PointConstraint;
 class gp_Pnt2d;
 class gp_Pnt;
 class Geom2d_Curve;
-class Adaptor3d_HCurve;
-class Adaptor2d_HCurve2d;
-class Message_ProgressIndicator;
-
 
 
 //! This class provides an algorithm for constructing such a plate surface that
@@ -131,7 +125,7 @@ public:
   //! Exceptions
   //! Standard_RangeError if the value of the constraint is
   //! null or if plate is not done.
-  Standard_EXPORT void Perform(const Handle(Message_ProgressIndicator) & aProgress = Handle(Message_ProgressIndicator)());
+  Standard_EXPORT void Perform(const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! returns the CurveConstraints of order order
   Standard_EXPORT Handle(GeomPlate_CurveConstraint) CurveConstraint (const Standard_Integer order) const;
@@ -159,7 +153,7 @@ public:
 
   //! Allows you to ensure that the array of curves returned by
   //! Curves2d has the correct orientation. Returns the
-  //! orientation of the curves in the the array returned by
+  //! orientation of the curves in the array returned by
   //! Curves2d. Computation changes the orientation of
   //! these curves. Consequently, this method returns the
   //! orientation prior to computation.
@@ -177,13 +171,13 @@ public:
   //! curves prior to computation.
   Standard_EXPORT Handle(TColStd_HArray1OfInteger) Order() const;
   
-  //! Returns the max distance betwen the result and the constraints
+  //! Returns the max distance between the result and the constraints
   Standard_EXPORT Standard_Real G0Error() const;
   
-  //! Returns  the max angle betwen the result and the constraints
+  //! Returns  the max angle between the result and the constraints
   Standard_EXPORT Standard_Real G1Error() const;
   
-  //! Returns  the max difference of curvature betwen the result and the constraints
+  //! Returns  the max difference of curvature between the result and the constraints
   Standard_EXPORT Standard_Real G2Error() const;
   
   //! Returns   the max distance between the result and the constraint Index
@@ -208,17 +202,17 @@ private:
 
   
   //! Evaluates the distance, the angle between normals, and the "courbure"
-  //! on middle points of contraints an corresponding points on the GeomPlate_Surface
+  //! on middle points of constraints and corresponding points on the GeomPlate_Surface
   //! the results are given for a curve c
   Standard_EXPORT void EcartContraintesMil (const Standard_Integer c, Handle(TColStd_HArray1OfReal)& d, Handle(TColStd_HArray1OfReal)& an, Handle(TColStd_HArray1OfReal)& courb);
   
   Standard_EXPORT gp_Pnt2d ProjectPoint (const gp_Pnt& P);
   
-  Standard_EXPORT Handle(Geom2d_Curve) ProjectCurve (const Handle(Adaptor3d_HCurve)& Curv);
+  Standard_EXPORT Handle(Geom2d_Curve) ProjectCurve (const Handle(Adaptor3d_Curve)& Curv);
   
-  Standard_EXPORT Handle(Adaptor2d_HCurve2d) ProjectedCurve (Handle(Adaptor3d_HCurve)& Curv);
+  Standard_EXPORT Handle(Adaptor2d_Curve2d) ProjectedCurve (Handle(Adaptor3d_Curve)& Curv);
   
-  Standard_EXPORT void ComputeSurfInit(const Handle(Message_ProgressIndicator) & aProgress);
+  Standard_EXPORT void ComputeSurfInit(const Message_ProgressRange& theProgress);
   
   Standard_EXPORT void Intersect (Handle(GeomPlate_HArray1OfSequenceOfReal)& PntInter, Handle(GeomPlate_HArray1OfSequenceOfReal)& PntG1G1);
   

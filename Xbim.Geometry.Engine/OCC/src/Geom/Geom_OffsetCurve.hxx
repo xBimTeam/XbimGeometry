@@ -28,13 +28,6 @@
 #include <Standard_Integer.hxx>
 #include <GeomEvaluator_OffsetCurve.hxx>
 
-class Geom_Curve;
-class Standard_ConstructionError;
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom_UndefinedDerivative;
-class Geom_UndefinedValue;
-class gp_Dir;
 class gp_Pnt;
 class gp_Vec;
 class gp_Trsf;
@@ -280,6 +273,9 @@ public:
   
   //! Returns continuity of the basis curve.
   Standard_EXPORT GeomAbs_Shape GetBasisCurveContinuity() const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

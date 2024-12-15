@@ -14,13 +14,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <Adaptor3d_HCurve.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_HCompCurve.hxx>
-#include <BRepAdaptor_HCurve.hxx>
+
+#include <BRep_Tool.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <ElCLib.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
@@ -41,6 +37,8 @@
 #include <TopExp.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(BRepAdaptor_CompCurve, Adaptor3d_Curve)
 
 BRepAdaptor_CompCurve::BRepAdaptor_CompCurve()
 : TFirst  (0.0),
@@ -81,6 +79,34 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
   Initialize(theWire, theIsAC, theFirst, theLast, theTolerance);
 }
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Curve) BRepAdaptor_CompCurve::ShallowCopy() const
+{
+  Handle(BRepAdaptor_CompCurve) aCopy = new BRepAdaptor_CompCurve();
+
+  aCopy->myWire   = myWire;
+  aCopy->TFirst   = TFirst;
+  aCopy->TLast    = TLast;
+  aCopy->PTol     = PTol;
+  aCopy->myCurves = new (BRepAdaptor_HArray1OfCurve) (1, myCurves->Size());
+  for (Standard_Integer anI = 1; anI <= myCurves->Size(); ++anI)
+  {
+    const Handle(Adaptor3d_Curve) aCurve = myCurves->Value(anI).ShallowCopy();
+    const BRepAdaptor_Curve& aBrepCurve = *(Handle(BRepAdaptor_Curve)::DownCast(aCurve));
+    aCopy->myCurves->SetValue(anI, aBrepCurve);
+  }
+  aCopy->myKnots  = myKnots;
+  aCopy->CurIndex = CurIndex;
+  aCopy->Forward  = Forward;
+  aCopy->IsbyAC   = IsbyAC;
+
+  return aCopy;
+}
+
  void BRepAdaptor_CompCurve::Initialize(const TopoDS_Wire& W,
 					const Standard_Boolean AC)
 {
@@ -118,7 +144,7 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
     }
   }
 
-  Forward = Standard_True; // Defaut ; The Reverse Edges are parsed.
+  Forward = Standard_True; // Default ; The Reverse Edges are parsed.
   if((NbEdge > 2) || ((NbEdge==2) && (!myWire.Closed())) ) {
     TopAbs_Orientation Or = myCurves->Value(1).Edge().Orientation();
     TopoDS_Vertex VI, VL;
@@ -152,7 +178,7 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
   PTol = Tol;
 
   // Trim the extremal curves.
-  Handle (BRepAdaptor_HCurve) HC;
+  Handle (BRepAdaptor_Curve) HC;
   Standard_Integer i1, i2;
   Standard_Real f=TFirst, l=TLast, d;
   i1 = i2 = CurIndex;
@@ -161,10 +187,10 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
   CurIndex = (i1+i2)/2; // Small optimization
   if (i1==i2) {
     if (l > f)
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(myCurves->Value(i1).Trim(f, l, PTol));
+      HC = Handle(BRepAdaptor_Curve)::DownCast(myCurves->Value(i1).Trim(f, l, PTol));
     else
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(myCurves->Value(i1).Trim(l, f, PTol));
-    myCurves->SetValue(i1, HC->ChangeCurve());
+      HC = Handle(BRepAdaptor_Curve)::DownCast(myCurves->Value(i1).Trim(l, f, PTol));
+    myCurves->SetValue(i1, *HC);
   }
   else {
     const BRepAdaptor_Curve& c1 = myCurves->Value(i1);
@@ -173,17 +199,17 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
 
     k = c1.LastParameter();
     if (k>f)
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(c1.Trim(f, k, PTol));
+      HC = Handle(BRepAdaptor_Curve)::DownCast(c1.Trim(f, k, PTol));
     else
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(c1.Trim(k, f, PTol));
-    myCurves->SetValue(i1, HC->ChangeCurve());
+      HC = Handle(BRepAdaptor_Curve)::DownCast(c1.Trim(k, f, PTol));
+    myCurves->SetValue(i1, *HC);
 
     k = c2.FirstParameter();
     if (k<=l)
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(c2.Trim(k, l, PTol));
+      HC = Handle(BRepAdaptor_Curve)::DownCast(c2.Trim(k, l, PTol));
     else
-      HC = Handle(BRepAdaptor_HCurve)::DownCast(c2.Trim(l, k, PTol));
-    myCurves->SetValue(i2, HC->ChangeCurve());
+      HC = Handle(BRepAdaptor_Curve)::DownCast(c2.Trim(l, k, PTol));
+    myCurves->SetValue(i2, *HC);
   }
 }
 
@@ -269,13 +295,13 @@ const TopoDS_Wire& BRepAdaptor_CompCurve::Wire() const
   }
 }
 
- Handle(Adaptor3d_HCurve) BRepAdaptor_CompCurve::Trim(const Standard_Real First,
+ Handle(Adaptor3d_Curve) BRepAdaptor_CompCurve::Trim(const Standard_Real First,
 						    const Standard_Real Last,
 						    const Standard_Real Tol) const
 {
   BRepAdaptor_CompCurve C(myWire, IsbyAC, First, Last, Tol);
-  Handle(BRepAdaptor_HCompCurve) HC =
-    new (BRepAdaptor_HCompCurve) (C);
+  Handle(BRepAdaptor_CompCurve) HC =
+    new (BRepAdaptor_CompCurve) (C);
   return HC;
 }
 

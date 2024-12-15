@@ -16,7 +16,7 @@
 
 #include <IntPatch_PointLine.hxx>
 
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <IntSurf_PntOn2S.hxx>
 #include <Precision.hxx>
 
@@ -45,8 +45,8 @@ IntPatch_PointLine::IntPatch_PointLine (const Standard_Boolean Tang) :
 //            Returns negative value if computation is not possible
 //=======================================================================
 Standard_Real IntPatch_PointLine::
-                CurvatureRadiusOfIntersLine(const Handle(Adaptor3d_HSurface)& theS1,
-                                            const Handle(Adaptor3d_HSurface)& theS2,
+                CurvatureRadiusOfIntersLine(const Handle(Adaptor3d_Surface)& theS1,
+                                            const Handle(Adaptor3d_Surface)& theS2,
                                             const IntSurf_PntOn2S& theUVPoint)
 {
   const Standard_Real aSmallValue = 1.0/Precision::Infinite();
@@ -67,7 +67,7 @@ Standard_Real IntPatch_PointLine::
   //the method, which will be changed possibly never.
   //However, if we do something in this method we can check its
   //functionality easily. For that:
-  //  1. Initialyze aTestID variable by the correct value;
+  //  1. Initialize aTestID variable by the correct value;
   //  2. Compile this test code fragment.
 
   int aTestID = 0;
@@ -115,7 +115,7 @@ Standard_Real IntPatch_PointLine::
 #endif
 
   const gp_Vec aN1(aDU1.Crossed(aDV1)), aN2(aDU2.Crossed(aDV2));
-  //Tangent vactor to the intersection curve
+  //Tangent vector to the intersection curve
   const gp_Vec aCTan(aN1.Crossed(aN2));
   const Standard_Real aSqMagnFDer = aCTan.SquareMagnitude();
   

@@ -28,8 +28,6 @@
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <FilletSurf_StatusType.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
 class TopoDS_Shape;
 class Geom_Surface;
 class TopoDS_Face;
@@ -53,7 +51,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  //! initialize  of the informations necessary for  the
+  //! initialize  of the information  necessary for  the
   //! computation of  the fillet on the
   //! Shape S from a list of edges E and a radius R.
   //!
@@ -74,7 +72,7 @@ public:
   //! IsPartial: the result is partial
   Standard_EXPORT FilletSurf_StatusDone IsDone() const;
   
-  //! gives    informations     about  error   status     if
+  //! gives    information     about   error   status     if
   //! IsDone=IsNotOk
   //! returns
   //! EdgeNotG1: the edges are not G1

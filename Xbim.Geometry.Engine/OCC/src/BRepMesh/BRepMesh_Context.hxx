@@ -18,19 +18,19 @@
 
 #include <IMeshTools_Context.hxx>
 
-//! Class implemeting default context of BRepMesh algorithm.
+//! Class implementing default context of BRepMesh algorithm.
 //! Initializes context by default algorithms.
 class BRepMesh_Context : public IMeshTools_Context
 {
 public:
 
   //! Constructor.
-  Standard_EXPORT BRepMesh_Context ();
+  Standard_EXPORT BRepMesh_Context (IMeshTools_MeshAlgoType theMeshType = IMeshTools_MeshAlgoType_DEFAULT);
 
   //! Destructor.
   Standard_EXPORT virtual ~BRepMesh_Context ();
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_Context, IMeshTools_Context)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_Context, IMeshTools_Context)
 };
 
 #endif

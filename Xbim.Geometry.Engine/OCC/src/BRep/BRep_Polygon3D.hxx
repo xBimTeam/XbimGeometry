@@ -23,9 +23,7 @@
 #include <BRep_CurveRepresentation.hxx>
 #include <Standard_Boolean.hxx>
 class Poly_Polygon3D;
-class Standard_DomainError;
 class TopLoc_Location;
-class BRep_CurveRepresentation;
 
 
 class BRep_Polygon3D;
@@ -49,6 +47,9 @@ public:
   
   //! Return a copy of this representation.
   Standard_EXPORT Handle(BRep_CurveRepresentation) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

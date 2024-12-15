@@ -39,7 +39,7 @@ public:
   //! Returns number of pcurves assigned to current edge.
   Standard_EXPORT virtual Standard_Integer PCurvesNb () const Standard_OVERRIDE;
 
-  //! Adds disrete pcurve for the specifed discrete face.
+  //! Adds discrete pcurve for the specified discrete face.
   Standard_EXPORT virtual const IMeshData::IPCurveHandle& AddPCurve (
     const IMeshData::IFacePtr& theDFace,
     const TopAbs_Orientation   theOrientation) Standard_OVERRIDE;
@@ -53,7 +53,7 @@ public:
   Standard_EXPORT virtual const IMeshData::IPCurveHandle& GetPCurve (
     const Standard_Integer theIndex) const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMeshData_Edge, IMeshData_Edge)
+  DEFINE_STANDARD_RTTIEXT(BRepMeshData_Edge, IMeshData_Edge)
 
 private:
 

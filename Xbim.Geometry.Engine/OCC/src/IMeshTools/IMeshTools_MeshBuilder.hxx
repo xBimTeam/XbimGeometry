@@ -19,6 +19,7 @@
 #include <Message_Algorithm.hxx>
 #include <IMeshTools_Context.hxx>
 #include <Standard_Type.hxx>
+#include <Message_ProgressRange.hxx>
 
 //! Builds mesh for each face of shape without triangulation.
 //! In case if some faces of shape have already been triangulated
@@ -50,21 +51,21 @@ public:
   Standard_EXPORT virtual ~IMeshTools_MeshBuilder();
 
   //! Sets context for algorithm.
-  inline void SetContext (const Handle (IMeshTools_Context)& theContext)
+  void SetContext (const Handle (IMeshTools_Context)& theContext)
   {
     myContext = theContext;
   }
 
   //! Gets context of algorithm.
-  inline const Handle (IMeshTools_Context)& GetContext () const
+  const Handle (IMeshTools_Context)& GetContext () const
   {
     return myContext;
   }
 
-  //! Performs meshing ot the shape using current context.
-  Standard_EXPORT virtual void Perform ();
+  //! Performs meshing to the shape using current context.
+  Standard_EXPORT virtual void Perform (const Message_ProgressRange& theRange);
 
-  DEFINE_STANDARD_RTTI_INLINE(IMeshTools_MeshBuilder, Message_Algorithm)
+  DEFINE_STANDARD_RTTIEXT(IMeshTools_MeshBuilder, Message_Algorithm)
 
 private:
 

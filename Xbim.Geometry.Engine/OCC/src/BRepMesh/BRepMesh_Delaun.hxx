@@ -29,6 +29,7 @@
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 #include <TColStd_MapOfInteger.hxx>
+#include <Message_ProgressRange.hxx>
 
 class Bnd_B2d;
 class Bnd_Box2d;
@@ -75,20 +76,21 @@ public:
   Standard_EXPORT void RemoveVertex (const BRepMesh_Vertex& theVertex);
 
   //! Adds some vertices into the triangulation.
-  Standard_EXPORT void AddVertices (IMeshData::VectorOfInteger& theVerticesIndices);
+  Standard_EXPORT void AddVertices (IMeshData::VectorOfInteger&  theVerticesIndices,
+                                    const Message_ProgressRange& theRange = Message_ProgressRange());
 
   //! Modify mesh to use the edge.
   //! @return True if done
   Standard_EXPORT Standard_Boolean UseEdge (const Standard_Integer theEdge);
 
   //! Gives the Mesh data structure.
-  inline const Handle(BRepMesh_DataStructureOfDelaun)& Result() const
+  const Handle(BRepMesh_DataStructureOfDelaun)& Result() const
   {
     return myMeshData;
   }
 
   //! Forces insertion of constraint edges into the base triangulation. 
-  inline void ProcessConstraints()
+  void ProcessConstraints()
   {
     insertInternalEdges();
 
@@ -97,43 +99,43 @@ public:
   }
 
   //! Gives the list of frontier edges.
-  inline Handle(IMeshData::MapOfInteger) Frontier() const
+  Handle(IMeshData::MapOfInteger) Frontier() const
   {
     return getEdgesByType (BRepMesh_Frontier);
   }
 
   //! Gives the list of internal edges.
-  inline Handle(IMeshData::MapOfInteger) InternalEdges() const
+  Handle(IMeshData::MapOfInteger) InternalEdges() const
   {
     return getEdgesByType (BRepMesh_Fixed);
   }
 
   //! Gives the list of free edges used only one time
-  inline Handle(IMeshData::MapOfInteger) FreeEdges() const
+  Handle(IMeshData::MapOfInteger) FreeEdges() const
   {
     return getEdgesByType (BRepMesh_Free);
   }
 
   //! Gives vertex with the given index
-  inline const BRepMesh_Vertex& GetVertex (const Standard_Integer theIndex) const
+  const BRepMesh_Vertex& GetVertex (const Standard_Integer theIndex) const
   {
     return myMeshData->GetNode (theIndex);
   }
 
   //! Gives edge with the given index
-  inline const BRepMesh_Edge& GetEdge (const Standard_Integer theIndex) const
+  const BRepMesh_Edge& GetEdge (const Standard_Integer theIndex) const
   {
     return myMeshData->GetLink (theIndex);
   }
 
   //! Gives triangle with the given index
-  inline const BRepMesh_Triangle& GetTriangle (const Standard_Integer theIndex) const
+  const BRepMesh_Triangle& GetTriangle (const Standard_Integer theIndex) const
   {
     return myMeshData->GetElement (theIndex);
   }
 
   //! Returns tool used to build mesh consistent to Delaunay criteria.
-  inline const BRepMesh_CircleTool& Circles() const
+  const BRepMesh_CircleTool& Circles() const
   {
     return myCircles;
   }
@@ -146,6 +148,17 @@ public:
                                              const BRepMesh_Vertex& theVertex,
                                              const Standard_Real    theSqTolerance,
                                              Standard_Integer&      theEdgeOn) const;
+
+  //! Explicitly sets ids of auxiliary vertices used to build mesh and used by 3rd-party algorithms.
+  inline void SetAuxVertices (const IMeshData::VectorOfInteger& theSupVert)
+  {
+    mySupVert = theSupVert;
+  }
+
+  //! Destruction of auxiliary triangles containing the given vertices.
+  //! Removes auxiliary vertices also.
+  //! @param theAuxVertices auxiliary vertices to be cleaned up.
+  Standard_EXPORT void RemoveAuxElements ();
 
 private:
 
@@ -163,7 +176,7 @@ private:
                         const Standard_Integer theCellsCountU,
                         const Standard_Integer theCellsCountV);
 
-  //! Add boundig box for edge defined by start & end point to
+  //! Add bounding box for edge defined by start & end point to
   //! the given vector of bounding boxes for triangulation edges.
   void fillBndBox (IMeshData::SequenceOfBndB2d&  theBoxes,
                    const BRepMesh_Vertex&        theV1,
@@ -199,7 +212,7 @@ private:
   //! angle respect the given reference link.
   //! Each time the next link is found other neighbor links at the pivot
   //! node are marked as leprous and will be excluded from consideration
-  //! next time until a hanging end is occured.
+  //! next time until a hanging end is occurred.
   Standard_Integer findNextPolygonLink (const Standard_Integer&               theFirstNode,
                                         const Standard_Integer&               thePivotNode,
                                         const BRepMesh_Vertex&                thePivotVertex,
@@ -215,7 +228,7 @@ private:
                                         Bnd_B2d&                              theNextLinkBndBox);
 
   //! Check is the given link intersects the polygon boundaries.
-  //! Returns bounding box for the given link trough the theLinkBndBox parameter.
+  //! Returns bounding box for the given link through the theLinkBndBox parameter.
   Standard_Boolean checkIntersection (const BRepMesh_Edge&                theLink,
                                       const IMeshData::SequenceOfInteger& thePolygon,
                                       const IMeshData::SequenceOfBndB2d&  thePolyBoxes,
@@ -247,16 +260,16 @@ private:
     IMeshData::SequenceOfBndB2d&  thePolyBoxesCut);
 
   //! Triangulation of closed polygon containing only three edges.
-  inline Standard_Boolean meshElementaryPolygon (const IMeshData::SequenceOfInteger& thePolygon);
+  Standard_Boolean meshElementaryPolygon (const IMeshData::SequenceOfInteger& thePolygon);
 
-  //! Creates the triangles beetween the given node and the given polyline.
+  //! Creates the triangles between the given node and the given polyline.
   void createTriangles (const Standard_Integer         theVertexIndex,
                         IMeshData::MapOfIntegerInteger& thePoly);
 
   //! Add a triangle based on the given oriented edges into mesh
-  inline void addTriangle (const Standard_Integer (&theEdgesId)[3],
-                           const Standard_Boolean (&theEdgesOri)[3],
-                           const Standard_Integer (&theNodesId)[3]);
+  void addTriangle (const Standard_Integer (&theEdgesId)[3],
+                    const Standard_Boolean (&theEdgesOri)[3],
+                    const Standard_Integer (&theNodesId)[3]);
 
   //! Deletes the triangle with the given index and adds the free edges into the map.
   //! When an edge is suppressed more than one time it is destroyed.
@@ -284,7 +297,8 @@ private:
                                                 IMeshData::SequenceOfBndB2d&  thePolyBoxes);
   
   //! Creates the triangles on new nodes.
-  void createTrianglesOnNewVertices (IMeshData::VectorOfInteger& theVertexIndices);
+  void createTrianglesOnNewVertices (IMeshData::VectorOfInteger&  theVertexIndices,
+                                     const Message_ProgressRange& theRange);
 
   //! Cleanup mesh from the free triangles.
   void cleanupMesh();
@@ -292,12 +306,8 @@ private:
   //! Goes through the neighbour triangles around the given node started
   //! from the given link, returns TRUE if some triangle has a bounding
   //! frontier edge or FALSE elsewhere.
-  //! Stop link is used to prevent cycles.
-  //! Previous element Id is used to identify next neighbor element.
   Standard_Boolean isBoundToFrontier (const Standard_Integer theRefNodeId,
-                                      const Standard_Integer theRefLinkId,
-                                      const Standard_Integer theStopLinkId,
-                                      const Standard_Integer thePrevElementId);
+                                      const Standard_Integer theRefLinkId);
 
   //! Remove internal triangles from the given polygon.
   void cleanupPolygon (const IMeshData::SequenceOfInteger& thePolygon,
@@ -354,13 +364,27 @@ private:
   //! Performs insertion of internal edges into mesh.
   void insertInternalEdges();
 
+  //! Checks whether the given vertex id relates to super contour.
+  Standard_Boolean isSupVertex (const Standard_Integer theVertexIdx) const
+  {
+    for (IMeshData::VectorOfInteger::Iterator aIt (mySupVert); aIt.More (); aIt.Next ())
+    {
+      if (theVertexIdx == aIt.Value ())
+      {
+        return Standard_True;
+      }
+    }
+
+    return Standard_False;
+  }
+
 private:
 
   Handle(BRepMesh_DataStructureOfDelaun) myMeshData;
   BRepMesh_CircleTool                    myCircles;
-  Standard_Integer                       mySupVert[3];
+  IMeshData::VectorOfInteger             mySupVert;
+  Standard_Boolean                       myInitCircles;
   BRepMesh_Triangle                      mySupTrian;
-
 };
 
 #endif

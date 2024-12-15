@@ -24,10 +24,7 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <Extrema_POnCurv.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class Adaptor3d_Curve;
-class Extrema_POnCurv;
 
 
 //! It calculates the distance between two curves with
@@ -44,7 +41,7 @@ public:
   //! close point is defined by a parameter value on each
   //! curve.
   //! The function F(u,v)=distance(C1(u),C2(v)) has an
-  //! extremun when gradient(f)=0. The algorithm searchs
+  //! extremun when gradient(f)=0. The algorithm searches
   //! the zero near the close point.
   Standard_EXPORT Extrema_LocateExtCC(const Adaptor3d_Curve& C1, const Adaptor3d_Curve& C2, const Standard_Real U0, const Standard_Real V0);
   

@@ -155,8 +155,10 @@ Standard_Boolean BRepLib_MakeWire::BRepLib_BndBoxVertexSelector::
   Standard_Real aTolV = BRep_Tool::Tolerance(aV);
 
   Standard_Real aL = myP.SquareDistance(aVPnt);
+  Standard_Real aSTol = aTolV + myTolP;
+  aSTol *= aSTol;
 
-  if (aL < Max(aTolV*aTolV, mySTol)) 
+  if (aL <= aSTol) 
   {
     myResultInd.Append(theObj);
     return Standard_True;
@@ -176,7 +178,7 @@ void BRepLib_MakeWire::BRepLib_BndBoxVertexSelector::
   myP = theP;
   myVBox.Add(myP);
   myVBox.Enlarge(theTol);
-  mySTol = theTol*theTol;
+  myTolP = theTol;
   myVInd = theVInd;
 }
 
@@ -304,7 +306,7 @@ void BRepLib_MakeWire::CreateNewVertices(const NCollection_List<NCollection_List
 {
   //map [old vertex => new vertex]
   //note that already existing shape (i.e. the original ones)
-  //shouldnt be modified on the topological level
+  //shouldn't be modified on the topological level
   NCollection_List<NCollection_List<TopoDS_Vertex>>::Iterator itLLV;
   NCollection_List<TopoDS_Vertex>::Iterator itLV;
   BRep_Builder aBB;
@@ -328,7 +330,7 @@ void BRepLib_MakeWire::CreateNewVertices(const NCollection_List<NCollection_List
 
     if (aNewV.IsNull())
     {
-      //vertices from the original shape isnt found in this group 
+      //vertices from the original shape isn't found in this group 
       //create the new vertex
       aNewV = BRepLib_MakeVertex(aNewC);
       aBB.UpdateVertex(aNewV, aNewTol);

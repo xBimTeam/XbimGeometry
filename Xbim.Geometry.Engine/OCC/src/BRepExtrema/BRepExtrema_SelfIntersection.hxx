@@ -35,7 +35,7 @@ class BRepExtrema_SelfIntersection : public BRepExtrema_ElementFilter
 
 public:
 
-  //! Creates unitialized self-intersection tool.
+  //! Creates uninitialized self-intersection tool.
   Standard_EXPORT BRepExtrema_SelfIntersection (const Standard_Real theTolerance = 0.0);
 
   //! Creates self-intersection tool for the given shape.
@@ -96,21 +96,21 @@ public:
 protected:
 
   //! Filter out correct adjacent mesh elements.
-  virtual BRepExtrema_ElementFilter::FilterResult PreCheckElements (const Standard_Integer theIndex1,
-                                                                    const Standard_Integer theIndex2);
+  Standard_EXPORT virtual BRepExtrema_ElementFilter::FilterResult PreCheckElements (const Standard_Integer theIndex1,
+                                                                                    const Standard_Integer theIndex2);
 
   //! Checks if the given triangles have only single common vertex.
-  BRepExtrema_ElementFilter::FilterResult isRegularSharedVertex (const BVH_Vec3d& theSharedVert,
-                                                                 const BVH_Vec3d& theTrng1Vtxs1,
-                                                                 const BVH_Vec3d& theTrng1Vtxs2,
-                                                                 const BVH_Vec3d& theTrng2Vtxs1,
-                                                                 const BVH_Vec3d& theTrng2Vtxs2);
+  Standard_EXPORT BRepExtrema_ElementFilter::FilterResult isRegularSharedVertex (const BVH_Vec3d& theSharedVert,
+                                                                                 const BVH_Vec3d& theTrng1Vtxs1,
+                                                                                 const BVH_Vec3d& theTrng1Vtxs2,
+                                                                                 const BVH_Vec3d& theTrng2Vtxs1,
+                                                                                 const BVH_Vec3d& theTrng2Vtxs2);
 
   //! Checks if the given triangles have only single common edge.
-  BRepExtrema_ElementFilter::FilterResult isRegularSharedEdge (const BVH_Vec3d& theTrng1Vtxs0,
-                                                               const BVH_Vec3d& theTrng1Vtxs1,
-                                                               const BVH_Vec3d& theTrng1Vtxs2,
-                                                               const BVH_Vec3d& theTrng2Vtxs2);
+  Standard_EXPORT BRepExtrema_ElementFilter::FilterResult isRegularSharedEdge (const BVH_Vec3d& theTrng1Vtxs0,
+                                                                               const BVH_Vec3d& theTrng1Vtxs1,
+                                                                               const BVH_Vec3d& theTrng1Vtxs2,
+                                                                               const BVH_Vec3d& theTrng2Vtxs2);
 
 private:
 

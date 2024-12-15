@@ -50,12 +50,12 @@ public:
     gp_Pnt&                thePoint,
     Standard_Real&         theParameter) const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_EdgeTessellationExtractor, IMeshTools_CurveTessellator)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_EdgeTessellationExtractor, IMeshTools_CurveTessellator)
 
 private:
 
   BRepMesh_EdgeParameterProvider<Handle(TColStd_HArray1OfReal)>  myProvider;
-  const TColgp_Array1OfPnt*                                      myNodes;
+  const Poly_Triangulation*                                      myTriangulation;
   const TColStd_Array1OfInteger*                                 myIndices;
   TopLoc_Location                                                myLoc;
 };

@@ -30,8 +30,6 @@
 #include <Standard_Integer.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <TopTools_ListOfShape.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class TopoDS_Wire;
 class gp_Ax2;
 class gp_Dir;
@@ -56,8 +54,8 @@ class Law_Function;
 //! The two global approaches can also be combined.
 //! You can also close the surface later in order to form a solid.
 //! Warning: some limitations exist
-//! -- Mode with auxilary spine is incompatible with hometetic laws
-//! -- Mode with auxilary spine and keep contact produce only CO surface.
+//! -- Mode with auxiliary spine is incompatible with hometetic laws
+//! -- Mode with auxiliary spine and keep contact produce only CO surface.
 class BRepOffsetAPI_MakePipeShell  : public BRepPrimAPI_MakeSweep
 {
 public:
@@ -67,7 +65,7 @@ public:
   
   //! Constructs the shell-generating framework defined by the wire Spine.
   //! Sets an sweep's mode
-  //! If no mode are setted, the mode use in MakePipe is used
+  //! If no mode are set, the mode use in MakePipe is used
   Standard_EXPORT BRepOffsetAPI_MakePipeShell(const TopoDS_Wire& Spine);
   
   //! Sets a Frenet or a CorrectedFrenet trihedron
@@ -84,14 +82,14 @@ public:
   Standard_EXPORT void SetMode (const gp_Ax2& Axe);
   
   //! Sets a fixed BiNormal  direction to perform the --
-  //! sweeping.   Angular   relations   beetween  the
+  //! sweeping.   Angular   relations   between  the
   //! section(s) and <BiNormal> will be constant
   Standard_EXPORT void SetMode (const gp_Dir& BiNormal);
   
   //! Sets support to the spine to define the BiNormal of
   //! the trihedron, like the normal  to the surfaces.
   //! Warning:  To be effective, Each  edge of the <spine> must
-  //! have an representaion on one face of<SpineSupport>
+  //! have a representation on one face of<SpineSupport>
   Standard_EXPORT Standard_Boolean SetMode (const TopoDS_Shape& SpineSupport);
   
   //! Sets  an  auxiliary  spine  to  define  the Normal
@@ -118,9 +116,9 @@ public:
   //! Possibilities are :
   //! - Give one or sevral section
   //! - Give one profile and an homotetic law.
-  //! - Automatic compute of correspondance beetween spine, and section
+  //! - Automatic compute of correspondence between spine, and section
   //! on the sweeped shape
-  //! - correspondance beetween spine, and section on the sweeped shape
+  //! - correspondence between spine, and section on the sweeped shape
   //! defined by a vertex of the spine
   Standard_EXPORT void SetMode (const TopoDS_Wire& AuxiliarySpine, const Standard_Boolean CurvilinearEquivalence, const BRepFill_TypeOfContact KeepContact = BRepFill_NoContact);
   
@@ -230,7 +228,7 @@ public:
   Standard_EXPORT void SetTransitionMode (const BRepBuilderAPI_TransitionMode Mode = BRepBuilderAPI_Transformed);
   
   //! Simulates the resulting shape by calculating its
-  //! cross-sections. The spine is devided by this
+  //! cross-sections. The spine is divided by this
   //! cross-sections into (NumberOfSection - 1) equal
   //! parts, the number of cross-sections is
   //! NumberOfSection. The cross-sections are wires and
@@ -241,7 +239,7 @@ public:
   Standard_EXPORT void Simulate (const Standard_Integer NumberOfSection, TopTools_ListOfShape& Result);
   
   //! Builds the resulting shape (redefined from MakeShape).
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Transforms the sweeping Shell in Solid.
   //! If a propfile is not closed returns False

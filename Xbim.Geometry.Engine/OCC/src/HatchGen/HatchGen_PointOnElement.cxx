@@ -34,24 +34,8 @@ HatchGen_PointOnElement::HatchGen_PointOnElement () :
 // Purpose  : Constructor.
 //=======================================================================
 
-HatchGen_PointOnElement::HatchGen_PointOnElement (const HatchGen_PointOnElement& Point)
-{
-  myIndex  = Point.myIndex ;
-  myParam  = Point.myParam ;
-  myPosit  = Point.myPosit ;
-  myBefore = Point.myBefore ;
-  myAfter  = Point.myAfter ;
-  mySegBeg = Point.mySegBeg ;
-  mySegEnd = Point.mySegEnd ;
-  myType   = Point.myType ;
-}
-
-//=======================================================================
-// Function : HatchGen_PointOnElement
-// Purpose  : Constructor.
-//=======================================================================
-
 HatchGen_PointOnElement::HatchGen_PointOnElement (const IntRes2d_IntersectionPoint& Point)
+: myType(HatchGen_UNDETERMINED)
 {
   const IntRes2d_Transition& TrsH = Point.TransitionOfFirst() ;
   const IntRes2d_Transition& TrsE = Point.TransitionOfSecond() ;

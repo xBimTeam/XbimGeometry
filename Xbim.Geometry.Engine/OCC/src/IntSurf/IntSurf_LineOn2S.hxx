@@ -28,7 +28,6 @@
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-class Standard_OutOfRange;
 class IntSurf_PntOn2S;
 
 
@@ -63,9 +62,14 @@ public:
   //! Replaces the point of range Index in the line.
     void Value (const Standard_Integer Index, const IntSurf_PntOn2S& P);
   
+  //! Sets the 3D point of the Index-th PntOn2S
+  Standard_EXPORT void SetPoint(const Standard_Integer Index, const gp_Pnt& thePnt);
+  
   //! Sets the parametric coordinates on one of the surfaces
   //! of the point of range Index in the line.
-  Standard_EXPORT void SetUV(const Standard_Integer Index, const Standard_Boolean OnFirst, const Standard_Real U, const Standard_Real V);
+  Standard_EXPORT void SetUV(const Standard_Integer Index,
+                             const Standard_Boolean OnFirst,
+                             const Standard_Real U, const Standard_Real V);
   
     void Clear();
   

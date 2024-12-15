@@ -14,7 +14,7 @@
 
 #include <GeomEvaluator_OffsetCurve.hxx>
 
-#include <GeomAdaptor_HCurve.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <Standard_NullValue.hxx>
 
 
@@ -32,7 +32,7 @@ GeomEvaluator_OffsetCurve::GeomEvaluator_OffsetCurve(
 }
 
 GeomEvaluator_OffsetCurve::GeomEvaluator_OffsetCurve(
-        const Handle(GeomAdaptor_HCurve)& theBase,
+        const Handle(GeomAdaptor_Curve)& theBase,
         const Standard_Real theOffset,
         const gp_Dir& theDirection)
   : GeomEvaluator_Curve(),
@@ -115,6 +115,21 @@ gp_Vec GeomEvaluator_OffsetCurve::DN(const Standard_Real theU,
     aDN = BaseDN(theU, theDeriv);
   }
   return aDN;
+}
+
+Handle(GeomEvaluator_Curve) GeomEvaluator_OffsetCurve::ShallowCopy() const
+{
+  Handle(GeomEvaluator_OffsetCurve) aCopy;
+  if (!myBaseAdaptor.IsNull())
+  {
+    aCopy = new GeomEvaluator_OffsetCurve(Handle(GeomAdaptor_Curve)::DownCast(myBaseAdaptor->ShallowCopy()),
+                                          myOffset, myOffsetDir);
+  }
+  else
+  {
+    aCopy = new GeomEvaluator_OffsetCurve(myBaseCurve, myOffset, myOffsetDir);
+  }
+  return aCopy;
 }
 
 

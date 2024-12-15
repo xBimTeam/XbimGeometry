@@ -523,8 +523,10 @@ TopoDS_Shape BRepSweep_NumLinearRegularSweep::SplitShell(const TopoDS_Shape& aNe
 Standard_Boolean BRepSweep_NumLinearRegularSweep::IsUsed(const TopoDS_Shape& aGenS) const
 {
   Standard_Integer iGenS = myGenShapeTool.Index(aGenS);
-  Standard_OutOfRange_Raise_if(iGenS == 0,
-    "BRepSweep_NumLinearRegularSweep::IsUsed: shape index = 0")
+  if (iGenS == 0)
+  {
+    return Standard_False;
+  }
   Standard_Integer j;
   Standard_Boolean isBuilt = Standard_False;
   Standard_Boolean isUsed = Standard_False;
@@ -576,7 +578,16 @@ Standard_Boolean BRepSweep_NumLinearRegularSweep::IsUsed(const TopoDS_Shape& aGe
 Standard_Boolean BRepSweep_NumLinearRegularSweep::GenIsUsed(const TopoDS_Shape& aGenS) const
 {
   Standard_Integer iGenS = myGenShapeTool.Index(aGenS);
-  Standard_OutOfRange_Raise_if(iGenS == 0,
-    "BRepSweep_NumLinearRegularSweep::GenIsUsed: shape index = 0")
-  return myBuiltShapes(iGenS, 1) && myUsedShapes(iGenS, 1);
+  if (iGenS == 0)
+  {
+    return Standard_False;
+  }
+  if (iGenS == 1)
+  {
+    return myBuiltShapes(iGenS, 1);
+  }
+  else
+  {
+    return myBuiltShapes(iGenS, 1) && myUsedShapes(iGenS, 1);
+  }
 }

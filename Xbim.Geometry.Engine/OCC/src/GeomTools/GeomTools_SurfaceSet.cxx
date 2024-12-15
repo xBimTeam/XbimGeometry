@@ -36,8 +36,7 @@
 #include <gp_Pln.hxx>
 #include <gp_Sphere.hxx>
 #include <gp_Torus.hxx>
-#include <Message_ProgressIndicator.hxx>
-#include <Message_ProgressSentry.hxx>
+#include <Message_ProgressScope.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_OutOfRange.hxx>
@@ -633,16 +632,14 @@ void  GeomTools_SurfaceSet::Dump(Standard_OStream& OS)const
 //purpose  : 
 //=======================================================================
 
-void  GeomTools_SurfaceSet::Write(Standard_OStream& OS)const 
+void  GeomTools_SurfaceSet::Write(Standard_OStream& OS, const Message_ProgressRange& theProgress)const
 {
   std::streamsize  prec = OS.precision(17);
 
   Standard_Integer i, nbsurf = myMap.Extent();
   OS << "Surfaces "<< nbsurf << "\n";
-  //OCC19559
-  Handle(Message_ProgressIndicator) progress = GetProgress();
-  Message_ProgressSentry PS(progress, "Surfaces", 0, nbsurf, 1);
-  for (i = 1; i <= nbsurf && PS.More(); i++, PS.Next()) {
+  Message_ProgressScope aPS(theProgress, "Surfaces", nbsurf);
+  for (i = 1; i <= nbsurf && aPS.More(); i++, aPS.Next()) {
     PrintSurface(Handle(Geom_Surface)::DownCast(myMap(i)),OS,Standard_True);
   }
   OS.precision(prec);
@@ -930,7 +927,7 @@ static Standard_IStream& operator>>(Standard_IStream& IS,
 //purpose  : 
 //=======================================================================
 
-Handle(Geom_Surface) GeomTools_SurfaceSet::ReadSurface(Standard_IStream& IS)
+Handle(Geom_Surface) GeomTools_SurfaceSet::ReadSurface (Standard_IStream& IS)
 {
   Standard_Integer stype;
 
@@ -1052,7 +1049,7 @@ Handle(Geom_Surface) GeomTools_SurfaceSet::ReadSurface(Standard_IStream& IS)
 //purpose  : 
 //=======================================================================
 
-void  GeomTools_SurfaceSet::Read(Standard_IStream& IS)
+void  GeomTools_SurfaceSet::Read(Standard_IStream& IS, const Message_ProgressRange& theProgress)
 {
   char buffer[255];
   IS >> buffer;
@@ -1063,34 +1060,9 @@ void  GeomTools_SurfaceSet::Read(Standard_IStream& IS)
 
   Standard_Integer i, nbsurf;
   IS >> nbsurf;
-  //OCC19559
-  Handle(Message_ProgressIndicator) progress = GetProgress();
-  Message_ProgressSentry PS(progress, "Surfaces", 0, nbsurf, 1);
-  for (i = 1; i <= nbsurf && PS.More(); i++, PS.Next()) {
+  Message_ProgressScope aPS(theProgress, "Surfaces", nbsurf);
+  for (i = 1; i <= nbsurf && aPS.More(); i++, aPS.Next()) {
     Handle(Geom_Surface) S = GeomTools_SurfaceSet::ReadSurface (IS);
     myMap.Add(S);
   }
 }
-
-//=======================================================================
-//function : GetProgress
-//purpose  : 
-//=======================================================================
-
-Handle(Message_ProgressIndicator) GeomTools_SurfaceSet::GetProgress() const
-{
-  return myProgress;
-}
-
-//=======================================================================
-//function : SetProgress
-//purpose  : 
-//=======================================================================
-
-void GeomTools_SurfaceSet::SetProgress(const Handle(Message_ProgressIndicator)& PR)
-{
-  myProgress = PR;
-}
-
-
-

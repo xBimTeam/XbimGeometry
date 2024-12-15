@@ -230,7 +230,7 @@ void BSplCLib::LocateParameter
 //function : LocateParameter
 //purpose  : Effective computation
 // pmn 28-01-97 : Add limits of the period as input argument,  
-//                as it is imposible to produce them at this level.
+//                as it is impossible to produce them at this level.
 //=======================================================================
 
 void BSplCLib::LocateParameter 
@@ -1186,7 +1186,7 @@ void  BSplCLib::Bohm(const Standard_Real U,
 		     const Standard_Integer Dimension,
 		     Standard_Real& Poles)
 {
-  // First phase independant of U, compute the poles of the derivatives
+  // First phase independent of U, compute the poles of the derivatives
   Standard_Integer i,j,iDim,min,Dmi,DDmi,jDmi,Degm1;
   Standard_Real *knot = &Knots, *pole, coef, *tbis, *psav, *psDD, *psDDmDim;
   psav     = &Poles;
@@ -1816,7 +1816,7 @@ Standard_Boolean  BSplCLib::PrepareInsertKnots
   }
 
   if (Periodic) {
-    //for periodic B-Spline the requirement is that multiplicites of the first
+    //for periodic B-Spline the requirement is that multiplicities of the first
     //and last knots must be equal (see Geom_BSplineCurve constructor for
     //instance);
     //respectively AddMults() must meet this requirement if AddKnots() contains
@@ -2677,7 +2677,7 @@ void  BSplCLib::PrepareUnperiodize
     NbKnots++;
   }
   // We must add exactly until Degree + 1 -> 
-  //    Supress the excedent.
+  //    Suppress the excedent.
   if ( sigma > Degree + 1)
     NbPoles -= sigma - Degree - 1;
 
@@ -2693,7 +2693,7 @@ void  BSplCLib::PrepareUnperiodize
     NbKnots++;
   }
   // We must add exactly until Degree + 1 -> 
-  //    Supress the excedent.
+  //    Suppress the excedent.
   if ( sigma > Degree + 1)
     NbPoles -= sigma - Degree - 1;
 }
@@ -2814,16 +2814,15 @@ void BSplCLib::Trimming(const Standard_Integer         Degree,
 		  	      TColStd_Array1OfReal&    NewPoles)
 {
   Standard_Integer i, nbpoles=0, nbknots=0;
-  Standard_Real kk[2];
-  Standard_Integer mm[2];
+  Standard_Real    kk[2] = { U1, U2 };
+  Standard_Integer mm[2] = { Degree, Degree };
   TColStd_Array1OfReal    K( kk[0], 1, 2 );
   TColStd_Array1OfInteger M( mm[0], 1, 2 );
-
-  K(1) = U1;  K(2) = U2;
-  mm[0] = mm[1] = Degree;
   if (!PrepareInsertKnots( Degree, Periodic, Knots, Mults, K, &M, 
 			  nbpoles, nbknots, Epsilon( U1), 0))
+  {
     throw Standard_OutOfRange();
+  }
 
   TColStd_Array1OfReal    TempPoles(1, nbpoles*Dimension);
   TColStd_Array1OfReal    TempKnots(1, nbknots);

@@ -14,10 +14,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
 #include <Adaptor3d_Surface.hxx>
+
+#include <Adaptor3d_Curve.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <gp_Ax1.hxx>
@@ -34,6 +33,8 @@
 #include <Standard_NotImplemented.hxx>
 #include <Standard_OutOfRange.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(Adaptor3d_Surface, Standard_Transient)
+
 //=======================================================================
 //function : ~Adaptor3d_Surface
 //purpose  : Destructor
@@ -42,6 +43,15 @@ Adaptor3d_Surface::~Adaptor3d_Surface()
 {
 }
 
+//=======================================================================
+//function : ShallowCopy()
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Surface) Adaptor3d_Surface::ShallowCopy() const
+{
+  throw Standard_NotImplemented("Adaptor3d_Surface::ShallowCopy");
+}
 //=======================================================================
 //function : FirstUParameter
 //purpose  : 
@@ -161,8 +171,8 @@ void Adaptor3d_Surface::VIntervals(TColStd_Array1OfReal& , const GeomAbs_Shape )
 //purpose  : 
 //=======================================================================
 
-//Handle(Adaptor3d_HSurface) Adaptor3d_Surface::UTrim(const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const 
-Handle(Adaptor3d_HSurface) Adaptor3d_Surface::UTrim(const Standard_Real , const Standard_Real , const Standard_Real ) const 
+//Handle(Adaptor3d_Surface) Adaptor3d_Surface::UTrim(const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const 
+Handle(Adaptor3d_Surface) Adaptor3d_Surface::UTrim(const Standard_Real , const Standard_Real , const Standard_Real ) const 
 {
   throw Standard_NotImplemented("Adaptor3d_Surface::UTrim");
 }
@@ -173,8 +183,8 @@ Handle(Adaptor3d_HSurface) Adaptor3d_Surface::UTrim(const Standard_Real , const 
 //purpose  : 
 //=======================================================================
 
-//Handle(Adaptor3d_HSurface) Adaptor3d_Surface::VTrim(const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const 
-Handle(Adaptor3d_HSurface) Adaptor3d_Surface::VTrim(const Standard_Real , const Standard_Real , const Standard_Real ) const 
+//Handle(Adaptor3d_Surface) Adaptor3d_Surface::VTrim(const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const 
+Handle(Adaptor3d_Surface) Adaptor3d_Surface::VTrim(const Standard_Real , const Standard_Real , const Standard_Real ) const 
 {
   throw Standard_NotImplemented("Adaptor3d_Surface::VTrim");
 }
@@ -545,7 +555,7 @@ gp_Dir Adaptor3d_Surface::Direction() const
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HCurve) Adaptor3d_Surface::BasisCurve() const 
+Handle(Adaptor3d_Curve) Adaptor3d_Surface::BasisCurve() const 
 {
   throw Standard_NotImplemented("Adaptor3d_Surface::BasisCurve");
 }
@@ -556,7 +566,7 @@ Handle(Adaptor3d_HCurve) Adaptor3d_Surface::BasisCurve() const
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HSurface) Adaptor3d_Surface::BasisSurface() const 
+Handle(Adaptor3d_Surface) Adaptor3d_Surface::BasisSurface() const 
 {
   throw Standard_NotImplemented("Adaptor3d_Surface::BasisSurface");
 }

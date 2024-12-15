@@ -491,18 +491,16 @@ namespace Xbim
 				aBOP.SetNonDestructive(true);
 				aBOP.SetFuzzyValue(fuzzyTol);
 				
+				
+				//// todo: multiple boolean timeout has been disabled
 				Handle(XbimProgressMonitor) pi = new XbimProgressMonitor(timeout);
-				aBOP.SetProgressIndicator(pi);
 				TopoDS_Shape aR;
-
-
-				aBOP.Perform();
+				aBOP.Perform(pi->Start());
 				aR = aBOP.Shape();
 
 				if (pi->TimedOut())
 				{
 					return BOOLEAN_TIMEDOUT;
-
 				}
 				bool bopErr = aBOP.HasErrors();
 #ifdef _DEBUG
@@ -518,7 +516,6 @@ namespace Xbim
 #endif // DEBUG
 				if (bopErr) // a sign of failure do them individually
 				{
-
 					//check if the shape is empty
 
 					if (tools.Size() > 1)//do them one at a time if we are not already doing or have done that
@@ -562,7 +559,7 @@ namespace Xbim
 					try
 					{
 						Handle(XbimProgressMonitor) pi2 = new XbimProgressMonitor(timeout);
-						if (fixer.Perform(pi2))
+						if (fixer.Perform(pi2->Start()))
 						{
 							result = fixer.Shape();
 							retVal = BOOLEAN_SUCCESS;
@@ -930,7 +927,7 @@ namespace Xbim
 				}
 				if (profileCount == 1)
 				{
-					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used");
+					XbimGeometryCreator::LogInfo(logger, repItem, "Invalid number of profiles in IIfcCompositeProfileDef #{0}. It must be 2 or more. A single Profile has been used", compProfile->EntityLabel);
 					XbimSolid^ s = gcnew XbimSolid(repItem, logger);
 					if (s->IsValid)
 					{
@@ -1119,17 +1116,20 @@ namespace Xbim
 			else if (hs != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(hs, logger);
-				if (s->IsValid) solids->Add(s);
+				if (s->IsValid)
+					solids->Add(s);
 			}
 			else if (csgPrim != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(csgPrim, logger);
-				if (s->IsValid)solids->Add(s);
+				if (s->IsValid)
+					solids->Add(s);
 			}
 			else if (sm != nullptr)
 			{
 				XbimSolid^ s = gcnew XbimSolid(sm, logger);
-				if (s->IsValid)solids->Add(s); // otherwise create a  solid model
+				if (s->IsValid)
+					solids->Add(s); // otherwise create a  solid model
 			}
 			else
 			{

@@ -14,14 +14,16 @@
 
 // JCV 07/12/90 Modifs suite a l'introduction des classes XYZ et Mat dans gp
 
+#include <gp_Dir.hxx>
+
 #include <gp_Ax1.hxx>
 #include <gp_Ax2.hxx>
-#include <gp_Dir.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 #include <gp_XYZ.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_DomainError.hxx>
+#include <Standard_Dump.hxx>
 #include <Standard_OutOfRange.hxx>
 
 Standard_Real gp_Dir::Angle (const gp_Dir& Other) const
@@ -139,3 +141,17 @@ gp_Dir gp_Dir::Mirrored (const gp_Ax2& A2) const
   return V;
 }
 
+void gp_Dir::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
+{
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "gp_Dir", 3, coord.X(), coord.Y(), coord.Z())
+}
+
+Standard_Boolean gp_Dir::InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+{
+  Standard_Integer aPos = theStreamPos;
+
+  OCCT_INIT_VECTOR_CLASS (Standard_Dump::Text (theSStream), "gp_Dir", aPos, 3, &coord.ChangeCoord (1), &coord.ChangeCoord (2), &coord.ChangeCoord (3))
+
+  theStreamPos = aPos;
+  return Standard_True;
+}

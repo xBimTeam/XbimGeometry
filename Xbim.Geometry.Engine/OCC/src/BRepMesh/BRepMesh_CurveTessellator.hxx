@@ -22,7 +22,6 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <IMeshData_Types.hxx>
 
-class TopoDS_Face;
 class Geom_Surface;
 class Geom2d_Curve;
 struct IMeshTools_Parameters;
@@ -60,7 +59,7 @@ public:
     gp_Pnt&                thePoint,
     Standard_Real&         theParameter) const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_CurveTessellator, IMeshTools_CurveTessellator)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_CurveTessellator, IMeshTools_CurveTessellator)
 
 private:
 
@@ -70,7 +69,7 @@ private:
   //! Adds internal vertices to discrete polygon.
   void addInternalVertices ();
 
-  //Check deflection in 2d space for improvement of edge tesselation.
+  //Check deflection in 2d space for improvement of edge tessellation.
   void splitByDeflection2d ();
 
   void splitSegment (

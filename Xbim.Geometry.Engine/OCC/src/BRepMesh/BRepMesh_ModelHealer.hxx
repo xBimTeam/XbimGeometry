@@ -32,7 +32,7 @@
 //! tolerances of 3D space only. This means that there are no specific 
 //! computations are made for the sake of determination of U and V tolerance.
 //! Registers intersections on edges forming the face's shape and tries to
-//! amplify discrete represenation by decreasing of deflection for the target edge.
+//! amplify discrete representation by decreasing of deflection for the target edge.
 //! Checks can be performed in parallel mode.
 class BRepMesh_ModelHealer : public IMeshTools_ModelAlgo
 {
@@ -45,28 +45,29 @@ public:
   Standard_EXPORT virtual ~BRepMesh_ModelHealer();
 
   //! Functor API to discretize the given edge.
-  inline void operator() (const Standard_Integer theEdgeIndex) const {
+  void operator() (const Standard_Integer theEdgeIndex) const {
     process(theEdgeIndex);
   }
 
   //! Functor API to discretize the given edge.
-  inline void operator() (const IMeshData::IFaceHandle& theDFace) const {
+  void operator() (const IMeshData::IFaceHandle& theDFace) const {
     process(theDFace);
   }
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_ModelHealer, IMeshTools_ModelAlgo)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_ModelHealer, IMeshTools_ModelAlgo)
 
 protected:
 
   //! Performs processing of edges of the given model.
   Standard_EXPORT virtual Standard_Boolean performInternal (
     const Handle(IMeshData_Model)& theModel,
-    const IMeshTools_Parameters&   theParameters) Standard_OVERRIDE;
+    const IMeshTools_Parameters&   theParameters,
+    const Message_ProgressRange&   theRange) Standard_OVERRIDE;
 
 private:
 
   //! Checks existing discretization of the face and updates data model.
-  inline void process(const Standard_Integer theFaceIndex) const
+  void process(const Standard_Integer theFaceIndex) const
   {
     const IMeshData::IFaceHandle& aDFace = myModel->GetFace(theFaceIndex);
     process(aDFace);
@@ -85,7 +86,7 @@ private:
 
   //! Connects pcurves of previous and current edge on the specified face 
   //! according to topological connectivity. Uses next edge in order to
-  //! identify closest point in case of signle vertex shared between both
+  //! identify closest point in case of single vertex shared between both
   //! ends of edge (degenerative edge)
   Standard_Boolean connectClosestPoints(
     const IMeshData::IPCurveHandle& thePrevDEdge,
@@ -95,7 +96,7 @@ private:
   //! Chooses the most closest point to reference one from the given pair.
   //! Returns square distance between reference point and closest one as 
   //! well as pointer to closest point.
-  inline Standard_Real closestPoint(
+  Standard_Real closestPoint(
     gp_Pnt2d&  theRefPnt,
     gp_Pnt2d&  theFristPnt,
     gp_Pnt2d&  theSecondPnt,
@@ -117,7 +118,7 @@ private:
   //! Chooses the most closest points among the given to reference one from the given pair.
   //! Returns square distance between reference point and closest one as 
   //! well as pointer to closest point.
-  inline Standard_Real closestPoints(
+  Standard_Real closestPoints(
     gp_Pnt2d&  theFirstPnt1,
     gp_Pnt2d&  theSecondPnt1,
     gp_Pnt2d&  theFirstPnt2,
@@ -143,7 +144,7 @@ private:
   //! Adjusts the given pair of points supposed to be the same.
   //! In addition, adjusts another end-point of an edge in order
   //! to perform correct matching in case of gap.
-  inline void adjustSamePoints(
+  void adjustSamePoints(
     gp_Pnt2d*& theMajorSamePnt1,
     gp_Pnt2d*& theMinorSamePnt1,
     gp_Pnt2d*& theMajorSamePnt2,
@@ -167,7 +168,7 @@ private:
   void fixFaceBoundaries(const IMeshData::IFaceHandle& theDFace) const;
 
   //! Returns True if check can be done in parallel.
-  inline Standard_Boolean isParallel() const
+  Standard_Boolean isParallel() const
   {
     return (myParameters.InParallel && myModel->FacesNb() > 1);
   }

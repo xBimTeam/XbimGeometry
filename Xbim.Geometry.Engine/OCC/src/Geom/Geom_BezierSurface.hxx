@@ -33,10 +33,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <BSplSLib.hxx>
 
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_RangeError;
-class Standard_OutOfRange;
 class gp_Pnt;
 class gp_Vec;
 class Geom_Curve;
@@ -582,6 +578,9 @@ public:
   
   //! Creates a new object which is a copy of this Bezier surface.
   Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

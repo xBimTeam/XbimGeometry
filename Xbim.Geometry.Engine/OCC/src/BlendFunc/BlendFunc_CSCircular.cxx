@@ -18,8 +18,8 @@
 //                        + Utilisation de GeomFill::GetCircle dans Section.
 // Modified 23/06/1997 PMN : Pb de division par 0.
 
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <Blend_Point.hxx>
 #include <BlendFunc.hxx>
 #include <BlendFunc_CSCircular.hxx>
@@ -45,9 +45,9 @@
 //purpose  : 
 //=======================================================================
 
-BlendFunc_CSCircular::BlendFunc_CSCircular(const Handle(Adaptor3d_HSurface)& S,
-                                           const Handle(Adaptor3d_HCurve)& C,
-                                           const Handle(Adaptor3d_HCurve)& CGuide,
+BlendFunc_CSCircular::BlendFunc_CSCircular(const Handle(Adaptor3d_Surface)& S,
+                                           const Handle(Adaptor3d_Curve)& C,
+                                           const Handle(Adaptor3d_Curve)& CGuide,
                                            const Handle(Law_Function)& L) :
        surf(S),curv(C),guide(CGuide),law(L),istangent(Standard_True),
        //prmc, dprmc, istangent, ray, choix, normtg,
@@ -901,12 +901,12 @@ Standard_Boolean BlendFunc_CSCircular::Section
 {
   gp_Vec d1u1,d1v1,d2u1,d2v1,d2uv1,d1,d2;
   gp_Vec ns,ns2,dnplan,dnw,dn2w; //,np2,dnp2;
-  gp_Vec ncrossns;;
+  gp_Vec ncrossns;
   gp_Vec resulu,resulv,temp,tgct,resul;
 
   gp_Pnt Center;
 
-  Standard_Real norm,ndotns,grosterme;;
+  Standard_Real norm,ndotns,grosterme;
 
   math_Vector sol(1,2),valsol(1,2),secmember(1,2);
   math_Matrix gradsol(1,2,1,2);

@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef BRepMesh_CircleInspector_Header
-#define BRepMesh_CircleInspector_Header
+#ifndef BRepMesh_CircleInspector_HeaderFile
+#define BRepMesh_CircleInspector_HeaderFile
 
 #include <IMeshData_Types.hxx>
 #include <BRepMesh_Circle.hxx>
@@ -23,7 +23,7 @@
 #include <gp_XYZ.hxx>
 #include <NCollection_CellFilter.hxx>
 
-//! Auxilary class to find circles shot by the given point.
+//! Auxiliary class to find circles shot by the given point.
 class BRepMesh_CircleInspector : public NCollection_CellFilter_InspectorXY
 {
 public:
@@ -46,14 +46,14 @@ public:
   //! Adds the circle to vector of circles at the given position.
   //! @param theIndex position of circle in the vector.
   //! @param theCircle circle to be added.
-  inline void Bind(const Standard_Integer theIndex,
-                   const BRepMesh_Circle& theCircle)
+  void Bind(const Standard_Integer theIndex,
+            const BRepMesh_Circle& theCircle)
   {
     myCircles.SetValue(theIndex, theCircle);
   }
 
   //! Resutns vector of registered circles.
-  inline const IMeshData::VectorOfCircle& Circles() const
+  const IMeshData::VectorOfCircle& Circles() const
   {
     return myCircles; 
   }
@@ -61,21 +61,21 @@ public:
   //! Returns circle with the given index.
   //! @param theIndex index of circle.
   //! @return circle with the given index.
-  inline BRepMesh_Circle& Circle(const Standard_Integer theIndex)
+  BRepMesh_Circle& Circle(const Standard_Integer theIndex)
   {
     return myCircles(theIndex);
   }
 
   //! Set reference point to be checked.
   //! @param thePoint bullet point.
-  inline void SetPoint(const gp_XY& thePoint)
+  void SetPoint(const gp_XY& thePoint)
   {
     myResIndices.Clear();
     myPoint = thePoint;
   }
 
   //! Returns list of circles shot by the reference point.
-  inline IMeshData::ListOfInteger& GetShotCircles()
+  IMeshData::ListOfInteger& GetShotCircles()
   {
     return myResIndices;
   }
@@ -83,7 +83,7 @@ public:
   //! Performs inspection of a circle with the given index.
   //! @param theTargetIndex index of a circle to be checked.
   //! @return status of the check.
-  inline NCollection_CellFilter_Action Inspect(
+  NCollection_CellFilter_Action Inspect(
     const Standard_Integer theTargetIndex)
   {
     BRepMesh_Circle& aCircle = myCircles(theTargetIndex);

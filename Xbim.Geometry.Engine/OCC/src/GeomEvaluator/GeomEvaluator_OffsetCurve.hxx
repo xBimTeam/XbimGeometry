@@ -16,10 +16,9 @@
 #define _GeomEvaluator_OffsetCurve_HeaderFile
 
 #include <Geom_Curve.hxx>
+#include <GeomAdaptor_Curve.hxx>
 #include <GeomEvaluator_Curve.hxx>
 #include <gp_Dir.hxx>
-
-class GeomAdaptor_HCurve;
 
 //! Allows to calculate values and derivatives for offset curves in 3D
 class GeomEvaluator_OffsetCurve : public GeomEvaluator_Curve
@@ -32,7 +31,7 @@ public:
       const gp_Dir& theDirection);
   //! Initialize evaluator by curve adaptor
   Standard_EXPORT GeomEvaluator_OffsetCurve(
-      const Handle(GeomAdaptor_HCurve)& theBase,
+      const Handle(GeomAdaptor_Curve)& theBase,
       const Standard_Real theOffset,
       const gp_Dir& theDirection);
 
@@ -59,6 +58,8 @@ public:
   //! Calculates N-th derivatives of curve, where N = theDeriv. Raises if N < 1
   Standard_EXPORT gp_Vec DN(const Standard_Real theU,
                             const Standard_Integer theDeriv) const Standard_OVERRIDE;
+
+  Standard_EXPORT virtual Handle(GeomEvaluator_Curve) ShallowCopy() const Standard_OVERRIDE;
 
   DEFINE_STANDARD_RTTIEXT(GeomEvaluator_OffsetCurve,GeomEvaluator_Curve)
 
@@ -112,7 +113,7 @@ private:
 
 private:
   Handle(Geom_Curve)         myBaseCurve;
-  Handle(GeomAdaptor_HCurve) myBaseAdaptor;
+  Handle(GeomAdaptor_Curve) myBaseAdaptor;
 
   Standard_Real myOffset;    ///< offset value
   gp_Dir        myOffsetDir; ///< offset direction

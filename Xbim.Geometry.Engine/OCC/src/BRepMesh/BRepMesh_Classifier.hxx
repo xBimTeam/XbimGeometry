@@ -27,7 +27,7 @@
 class gp_Pnt2d;
 class CSLib_Class2d;
 
-//! Auxilary class intended for classification of points
+//! Auxiliary class intended for classification of points
 //! regarding internals of discrete face.
 class BRepMesh_Classifier : public Standard_Transient
 {
@@ -58,7 +58,7 @@ public:
     const std::pair<Standard_Real, Standard_Real>& theRangeU,
     const std::pair<Standard_Real, Standard_Real>& theRangeV);
 
-  DEFINE_STANDARD_RTTI_INLINE (BRepMesh_Classifier, Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_Classifier, Standard_Transient)
 
 private:
 

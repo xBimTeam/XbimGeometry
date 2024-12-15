@@ -219,7 +219,7 @@ public:
 
   //! Move assignment.
   //! This array will borrow all the data from theOther.
-  //! The moved object will be left unitialized and should not be used anymore.
+  //! The moved object will be left uninitialized and should not be used anymore.
   NCollection_Array2& Move (NCollection_Array2& theOther)
   {
     if (&theOther == this)
@@ -349,10 +349,11 @@ public:
     }
     delete[] aTableOld;
 
+    const Standard_Boolean wasDeletable = myDeletable;
+    myDeletable = Standard_True;
     Allocate();
     if (!theToCopyData)
     {
-      myDeletable = Standard_True;
       return;
     }
 
@@ -366,11 +367,10 @@ public:
       }
     }
 
-    if (myDeletable)
+    if (wasDeletable)
     {
       delete[] aStartOld;
     }
-    myDeletable = Standard_True;
   }
 
   //! Destructor - releases the memory

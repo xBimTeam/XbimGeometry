@@ -48,7 +48,7 @@ BRep_CurveOnSurface::BRep_CurveOnSurface(const Handle(Geom2d_Curve)& PC,
 
 void BRep_CurveOnSurface::D0(const Standard_Real U, gp_Pnt& P) const
 {
-  // shoud be D0 NYI
+  // should be D0 NYI
   gp_Pnt2d P2d = myPCurve->Value(U);
   P = mySurface->Value(P2d.X(),P2d.Y());
   P.Transform(myLocation.Transformation());
@@ -146,4 +146,20 @@ void  BRep_CurveOnSurface::Update()
   }
 }
 
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void BRep_CurveOnSurface::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, BRep_GCurve)
+
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &myUV1)
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &myUV2)
+
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, myPCurve.get())
+  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, mySurface.get())
+}
 

@@ -23,7 +23,6 @@
 #include <TopoDS.hxx>
 #include <IMeshData_Types.hxx>
 
-class IMeshData_Edge;
 
 //! Interface class representing discrete model of a wire.
 //! Wire should represent an ordered set of edges.
@@ -32,12 +31,12 @@ class IMeshData_Wire : public IMeshData_TessellatedShape, public IMeshData_Statu
 public:
 
   //! Destructor.
-  Standard_EXPORT virtual ~IMeshData_Wire()
+  virtual ~IMeshData_Wire()
   {
   }
 
   //! Returns TopoDS_Face attached to model.
-  inline const TopoDS_Wire& GetWire () const
+  const TopoDS_Wire& GetWire () const
   {
     return TopoDS::Wire (GetShape ());
   }
@@ -59,13 +58,13 @@ public:
   Standard_EXPORT virtual TopAbs_Orientation GetEdgeOrientation (
     const Standard_Integer theIndex) const = 0;
 
-  DEFINE_STANDARD_RTTI_INLINE(IMeshData_Wire, IMeshData_TessellatedShape)
+  DEFINE_STANDARD_RTTIEXT(IMeshData_Wire, IMeshData_TessellatedShape)
 
 protected:
 
   //! Constructor.
   //! Initializes empty model.
-  Standard_EXPORT IMeshData_Wire(const TopoDS_Wire& theWire)
+  IMeshData_Wire(const TopoDS_Wire& theWire)
     : IMeshData_TessellatedShape(theWire)
   {
   }

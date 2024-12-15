@@ -114,8 +114,9 @@ public:
 
   //! Creation by converting an Ascii string to an extended
   //! string. The string is treated as having UTF-8 coding.
-  //! If it is not a UTF-8 then each character is copied to ExtCharacter.
-  Standard_EXPORT TCollection_ExtendedString(const TCollection_AsciiString& astring);
+  //! If it is not a UTF-8 or multi byte then
+  //! each character is copied to ExtCharacter.
+  Standard_EXPORT TCollection_ExtendedString(const TCollection_AsciiString& astring, const Standard_Boolean isMultiByte = Standard_True);
   
   //! Appends the other extended string to this extended string.
   //! Note that this method is an alias of operator +=.
@@ -125,6 +126,9 @@ void operator += (const TCollection_ExtendedString& other)
 {
   AssignCat(other);
 }
+
+  //! Appends the utf16 char to this extended string.
+  Standard_EXPORT void AssignCat (const Standard_Utf16Char theChar);
   
   //! Appends <other> to me.
   Standard_EXPORT TCollection_ExtendedString Cat (const TCollection_ExtendedString& other) const;
@@ -136,8 +140,7 @@ TCollection_ExtendedString operator + (const TCollection_ExtendedString& other) 
   //! Substitutes all the characters equal to aChar by NewChar
   //! in the ExtendedString <me>.
   //! The substitution can be case sensitive.
-  //! If you don't use default case sensitive, no matter wether aChar
-  //! is uppercase or not.
+  //! If you don't use default case sensitive, no matter whether aChar is uppercase or not.
   Standard_EXPORT void ChangeAll (const Standard_ExtCharacter aChar, const Standard_ExtCharacter NewChar);
   
   //! Removes all characters contained in <me>.
@@ -325,7 +328,7 @@ friend Standard_EXPORT Standard_OStream& operator << (Standard_OStream& astream,
   Standard_EXPORT void Trunc (const Standard_Integer ahowmany);
   
   //! Returns character at position <where> in <me>.
-  //! If <where> is less than zero or greater than the lenght of
+  //! If <where> is less than zero or greater than the length of
   //! <me>, an exception is raised.
   //! Example:
   //! aString contains "Hello"
@@ -368,8 +371,7 @@ friend Standard_EXPORT Standard_OStream& operator << (Standard_OStream& astream,
 
 private:
 
-  //! Returns true if the input CString was successfuly converted
-  //! to UTF8 coding
+  //! Returns true if the input CString was successfully converted to UTF8 coding.
   Standard_EXPORT Standard_Boolean ConvertToUnicode (const Standard_CString astring);
 
 private:

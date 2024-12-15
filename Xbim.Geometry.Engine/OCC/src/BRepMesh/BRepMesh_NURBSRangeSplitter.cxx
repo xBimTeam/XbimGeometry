@@ -37,14 +37,17 @@ namespace
       const Handle(IMeshData::MapOfReal)&       theParamsForbiddenToRemove,
       const Handle(IMeshData::MapOfReal)&       theControlParamsForbiddenToRemove)
       : myDFace(theDFace),
-        mySurface(myDFace->GetSurface()->ChangeSurface().Surface().Surface()),
+        mySurface(myDFace->GetSurface()->Surface().Surface()),
         myIsoU(theIsoType == GeomAbs_IsoU),
         myParams(theParams),
         myControlParams(theControlParams),
         myParamsForbiddenToRemove(theParamsForbiddenToRemove),
         myControlParamsForbiddenToRemove(theControlParamsForbiddenToRemove),
         myAllocator(new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-        myControlParamsToRemove(new IMeshData::MapOfReal(1, myAllocator))
+        myControlParamsToRemove(new IMeshData::MapOfReal(1, myAllocator)),
+        myCurrParam(0.0),
+        myCurrControlParam(0.0),
+        myPrevControlParam(0.0)
     {
     }
 
@@ -214,7 +217,7 @@ namespace
   };
 
   //! Adds param to map if it fits specified range.
-  inline Standard_Boolean addParam(
+  Standard_Boolean addParam(
     const Standard_Real&                           theParam,
     const std::pair<Standard_Real, Standard_Real>& theRange,
     IMeshData::IMapOfReal&                         theParams)
@@ -230,7 +233,7 @@ namespace
   }
 
   //! Initializes parameters map using CN intervals.
-  inline Standard_Boolean initParamsFromIntervals(
+  Standard_Boolean initParamsFromIntervals(
     const TColStd_Array1OfReal&                    theIntervals,
     const std::pair<Standard_Real, Standard_Real>& theRange,
     const Standard_Boolean                         isSplitIntervals,
@@ -269,11 +272,17 @@ namespace
     for (; aIntervalU <= theIntervals[0].Upper (); ++aIntervalU)
     {
       const Standard_Real aParamU = theIntervals[0].Value(aIntervalU);
+      if (Precision::IsInfinite (aParamU))
+        continue;
+
       Standard_Integer aIntervalV = theIntervals[1].Lower ();
       for (; aIntervalV <= theIntervals[1].Upper (); ++aIntervalV)
       {
         gp_Dir aNorm;
         const Standard_Real aParamV = theIntervals[1].Value(aIntervalV);
+        if (Precision::IsInfinite (aParamV))
+          continue;
+
         if (GeomLib::NormEstim (theSurf, gp_Pnt2d (aParamU, aParamV), Precision::Confusion (), aNorm) != 0)
         {
           return Standard_True;
@@ -324,8 +333,8 @@ Handle(IMeshData::ListOfPnt2d) BRepMesh_NURBSRangeSplitter::GenerateSurfaceNodes
   const std::pair<Standard_Real, Standard_Real>& aDelta  = GetDelta ();
 
   const Standard_Real                 aDefFace = GetDFace()->GetDeflection();
-  const Handle(BRepAdaptor_HSurface)& gFace    = GetSurface();
-  Handle(Geom_Surface)                aSurface = gFace->ChangeSurface().Surface().Surface();
+  const Handle(BRepAdaptor_Surface)& gFace    = GetSurface();
+  Handle(Geom_Surface)                aSurface = gFace->Surface().Surface();
 
   const Handle(NCollection_IncAllocator) aTmpAlloc =
     new NCollection_IncAllocator(IMeshData::MEMORY_BLOCK_SIZE_HUGE);
@@ -389,7 +398,7 @@ Handle(IMeshData::ListOfPnt2d) BRepMesh_NURBSRangeSplitter::GenerateSurfaceNodes
 //=======================================================================
 Standard_Boolean BRepMesh_NURBSRangeSplitter::initParameters() const
 {
-  const Handle(BRepAdaptor_HSurface)& aSurface = GetSurface();
+  const Handle(BRepAdaptor_Surface)& aSurface = GetSurface();
 
   const GeomAbs_Shape aContinuity = GeomAbs_CN;
   const std::pair<Standard_Integer, Standard_Integer> aIntervalsNb(
@@ -405,8 +414,7 @@ Standard_Boolean BRepMesh_NURBSRangeSplitter::initParameters() const
   aSurface->UIntervals(aIntervals[0], aContinuity);
   aSurface->VIntervals(aIntervals[1], aContinuity);
 
-  const Standard_Boolean isSplitIntervals = toSplitIntervals (
-    aSurface->ChangeSurface().Surface().Surface(), aIntervals);
+  const Standard_Boolean isSplitIntervals = toSplitIntervals (aSurface->Surface().Surface(), aIntervals);
 
   if (!initParamsFromIntervals(aIntervals[0], GetRangeU(), isSplitIntervals,
                                const_cast<IMeshData::IMapOfReal&>(GetParametersU())))

@@ -22,7 +22,7 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
@@ -84,7 +84,13 @@ static StatistiquesFClass2d STAT;
 
 
 BRepTopAdaptor_FClass2d::BRepTopAdaptor_FClass2d(const TopoDS_Face& aFace,const Standard_Real TolUV) 
-: Toluv(TolUV), Face(aFace)  { 
+: Toluv(TolUV),
+  Face(aFace),
+  U1(0.0),
+  V1(0.0),
+  U2(0.0),
+  V2(0.0)
+{
   
 #if LBRCOMPT 
   STAT.NbConstrShape++;
@@ -93,8 +99,8 @@ BRepTopAdaptor_FClass2d::BRepTopAdaptor_FClass2d(const TopoDS_Face& aFace,const 
   //-- dead end on surfaces defined on more than one period
 
   Face.Orientation(TopAbs_FORWARD);
-  Handle(BRepAdaptor_HSurface) surf = new BRepAdaptor_HSurface();
-  surf->ChangeSurface().Initialize(aFace,Standard_False);
+  Handle(BRepAdaptor_Surface) surf = new BRepAdaptor_Surface();
+  surf->Initialize(aFace,Standard_False);
   
   TopoDS_Edge  edge;
   TopAbs_Orientation Or;
@@ -171,7 +177,6 @@ BRepTopAdaptor_FClass2d::BRepTopAdaptor_FClass2d(const TopoDS_Face& aFace,const 
 		      gp_Pnt P3db=C3d.Value(u);
 		      // 		      if(P3da.SquareDistance(P3db)) { degenerated=Standard_False; break; }
 		      if(P3da.SquareDistance(P3db) > Precision::Confusion()) { degenerated=Standard_False; break; }
-			  if (u + du == u) break; //SRL if adding the difference has no impact we will just go around in a loop
 		      u+=du;
 		    }
 		  while(u<plbid);
@@ -506,8 +511,8 @@ TopAbs_State BRepTopAdaptor_FClass2d::Perform(const gp_Pnt2d& _Puv,
   Standard_Real v=_Puv.Y();
   Standard_Real uu = u, vv = v;
 
-  Handle(BRepAdaptor_HSurface) surf = new BRepAdaptor_HSurface();
-  surf->ChangeSurface().Initialize( Face, Standard_False );
+  Handle(BRepAdaptor_Surface) surf = new BRepAdaptor_Surface();
+  surf->Initialize( Face, Standard_False );
   const Standard_Boolean IsUPer  = surf->IsUPeriodic();
   const Standard_Boolean IsVPer  = surf->IsVPeriodic();
   const Standard_Real    uperiod = IsUPer ? surf->UPeriod() : 0.0;
@@ -640,8 +645,8 @@ TopAbs_State BRepTopAdaptor_FClass2d::TestOnRestriction(const gp_Pnt2d& _Puv,
   Standard_Real v=_Puv.Y();
   Standard_Real uu = u, vv = v;
   
-  Handle(BRepAdaptor_HSurface) surf = new BRepAdaptor_HSurface();
-  surf->ChangeSurface().Initialize( Face, Standard_False );
+  Handle(BRepAdaptor_Surface) surf = new BRepAdaptor_Surface();
+  surf->Initialize( Face, Standard_False );
   const Standard_Boolean IsUPer  = surf->IsUPeriodic();
   const Standard_Boolean IsVPer  = surf->IsVPeriodic();
   const Standard_Real    uperiod = IsUPer ? surf->UPeriod() : 0.0;

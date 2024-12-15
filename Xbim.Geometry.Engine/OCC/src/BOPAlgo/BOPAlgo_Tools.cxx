@@ -302,17 +302,13 @@ Standard_Real BOPAlgo_Tools::ComputeToleranceOfCB
   //
   // compute max tolerance for common blocks on faces
   if (aLFI.Extent()) {
-    Standard_Integer nF;
-    GeomAPI_ProjectPointOnSurf aProjPS;
-    TColStd_ListIteratorOfListOfInteger aItLI;
-    //
-    aItLI.Initialize(aLFI);
-    for (; aItLI.More(); aItLI.Next()) {
-      nF = aItLI.Value();
+    for (TColStd_ListIteratorOfListOfInteger aItLI (aLFI); aItLI.More(); aItLI.Next())
+    {
+      const Standard_Integer nF = aItLI.Value();
       const TopoDS_Face& aF = *(TopoDS_Face*)&theDS->Shape(nF);
       aTol = BRep_Tool::Tolerance(aF);
       //
-      aProjPS = aCtx->ProjPS(aF);
+      GeomAPI_ProjectPointOnSurf& aProjPS = aCtx->ProjPS(aF);
       //
       aT = aT1;
       for (Standard_Integer i=1; i <= aNbPnt; i++) {
@@ -1104,29 +1100,6 @@ void BOPAlgo_Tools::IntersectVertices(const TopTools_IndexedDataMapOfShapeReal& 
 }
 
 //=======================================================================
-//function : TreatCompound
-//purpose  : 
-//=======================================================================
-void BOPAlgo_Tools::TreatCompound(const TopoDS_Shape& theS,
-                                  TopTools_MapOfShape& aMFence,
-                                  TopTools_ListOfShape& theLS)
-{
-  TopAbs_ShapeEnum aType = theS.ShapeType();
-  if (aType != TopAbs_COMPOUND)
-  {
-    if (aMFence.Add(theS))
-      theLS.Append(theS);
-    return;
-  }
-  TopoDS_Iterator aIt(theS);
-  for (; aIt.More(); aIt.Next())
-  {
-    const TopoDS_Shape& aS = aIt.Value();
-    TreatCompound(aS, aMFence, theLS);
-  }
-}
-
-//=======================================================================
 // Classification of the faces relatively solids
 //=======================================================================
 
@@ -1170,7 +1143,7 @@ typedef NCollection_Vector<BOPAlgo_ShapeBox> BOPAlgo_VectorOfShapeBox;
 //class : BOPAlgo_FillIn3DParts
 //purpose : Auxiliary class for faces classification in parallel mode
 //=======================================================================
-class BOPAlgo_FillIn3DParts : public BOPAlgo_Algo
+class BOPAlgo_FillIn3DParts : public BOPAlgo_ParallelAlgo
 {
 public:
   DEFINE_STANDARD_ALLOC
@@ -1289,7 +1262,11 @@ private:
 //=======================================================================
 void BOPAlgo_FillIn3DParts::Perform()
 {
-  BOPAlgo_Algo::UserBreak();
+  Message_ProgressScope aPSOuter(myProgressRange, NULL, 2);
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
 
   myInFaces.Clear();
 
@@ -1361,6 +1338,8 @@ void BOPAlgo_FillIn3DParts::Perform()
       MapEdgesAndFaces(aVShapeBox(aIVec(k)).Shape(), aMEFP, anAlloc);
   }
 
+  aPSOuter.Next();
+
   // Map of Edge-Face connection, necessary for solid classification.
   // It will be filled when first classification is performed.
   TopTools_IndexedDataMapOfShapeListOfShape aMEFDS(1, anAlloc);
@@ -1368,8 +1347,13 @@ void BOPAlgo_FillIn3DParts::Perform()
   // Fence map to avoid processing of the same faces twice
   TopTools_MapOfShape aMFDone(1, anAlloc);
 
-  for (k = 0; k < aNbFP; ++k)
+  Message_ProgressScope aPSLoop (aPSOuter.Next(), NULL, aNbFP);
+  for (k = 0; k < aNbFP; ++k, aPSLoop.Next())
   {
+    if (UserBreak (aPSLoop))
+    {
+      return;
+    }
     Standard_Integer nFP = aIVec(k);
     const TopoDS_Face& aFP = (*(TopoDS_Face*)&aVShapeBox(nFP).Shape());
     if (!aMFDone.Add(aFP))
@@ -1518,9 +1502,12 @@ void BOPAlgo_Tools::ClassifyFaces(const TopTools_ListOfShape& theFaces,
                                   Handle(IntTools_Context)& theContext,
                                   TopTools_IndexedDataMapOfShapeListOfShape& theInParts,
                                   const TopTools_DataMapOfShapeBox& theShapeBoxMap,
-                                  const TopTools_DataMapOfShapeListOfShape& theSolidsIF)
+                                  const TopTools_DataMapOfShapeListOfShape& theSolidsIF,
+                                  const Message_ProgressRange& theRange)
 {
   Handle(NCollection_BaseAllocator) anAlloc = new NCollection_IncAllocator;
+
+  Message_ProgressScope aPSOuter(theRange, NULL, 10);
 
   // Fill the vector of shape box with faces and its bounding boxes
   BOPAlgo_VectorOfShapeBox aVSB(256, anAlloc);
@@ -1528,6 +1515,11 @@ void BOPAlgo_Tools::ClassifyFaces(const TopTools_ListOfShape& theFaces,
   TopTools_ListIteratorOfListOfShape aItLF(theFaces);
   for (; aItLF.More(); aItLF.Next())
   {
+    if (!aPSOuter.More())
+    {
+      return;
+    }
+
     const TopoDS_Shape& aF = aItLF.Value();
     // Append face to the vector of shape box
     BOPAlgo_ShapeBox& aSB = aVSB.Appended();
@@ -1595,14 +1587,20 @@ void BOPAlgo_Tools::ClassifyFaces(const TopTools_ListOfShape& theFaces,
     aFIP.SetShapeBoxVector(aVSB);
   }
 
+  // Close preparation task
+  aPSOuter.Next();
+  // Set progress range for each task to be run in parallel
+  Standard_Integer aNbS = aVFIP.Length();
+  Message_ProgressScope aPSParallel(aPSOuter.Next(9), "Classification of faces relatively solids", aNbS);
+  for (Standard_Integer iFS = 0; iFS < aNbS; ++iFS)
+  {
+    aVFIP.ChangeValue(iFS).SetProgressRange(aPSParallel.Next());
+  }
   // Perform classification
   //================================================================
   BOPTools_Parallel::Perform (theRunParallel, aVFIP, theContext);
   //================================================================
-
   // Analyze the results and fill the resulting map
-
-  Standard_Integer aNbS = aVFIP.Length();
   for (Standard_Integer i = 0; i < aNbS; ++i)
   {
     BOPAlgo_FillIn3DParts& aFIP = aVFIP(i);
@@ -1755,4 +1753,31 @@ void BOPAlgo_Tools::FillInternals(const TopTools_ListOfShape& theSolids,
       BRep_Builder().Add(aSd, aShell);
     }
   }
+}
+
+//=======================================================================
+//function : TrsfToPoint
+//purpose  :
+//=======================================================================
+Standard_Boolean BOPAlgo_Tools::TrsfToPoint (const Bnd_Box& theBox1,
+                                             const Bnd_Box& theBox2,
+                                             gp_Trsf&       theTrsf,
+                                             const gp_Pnt&  thePoint,
+                                             const Standard_Real theCriteria)
+{
+  // Unify two boxes
+  Bnd_Box aBox = theBox1;
+  aBox.Add (theBox2);
+
+  gp_XYZ aBCenter = (aBox.CornerMin().XYZ() + aBox.CornerMax().XYZ()) / 2.;
+  Standard_Real aPBDist = (thePoint.XYZ() - aBCenter).Modulus();
+  if (aPBDist < theCriteria)
+    return Standard_False;
+  
+  Standard_Real aBSize = Sqrt (aBox.SquareExtent());
+  if ((aBSize / aPBDist) > (1. / theCriteria))
+    return Standard_False;
+
+  theTrsf.SetTranslation (gp_Vec (aBox.CornerMin(), thePoint));
+  return Standard_True;
 }

@@ -24,9 +24,8 @@
 #include <Standard_Boolean.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <BOPAlgo_Options.hxx>
-class Message_ProgressIndicator;
-class TopoDS_Shape;
 
+class TopoDS_Shape;
 
 //! Provides the root interface for the API algorithms
 
@@ -54,7 +53,6 @@ public:
   using BOPAlgo_Options::DumpWarnings;
   using BOPAlgo_Options::ClearWarnings;
   using BOPAlgo_Options::GetReport;
-  using BOPAlgo_Options::SetProgressIndicator;
   using BOPAlgo_Options::SetUseOBB;
 
 protected:

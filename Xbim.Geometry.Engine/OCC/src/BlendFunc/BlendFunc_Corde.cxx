@@ -15,8 +15,8 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <BlendFunc.hxx>
 #include <BlendFunc_Corde.hxx>
 #include <ElCLib.hxx>
@@ -33,9 +33,14 @@
 //function : BlendFunc_Corde
 //purpose  : 
 //=======================================================================
-BlendFunc_Corde::BlendFunc_Corde(const Handle(Adaptor3d_HSurface)&   S,
-                                 const Handle(Adaptor3d_HCurve)&     CG) :
-    surf(S),guide(CG)
+BlendFunc_Corde::BlendFunc_Corde(const Handle(Adaptor3d_Surface)&   S,
+                                 const Handle(Adaptor3d_Curve)&     CG)
+: surf(S),
+  guide(CG),
+  dis(0.0),
+  normtg(0.0),
+  theD(0.0),
+  istangent(Standard_False)
 {
 }
 

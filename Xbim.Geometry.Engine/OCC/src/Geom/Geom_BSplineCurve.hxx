@@ -33,13 +33,6 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom_UndefinedDerivative;
 class gp_Pnt;
 class gp_Vec;
 class gp_Trsf;
@@ -159,7 +152,7 @@ public:
   //! 1 <= Mults(i) <= Degree
   //!
   //! On a non periodic curve the first and last multiplicities
-  //! may be Degree+1 (this is even recommanded if you want the
+  //! may be Degree+1 (this is even recommended if you want the
   //! curve to start and finish on the first and last pole).
   //!
   //! On a periodic  curve the first  and  the last multicities
@@ -370,7 +363,7 @@ public:
   
   //! Set the origin of a periodic curve at Knot U. If U
   //! is  not a  knot  of  the  BSpline  a  new knot  is
-  //! inseted. KnotVector and poles are modified.
+  //! inserted. KnotVector and poles are modified.
   //! Raised if the curve is not periodic
   Standard_EXPORT void SetOrigin (const Standard_Real U, const Standard_Real Tol);
   
@@ -440,7 +433,7 @@ public:
   //! StartingCondition = 1 means the first point and tangent cannot move
   //! EndingCondition   = 1 means the last point and tangent cannot move
   //! and so forth
-  //! ErrorStatus != 0 means that there are not enought degree of freedom
+  //! ErrorStatus != 0 means that there are not enough degree of freedom
   //! with the constrain to deform the curve accordingly
   Standard_EXPORT void MovePointAndTangent (const Standard_Real U, const gp_Pnt& P, const gp_Vec& Tangent, const Standard_Real Tolerance, const Standard_Integer StartingCondition, const Standard_Integer EndingCondition, Standard_Integer& ErrorStatus);
   
@@ -453,7 +446,7 @@ public:
   //! Check if curve has at least G1 continuity in interval [theTf, theTl]
   //! Returns true if IsCN(1)
   //! or
-  //! angle betweem "left" and "right" first derivatives at
+  //! angle between "left" and "right" first derivatives at
   //! knots with C0 continuity is less then theAngTol
   //! only knots in interval [theTf, theTl] is checked
   Standard_EXPORT Standard_Boolean IsG1 (const Standard_Real theTf, const Standard_Real theTl, const Standard_Real theAngTol) const;
@@ -785,6 +778,9 @@ public:
   
   //! Comapare two Bspline curve on identity;
   Standard_EXPORT Standard_Boolean IsEqual (const Handle(Geom_BSplineCurve)& theOther, const Standard_Real thePreci) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

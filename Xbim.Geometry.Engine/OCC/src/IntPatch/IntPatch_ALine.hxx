@@ -24,7 +24,6 @@
 #include <IntPatch_SequenceOfPoint.hxx>
 #include <TColStd_ListOfReal.hxx>
 
-class IntAna_Curve;
 class IntPatch_Point;
 class IntPatch_ALine;
 
@@ -63,14 +62,14 @@ public:
   
   //! Returns the first parameter on the intersection line.
   //! If IsIncluded returns True, Value and D1 methods can
-  //! be call with a parameter equal to FirstParamater.
+  //! be call with a parameter equal to FirstParameter.
   //! Otherwise, the parameter must be greater than
   //! FirstParameter.
     Standard_Real FirstParameter (Standard_Boolean& IsIncluded) const;
   
   //! Returns the last parameter on the intersection line.
   //! If IsIncluded returns True, Value and D1 methods can
-  //! be call with a parameter equal to LastParamater.
+  //! be call with a parameter equal to LastParameter.
   //! Otherwise, the parameter must be less than LastParameter.
     Standard_Real LastParameter (Standard_Boolean& IsIncluded) const;
   

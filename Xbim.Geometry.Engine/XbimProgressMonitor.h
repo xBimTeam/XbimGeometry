@@ -19,11 +19,13 @@ private:
 public:
 	XbimProgressMonitor(Standard_Real maxDurationSeconds, bool startTimer = true);
 	virtual Standard_Boolean Show(const Standard_Boolean) { return true; }
-	virtual Standard_Boolean UserBreak();
+	virtual Standard_Boolean UserBreak() override;
 	void StartTimer() { timedOut = false;  aTimer.Start(); }
 	void StopTimer() { aTimer.Stop(); }
 	Standard_Real ElapsedTime() { return aTimer.ElapsedTime(); }
 	bool TimedOut() { return timedOut; }
+	void Show(const Message_ProgressScope& theScope, const Standard_Boolean force = Standard_True) override {};
+
 	/*DEFINE_STANDARD_RTTI(XbimProgressIndicator, Message_ProgressIndicator)*/
 };
 #endif

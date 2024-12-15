@@ -14,8 +14,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <TopOpeBRep_LineInter.hxx>
 
-#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor2d_Curve2d.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <Geom_Circle.hxx>
@@ -45,13 +46,12 @@
 #include <TopOpeBRep.hxx>
 #include <TopOpeBRep_Bipoint.hxx>
 #include <TopOpeBRep_FFTransitionTool.hxx>
-#include <TopOpeBRep_LineInter.hxx>
 #include <TopOpeBRep_VPointInter.hxx>
 #include <TopOpeBRep_VPointInterIterator.hxx>
 #include <TopOpeBRep_WPointInter.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
 
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
 
 #ifdef OCCT_DEBUG
 extern Standard_Boolean TopOpeBRep_GetcontextALWLNBP(Standard_Integer&);
@@ -60,8 +60,8 @@ extern Standard_Boolean TopOpeBRep_GettraceCONIC();
 
 //-----------------------------------------------------------------------
 static void FUN_ALINETOWLINE (const Handle(IntPatch_ALine)& AL,
-                              const Handle(BRepAdaptor_HSurface) surf1,
-                              const Handle(BRepAdaptor_HSurface) surf2,
+                              const Handle(BRepAdaptor_Surface) surf1,
+                              const Handle(BRepAdaptor_Surface) surf2,
                               IntPatch_SequenceOfLine& theLines)
 {
   Standard_Integer nbpointsmax = 200;
@@ -116,8 +116,8 @@ void TopOpeBRep_LineInter::SetLine(const Handle(IntPatch_Line)& L,
   // transform an analytic line to a walking line
   if (myTypeLineCurve == TopOpeBRep_ANALYTIC) {
     IntPatch_SequenceOfLine aSLin;
-    FUN_ALINETOWLINE(myILA,new BRepAdaptor_HSurface(S1),
-                        new BRepAdaptor_HSurface(S2), aSLin);
+    FUN_ALINETOWLINE(myILA,new BRepAdaptor_Surface(S1),
+                        new BRepAdaptor_Surface(S2), aSLin);
 
     if(aSLin.Length() > 0)
       myILW = Handle(IntPatch_WLine)::DownCast(aSLin.Value(1));
@@ -342,38 +342,43 @@ Standard_Boolean TopOpeBRep_LineInter::IsPeriodic() const
 
 //=======================================================================
 //function : Period
-//purpose  : 
+//purpose  :
 //=======================================================================
-
 Standard_Real TopOpeBRep_LineInter::Period() const
 {
-  Standard_Real f,l;
-  Bounds(f,l);
-  return (l - f);
+  Standard_Real aFirst = 0.0, aLast = 0.0;
+  Bounds (aFirst, aLast);
+  return (aLast - aFirst);
 }
 
 //=======================================================================
 //function : Bounds
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void TopOpeBRep_LineInter::Bounds(Standard_Real& First,Standard_Real& Last) const
+void TopOpeBRep_LineInter::Bounds (Standard_Real& theFirst, Standard_Real& theLast) const
 {
-  if ( myILG.IsNull() )  {
-    TopOpeBRep_LineInter* p = (TopOpeBRep_LineInter*)this; // NYI deconst
-    p->SetOK(Standard_False);
+  theFirst = 0.0; theLast = 0.0;
+  if (myILG.IsNull())
+  {
+    TopOpeBRep_LineInter* aPtr = const_cast<TopOpeBRep_LineInter*>(this); // NYI deconst
+    aPtr->SetOK (Standard_False);
     return;
   }
-  
-  First = 0.; Last = 0.;
-  if ( IsPeriodic() )
-    Last = Curve()->Period();
-  
-  if ( myILG->HasFirstPoint() )
-    First = myILG->FirstPoint().ParameterOnLine();
 
-  if ( myILG->HasLastPoint() )
-    Last = myILG->LastPoint().ParameterOnLine();
+  if (IsPeriodic())
+  {
+    theLast = Curve()->Period();
+  }
+
+  if (myILG->HasFirstPoint())
+  {
+    theFirst = myILG->FirstPoint().ParameterOnLine();
+  }
+
+  if (myILG->HasLastPoint())
+  {
+    theLast = myILG->LastPoint().ParameterOnLine();
+  }
 }
 
 //=======================================================================
@@ -482,14 +487,14 @@ const TopoDS_Shape& TopOpeBRep_LineInter::Arc() const
 {
   if (myTypeLineCurve == TopOpeBRep_RESTRICTION) {
     if(myILR->IsArcOnS1()) { 
-      const Handle(Adaptor2d_HCurve2d)& AHC2D = myILR->ArcOnS1();
-      const BRepAdaptor_Curve2d& BC2DP = *((BRepAdaptor_Curve2d*)&(AHC2D->Curve2d()));
+      const Handle(Adaptor2d_Curve2d)& AHC2D = myILR->ArcOnS1();
+      const BRepAdaptor_Curve2d& BC2DP = *((BRepAdaptor_Curve2d*)AHC2D.get());
       const TopoDS_Shape& S = BC2DP.Edge();
       return S;
     }
     else { 
-      const Handle(Adaptor2d_HCurve2d)& AHC2D = myILR->ArcOnS2();
-      const BRepAdaptor_Curve2d& BC2DP = *((BRepAdaptor_Curve2d*)&(AHC2D->Curve2d()));
+      const Handle(Adaptor2d_Curve2d)& AHC2D = myILR->ArcOnS2();
+      const BRepAdaptor_Curve2d& BC2DP = *((BRepAdaptor_Curve2d*)AHC2D.get());
       const TopoDS_Shape& S = BC2DP.Edge();
       return S;
     }

@@ -31,6 +31,8 @@
   #endif
 #endif
 
+#include <Standard_WarningDisableFunctionCast.hxx>
+
 namespace {
 
 #if defined(_WIN32) && !defined(OCCT_UWP)
@@ -138,7 +140,7 @@ namespace {
         return aCpuMask;
       }
 
-      // if we're not at the end of the item, expect a dash and and integer; extract end value.
+      // if we're not at the end of the item, expect a dash and integer; extract end value.
       int anIndexUpper = anIndexLower;
       if (aCharIter < aChunkEnd && *aCharIter == '-')
       {
@@ -203,7 +205,7 @@ void OSD_Parallel::SetUseOcctThreads (Standard_Boolean theToUseOcct)
 
 //=======================================================================
 //function : NbLogicalProcessors
-//purpose  : Returns number of logical proccessors.
+//purpose  : Returns number of logical processors.
 //=======================================================================
 Standard_Integer OSD_Parallel::NbLogicalProcessors()
 {

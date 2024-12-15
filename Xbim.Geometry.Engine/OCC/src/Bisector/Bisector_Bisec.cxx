@@ -70,7 +70,7 @@ Bisector_Bisec::Bisector_Bisec()
 //   apoint        :   point through which the bissectrice should pass.         
 //   afirstvector  : \ vectors to determine the sector where       
 //   asecondvector : / the bissectrice should be located.                      
-//   adirection    :   shows the the side of the bissectrice to be preserved.       
+//   adirection    :   shows the side of the bissectrice to be preserved.
 //   tolerance     :   threshold starting from which the bisectrices are degenerated
 //===========================================================================
 
@@ -677,12 +677,12 @@ static Standard_Boolean  IsMaxRC (const Handle(Geom2d_Curve)& C,
   Standard_Real Norm2;
 
   C->D2(US,P,D1,D2);
-  Norm2 = D1.SquareMagnitude();;
+  Norm2 = D1.SquareMagnitude();
   if (Norm2 < gp::Resolution()) { KF = 0.0;}
   else                          { KF = Abs(D1^D2)/(Norm2*sqrt(Norm2));}
 
   C->D2(UL,P,D1,D2);
-  Norm2 = D1.SquareMagnitude();;
+  Norm2 = D1.SquareMagnitude();
   if (Norm2 < gp::Resolution()) { KL = 0.0;}
   else                          { KL = Abs(D1^D2)/(Norm2*sqrt(Norm2));}
 

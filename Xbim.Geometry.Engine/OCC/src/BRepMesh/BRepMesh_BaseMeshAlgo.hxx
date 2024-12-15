@@ -23,9 +23,8 @@
 #include <Poly_Triangulation.hxx>
 
 class BRepMesh_DataStructureOfDelaun;
-class BRepMesh_Delaun;
 
-//! Class provides base fuctionality for algorithms building face triangulation.
+//! Class provides base functionality for algorithms building face triangulation.
 //! Performs initialization of BRepMesh_DataStructureOfDelaun and nodes map structures.
 class BRepMesh_BaseMeshAlgo : public IMeshTools_MeshAlgo
 {
@@ -42,38 +41,39 @@ public:
   //! Performs processing of the given face.
   Standard_EXPORT virtual void Perform(
     const IMeshData::IFaceHandle& theDFace,
-    const IMeshTools_Parameters&  theParameters) Standard_OVERRIDE;
+    const IMeshTools_Parameters&  theParameters,
+    const Message_ProgressRange&  theRange = Message_ProgressRange()) Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_BaseMeshAlgo, IMeshTools_MeshAlgo)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_BaseMeshAlgo, IMeshTools_MeshAlgo)
 
 protected:
 
   //! Gets discrete face.
-  inline const IMeshData::IFaceHandle& getDFace() const
+  const IMeshData::IFaceHandle& getDFace() const
   {
     return myDFace;
   }
 
   //! Gets meshing parameters.
-  inline const IMeshTools_Parameters& getParameters() const
+  const IMeshTools_Parameters& getParameters() const
   {
     return myParameters;
   }
 
   //! Gets common allocator.
-  inline const Handle(NCollection_IncAllocator)& getAllocator() const
+  const Handle(NCollection_IncAllocator)& getAllocator() const
   {
     return myAllocator;
   }
 
   //! Gets mesh structure.
-  inline const Handle(BRepMesh_DataStructureOfDelaun)& getStructure() const
+  const Handle(BRepMesh_DataStructureOfDelaun)& getStructure() const
   {
     return myStructure;
   }
 
   //! Gets 3d nodes map.
-  inline const Handle(VectorOfPnt)& getNodesMap() const
+  const Handle(VectorOfPnt)& getNodesMap() const
   {
     return myNodesMap;
   }
@@ -103,11 +103,11 @@ protected:
   Standard_EXPORT virtual Standard_Boolean initDataStructure();
 
   //! Generates mesh for the contour stored in data structure.
-  Standard_EXPORT virtual void generateMesh() = 0;
+  Standard_EXPORT virtual void generateMesh(const Message_ProgressRange& theRange) = 0;
 
 private:
 
-  //! If the given edge has another pcurve for current face coinsiding with specified one,
+  //! If the given edge has another pcurve for current face coinciding with specified one,
   //! returns TopAbs_INTERNAL flag. Elsewhere returns orientation of specified pcurve.
   TopAbs_Orientation fixSeamEdgeOrientation(
     const IMeshData::IEdgeHandle&   theDEdge,

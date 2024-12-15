@@ -20,6 +20,8 @@
 // Modified:    Mon Jan 18 11:06:46 1999
 //              mise au point de D1, D2 et IsConstant
 
+#include <GeomFill_NSections.hxx>
+
 #include <BSplCLib.hxx>
 #include <Convert_ParameterisationType.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
@@ -35,14 +37,12 @@
 #include <GeomConvert.hxx>
 #include <GeomFill_AppSurf.hxx>
 #include <GeomFill_Line.hxx>
-#include <GeomFill_NSections.hxx>
 #include <GeomFill_SectionGenerator.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Lin.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <Standard_Type.hxx>
 #include <TColGeom_Array1OfCurve.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
@@ -62,7 +62,7 @@ static Standard_Integer NbSurf = 0;
 
 #ifdef OCCT_DEBUG
 // verification des fonctions de derivation D1 et D2 par differences finies
-Standard_Boolean verifD1(const TColgp_Array1OfPnt& P1,
+static Standard_Boolean verifD1(const TColgp_Array1OfPnt& P1,
 			 const TColStd_Array1OfReal& W1,
 			 const TColgp_Array1OfPnt& P2,
 			 const TColStd_Array1OfReal& W2,
@@ -104,7 +104,7 @@ Standard_Boolean verifD1(const TColgp_Array1OfPnt& P1,
   return ok;
 }
 
-Standard_Boolean verifD2(const TColgp_Array1OfVec& DP1,
+static Standard_Boolean verifD2(const TColgp_Array1OfVec& DP1,
                          const TColStd_Array1OfReal& DW1,
                          const TColgp_Array1OfVec& DP2,
                          const TColStd_Array1OfReal& DW2,
@@ -114,7 +114,7 @@ Standard_Boolean verifD2(const TColgp_Array1OfVec& DP1,
                          const Standard_Real wTol,
                          const Standard_Real pas)
 {
-  Standard_Boolean ok = Standard_True;;
+  Standard_Boolean ok = Standard_True;
   Standard_Integer ii, L =  DP1.Length();
   Standard_Real d2w;
   gp_Vec d2P;
@@ -230,6 +230,25 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
   ULast = 1.;
   VFirst = 0.;
   VLast = 1.;
+  myRefSurf.Nullify();
+  ComputeSurface();
+}
+
+//=======================================================================
+//function : GeomFill_NSections
+//purpose  :
+//=======================================================================
+GeomFill_NSections::GeomFill_NSections (const TColGeom_SequenceOfCurve& theNC,
+                                        const TColStd_SequenceOfReal& theNP,
+                                        const Standard_Real theUF,
+                                        const Standard_Real theUL)
+{
+  mySections = theNC;
+  myParams = theNP;
+  UFirst = theUF;
+  ULast = theUL;
+  VFirst = 0.0;
+  VLast = 1.0;
   myRefSurf.Nullify();
   ComputeSurface();
 }
@@ -598,7 +617,8 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
       new Geom_BSplineSurface(anApprox.SurfPoles(), anApprox.SurfWeights(),
                               anApprox.SurfUKnots(), anApprox.SurfVKnots(),
                               anApprox.SurfUMults(), anApprox.SurfVMults(),
-                              anApprox.UDegree(), anApprox.VDegree());
+                              anApprox.UDegree(), anApprox.VDegree(), 
+                              section.IsPeriodic());
   }
 
   else {

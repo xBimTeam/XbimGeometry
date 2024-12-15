@@ -26,8 +26,6 @@
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-class Standard_RangeError;
-class gp_Ax1;
 class gp_Lin;
 class gp_Pnt;
 class gp_Dir;
@@ -178,6 +176,9 @@ public:
   
   //! Creates a new object which is a copy of this line.
   Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

@@ -24,7 +24,6 @@
 #include <GCE2d_Root.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 
-class StdFail_NotDone;
 class gp_Pnt2d;
 class gp_Dir2d;
 class gp_Lin2d;
@@ -57,7 +56,7 @@ public:
   
   //! Make a segment of Line from the line <Line>
   //! between the two parameters U1 and U2.
-  //! Status is "SameParamters" if <U1> is equal <U2>.
+  //! Status is "SameParameters" if <U1> is equal <U2>.
   Standard_EXPORT GCE2d_MakeSegment(const gp_Lin2d& Line, const Standard_Real U1, const Standard_Real U2);
   
   //! Make a segment of Line from the line <Line>

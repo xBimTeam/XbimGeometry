@@ -28,8 +28,6 @@
 #include <Standard_Real.hxx>
 #include <Standard_Transient.hxx>
 #include <TColStd_MapOfInteger.hxx>
-class BOPDS_Pave;
-class Bnd_Box;
 
 
 class BOPDS_PaveBlock;
@@ -44,16 +42,12 @@ class BOPDS_PaveBlock : public Standard_Transient
 
 public:
 
-  
-
-  //! Empty contructor
+  //! Empty constructor
   Standard_EXPORT BOPDS_PaveBlock();
-  
 
-  //! Contructor
-  //! <theAllocator> - the allocator to manage the memory
+  //! Constructor
+  //! @param theAllocator the allocator to manage the memory
   Standard_EXPORT BOPDS_PaveBlock(const Handle(NCollection_BaseAllocator)& theAllocator);
-  
 
   //! Modifier
   //! Sets the first pave <thePave>

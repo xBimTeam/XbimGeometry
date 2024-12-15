@@ -24,8 +24,6 @@
 #include <Standard_Real.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_DomainError;
-class TopLoc_Location;
 class Geom_Curve;
 class Geom2d_Curve;
 class Geom_Surface;
@@ -83,6 +81,9 @@ public:
   Standard_EXPORT virtual const Handle(Geom_Surface)& Surface() const;
   
   Standard_EXPORT virtual void Surface (const Handle(Geom_Surface)& S);
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
 

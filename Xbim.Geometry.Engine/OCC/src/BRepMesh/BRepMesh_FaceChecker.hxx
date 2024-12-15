@@ -25,7 +25,7 @@
 //! Auxiliary class checking wires of target face for self-intersections.
 //! Explodes wires of discrete face on sets of segments using tessellation 
 //! data stored in model. Each segment is then checked for intersection with
-//! other ones. All collisions are registerd and returned as result of check.
+//! other ones. All collisions are registered and returned as result of check.
 class BRepMesh_FaceChecker : public Standard_Transient
 {
 public: //! @name mesher API
@@ -38,8 +38,9 @@ public: //! @name mesher API
     gp_Pnt2d*                Point2; // / using indices.
 
     Segment()
-      : Point1(NULL)
-      , Point2(NULL)
+    : EdgePtr(NULL),
+      Point1(NULL),
+      Point2(NULL)
     {
     }
 
@@ -77,17 +78,17 @@ public: //! @name mesher API
   }
 
   //! Checks wire with the given index for intersection with others.
-  inline void operator()(const Standard_Integer theWireIndex) const
+  void operator()(const Standard_Integer theWireIndex) const
   {
     perform(theWireIndex);
   }
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_FaceChecker, Standard_Transient)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_FaceChecker, Standard_Transient)
 
 private:
 
   //! Returns True in case if check can be performed in parallel mode.
-  inline Standard_Boolean isParallel() const
+  Standard_Boolean isParallel() const
   {
     return (myParameters.InParallel && myDFace->WiresNb() > 1);
   }

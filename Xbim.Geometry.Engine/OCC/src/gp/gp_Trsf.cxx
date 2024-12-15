@@ -19,6 +19,7 @@
 
 #define No_Standard_OutOfRange
 
+#include <gp_Trsf.hxx>
 
 #include <gp.hxx>
 #include <gp_Ax1.hxx>
@@ -28,7 +29,6 @@
 #include <gp_Mat.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Quaternion.hxx>
-#include <gp_Trsf.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec.hxx>
 #include <gp_XYZ.hxx>
@@ -127,6 +127,57 @@ void gp_Trsf::SetRotation (const gp_Quaternion& R)
   scale = 1.;
   loc.SetCoord (0., 0., 0.);
   matrix = R.GetMatrix();
+}
+
+//=======================================================================
+//function : SetRotationPart
+//purpose  :
+//=======================================================================
+void gp_Trsf::SetRotationPart (const gp_Quaternion& theR)
+{
+  const bool hasRotation = !theR.IsEqual (gp_Quaternion());
+  if (hasRotation)
+  {
+    matrix = theR.GetMatrix();
+  }
+  else
+  {
+    matrix.SetIdentity();
+  }
+
+  switch (shape)
+  {
+    case gp_Identity:
+    {
+      if (hasRotation)
+      {
+        shape = gp_Rotation;
+      }
+      break;
+    }
+    case gp_Rotation:
+    {
+      if (!hasRotation)
+      {
+        shape = gp_Identity;
+      }
+      break;
+    }
+    case gp_Translation:
+    case gp_PntMirror:
+    case gp_Ax1Mirror:
+    case gp_Ax2Mirror:
+    case gp_Scale:
+    case gp_CompoundTrsf:
+    case gp_Other:
+    {
+      if (hasRotation)
+      {
+        shape = gp_CompoundTrsf;
+      }
+      break;
+    }
+  }
 }
 
 //=======================================================================
@@ -855,13 +906,48 @@ void gp_Trsf::Orthogonalize()
 //function : DumpJson
 //purpose  : 
 //=======================================================================
-void gp_Trsf::DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth) const
+void gp_Trsf::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
 {
-  OCCT_DUMP_CLASS_BEGIN (theOStream, gp_Trsf);
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "Location", 3, loc.X(), loc.Y(), loc.Z())
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "Matrix", 9, matrix.Value(1, 1), matrix.Value(1, 2), matrix.Value(1, 3),
+                                                   matrix.Value(2, 1), matrix.Value(2, 2), matrix.Value(2, 3),
+                                                   matrix.Value(3, 1), matrix.Value(3, 2), matrix.Value(3, 3))
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, shape)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, scale)
+}
 
-  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &loc);
-  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &matrix);
+//=======================================================================
+//function : InitFromJson
+//purpose  : 
+//=======================================================================
+Standard_Boolean  gp_Trsf::InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+{
+  Standard_Integer aPos = theStreamPos;
+  TCollection_AsciiString aStreamStr = Standard_Dump::Text (theSStream);
 
-  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, shape);
-  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, scale);
+  gp_XYZ anXYZLoc;
+  OCCT_INIT_VECTOR_CLASS (aStreamStr, "Location", aPos, 3,
+                          &anXYZLoc.ChangeCoord (1), &anXYZLoc.ChangeCoord (2), &anXYZLoc.ChangeCoord (3))
+  SetTranslation (anXYZLoc);
+
+  Standard_Real mymatrix[3][3];
+  OCCT_INIT_VECTOR_CLASS (aStreamStr, "Matrix", aPos, 9, &mymatrix[0][0], &mymatrix[0][1], &mymatrix[0][2],
+                                                         &mymatrix[1][0], &mymatrix[1][1], &mymatrix[1][2],
+                                                         &mymatrix[2][0], &mymatrix[2][1], &mymatrix[2][2])
+  for (int i = 0; i < 3; i++)
+  {
+    for (int j = 0; j < 3; j++)
+    {
+      matrix.SetValue (i + 1, j + 1, mymatrix[i][j]);
+    }
+  }
+
+  Standard_Real ashape;
+  OCCT_INIT_FIELD_VALUE_INTEGER (aStreamStr, aPos, ashape);
+  shape = (gp_TrsfForm)((Standard_Integer)ashape);
+
+  OCCT_INIT_FIELD_VALUE_REAL (aStreamStr, aPos, scale);
+
+  theStreamPos = aPos;
+  return Standard_True;
 }

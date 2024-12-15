@@ -41,7 +41,9 @@
   #include <stdlib.h>
   #include <sys/param.h>
   #include <sys/time.h>
+  #if !defined(__EMSCRIPTEN__)
   #include <pwd.h>       // For command getpwuid
+  #endif
   #include <unistd.h>
 #endif
 
@@ -99,8 +101,13 @@ Standard_Integer OSD_Process::ProcessId(){
 
 TCollection_AsciiString OSD_Process::UserName()
 {
+#if defined(__EMSCRIPTEN__)
+  // Emscripten SDK raises TODO exception in runtime while calling getpwuid()
+  return TCollection_AsciiString();
+#else
   struct passwd *anInfos = getpwuid (getuid());
   return TCollection_AsciiString (anInfos ? anInfos->pw_name : "");
+#endif
 }
 
 Standard_Boolean OSD_Process::IsSuperUser (){
@@ -187,7 +194,7 @@ Standard_Integer OSD_Process::Error()const{
 //-------------------  WNT Sources of OSD_Path ---------------------------
 //------------------------------------------------------------------------
 
-void _osd_wnt_set_error ( OSD_Error&, OSD_WhoAmI, ... );
+void _osd_wnt_set_error ( OSD_Error&, Standard_Integer, ... );
 
 // =======================================================================
 // function : OSD_Process

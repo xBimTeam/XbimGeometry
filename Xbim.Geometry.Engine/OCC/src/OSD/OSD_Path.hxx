@@ -32,7 +32,7 @@ public:
   //! i.e. current directory.
   Standard_EXPORT OSD_Path();
   
-  //! Creates a Path object initialized by dependant path.
+  //! Creates a Path object initialized by dependent path.
   //! ex: OSD_Path me ("/usr/bin/myprog.sh",OSD_UnixBSD);
   //!
   //! OSD_Path me ("sys$common:[syslib]cc.exe",OSD_OSF) will
@@ -215,6 +215,18 @@ public:
                                                      TCollection_AsciiString&       theFolder,
                                                      TCollection_AsciiString&       theFileName);
 
+  //! Return file extension from the name in lower case.
+  //! Extension is expected to be within 20-symbols length, and determined as file name tail after last dot.
+  //! Example: IN  theFilePath ='Image.sbs.JPG'
+  //!          OUT theName     ='Image.sbs'
+  //!          OUT theFileName ='jpg'
+  //! @param theFilePath  [in]  file path
+  //! @param theName      [out] file name without extension
+  //! @param theExtension [out] file extension in lower case and without dot
+  Standard_EXPORT static void FileNameAndExtension (const TCollection_AsciiString& theFilePath,
+                                                    TCollection_AsciiString&       theName,
+                                                    TCollection_AsciiString&       theExtension);
+
   //! Detect absolute DOS-path also used in Windows.
   //! The total path length is limited to 256 characters.
   //! Sample path:
@@ -228,7 +240,10 @@ public:
   //!   \\?\D:\very long path
   //! File I/O functions in the Windows API convert "/" to "\" as part of converting the name to an NT-style name, except when using the "\\?\" prefix.
   //! @return true if extended-length NT path syntax detected.
-  static Standard_Boolean IsNtExtendedPath (const char* thePath) { return ::memcmp (thePath, "\\\\?\\", 4) == 0; }
+  static Standard_Boolean IsNtExtendedPath (const char* thePath) 
+  { 
+    return ::strncmp (thePath, "\\\\?\\", 4) == 0;
+  }
 
   //! UNC is a naming convention used primarily to specify and map network drives in Microsoft Windows.
   //! Sample path:
@@ -236,31 +251,40 @@ public:
   //! @return true if UNC path syntax detected.
   static Standard_Boolean IsUncPath (const char* thePath)
   {
-    if (::memcmp (thePath, "\\\\", 2) == 0)
+    if (::strncmp (thePath, "\\\\", 2) == 0)
     {
       return thePath[2] != '?'
           || IsUncExtendedPath (thePath);
     }
-    return ::memcmp (thePath, "//",   2) == 0;
+    return ::strncmp (thePath, "//", 2) == 0;
   }
 
   //! Detect extended-length UNC path.
   //! Sample path:
   //!   \\?\UNC\server\share
   //! @return true if extended-length UNC path syntax detected.
-  static Standard_Boolean IsUncExtendedPath (const char* thePath) { return ::memcmp (thePath, "\\\\?\\UNC\\", 8) == 0; }
+  static Standard_Boolean IsUncExtendedPath (const char* thePath) 
+  { 
+    return ::strncmp (thePath, "\\\\?\\UNC\\", 8) == 0;
+  }
 
   //! Detect absolute UNIX-path.
   //! Sample path:
   //!   /media/cdrom/file
   //! @return true if UNIX path syntax detected.
-  static Standard_Boolean IsUnixPath (const char* thePath) { return thePath[0] == '/' && thePath[1] != '/'; }
+  static Standard_Boolean IsUnixPath (const char* thePath)
+  {
+    return thePath[0] == '/' && thePath[1] != '/';
+  }
 
   //! Detect special URLs on Android platform.
   //! Sample path:
   //!   content://filename
   //! @return true if content path syntax detected
-  static Standard_Boolean IsContentProtocolPath (const char* thePath) { return ::memcmp (thePath, "content://", 10) == 0; }
+  static Standard_Boolean IsContentProtocolPath (const char* thePath)
+  {
+    return ::strncmp (thePath, "content://", 10) == 0;
+  }
 
   //! Detect remote protocol path (http / ftp / ...).
   //! Actually shouldn't be remote...

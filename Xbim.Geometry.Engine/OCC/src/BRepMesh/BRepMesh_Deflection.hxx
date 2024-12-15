@@ -21,9 +21,6 @@
 #include <Standard_Transient.hxx>
 #include <IMeshData_Types.hxx>
 
-class Bnd_Box;
-class TopoDS_Face;
-class TopoDS_Edge;
 struct IMeshTools_Parameters;
 
 //! Auxiliary tool encompassing methods to compute deflection of shapes.
@@ -58,7 +55,21 @@ public:
     const IMeshData::IFaceHandle& theDFace,
     const IMeshTools_Parameters&  theParameters);
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_Deflection, Standard_Transient)
+  //! Checks if the deflection of current polygonal representation
+  //! is consistent with the required deflection.
+  //! @param theCurrent [in] Current deflection.
+  //! @param theRequired [in] Required deflection.
+  //! @param theAllowDecrease [in] Flag controlling the check. If decrease is allowed,
+  //! to be consistent the current and required deflections should be approximately the same.
+  //! If not allowed, the current deflection should be less than required.
+  //! @param theRatio [in] The ratio for comparison of the deflections (value from 0 to 1).
+  Standard_EXPORT static Standard_Boolean IsConsistent (
+    const Standard_Real theCurrent,
+    const Standard_Real theRequired,
+    const Standard_Boolean theAllowDecrease,
+    const Standard_Real theRatio = 0.1);
+
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_Deflection, Standard_Transient)
 };
 
 #endif

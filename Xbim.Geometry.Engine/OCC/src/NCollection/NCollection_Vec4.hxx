@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _NCollection_Vec4_H__
-#define _NCollection_Vec4_H__
+#ifndef NCollection_Vec4_HeaderFile
+#define NCollection_Vec4_HeaderFile
 
 #include <NCollection_Vec3.hxx>
 
@@ -183,11 +183,9 @@ public:
   }
 
   //! Check this vector with another vector for equality (without tolerance!).
-  bool operator== (const NCollection_Vec4& theOther)       { return IsEqual (theOther); }
   bool operator== (const NCollection_Vec4& theOther) const { return IsEqual (theOther); }
 
   //! Check this vector with another vector for non-equality (without tolerance!).
-  bool operator!= (const NCollection_Vec4& theOther)       { return !IsEqual (theOther); }
   bool operator!= (const NCollection_Vec4& theOther) const { return !IsEqual (theOther); }
 
   //! Raw access to the data (for OpenGL exchange).
@@ -373,6 +371,13 @@ public:
   {
     NCollection_Vec4 aResult = NCollection_Vec4 (theLeft);
     return aResult /= theRight;
+  }
+
+  //! Dumps the content of me into the stream
+  void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const
+  {
+    (void)theDepth;
+    OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "Vec4", 4, v[0], v[1], v[2], v[3])
   }
 
 private:

@@ -102,14 +102,15 @@ const TopoDS_Shape& BOPAlgo_CellsBuilder::GetAllParts() const
 //function : PerformInternal1
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CellsBuilder::PerformInternal1(const BOPAlgo_PaveFiller& theFiller)
+void BOPAlgo_CellsBuilder::PerformInternal1(const BOPAlgo_PaveFiller& theFiller, const Message_ProgressRange& theRange)
 {
   // Avoid filling history after GF operation as later
   // in this method the result shape will be nullified
   Standard_Boolean isHistory = HasHistory();
   SetToFillHistory(Standard_False);
   // Perform splitting of the arguments
-  BOPAlgo_Builder::PerformInternal1(theFiller);
+  Message_ProgressScope aPS(theRange, "Performing MakeCells operation", 1);
+  BOPAlgo_Builder::PerformInternal1(theFiller, aPS.Next());
   if (HasErrors()) {
     return;
   }
@@ -141,44 +142,50 @@ void BOPAlgo_CellsBuilder::IndexParts()
   TopTools_ListIteratorOfListOfShape aIt(myArguments);
   for (; aIt.More(); aIt.Next()) {
     const TopoDS_Shape& aS = aIt.Value();
-    //
-    Standard_Integer iDim = BOPTools_AlgoTools::Dimension(aS);
-    aMDims.Add(iDim);
-    TopAbs_ShapeEnum aType = TypeToExplore(iDim);
-    //
-    TopExp_Explorer aExp(aS, aType);
-    for (; aExp.More(); aExp.Next()) {
-      const TopoDS_Shape& aST = aExp.Current();
-      const TopTools_ListOfShape* pLSIm = myImages.Seek(aST);
-      if (!pLSIm) {
-        TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aST);
-        if (!pLS) {
-          pLS = &myIndex(myIndex.Add(aST, TopTools_ListOfShape()));
+
+    TopTools_ListOfShape aLSubS;
+    BOPTools_AlgoTools::TreatCompound (aS, aLSubS);
+    for (TopTools_ListOfShape::Iterator itSub (aLSubS); itSub.More(); itSub.Next())
+    {
+      const TopoDS_Shape& aSS = itSub.Value();
+      Standard_Integer iDim = BOPTools_AlgoTools::Dimension (aSS);
+      aMDims.Add(iDim);
+      TopAbs_ShapeEnum aType = TypeToExplore (iDim);
+      TopExp_Explorer aExp (aSS, aType);
+      for (; aExp.More(); aExp.Next())
+      {
+        const TopoDS_Shape& aST = aExp.Current();
+        const TopTools_ListOfShape* pLSIm = myImages.Seek(aST);
+        if (!pLSIm) {
+          TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aST);
+          if (!pLS) {
+            pLS = &myIndex(myIndex.Add(aST, TopTools_ListOfShape()));
+          }
+          pLS->Append(aS);
+          //
+          if (aMFence.Add(aST)) {
+            aBB.Add(anAllParts, aST);
+          }
+          //
+          continue;
         }
-        pLS->Append(aS);
         //
-        if (aMFence.Add(aST)) {
-          aBB.Add(anAllParts, aST);
-        }
-        //
-        continue;
-      }
-      //
-      TopTools_ListIteratorOfListOfShape aItIm(*pLSIm);
-      for (; aItIm.More(); aItIm.Next()) {
-        const TopoDS_Shape& aSTIm = aItIm.Value();
-        //
-        TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aSTIm);
-        if (!pLS) {
-          pLS = &myIndex(myIndex.Add(aSTIm, TopTools_ListOfShape()));
-        }
-        pLS->Append(aS);
-        //
-        if (aMFence.Add(aSTIm)) {
-          aBB.Add(anAllParts, aSTIm);
-        }
-      } // for (; aItIm.More(); aItIm.Next()) {
-    } // for (; aExp.More(); aExp.Next()) {
+        TopTools_ListIteratorOfListOfShape aItIm(*pLSIm);
+        for (; aItIm.More(); aItIm.Next()) {
+          const TopoDS_Shape& aSTIm = aItIm.Value();
+          //
+          TopTools_ListOfShape* pLS = myIndex.ChangeSeek(aSTIm);
+          if (!pLS) {
+            pLS = &myIndex(myIndex.Add(aSTIm, TopTools_ListOfShape()));
+          }
+          pLS->Append(aS);
+          //
+          if (aMFence.Add(aSTIm)) {
+            aBB.Add(anAllParts, aSTIm);
+          }
+        } // for (; aItIm.More(); aItIm.Next()) {
+      } // for (; aExp.More(); aExp.Next()) {
+    } // for (; itSub.More(); itSub.Next())
   } // for (; aIt.More(); aIt.Next()) {
   //
   myAllParts = anAllParts;
@@ -290,7 +297,7 @@ void BOPAlgo_CellsBuilder::AddToResult(const TopTools_ListOfShape& theLSToTake,
   //
   if (!theUpdate) {
     if (bChanged) {
-      PrepareHistory();
+      PrepareHistory(Message_ProgressRange());
     }
   }
   else {
@@ -323,7 +330,7 @@ void BOPAlgo_CellsBuilder::AddAllToResult(const Standard_Integer theMaterial,
   }
   //
   if (!theUpdate) {
-    PrepareHistory();
+    PrepareHistory(Message_ProgressRange());
   }
   else {
     RemoveInternalBoundaries();
@@ -413,7 +420,7 @@ void BOPAlgo_CellsBuilder::RemoveFromResult(const TopTools_ListOfShape& theLSToT
   if (bChanged) {
     myShape = aResult;
     //
-    PrepareHistory();
+    PrepareHistory(Message_ProgressRange());
   }
 }
 
@@ -432,7 +439,7 @@ void BOPAlgo_CellsBuilder::RemoveAllFromResult()
   myShapeMaterial.Clear();
   myMapModified.Clear();
   //
-  PrepareHistory();
+  PrepareHistory(Message_ProgressRange());
 }
 
 //=======================================================================
@@ -592,7 +599,7 @@ void BOPAlgo_CellsBuilder::RemoveInternalBoundaries()
     //
     myShape = aResult;
     //
-    PrepareHistory();
+    PrepareHistory(Message_ProgressRange());
   }
 }
 

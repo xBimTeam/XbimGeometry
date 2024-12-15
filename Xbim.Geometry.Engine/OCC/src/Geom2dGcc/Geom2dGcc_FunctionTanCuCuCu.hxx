@@ -29,17 +29,13 @@
 #include <math_Vector.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_ConstructionError;
-class Geom2dAdaptor_Curve;
-class gp_Circ2d;
-class gp_Lin2d;
 class gp_Pnt2d;
 class gp_Vec2d;
 class math_Matrix;
 
 
 //! This abstract class describes a set on N Functions of
-//! M independant variables.
+//! M independent variables.
 class Geom2dGcc_FunctionTanCuCuCu  : public math_FunctionSetWithDerivatives
 {
 public:

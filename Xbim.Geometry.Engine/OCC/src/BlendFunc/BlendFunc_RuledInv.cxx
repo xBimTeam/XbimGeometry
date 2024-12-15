@@ -15,21 +15,25 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor2d_HCurve2d.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor2d_Curve2d.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <BlendFunc_RuledInv.hxx>
 #include <math_Matrix.hxx>
 #include <Precision.hxx>
 
-BlendFunc_RuledInv::BlendFunc_RuledInv(const Handle(Adaptor3d_HSurface)& S1,
-                                       const Handle(Adaptor3d_HSurface)& S2,
-                                       const Handle(Adaptor3d_HCurve)& C) :
-       surf1(S1),surf2(S2),curv(C)
-{}
+BlendFunc_RuledInv::BlendFunc_RuledInv(const Handle(Adaptor3d_Surface)& S1,
+                                       const Handle(Adaptor3d_Surface)& S2,
+                                       const Handle(Adaptor3d_Curve)& C)
+: surf1(S1),
+  surf2(S2),
+  curv(C),
+  first(Standard_False)
+{
+}
 
 void BlendFunc_RuledInv::Set(const Standard_Boolean OnFirst,
-                             const Handle(Adaptor2d_HCurve2d)& C)
+                             const Handle(Adaptor2d_Curve2d)& C)
 {
   first = OnFirst;
   csurf = C;
