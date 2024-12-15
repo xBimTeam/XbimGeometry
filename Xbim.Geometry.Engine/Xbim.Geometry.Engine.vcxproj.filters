@@ -396,33 +396,6 @@
     <ClInclude Include="BRep\XSurfaceOfLinearExtrusion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Storage\BRepDocument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\BRepDocumentManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\BRepDocumentItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\FlexApp_Application.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\FlexShape.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Storage\Unmanaged\NBRepDocument.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Primitives\GeometryPrimitives.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -502,6 +475,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BRep\OccExtensions\Curves\Segments\Geom2d_Polynomial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Services\ShapeBinarySerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -797,33 +773,6 @@
     <ClCompile Include="BRep\XEllipse.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Storage\BRepDocument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\BRepDocumentManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\BRepDocumentItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\FlexApp_Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\FlexShape.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentRetrievalDriver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\FlexDrivers_DocumentStorageDriver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage\Unmanaged\NBRepDocument.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Primitives\GeometryPrimitives.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -873,6 +822,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\ModelPlacementBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Services\ShapeBinarySerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

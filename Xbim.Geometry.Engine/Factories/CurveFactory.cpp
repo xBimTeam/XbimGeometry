@@ -1837,16 +1837,16 @@ namespace Xbim
 			{
 				Ifc4x3::GeometryResource::IfcSpiral^ spiral = dynamic_cast<Ifc4x3::GeometryResource::IfcSpiral^>(segment->ParentCurve);
 				Ifc4x3::GeometryResource::IfcPolynomialCurve^ polyCurve = dynamic_cast<Ifc4x3::GeometryResource::IfcPolynomialCurve^>(segment->ParentCurve);
-				Ifc4x3::MeasureResource::IfcLengthMeasure^ startLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(segment->SegmentStart);
-				Ifc4x3::MeasureResource::IfcLengthMeasure^ curveLength = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(segment->SegmentLength);
+				Ifc4::Interfaces::IIfcLengthMeasure^ startLen = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(segment->SegmentStart);
+				Ifc4::Interfaces::IIfcLengthMeasure^ curveLength = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(segment->SegmentLength);
 
 				// Informal Proposition:
 				// SegmentStart and SegmentStart shall be of type IfcLengthMeasure
 				if (startLen == nullptr || curveLength == nullptr)
-					throw RaiseGeometryFactoryException("IfcCurveSegment egmentStart and SegmentEnd should be of type IfcLengthMeasure", segment);
+					throw RaiseGeometryFactoryException("IfcCurveSegment SegmentStart and SegmentEnd should be of type IfcLengthMeasure", segment);
 
-				double startParam = static_cast<double>(startLen->Value);
-				double length = static_cast<double>(curveLength->Value);
+				double startParam = startLen->Value;
+				double length = curveLength->Value;
 				double endParam = startParam + length;
 				Geom2d_Spiral::IntegrationSteps = (int)((endParam - startParam) / _modelService->OneMeter);
 
