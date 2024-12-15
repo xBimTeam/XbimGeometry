@@ -3,6 +3,7 @@ trigger:
     include:
     - master
     - develop
+    - feature/netcore
   paths:
     exclude:
     - README.md
@@ -116,6 +117,7 @@ jobs:
     displayName: 'Build and pack solution Xbim.Geometry.Engine.sln'
     inputs:
       solution: 'Xbim.Geometry.Engine.sln'
+      vsVersion: '16.0' # vs2019
       msbuildArgs: '/t:build'
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
@@ -181,3 +183,11 @@ jobs:
       publishFeedCredentials: 'MyGetDev'
       versioningScheme: byEnvVar
       versionEnvVar: packageversion
+  - task: NuGetCommand@2
+    name: 'MyGetPublishing_FlexGet'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature/netcore'))
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '2591d379-784d-4b57-88f5-a932c93cbffd'

@@ -189,11 +189,12 @@ static Standard_Boolean TryMakeLine(const Handle(Geom2d_Curve)& thePCurve,
   return Standard_True;
 }
 
-static void RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
+static bool RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
                               TopTools_IndexedDataMapOfShapeListOfShape& theVEmap)
 {
   TopoDS_Vertex VV [2];
   TopExp::Vertices(theEdge, VV[0], VV[1]);
+  bool removed = false;
   for (Standard_Integer i = 0; i < 2; i++)
   {
     TopTools_ListOfShape& Elist = theVEmap.ChangeFromKey(VV[i]);
@@ -202,11 +203,15 @@ static void RemoveEdgeFromMap(const TopoDS_Edge& theEdge,
     {
       const TopoDS_Shape& anEdge = itl.Value();
       if (anEdge.IsSame(theEdge))
-        Elist.Remove(itl);
+      {
+          Elist.Remove(itl);
+          removed = true;
+      }
       else
         itl.Next();
     }
   }
+  return removed;
 }
 
 static Standard_Real ComputeMinEdgeSize(const TopTools_SequenceOfShape& theEdges,
@@ -375,7 +380,8 @@ static void RelocatePCurvesToNewUorigin(const TopTools_SequenceOfShape& theEdges
     gp_Pnt2d CurPoint = CurPCurve->Value(CurParam);
     for (;;) //collect pcurves of a contour
     {
-      RemoveEdgeFromMap(CurEdge, theVEmap);
+      if (!RemoveEdgeFromMap(CurEdge, theVEmap))
+        break;
       theUsedEdges.Add(CurEdge);
       TopoDS_Vertex CurVertex = (anOr == TopAbs_FORWARD)?
         TopExp::LastVertex(CurEdge, Standard_True) : TopExp::FirstVertex(CurEdge, Standard_True);
