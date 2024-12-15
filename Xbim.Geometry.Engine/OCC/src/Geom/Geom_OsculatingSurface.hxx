@@ -47,7 +47,7 @@ public:
   
   //! detects if the  surface has punctual U  or  V
   //! isoparametric  curve along on  the bounds of the surface
-  //! relativly to the tolerance Tol and Builds the corresponding
+  //! relatively to the tolerance Tol and Builds the corresponding
   //! osculating surfaces.
   Standard_EXPORT Geom_OsculatingSurface(const Handle(Geom_Surface)& BS, const Standard_Real Tol);
   
@@ -64,6 +64,9 @@ public:
   //! if Standard_True, L is the local osculating surface
   //! along V at the point U,V.
   Standard_EXPORT Standard_Boolean VOscSurf (const Standard_Real U, const Standard_Real V, Standard_Boolean& t, Handle(Geom_BSplineSurface)& L) const;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
 
   DEFINE_STANDARD_RTTIEXT(Geom_OsculatingSurface,Standard_Transient)

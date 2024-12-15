@@ -294,6 +294,11 @@ namespace Xbim
 					return CreateGeometricSet((IIfcGeometricSet^)geomRep, logger);
 				}
 			}
+			catch (System::Exception^ Sexc)
+			{
+				LogError(logger, geomRep, "Error creating geometry #{2} representation of type {0}, {1}", geomRep->GetType()->Name, Sexc->Message, geomRep->EntityLabel);
+				return XbimGeometryObjectSet::Empty;
+			}
 			catch (const std::exception &exc)
 			{
 				String^ err = gcnew String(exc.what());

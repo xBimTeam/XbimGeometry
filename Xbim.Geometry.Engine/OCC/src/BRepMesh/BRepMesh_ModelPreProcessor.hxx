@@ -33,14 +33,15 @@ public:
   //! Destructor.
   Standard_EXPORT virtual ~BRepMesh_ModelPreProcessor();
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_ModelPreProcessor, IMeshTools_ModelAlgo)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_ModelPreProcessor, IMeshTools_ModelAlgo)
 
 protected:
 
   //! Performs processing of edges of the given model.
   Standard_EXPORT virtual Standard_Boolean performInternal (
     const Handle(IMeshData_Model)& theModel,
-    const IMeshTools_Parameters&   theParameters) Standard_OVERRIDE;
+    const IMeshTools_Parameters&   theParameters,
+    const Message_ProgressRange&   theRange) Standard_OVERRIDE;
 };
 
 #endif

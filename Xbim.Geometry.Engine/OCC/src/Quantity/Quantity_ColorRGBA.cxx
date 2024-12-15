@@ -15,7 +15,7 @@
 
 #include <Quantity_ColorRGBA.hxx>
 
-#include <Graphic3d_Vec4.hxx>
+#include <NCollection_Vec4.hxx>
 #include <Standard_Dump.hxx>
 
 #include <algorithm>
@@ -44,7 +44,7 @@ namespace
                                                            const ColorInteger theColorComponentBase)
   {
     Standard_ASSERT_RETURN (theColorComponentBase >= 2,
-                            __FUNCTION__ ": 'theColorComponentBase' must be greater than 1.",
+                            "'theColorComponentBase' must be greater than 1.",
                             0.0f);
     const ColorInteger       aColorComponentMaxValue  = theColorComponentBase - 1;
     const ColorInteger       aColorComponentAsInteger = theColorInteger % theColorComponentBase;
@@ -67,9 +67,9 @@ namespace
                                          Quantity_ColorRGBA& theColor)
   {
     Standard_ASSERT_RETURN (theColorComponentBase >= 2,
-                            __FUNCTION__ ": 'theColorComponentBase' must be greater than 1.",
+                            "'theColorComponentBase' must be greater than 1.",
                             0.0f);
-    Graphic3d_Vec4 aColor (1.0f);
+    NCollection_Vec4<float> aColor (1.0f);
     if (hasAlphaComponent)
     {
       const Standard_ShortReal anAlphaComponent = takeColorComponentFromInteger (theColorInteger,
@@ -79,7 +79,7 @@ namespace
     for (Standard_Integer aColorComponentIndex = 2; aColorComponentIndex >= 0; --aColorComponentIndex)
     {
       const Standard_ShortReal aColorComponent = takeColorComponentFromInteger (theColorInteger, theColorComponentBase);
-      aColor[aColorComponentIndex]             = aColorComponent;
+      aColor[aColorComponentIndex]             = Quantity_Color::Convert_sRGB_To_LinearRGB (aColorComponent);
     }
     if (theColorInteger != 0)
     {
@@ -204,10 +204,22 @@ bool Quantity_ColorRGBA::ColorFromHex (const char* const   theHexColorString,
 //function : DumpJson
 //purpose  : 
 //=======================================================================
-void Quantity_ColorRGBA::DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth) const
+void Quantity_ColorRGBA::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
 {
-  OCCT_DUMP_CLASS_BEGIN (theOStream, Quantity_ColorRGBA);
+  OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "RGBA", 4, myRgb.Red(), myRgb.Green(), myRgb.Blue(), myAlpha)
+}
 
-  OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &myRgb);
-  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myAlpha);
+//=======================================================================
+//function : InitFromJson
+//purpose  : 
+//=======================================================================
+Standard_Boolean Quantity_ColorRGBA::InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+{
+  Standard_Integer aPos = theStreamPos;
+
+  Standard_Real aRed, aGreen, aBlue, anAlpha;
+  OCCT_INIT_VECTOR_CLASS (Standard_Dump::Text (theSStream), "RGBA", aPos, 4, &aRed, &aGreen, &aBlue, &anAlpha)
+
+  SetValues ((Standard_ShortReal)aRed, (Standard_ShortReal)aGreen, (Standard_ShortReal)aBlue, (Standard_ShortReal)anAlpha);
+  return Standard_True;
 }

@@ -20,14 +20,14 @@
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 
+#include <TopAbs_Orientation.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopExp_Explorer.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-#include <TopAbs_Orientation.hxx>
-class TopoDS_Face;
 class gp_Pnt2d;
 class gp_Lin2d;
 class BRepClass_Edge;
@@ -94,6 +94,33 @@ public:
   //! Current edge in current wire and its orientation.
   Standard_EXPORT void CurrentEdge (BRepClass_Edge& E, TopAbs_Orientation& Or) const;
 
+  //! Returns the maximum tolerance
+  Standard_Real MaxTolerance() const
+  {
+    return myMaxTolerance;
+  }
+
+  //! Sets the maximum tolerance at 
+  //! which to start checking in the intersector
+  void SetMaxTolerance(const Standard_Real theValue)
+  {
+    myMaxTolerance = theValue;
+  }
+
+  //! Returns true if we are using boxes
+  //! in the intersector
+  Standard_Boolean UseBndBox() const
+  {
+    return myUseBndBox;
+  }
+
+  //! Sets the status of whether we are
+  //! using boxes or not
+  void SetUseBndBox(const Standard_Boolean theValue)
+  {
+    myUseBndBox = theValue;
+  }
+
 
 
 
@@ -112,6 +139,9 @@ private:
   TopExp_Explorer myEExplorer;
   Standard_Integer myCurEdgeInd;
   Standard_Real myCurEdgePar;
+  Standard_Real myMaxTolerance;
+  Standard_Boolean myUseBndBox;
+  TopTools_IndexedDataMapOfShapeListOfShape myMapVE;
 
   Standard_Real myUMin;
   Standard_Real myUMax;

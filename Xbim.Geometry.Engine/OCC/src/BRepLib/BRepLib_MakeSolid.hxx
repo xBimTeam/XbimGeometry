@@ -24,7 +24,6 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BRepLib_MakeShape.hxx>
 #include <BRepLib_ShapeModification.hxx>
-class StdFail_NotDone;
 class TopoDS_CompSolid;
 class TopoDS_Shell;
 class TopoDS_Solid;
@@ -54,7 +53,7 @@ public:
   //! Make a solid from three shells.
   Standard_EXPORT BRepLib_MakeSolid(const TopoDS_Shell& S1, const TopoDS_Shell& S2, const TopoDS_Shell& S3);
   
-  //! Make a solid from a solid. Usefull for adding later.
+  //! Make a solid from a solid. Useful for adding later.
   Standard_EXPORT BRepLib_MakeSolid(const TopoDS_Solid& So);
   
   //! Add a shell to a solid.

@@ -31,9 +31,13 @@
 //purpose  : 
 //=======================================================================
 GeomAPI_ExtremaCurveCurve::GeomAPI_ExtremaCurveCurve()
+: myIsDone(Standard_False),
+  myIndex(0),
+  myTotalExt(Standard_False),
+  myIsInfinite(Standard_False),
+  myTotalDist(0.0)
 {
-  myIsDone = Standard_False;
-  myTotalExt = Standard_False;
+  memset (myTotalPars, 0, sizeof (myTotalPars));
 }
 
 
@@ -82,9 +86,9 @@ void GeomAPI_ExtremaCurveCurve::Init
   Standard_Real Tol = Precision::PConfusion();
   myC1.Load(C1);
   myC2.Load(C2);
-  Extrema_ExtCC theExtCC(myC1, myC2, Tol,Tol);
-  myExtCC = theExtCC;
 
+  myExtCC.Initialize (myC1, myC2, Tol,Tol);
+  myExtCC.Perform();
   myIsDone = myExtCC.IsDone() && ( myExtCC.NbExt() > 0);
 
   if ( myIsDone) {
@@ -124,8 +128,9 @@ void GeomAPI_ExtremaCurveCurve::Init
   Standard_Real Tol = Precision::PConfusion();
   myC1.Load(C1);
   myC2.Load(C2);
-  Extrema_ExtCC theExtCC(myC1,myC2,U1min,U1max,U2min,U2max,Tol,Tol);
-  myExtCC = theExtCC;
+
+  myExtCC.Initialize (myC1,myC2,U1min,U1max,U2min,U2max,Tol,Tol);
+  myExtCC.Perform();
 
   myIsDone = myExtCC.IsDone() && ( myExtCC.NbExt() > 0 );
 

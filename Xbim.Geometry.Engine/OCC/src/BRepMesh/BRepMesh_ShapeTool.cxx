@@ -26,9 +26,11 @@
 #include <Precision.hxx>
 #include <Bnd_Box.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_ShapeTool, Standard_Transient)
+
 namespace
 {
-  //! Auxilary struct to take a tolerance of edge.
+  //! Auxiliary struct to take a tolerance of edge.
   struct EdgeTolerance
   {
     static Standard_Real Get(const TopoDS_Shape& theEdge)
@@ -37,7 +39,7 @@ namespace
     }
   };
 
-  //! Auxilary struct to take a tolerance of vertex.
+  //! Auxiliary struct to take a tolerance of vertex.
   struct VertexTolerance
   {
     static Standard_Real Get(const TopoDS_Shape& theVertex)
@@ -72,7 +74,7 @@ Standard_Real BRepMesh_ShapeTool::MaxFaceTolerance(const TopoDS_Face& theFace)
   Standard_Real aMaxTolerance = BRep_Tool::Tolerance(theFace);
 
   Standard_Real aTolerance = Max(
-    MaxTolerance<TopAbs_EDGE, EdgeTolerance  >(theFace),
+    MaxTolerance<TopAbs_EDGE,   EdgeTolerance  >(theFace),
     MaxTolerance<TopAbs_VERTEX, VertexTolerance>(theFace));
 
   return Max(aMaxTolerance, aTolerance);
@@ -206,10 +208,12 @@ void BRepMesh_ShapeTool::AddInFace(
   {
     gp_Trsf aTrsf = aLoc.Transformation();
     aTrsf.Invert();
-
-    TColgp_Array1OfPnt& aNodes = theTriangulation->ChangeNodes();
-    for (Standard_Integer i = aNodes.Lower(); i <= aNodes.Upper(); ++i)
-      aNodes(i).Transform(aTrsf);
+    for (Standard_Integer aNodeIter = 1; aNodeIter <= theTriangulation->NbNodes(); ++aNodeIter)
+    {
+      gp_Pnt aNode = theTriangulation->Node (aNodeIter);
+      aNode.Transform (aTrsf);
+      theTriangulation->SetNode (aNodeIter, aNode);
+    }
   }
 
   BRep_Builder aBuilder;

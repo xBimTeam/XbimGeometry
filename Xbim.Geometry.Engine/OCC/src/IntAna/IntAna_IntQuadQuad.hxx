@@ -26,14 +26,9 @@
 #include <Standard_Integer.hxx>
 #include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
-class Standard_DomainError;
 class gp_Cylinder;
 class IntAna_Quadric;
 class gp_Cone;
-class IntAna_Curve;
-class gp_Pnt;
 
 
 //! This class provides the analytic intersection between a
@@ -89,13 +84,11 @@ public:
   
   //! Returns the point of range N.
   Standard_EXPORT const gp_Pnt& Point (const Standard_Integer N) const;
-  
-  //! Returns  the paramaters on the  "explicit quadric"
-  //! (i.e  the cylinder or the  cone, the
-  //! first argument   given to the constructor)  of the
-  //! point of  range  N.
+
+  //! Returns the parameters on the "explicit quadric"
+  //! (i.e  the cylinder or the  cone, the first argument given to the constructor) of the point of range N.
   Standard_EXPORT void Parameters (const Standard_Integer N, Standard_Real& U1, Standard_Real& U2) const;
-  
+
   //! Returns True if the Curve I  shares its last bound
   //! with another curve.
   Standard_EXPORT Standard_Boolean HasNextCurve (const Standard_Integer I) const;
@@ -124,15 +117,12 @@ public:
   //! same point.
   Standard_EXPORT Standard_Integer PreviousCurve (const Standard_Integer I, Standard_Boolean& theOpposite) const;
 
-
-
-
 protected:
 
-  
   //! Set the next and previous fields. Private method.
   Standard_EXPORT void InternalSetNextAndPrevious();
 
+protected:
 
   Standard_Boolean done;
   Standard_Boolean identical;
@@ -146,20 +136,8 @@ protected:
   Standard_Real myEpsilon;
   Standard_Real myEpsilonCoeffPolyNull;
 
-
-private:
-
-
-
-
-
 };
 
-
 #include <IntAna_IntQuadQuad.lxx>
-
-
-
-
 
 #endif // _IntAna_IntQuadQuad_HeaderFile

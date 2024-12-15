@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _FILLETALGO_H_
-#define _FILLETALGO_H_
+#ifndef ChFi2d_FilletAlgo_HeaderFile
+#define ChFi2d_FilletAlgo_HeaderFile
 
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
@@ -51,10 +51,9 @@ class FilletPoint;
 //! 3. Using Newton search method take the point on the segment where function
 //!    value is most close to zero. If it is not enough close, step 2 and 3 are
 //!    repeated taking as start or end point the found point.
-//! 4. If solution is found, result is created on point on root of the function
-//!    (as a start point), point of the projection onto second curve (as an end 
-//!    point) and center of arc in found center. Initial edges are cutted by
-//!    the start and end point of tangency.
+//! 4. If solution is found, result is created on point on root of the function (as a start point),
+//!    point of the projection onto second curve (as an end point) and center of arc in found center.
+//!    Initial edges are cut by the start and end point of tangency.
 class ChFi2d_FilletAlgo 
 {
 public:
@@ -87,18 +86,18 @@ public:
   Standard_EXPORT Standard_Boolean Perform(const Standard_Real theRadius);
 
   //! Returns number of possible solutions.
-  //! <thePoint> chooses a particular fillet in case of several fillets 
+  //! <thePoint> chooses a particular fillet in case of several fillets
   //! may be constructed (for example, a circle intersecting a segment in 2 points).
   //! Put the intersecting (or common) point of the edges.
   Standard_EXPORT Standard_Integer NbResults(const gp_Pnt& thePoint);
 
-  //! Returns result (fillet edge, modified edge1, modified edge2), 
-  //! neares to the given point <thePoint> if iSolution == -1.
-  //! <thePoint> chooses a particular fillet in case of several fillets 
+  //! Returns result (fillet edge, modified edge1, modified edge2),
+  //! nearest to the given point <thePoint> if iSolution == -1.
+  //! <thePoint> chooses a particular fillet in case of several fillets
   //! may be constructed (for example, a circle intersecting a segment in 2 points).
   //! Put the intersecting (or common) point of the edges.
-  Standard_EXPORT TopoDS_Edge Result(const gp_Pnt& thePoint, 
-                                     TopoDS_Edge& theEdge1, TopoDS_Edge& theEdge2, 
+  Standard_EXPORT TopoDS_Edge Result(const gp_Pnt& thePoint,
+                                     TopoDS_Edge& theEdge1, TopoDS_Edge& theEdge2,
                                      const Standard_Integer iSolution = -1);
 
 private:
@@ -107,7 +106,7 @@ private:
   void FillPoint(FilletPoint*, const Standard_Real theLimit);
   //! Computes the derivative value of the function in the current point.
   //! <theDiffStep> is small step for approximate derivative computation
-  //! <theFront> is direction of the step: from or reverced
+  //! <theFront> is direction of the step: from or reversed
   void FillDiff(FilletPoint*, Standard_Real theDiffStep, Standard_Boolean theFront);
   //! Using Newton methods computes optimal point, that can be root of the
   //! function taking into account two input points, functions value and derivatives.
@@ -115,7 +114,7 @@ private:
   //! Stores roots in myResultParams.
   void PerformNewton(FilletPoint*, FilletPoint*);
   //! Splits segment by the parameter and calls Newton method for both segments.
-  //! It supplies recursive iterations of the Newthon methods calls 
+  //! It supplies recursive iterations of the Newton methods calls
   //! (PerformNewton calls this function and this calls Netwton two times).
   Standard_Boolean ProcessPoint(FilletPoint*, FilletPoint*, Standard_Real);
 

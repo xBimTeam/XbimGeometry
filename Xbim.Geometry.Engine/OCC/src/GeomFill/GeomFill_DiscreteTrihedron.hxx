@@ -29,10 +29,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 class GeomFill_Frenet;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
-class GeomFill_TrihedronLaw;
-class Adaptor3d_HCurve;
 class gp_Vec;
 
 
@@ -55,21 +51,21 @@ public:
   
   Standard_EXPORT void Init();
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C) Standard_OVERRIDE;
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
   //! compute Trihedron on curve at parameter <Param>
   Standard_EXPORT virtual Standard_Boolean D0 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& Normal, gp_Vec& BiNormal) Standard_OVERRIDE;
   
   //! compute Trihedron and  derivative Trihedron  on curve
   //! at parameter <Param>
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   //! For the moment it returns null values for DTangent, DNormal
   //! and DBiNormal.
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& BiNormal, gp_Vec& DBiNormal) Standard_OVERRIDE;
   
   //! compute  Trihedron on curve
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   //! For the moment it returns null values for DTangent, DNormal
   //! DBiNormal, D2Tangent, D2Normal, D2BiNormal.
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& D2Tangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& D2Normal, gp_Vec& BiNormal, gp_Vec& DBiNormal, gp_Vec& D2BiNormal) Standard_OVERRIDE;
@@ -82,7 +78,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   

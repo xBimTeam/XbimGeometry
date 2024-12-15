@@ -219,6 +219,12 @@ GeomFill_Sweep::GeomFill_Sweep(const Handle(GeomFill_LocationLaw)& Location,
  
  // Traitement des KPart
  if (myKPart)  isKPart = BuildKPart();
+
+ if (!isKPart)
+ {
+   myExchUV = Standard_False;
+   isUReversed = isVReversed = Standard_False;
+ }
  
  // Traitement des produits Formelles
  if ((!isKPart) && (Methode == GeomFill_Location)) {
@@ -812,7 +818,7 @@ static Standard_Boolean IsSweepParallelSpine (const Handle(GeomFill_LocationLaw)
       if ((SectionType == GeomAbs_Circle) && IsTrsf) {
 	gp_Circ C = AC.Circle();
         Standard_Real Radius;
-	Standard_Boolean IsGoodSide = Standard_True;;
+	Standard_Boolean IsGoodSide = Standard_True;
 	C.Transform(Tf2);
 	gp_Vec DC;
         // On calcul le centre eventuel
@@ -869,6 +875,16 @@ static Standard_Boolean IsSweepParallelSpine (const Handle(GeomFill_LocationLaw)
               l = VfirstOnSec;
 	      isUReversed = Standard_True;
 	    }
+
+            if (Abs(l - f) <= Precision::PConfusion() ||
+                Abs(UlastOnSec - UfirstOnSec) > M_PI_2)
+            {
+              // l == f - "degenerated" surface
+              // UlastOnSec - UfirstOnSec > M_PI_2 - "twisted" surface,
+              // it is impossible to represent with help of trimmed sphere
+	      isUReversed = Standard_False;
+              return Ok;
+            }
 
 	    if ( (f >= -M_PI/2) && (l <= M_PI/2)) {
 	      Ok = Standard_True;
@@ -953,7 +969,12 @@ static Standard_Boolean IsSweepParallelSpine (const Handle(GeomFill_LocationLaw)
 	    // (2.2.a) Cylindre
             // si la line est orthogonale au plan de rotation
 	    SError = error;
-	    gp_Ax3 Axis(CentreOfSurf, Dir.Direction(), DS);
+      //
+      gp_Ax3 Axis(CentreOfSurf, Dir.Direction());
+      if (DS.SquareMagnitude() > gp::Resolution())
+      {
+        Axis.SetXDirection(DS);
+      }
 	    S = new (Geom_CylindricalSurface) 
 	            (Axis, L.Distance(CentreOfSurf));
 	    Ok = Standard_True;

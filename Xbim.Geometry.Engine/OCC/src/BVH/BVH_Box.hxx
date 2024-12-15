@@ -13,21 +13,95 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _BVH_Box_Header
-#define _BVH_Box_Header
+#ifndef BVH_Box_HeaderFile
+#define BVH_Box_HeaderFile
 
 #include <BVH_Constants.hxx>
 #include <BVH_Types.hxx>
-#include <Standard_ShortReal.hxx>
+#include <Standard_Macro.hxx>
 #include <Standard_Dump.hxx>
+#include <Standard_ShortReal.hxx>
 
 #include <limits>
+
+//! Base class for BVH_Box (CRTP idiom is used).
+//! @tparam T             Numeric data type
+//! @tparam N             Vector dimension
+//! @tparam TheDerivedBox Template of derived class that defined axis aligned bounding box.
+template <class T, int N, template <class /*T*/, int /*N*/> class TheDerivedBox>
+class BVH_BaseBox {};
+
+// forward declaration
+template <class T, int N> class BVH_Box;
+
+//! Partial template specialization for BVH_Box when N = 3.
+template <class T>
+class BVH_BaseBox<T, 3, BVH_Box>
+{
+public:
+
+  //! Transforms this box with given transformation.
+  void Transform (const NCollection_Mat4<T>& theTransform)
+  {
+    if (theTransform.IsIdentity())
+    {
+      return;
+    }
+
+    BVH_Box<T, 3> *aThis = static_cast<BVH_Box<T, 3>*>(this);
+    if (!aThis->IsValid())
+    {
+      return;
+    }
+
+    BVH_Box<T, 3> aBox = Transformed (theTransform);
+
+    aThis->CornerMin() = aBox.CornerMin();
+    aThis->CornerMax() = aBox.CornerMax();
+  }
+
+  //! Returns a box which is the result of applying the
+  //! given transformation to this box.
+  BVH_Box<T, 3> Transformed (const NCollection_Mat4<T>& theTransform) const
+  {
+    BVH_Box<T, 3> aResultBox;
+
+    if (theTransform.IsIdentity())
+    {
+      return aResultBox;
+    }
+
+    const BVH_Box<T, 3> *aThis = static_cast<const BVH_Box<T, 3>*>(this);
+    if (!aThis->IsValid())
+    {
+      return aResultBox;
+    }
+
+    for (size_t aX = 0; aX <= 1; ++aX)
+    {
+      for (size_t aY = 0; aY <= 1; ++aY)
+      {
+        for (size_t aZ = 0; aZ <= 1; ++aZ)
+        {
+          typename BVH::VectorType<T, 4>::Type aPnt =
+            theTransform * typename BVH::VectorType<T, 4>::Type (aX ? aThis->CornerMax().x() : aThis->CornerMin().x(),
+                                                                 aY ? aThis->CornerMax().y() : aThis->CornerMin().y(),
+                                                                 aZ ? aThis->CornerMax().z() : aThis->CornerMin().z(),
+                                                                 static_cast<T> (1.0));
+
+          aResultBox.Add (aPnt.xyz());
+        }
+      }
+    }
+    return aResultBox;
+  }
+};
 
 //! Defines axis aligned bounding box (AABB) based on BVH vectors.
 //! \tparam T Numeric data type
 //! \tparam N Vector dimension
 template<class T, int N>
-class BVH_Box
+class BVH_Box : public BVH_BaseBox<T, N, BVH_Box>
 {
 public:
 
@@ -43,12 +117,6 @@ public:
   : myMinPoint (thePoint),
     myMaxPoint (thePoint),
     myIsInited (Standard_True) {}
-
-  //! Creates copy of another bounding box.
-  BVH_Box (const BVH_Box& theBox)
-  : myMinPoint (theBox.myMinPoint),
-    myMaxPoint (theBox.myMaxPoint),
-    myIsInited (theBox.myIsInited) {}
 
   //! Creates bounding box from corner points.
   BVH_Box (const BVH_VecNt& theMinPoint,
@@ -110,11 +178,74 @@ public:
   T Center (const Standard_Integer theAxis) const;
 
   //! Dumps the content of me into the stream
-  void DumpJson (Standard_OStream& theOStream, const Standard_Integer theDepth = -1) const
+  void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const
   {
     (void)theDepth;
-    OCCT_DUMP_CLASS_BEGIN (theOStream, BVH_Box);
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, IsValid());
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myIsInited)
+
+    int n = Min (N, 3);
+    if (n == 1)
+    {
+      OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myMinPoint[0])
+      OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myMinPoint[0])
+    }
+    else if (n == 2)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MinPoint", n, myMinPoint[0], myMinPoint[1])
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MaxPoint", n, myMaxPoint[0], myMaxPoint[1])
+    }
+    else if (n == 3)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MinPoint", n, myMinPoint[0], myMinPoint[1], myMinPoint[2])
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MaxPoint", n, myMaxPoint[0], myMaxPoint[1], myMaxPoint[2])
+    }
+  }
+
+  //! Inits the content of me from the stream
+  Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+  {
+    Standard_Integer aPos = theStreamPos;
+
+    Standard_Integer anIsInited = 0;
+    TCollection_AsciiString aStreamStr = Standard_Dump::Text (theSStream);
+
+    OCCT_INIT_FIELD_VALUE_INTEGER (aStreamStr, aPos, anIsInited);
+    myIsInited = anIsInited != 0;
+
+    int n = Min (N, 3);
+    if (n == 1)
+    {
+      Standard_Real aValue;
+      OCCT_INIT_FIELD_VALUE_REAL (aStreamStr, aPos, aValue);
+      myMinPoint[0] = (T)aValue;
+    }
+    else if (n == 2)
+    {
+      Standard_Real aValue1, aValue2;
+      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MinPoint", aPos, n, &aValue1, &aValue2);
+      myMinPoint[0] = (T)aValue1;
+      myMinPoint[1] = (T)aValue2;
+
+      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MaxPoint", aPos, n, &aValue1, &aValue2);
+      myMaxPoint[0] = (T)aValue1;
+      myMaxPoint[1] = (T)aValue2;
+    }
+    else if (n == 3)
+    {
+      Standard_Real aValue1, aValue2, aValue3;
+      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MinPoint", aPos, n, &aValue1, &aValue2, &aValue3);
+      myMinPoint[0] = (T)aValue1;
+      myMinPoint[1] = (T)aValue2;
+      myMinPoint[2] = (T)aValue3;
+
+      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MaxPoint", aPos, n, &aValue1, &aValue2, &aValue3);
+      myMaxPoint[0] = (T)aValue1;
+      myMaxPoint[1] = (T)aValue2;
+      myMaxPoint[2] = (T)aValue3;
+    }
+
+    theStreamPos = aPos;
+    return Standard_True;
   }
 
 public:

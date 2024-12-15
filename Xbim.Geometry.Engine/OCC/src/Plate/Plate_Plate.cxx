@@ -30,7 +30,6 @@
 #include <Plate_Plate.hxx>
 #include <Plate_SampledCurveConstraint.hxx>
 #include <Standard_ErrorHandler.hxx>
-#include <Message_ProgressIndicator.hxx>
 
 //=======================================================================
 //function : Plate_Plate
@@ -47,6 +46,8 @@ Plate_Plate::Plate_Plate()
   L (0.0)
 {
   PolynomialPartOnly = Standard_False;
+  memset (ddu, 0, sizeof (ddu));
+  memset (ddv, 0, sizeof (ddv));
 }
 
 //=======================================================================
@@ -243,8 +244,8 @@ void Plate_Plate::Load(const Plate_GlobalTranslationConstraint& GTConst)
 //=======================================================================
 
 void Plate_Plate::SolveTI(const Standard_Integer ord, 
-			  const Standard_Real anisotropie, 
-          const Handle(Message_ProgressIndicator) & aProgress)
+                          const Standard_Real anisotropie, 
+                          const Message_ProgressRange& theProgress)
 {
   Standard_Integer IterationNumber=0;
   OK = Standard_False;
@@ -275,12 +276,12 @@ void Plate_Plate::SolveTI(const Standard_Integer ord,
   if(myLScalarConstraints.IsEmpty())
     {
       if(myLXYZConstraints.IsEmpty())
-	SolveTI1(IterationNumber, aProgress);
+	SolveTI1(IterationNumber, theProgress);
       else
-	SolveTI2(IterationNumber, aProgress);
+	SolveTI2(IterationNumber, theProgress);
     }
   else
-    SolveTI3(IterationNumber, aProgress);
+    SolveTI3(IterationNumber, theProgress);
 
 }
 
@@ -290,7 +291,8 @@ void Plate_Plate::SolveTI(const Standard_Integer ord,
 //           only PinPointConstraints are loaded
 //=======================================================================
 
-void Plate_Plate::SolveTI1(const Standard_Integer IterationNumber, const Handle(Message_ProgressIndicator) & aProgress)
+void Plate_Plate::SolveTI1(const Standard_Integer IterationNumber,
+                           const Message_ProgressRange& theProgress)
 {
 // computation of square matrix members
 
@@ -343,9 +345,10 @@ void Plate_Plate::SolveTI1(const Standard_Integer IterationNumber, const Handle(
   Standard_Real pivot_max = 1.e-12;
   OK = Standard_True;     
 
-  math_Gauss algo_gauss(mat,pivot_max, aProgress);
+  Message_ProgressScope aScope (theProgress, "Plate_Plate::SolveTI1()", 10);
+  math_Gauss algo_gauss(mat,pivot_max, aScope.Next (7));
 
-  if (!aProgress.IsNull() && aProgress->UserBreak())
+  if (aScope.UserBreak())
   {
     OK = Standard_False;
     return;
@@ -357,7 +360,14 @@ void Plate_Plate::SolveTI1(const Standard_Integer IterationNumber, const Handle(
       mat(i,i) = 1.e-8;
     }
     pivot_max = 1.e-18;
-    math_Gauss thealgo(mat,pivot_max, aProgress);
+
+    math_Gauss thealgo(mat,pivot_max, aScope.Next (3));
+
+    if (aScope.UserBreak())
+    {
+      OK = Standard_False;
+      return;
+    }
     algo_gauss = thealgo;
     OK = algo_gauss.IsDone();
   }
@@ -401,7 +411,8 @@ void Plate_Plate::SolveTI1(const Standard_Integer IterationNumber, const Handle(
 //           LinearXYZ constraints are provided but no LinearScalar one
 //=======================================================================
 
-void Plate_Plate::SolveTI2(const Standard_Integer IterationNumber, const Handle(Message_ProgressIndicator) & aProgress)
+void Plate_Plate::SolveTI2(const Standard_Integer IterationNumber,
+                           const Message_ProgressRange& theProgress)
 {
 // computation of square matrix members
 
@@ -448,9 +459,10 @@ void Plate_Plate::SolveTI2(const Standard_Integer IterationNumber, const Handle(
   Standard_Real pivot_max = 1.e-12;
   OK = Standard_True;      // ************ JHH
 
-  math_Gauss algo_gauss(mat,pivot_max, aProgress);
+  Message_ProgressScope aScope (theProgress, "Plate_Plate::SolveTI2()", 10);
+  math_Gauss algo_gauss(mat,pivot_max, aScope.Next (7));
   
-  if (!aProgress.IsNull() && aProgress->UserBreak ())
+  if (aScope.UserBreak())
   {
     OK = Standard_False;
     return;
@@ -461,8 +473,15 @@ void Plate_Plate::SolveTI2(const Standard_Integer IterationNumber, const Handle(
       mat(i,i) = 1.e-8;
     }
     pivot_max = 1.e-18;
-    math_Gauss thealgo1(mat,pivot_max, aProgress);
-    algo_gauss = thealgo1; 
+
+    math_Gauss thealgo1(mat,pivot_max, aScope.Next (3));
+
+    if (aScope.UserBreak())
+    {
+      OK = Standard_False;
+      return;
+    }
+    algo_gauss = thealgo1;
     OK = algo_gauss.IsDone();
   }
 
@@ -532,7 +551,8 @@ void Plate_Plate::SolveTI2(const Standard_Integer IterationNumber, const Handle(
 //purpose  : to solve the set of constraints in the most general situation
 //=======================================================================
 
-void Plate_Plate::SolveTI3(const Standard_Integer IterationNumber, const Handle(Message_ProgressIndicator) & aProgress)
+void Plate_Plate::SolveTI3(const Standard_Integer IterationNumber,
+                           const Message_ProgressRange& theProgress)
 {
 // computation of square matrix members
 
@@ -713,9 +733,10 @@ void Plate_Plate::SolveTI3(const Standard_Integer IterationNumber, const Handle(
   Standard_Real pivot_max = 1.e-12;
   OK = Standard_True;      // ************ JHH
 
-  math_Gauss algo_gauss(mat,pivot_max, aProgress);
+  Message_ProgressScope aScope (theProgress, "Plate_Plate::SolveTI3()", 10);
+  math_Gauss algo_gauss(mat,pivot_max, aScope.Next (7));
   
-  if (!aProgress.IsNull() && aProgress->UserBreak ())
+  if (aScope.UserBreak())
   {
     OK = Standard_False;
     return;
@@ -728,7 +749,14 @@ void Plate_Plate::SolveTI3(const Standard_Integer IterationNumber, const Handle(
       mat(2*n_dimsousmat+i,2*n_dimsousmat+i) = 1.e-8;
     }
     pivot_max = 1.e-18;
-    math_Gauss thealgo2(mat,pivot_max, aProgress);
+
+    math_Gauss thealgo2(mat,pivot_max, aScope.Next (3));
+
+    if (aScope.UserBreak())
+    {
+      OK = Standard_False;
+      return;
+    }
     algo_gauss = thealgo2;
     OK = algo_gauss.IsDone();
   }

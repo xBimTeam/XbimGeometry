@@ -115,11 +115,6 @@ int mcrgetv_(integer *sz,
 	     intptr_t *iad,
 	     integer *ier);
 
-static
-int mcrlocv_(void* t,
-	     intptr_t *l);
-
-
 static struct {
     integer lec, imp, keyb, mae, jscrn, itblt, ibb;
 } mblank__;
@@ -383,9 +378,6 @@ int AdvApp2Var_SysBase::macrchk_()
   
   /* Local variables */
   integer  i__, j;
-  intptr_t ioff;
-  doublereal* t = 0;
-  intptr_t loc;
   
 /* ***********************************************************************
  */
@@ -469,8 +461,6 @@ int AdvApp2Var_SysBase::macrchk_()
 /* ----------------------------------------------------------------------*
  */
 
-/* CALCULATE ADDRESS OF T */
-  mcrlocv_(t, &loc);  
   /* CONTROL OF FLAGS IN THE TABLE */
   i__1 = mcrgene_.ncore;
   for (i__ = 0; i__ < i__1; ++i__) {
@@ -481,10 +471,9 @@ int AdvApp2Var_SysBase::macrchk_()
       intptr_t* pp = p + j;
       if (*pp != -1) {
 	
-	ioff = (*pp - loc) / 8;
-	
-	if (t[ioff] != -134744073.) {
-	  
+	double* t = reinterpret_cast<double*>(*pp);
+	if (*t != -134744073.)
+	{
 	  /* MSG : '*** ERREUR  : REMOVAL FROM MEMORY OF ADDRESS
 	     E:',ICORE(J,I) */
 	  /*       AND OF RANK ICORE(12,I) */
@@ -725,12 +714,9 @@ int macrgfl_(intptr_t *iadfld,
   */
   integer ifois = 1;
   
-  char cbid[1];
+  char cbid[1] = {};
   integer ibid, ienr;
-  doublereal* t = 0;
   integer novfl = 0;
-  intptr_t ioff,iadt;
-  
   
   /* ***********************************************************************
    */
@@ -824,27 +810,25 @@ int macrgfl_(intptr_t *iadfld,
     ifois = 1;
   }
   
-  /*  CALCULATE THE ADDRESS OF T */
-  mcrlocv_(t, &iadt);
-  
+ 
   /* CALCULATE THE OFFSET */
-  ioff = (*iadfld - iadt) / 8;
+  double* t = reinterpret_cast<double*>(*iadfld);
   
   /*  SET TO OVERFLOW OF THE USER ZONE IN CASE OF PRODUCTION VERSION */
   if (*iphase == 1 && novfl == 0) {
     ienr = *iznuti / 8;
-    maoverf_(&ienr, &t[ioff + 1]);
+    maoverf_(&ienr, &t[1]);
   }
     
   /*  UPDATE THE START FLAG */
-  t[ioff] = -134744073.;
+  *t = -134744073.;
   
   /*  FAKE CALL TO STOP THE DEBUGGER : */
   macrbrk_();
   
   /*  UPDATE THE START FLAG */
-  ioff = (*iadflf - iadt) / 8;
-  t[ioff] = -134744073.;
+  t = reinterpret_cast<double*>(*iadflf);
+  *t = -134744073.;
     
   /*  FAKE CALL TO STOP THE DEBUGGER : */
   macrbrk_();
@@ -928,6 +912,8 @@ int macrmsg_(const char *,//crout,
 /*  READING OF THE LANGUAGE : */
     /* Parameter adjustments */
   ct -= ct_len;
+  (void )ct; // unused
+
   --xt;
   --it;
   
@@ -1483,7 +1469,7 @@ int mamdlng_(char *,//cmdlng,
 
 /*     FUNCTION : */
 /*     ---------- */
-/*        CONTAINS INFORMATIONS ABOUT THE COMPOSITION OF */
+/*        CONTAINS INFORMATION ABOUT THE COMPOSITION OF */
 /*        THE EXECUTABLE AND ITS ENVIRONMENT : */
 /*        - LANGUAGES */
 /*        - PRESENT APPLICATIONS */
@@ -1675,7 +1661,7 @@ int maoverf_(integer *nbentr,
 /*       Other types of tables (INTEGER*2, INTEGER, REAL, ...) */
 /*       are not managed by the routine. */
 
-/*       It is usable in phase of developpement to detect the */
+/*       It is usable in phase of development to detect the */
 /*       errors of initialization. */
 
 /*       In official version, these calls will be inactive. */
@@ -1700,15 +1686,15 @@ int maoverf_(integer *nbentr,
 /*    NLONGR*8    specific COMMON not by a routine as */
 /*                the initialisation is done by DATA. */
 
-/*                * If NBENTR<NLONGR, a part of the buffer is transfered*/
+/*                * If NBENTR<NLONGR, a part of the buffer is transferred*/
 /*     DTABLE     in DTABLE. */
 /*   __________ */
-/*  !  amorce  !  * Otherwise, the entire buffer is transfered in DTABLE. */
+/*  !  amorce  !  * Otherwise, the entire buffer is transferred in DTABLE. */
 /*  !__________!  This initiates it. Then a loop is execute, which at each  
 */
 /*  !  temps 1 !  iteration transfers the part of the already initialized table */
 /*  !__________!  in the one that was not yet initialized. */
-/*  !          !  The size of the zone transfered by each call to MCRFILL 
+/*  !          !  The size of the zone transferred by each call to MCRFILL 
 */
 /*  !  temps 2 !  is NLONGR*2**(numero_de_l'iteration). When  
 */
@@ -1770,7 +1756,7 @@ int maoverf_(integer *nbentr,
 
 /*      TABLES */
 
-/*      DATAS */
+/*      DATA */
     /* Parameter adjustments */
   --dtable;
   
@@ -1867,7 +1853,7 @@ int matrsym_(const char *cnmsym,
 
 {
   /* Local variables */
-  char chainx[255];
+  char chainx[255] = {};
 
 /* ***********************************************************************
  */
@@ -2074,7 +2060,7 @@ int mcrcomm_(integer *kop,
 	itab[(i__ << 2) - 4] = *noct / 8 + 1;
 	itab[(i__ << 2) - 3] = ipre;
 	itab[(i__ << 2) - 2] = *noct;
-	mcrlocv_(&dtab[ipre - 1], iadr);
+	*iadr = reinterpret_cast<intptr_t> (&dtab[ipre - 1]);
 	itab[(i__ << 2) - 1] = *iadr;
 	goto L9900;
       }
@@ -2268,7 +2254,7 @@ int AdvApp2Var_SysBase::mcrdelt_(integer *iunit,
 /* SEARCH IN MCRGENE */
 
     n = -1;
-    mcrlocv_(t, &loc);
+    loc = reinterpret_cast<intptr_t> (t);
 
     for (i__ = mcrgene_.ncore - 1; i__ >= 0; --i__) {
 	if (*iunit == mcrgene_.icore[i__].unit && *isize == 
@@ -2668,19 +2654,6 @@ int AdvApp2Var_SysBase::mcrlist_(integer *ier) const
  return 0 ;
 } /* mcrlist_ */
 
-
-//=======================================================================
-//function : mcrlocv_
-//purpose  : 
-//=======================================================================
-int mcrlocv_(void* t,
-	     intptr_t *l)
-
-{
-  *l = reinterpret_cast<intptr_t> (t);
-  return 0 ;
-}
-
 //=======================================================================
 //function : AdvApp2Var_SysBase::mcrrqst_
 //purpose  : 
@@ -2886,7 +2859,7 @@ int AdvApp2Var_SysBase::mcrrqst_(integer *iunit,
 /*     . add delta for alinement with the base */
 /*     . round to multiple of 8 above */
 
-  mcrlocv_(t, &loc);
+  loc = reinterpret_cast<intptr_t> (t);
     izu = ibyte + loc % *iunit;
     irest = izu % 8;
     if (irest != 0) {

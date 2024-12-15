@@ -17,7 +17,7 @@
 #include <IntPatch_WLine.hxx>
 
 static 
-  Standard_Integer SetQuad(const Handle(Adaptor3d_HSurface)& theS,
+  Standard_Integer SetQuad(const Handle(Adaptor3d_Surface)& theS,
                            GeomAbs_SurfaceType& theTS,
                            IntSurf_Quadric& theQuad);
 
@@ -26,7 +26,10 @@ static
 //purpose  : 
 //=======================================================================
 IntPatch_ImpImpIntersection::IntPatch_ImpImpIntersection ():
-myDone(IntStatus_Fail)
+myDone(IntStatus_Fail),
+empt(Standard_True),
+tgte(Standard_False),
+oppo(Standard_False)
 {
 }
 //=======================================================================
@@ -34,9 +37,9 @@ myDone(IntStatus_Fail)
 //purpose  : 
 //=======================================================================
 IntPatch_ImpImpIntersection::IntPatch_ImpImpIntersection
-       (const Handle(Adaptor3d_HSurface)&  S1,
+       (const Handle(Adaptor3d_Surface)&  S1,
         const Handle(Adaptor3d_TopolTool)& D1,
-        const Handle(Adaptor3d_HSurface)&  S2,
+        const Handle(Adaptor3d_Surface)&  S2,
         const Handle(Adaptor3d_TopolTool)& D2,
         const Standard_Real TolArc,
         const Standard_Real TolTang,
@@ -48,9 +51,9 @@ IntPatch_ImpImpIntersection::IntPatch_ImpImpIntersection
 //function : Perform
 //purpose  : 
 //=======================================================================
-void IntPatch_ImpImpIntersection::Perform(const Handle(Adaptor3d_HSurface)&  S1,
+void IntPatch_ImpImpIntersection::Perform(const Handle(Adaptor3d_Surface)&  S1,
                                           const Handle(Adaptor3d_TopolTool)& D1,
-                                          const Handle(Adaptor3d_HSurface)&  S2,
+                                          const Handle(Adaptor3d_Surface)&  S2,
                                           const Handle(Adaptor3d_TopolTool)& D2,
                                           const Standard_Real TolArc,
                                           const Standard_Real TolTang,
@@ -109,7 +112,7 @@ void IntPatch_ImpImpIntersection::Perform(const Handle(Adaptor3d_HSurface)&  S1,
     case 21: { // Plane/Cylinder
       Standard_Real VMin, VMax, H;
       //
-      const Handle(Adaptor3d_HSurface)& aSCyl = bReverse ? S2 : S1;
+      const Handle(Adaptor3d_Surface)& aSCyl = bReverse ? S1 : S2;
       VMin = aSCyl->FirstVParameter();
       VMax = aSCyl->LastVParameter();
       H = (Precision::IsNegativeInfinite(VMin) || 
@@ -543,7 +546,7 @@ void IntPatch_ImpImpIntersection::Perform(const Handle(Adaptor3d_HSurface)&  S1,
 //function : SetQuad
 //purpose  : 
 //=======================================================================
-Standard_Integer SetQuad(const Handle(Adaptor3d_HSurface)& theS,
+Standard_Integer SetQuad(const Handle(Adaptor3d_Surface)& theS,
                          GeomAbs_SurfaceType& theTS,
                          IntSurf_Quadric& theQuad)
 {

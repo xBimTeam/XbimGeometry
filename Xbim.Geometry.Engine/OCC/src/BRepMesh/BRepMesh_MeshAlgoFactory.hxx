@@ -22,7 +22,7 @@
 #include <IMeshTools_MeshAlgoFactory.hxx>
 
 //! Default implementation of IMeshTools_MeshAlgoFactory providing algorithms 
-//! of different compexity depending on type of target surface.
+//! of different complexity depending on type of target surface.
 class BRepMesh_MeshAlgoFactory : public IMeshTools_MeshAlgoFactory
 {
 public:
@@ -38,7 +38,7 @@ public:
     const GeomAbs_SurfaceType    theSurfaceType,
     const IMeshTools_Parameters& theParameters) const Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_MeshAlgoFactory, IMeshTools_MeshAlgoFactory)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_MeshAlgoFactory, IMeshTools_MeshAlgoFactory)
 };
 
 #endif

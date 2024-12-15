@@ -23,36 +23,28 @@
 #include <NCollection_DefineAlloc.hxx>
 #include <NCollection_StlIterator.hxx>
 
-// *********************************************** Template for Array1 class
-
-/**
-* Purpose:     The class Array1 represents unidimensional arrays 
-*              of fixed size known at run time. 
-*              The range of the index is user defined.
-*              An array1 can be constructed with a "C array".
-*              This functionality is useful to call methods expecting
-*              an Array1. It allows to carry the bounds inside the arrays.
-*              
-* Examples:    Item tab[100]; //  An example with a C array
-*              Array1OfItem ttab (tab[0],1,100);
-*              
-*              Array1OfItem tttab (ttab(10),10,20); // a slice of ttab
-*              
-*              If you want to reindex an array from 1 to Length do :
-*              
-*              Array1 tab1(tab(tab.Lower()),1,tab.Length());
-*                          
-* Warning:     Programs client of such a class must be independant
-*              of the range of the first element. Then, a C++ for
-*              loop must be written like this
-*              
-*              for (i = A.Lower(); i <= A.Upper(); i++)
-*              
-* Changes:     In  comparison  to  TCollection  the  flag  isAllocated  was
-*              renamed into myDeletable (alike in  the Array2).  For naming
-*              compatibility the method IsAllocated remained in class along
-*              with IsDeletable.
-*/              
+//! The class NCollection_Array1 represents unidimensional arrays of fixed size known at run time.
+//! The range of the index is user defined.
+//! An array1 can be constructed with a "C array".
+//! This functionality is useful to call methods expecting an Array1.
+//! It allows to carry the bounds inside the arrays.
+//!
+//! Examples:
+//! @code
+//! Item tab[100]; //  an example with a C array
+//! NCollection_Array1<Item> ttab (tab[0], 1, 100);
+//!
+//! NCollection_Array1<Item> tttab (ttab(10), 10, 20); // a slice of ttab
+//! @endcode
+//! If you want to reindex an array from 1 to Length do:
+//! @code
+//! NCollection_Array1<Item> tab1 (tab (tab.Lower()), 1, tab.Length());
+//! @endcode
+//! Warning: Programs client of such a class must be independent of the range of the first element.
+//! Then, a C++ for loop must be written like this
+//! @code
+//! for (i = A.Lower(); i <= A.Upper(); i++)
+//! @endcode
 template <class TheItemType>
 class NCollection_Array1
 {
@@ -86,14 +78,6 @@ public:
     { 
       myPtrCur = const_cast<TheItemType*> (&theArray.First());
       myPtrEnd = const_cast<TheItemType*> (&theArray.Last() + 1);
-    }
-
-    //! Assignment
-    Iterator& operator= (const Iterator& theOther)
-    {
-      myPtrCur = theOther.myPtrCur;
-      myPtrEnd = theOther.myPtrEnd;
-      return *this;
     }
 
     //! Check end
@@ -227,7 +211,7 @@ public:
     myDeletable                                 (Standard_False)
   {
     Standard_RangeError_Raise_if (theUpper < theLower, "NCollection_Array1::Create");
-  #if (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+  #if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
     // gcc emits -Warray-bounds warning when NCollection_Array1 is initialized
     // from local array with lower index 1 (so that (&theBegin - 1) points out of array bounds).
     // NCollection_Array1 initializes myData with a shift to avoid this shift within per-element access.
@@ -236,7 +220,7 @@ public:
     #pragma GCC diagnostic ignored "-Warray-bounds"
   #endif
     myData = (TheItemType *) &theBegin - theLower;
-  #if (defined(__GNUC__) && __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+  #if (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)))
     #pragma GCC diagnostic pop
   #endif
   }
@@ -406,11 +390,10 @@ public:
                const Standard_Boolean theToCopyData)
   {
     Standard_RangeError_Raise_if (theUpper < theLower, "NCollection_Array1::Resize");
-    const Standard_Integer anOldLen   = Length();
-    const Standard_Integer aNewLen    = theUpper - theLower + 1;
-    const Standard_Integer aLowerOld  = myLowerBound;
+    const Standard_Integer anOldLen = Length();
+    const Standard_Integer aNewLen  = theUpper - theLower + 1;
 
-    TheItemType* aBeginOld = &myData[aLowerOld];
+    TheItemType* aBeginOld = myData != NULL ? &myData[myLowerBound] : NULL;
     myLowerBound = theLower;
     myUpperBound = theUpper;
     if (aNewLen == anOldLen)

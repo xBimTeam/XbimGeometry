@@ -27,8 +27,8 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <Adaptor3d_CurveOnSurface.hxx>
 #include <TColStd_HArray1OfReal.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
+#include <GeomAdaptor_Surface.hxx>
 
 class gp_Pnt;
 class TopoDS_Edge;
@@ -45,6 +45,12 @@ public:
 
   //! Constructor. Initializes empty provider.
   BRepMesh_EdgeParameterProvider()
+  : myIsSameParam(Standard_False),
+    myFirstParam(0.0),
+    myOldFirstParam(0.0),
+    myScale(0.0),
+    myCurParam(0.0),
+    myFoundParam(0.0)
   {
   }
 
@@ -140,7 +146,7 @@ public:
   }
 
   //! Returns pcurve used to compute parameters.
-  const Handle(Adaptor2d_HCurve2d)& GetPCurve() const
+  const Handle(Adaptor2d_Curve2d)& GetPCurve() const
   {
     return myCurveAdaptor.CurveOnSurface().GetCurve();
   }

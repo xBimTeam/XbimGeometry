@@ -24,9 +24,6 @@
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-class Standard_NullObject;
-class TopoDS_Edge;
-class TopoDS_Face;
 
 
 //! The Curve2d from BRepAdaptor allows to use an Edge
@@ -41,16 +38,17 @@ class TopoDS_Face;
 //! Geom2dAdaptor.
 class BRepAdaptor_Curve2d  : public Geom2dAdaptor_Curve
 {
+  DEFINE_STANDARD_RTTIEXT(BRepAdaptor_Curve2d, Geom2dAdaptor_Curve)
 public:
-
-  DEFINE_STANDARD_ALLOC
-
   
   //! Creates an uninitialized curve2d.
   Standard_EXPORT BRepAdaptor_Curve2d();
   
   //! Creates with the pcurve of <E> on <F>.
   Standard_EXPORT BRepAdaptor_Curve2d(const TopoDS_Edge& E, const TopoDS_Face& F);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor2d_Curve2d) ShallowCopy() const Standard_OVERRIDE;
   
   //! Initialize with the pcurve of <E> on <F>.
   Standard_EXPORT void Initialize (const TopoDS_Edge& E, const TopoDS_Face& F);
@@ -61,29 +59,13 @@ public:
   //! Returns the Face.
   Standard_EXPORT const TopoDS_Face& Face() const;
 
-
-
-
-protected:
-
-
-
-
-
 private:
-
-
 
   TopoDS_Edge myEdge;
   TopoDS_Face myFace;
 
-
 };
 
-
-
-
-
-
+DEFINE_STANDARD_HANDLE(BRepAdaptor_Curve2d, Geom2dAdaptor_Curve)
 
 #endif // _BRepAdaptor_Curve2d_HeaderFile

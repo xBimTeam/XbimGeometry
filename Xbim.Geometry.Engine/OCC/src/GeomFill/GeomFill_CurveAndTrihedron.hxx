@@ -32,12 +32,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 class GeomFill_TrihedronLaw;
-class Adaptor3d_HCurve;
-class Standard_OutOfRange;
-class gp_Mat;
-class GeomFill_LocationLaw;
-class gp_Vec;
-class gp_Pnt;
 
 
 class GeomFill_CurveAndTrihedron;
@@ -58,9 +52,9 @@ public:
   
   Standard_EXPORT GeomFill_CurveAndTrihedron(const Handle(GeomFill_TrihedronLaw)& Trihedron);
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C) Standard_OVERRIDE;
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
-  Standard_EXPORT virtual const Handle(Adaptor3d_HCurve)& GetCurve() const Standard_OVERRIDE;
+  Standard_EXPORT virtual const Handle(Adaptor3d_Curve)& GetCurve() const Standard_OVERRIDE;
   
   //! Set a transformation Matrix like   the law M(t) become
   //! Mat * M(t)
@@ -76,12 +70,12 @@ public:
   
   //! compute location 2d  points and  associated
   //! first derivatives.
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d) Standard_OVERRIDE;
   
   //! compute location 2d  points and associated
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, gp_Mat& D2M, gp_Vec& D2V, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d, TColgp_Array1OfVec2d& D2Poles2d) Standard_OVERRIDE;
   
   //! Returns  the number  of  intervals for  continuity
@@ -92,7 +86,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -144,8 +138,8 @@ private:
 
   Standard_Boolean WithTrans;
   Handle(GeomFill_TrihedronLaw) myLaw;
-  Handle(Adaptor3d_HCurve) myCurve;
-  Handle(Adaptor3d_HCurve) myTrimmed;
+  Handle(Adaptor3d_Curve) myCurve;
+  Handle(Adaptor3d_Curve) myTrimmed;
   gp_Pnt Point;
   gp_Vec V1;
   gp_Vec V2;

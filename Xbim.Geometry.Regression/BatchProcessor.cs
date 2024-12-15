@@ -49,35 +49,30 @@ namespace XbimRegression
                 ProcessResult result;
                 using (var loggerFactory = new LoggerFactory())
                 {
-                    XbimLogging.LoggerFactory = loggerFactory;
-                    loggerFactory.AddConsole(LogLevel.Error);
-                    loggerFactory.AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
-                    {
-                        FormatLogEntry = (msg) =>
-                        {
-                            var sb = new System.Text.StringBuilder();
-                            StringWriter sw = new StringWriter(sb);
-                            var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                            jsonWriter.WriteStartArray();
-                            jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                            jsonWriter.WriteValue(msg.LogLevel.ToString());
-                            jsonWriter.WriteValue(msg.EventId.Id);
-                            jsonWriter.WriteValue(msg.Message);
-                            jsonWriter.WriteValue(msg.Exception?.ToString());
-                            jsonWriter.WriteEndArray();
-                            return sb.ToString();
-                        }
-                    });
+                    loggerFactory.AddConsole(LogLevel.Error)
+                        .AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
+                            {
+                                FormatLogEntry = (msg) =>
+                                {
+                                    var sb = new System.Text.StringBuilder();
+                                    StringWriter sw = new StringWriter(sb);
+                                    var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                                    jsonWriter.WriteStartArray();
+                                    jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                                    jsonWriter.WriteValue(msg.LogLevel.ToString());
+                                    jsonWriter.WriteValue(msg.EventId.Id);
+                                    jsonWriter.WriteValue(msg.Message);
+                                    jsonWriter.WriteValue(msg.Exception?.ToString());
+                                    jsonWriter.WriteEndArray();
+                                    return sb.ToString();
+                                },
+                                MinLevel = Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Information // if doing one at a time, we want to trace progress.
+                            });
                     var logger = loggerFactory.CreateLogger<BatchProcessor>();
                     Console.WriteLine($"Processing {file}");
-                    result = ProcessFile(file.FullName, writer, logger);
-                }
-                if (result == null)
-                {
-                    continue;
-                }
+                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
 
-                XbimLogging.LoggerFactory = null; // uses a default loggerFactory
+                }
 
                 var txt = File.ReadAllText(logFile);
                 if (string.IsNullOrEmpty(txt))
@@ -89,7 +84,6 @@ namespace XbimRegression
                 }
                 else
                 {
-
                     var tokens = txt.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     result.Errors = tokens.Count(t => t == "\"Error\"");
                     result.Warnings = tokens.Count(t => t == "\"Warning\"");
@@ -109,7 +103,7 @@ namespace XbimRegression
             }
 
             writer.Close();
-
+            
             Console.WriteLine("Finished. Press Enter to continue...");
 
             Console.ReadLine();
@@ -135,7 +129,7 @@ namespace XbimRegression
                 Console.WriteLine("");
             }
             if (userState.ToString() != lastState)
-            {
+        {
                 lastState = userState.ToString();
                 if (!stateIsComplete)
                     Console.WriteLine("");
@@ -151,7 +145,7 @@ namespace XbimRegression
             stateIsComplete = false;
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, ILogger<BatchProcessor> logger)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger logger)
         {
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
@@ -169,8 +163,6 @@ namespace XbimRegression
                     watch.Start();
                     using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
                     {
-                        if (model == null)
-                            return null;
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
                         var context = new Xbim3DModelContext(model, logger: logger);
@@ -179,7 +171,7 @@ namespace XbimRegression
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
                         if (_params.WriteBreps == null)
                         {
-                            context.CreateContext(progress);
+                            context.CreateContext(progress, adjustWCS);
                             //}
                             var geomTime = watch.ElapsedMilliseconds - parseTime;
                             //XbimSceneBuilder sb = new XbimSceneBuilder();
@@ -248,22 +240,22 @@ namespace XbimRegression
                                     //
                                     var exportBrepByType = new string[]
                                     {
-                                    "IfcFacetedBrep",
-								    // IIfcGeometricRepresentationItem
-								    "IfcCsgSolid",
-                                    "IfcExtrudedAreaSolid",
-                                    "IfcExtrudedAreaSolidTapered",
-                                    "IfcFixedReferenceSweptAreaSolid",
-                                    "IfcRevolvedAreaSolid",
-                                    "IfcRevolvedAreaSolidTapered",
-                                    "IfcSurfaceCurveSweptAreaSolid",
-                                    "IfcSectionedSolidHorizontal",
-                                    "IfcSweptDiskSolid",
-                                    "IfcSweptDiskSolidPolygonal",
-                                    "IfcBooleanResult",
-                                    "IfcBooleanClippingResult",
-								    // composing objects
-								    "IfcConnectedFaceSet"
+                                        "IfcFacetedBrep",
+								        // IIfcGeometricRepresentationItem
+								        "IfcCsgSolid",
+                                        "IfcExtrudedAreaSolid",
+                                        "IfcExtrudedAreaSolidTapered",
+                                        "IfcFixedReferenceSweptAreaSolid",
+                                        "IfcRevolvedAreaSolid",
+                                        "IfcRevolvedAreaSolidTapered",
+                                        "IfcSurfaceCurveSweptAreaSolid",
+                                        "IfcSectionedSolidHorizontal",
+                                        "IfcSweptDiskSolid",
+                                        "IfcSweptDiskSolidPolygonal",
+                                        "IfcBooleanResult",
+                                        "IfcBooleanClippingResult",
+								        // composing objects
+								        "IfcConnectedFaceSet"
                                     };
                                     foreach (var type in exportBrepByType)
                                     {
@@ -324,7 +316,7 @@ namespace XbimRegression
             }
         }
 
-
+        
 
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {
@@ -336,28 +328,33 @@ namespace XbimRegression
             return Xbim3DModelContext.MeshingBehaviourResult.Default;
         }
 
-        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger<BatchProcessor> logger, ReportProgressDelegate progress)
+        private IModel ParseModelFile(string ifcFileName, bool caching, ILogger logger, ReportProgressDelegate progress)
         {
             IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
+            {
+                logger.LogError("Missing file to parse: '{0}'", ifcFileName);
                 return null;
-            if (!File.Exists(ifcFileName))
-                return null;
+            }
             // create a callback for progress
-            var ext = Path.GetExtension(ifcFileName).ToLowerInvariant();
-            switch (ext)
+
+            switch (Path.GetExtension(ifcFileName).ToLowerInvariant())
             {
                 case ".ifc":
                 case ".ifczip":
                 case ".ifcxml":
+                    logger.LogInformation($"Parsing started.");
                     if (caching)
                         ret = IfcStore.Open(ifcFileName, null, 0, progress);
                     else
-                        ret = MemoryModel.OpenRead(ifcFileName, logger, progress);
+                        ret = MemoryModel.OpenRead(ifcFileName, progress);
+                    logger.LogInformation($"Parsing ended.");
                     return ret;
                 default:
-                    logger?.LogError("XbimRegression does not support {0} file format.", ext);
-                    return null;
+                    throw new NotImplementedException(
+                        string.Format("XbimRegression does not support {0} file formats currently",
+                            Path.GetExtension(ifcFileName))
+                            );
             }
         }
 

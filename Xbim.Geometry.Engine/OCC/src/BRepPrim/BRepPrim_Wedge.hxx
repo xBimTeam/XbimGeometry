@@ -23,7 +23,6 @@
 
 #include <BRepPrim_GWedge.hxx>
 #include <Standard_Real.hxx>
-class Standard_DomainError;
 class gp_Ax2;
 
 
@@ -34,7 +33,9 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
+  //! Default constructor
+  BRepPrim_Wedge() {}
+
   //! Creates a  Wedge  algorithm.   <Axes> is  the axis
   //! system for the primitive.
   //!

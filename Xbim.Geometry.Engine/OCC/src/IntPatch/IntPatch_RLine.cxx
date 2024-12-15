@@ -15,7 +15,7 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor2d_HCurve2d.hxx>
+#include <Adaptor2d_Curve2d.hxx>
 #include <IntPatch_Point.hxx>
 #include <IntPatch_RLine.hxx>
 #include <IntSurf_LineOn2S.hxx>
@@ -30,8 +30,15 @@ IMPLEMENT_STANDARD_RTTIEXT(IntPatch_RLine,IntPatch_PointLine)
 IntPatch_RLine::IntPatch_RLine (const Standard_Boolean Tang,
                                 const IntSurf_TypeTrans Trans1,
                                 const IntSurf_TypeTrans Trans2) :
-  IntPatch_PointLine(Tang,Trans1,Trans2), fipt(Standard_False),lapt(Standard_False)
-
+  IntPatch_PointLine(Tang,Trans1,Trans2),
+  ParamInf1(0.0),
+  ParamSup1(0.0),
+  ParamInf2(0.0),
+  ParamSup2(0.0),
+  fipt(Standard_False),
+  lapt(Standard_False),
+  indf(0),
+  indl(0)
 {
   typ = IntPatch_Restriction;
   onS2=Standard_False;
@@ -42,7 +49,15 @@ IntPatch_RLine::IntPatch_RLine (const Standard_Boolean Tang,
 IntPatch_RLine::IntPatch_RLine (const Standard_Boolean Tang,
                                 const IntSurf_Situation Situ1,
                                 const IntSurf_Situation Situ2) :
-  IntPatch_PointLine(Tang,Situ1,Situ2), fipt(Standard_False),lapt(Standard_False)
+  IntPatch_PointLine(Tang,Situ1,Situ2),
+  ParamInf1(0.0),
+  ParamSup1(0.0),
+  ParamInf2(0.0),
+  ParamSup2(0.0),
+  fipt(Standard_False),
+  lapt(Standard_False),
+  indf(0),
+  indl(0)
 {
   typ = IntPatch_Restriction;
   onS2=Standard_False;
@@ -51,8 +66,15 @@ IntPatch_RLine::IntPatch_RLine (const Standard_Boolean Tang,
 
 
 IntPatch_RLine::IntPatch_RLine (const Standard_Boolean Tang) :
-  IntPatch_PointLine(Tang), fipt(Standard_False),lapt(Standard_False)
-
+  IntPatch_PointLine(Tang),
+  ParamInf1(0.0),
+  ParamSup1(0.0),
+  ParamInf2(0.0),
+  ParamSup2(0.0),
+  fipt(Standard_False),
+  lapt(Standard_False),
+  indf(0),
+  indl(0)
 {
   typ = IntPatch_Restriction;
   onS2=Standard_False;
@@ -88,12 +110,12 @@ void IntPatch_RLine::ParamOnS2(Standard_Real& a,Standard_Real& b) const {
 }
 
 
-void IntPatch_RLine::SetArcOnS1(const Handle(Adaptor2d_HCurve2d)& A) { 
+void IntPatch_RLine::SetArcOnS1(const Handle(Adaptor2d_Curve2d)& A) { 
   theArcOnS1 = A;
   onS1=Standard_True;
 }
 
-void IntPatch_RLine::SetArcOnS2(const Handle(Adaptor2d_HCurve2d)& A) { 
+void IntPatch_RLine::SetArcOnS2(const Handle(Adaptor2d_Curve2d)& A) { 
   theArcOnS2 = A;
   onS2=Standard_True;
 }

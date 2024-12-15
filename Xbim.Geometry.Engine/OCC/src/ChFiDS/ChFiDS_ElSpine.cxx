@@ -15,7 +15,7 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <ChFiDS_ElSpine.hxx>
 #include <ChFiDS_SurfData.hxx>
 #include <ElCLib.hxx>
@@ -35,16 +35,50 @@
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_OutOfRange.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(ChFiDS_ElSpine, Adaptor3d_Curve)
+
 //=======================================================================
 //function : ChFiDS_ElSpine
 //purpose  : 
 //=======================================================================
-ChFiDS_ElSpine::ChFiDS_ElSpine():periodic(0)
+ChFiDS_ElSpine::ChFiDS_ElSpine()
+: pfirst (0.0),
+  plast (0.0),
+  period (0.0),
+  periodic (Standard_False),
+  pfirstsav (Precision::Infinite()),
+  plastsav (Precision::Infinite())
 {
-  pfirstsav = Precision::Infinite();
-  plastsav  = Precision::Infinite();
 }
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+Handle(Adaptor3d_Curve) ChFiDS_ElSpine::ShallowCopy() const
+{
+  Handle(ChFiDS_ElSpine) aCopy = new ChFiDS_ElSpine();
+
+  const Handle(Adaptor3d_Curve) aCurve = curve.ShallowCopy();
+  const GeomAdaptor_Curve& aGeomCurve = *(Handle(GeomAdaptor_Curve)::DownCast(aCurve));
+  aCopy->curve = aGeomCurve;
+
+  aCopy->ptfirst              = ptfirst;
+  aCopy->ptlast               = ptlast;
+  aCopy->tgfirst              = tgfirst;
+  aCopy->tglast               = tglast;
+  aCopy->VerticesWithTangents = VerticesWithTangents;
+  aCopy->previous             = previous;
+  aCopy->next                 = next;
+  aCopy->pfirst               = pfirst;
+  aCopy->plast                = plast;
+  aCopy->period               = period;
+  aCopy->periodic             = periodic;
+  aCopy->pfirstsav            = pfirstsav;
+  aCopy->plastsav             = plastsav;
+
+  return aCopy;
+}
 
 //=======================================================================
 //function : FirstParameter
@@ -122,7 +156,7 @@ void ChFiDS_ElSpine::Intervals(TColStd_Array1OfReal& T,const GeomAbs_Shape S) co
 //purpose  : 
 //=======================================================================
 
-Handle(Adaptor3d_HCurve) ChFiDS_ElSpine::Trim(const Standard_Real First,
+Handle(Adaptor3d_Curve) ChFiDS_ElSpine::Trim(const Standard_Real First,
 					    const Standard_Real Last,
 					    const Standard_Real Tol) const
 {
@@ -443,7 +477,7 @@ Handle(ChFiDS_SurfData)& ChFiDS_ElSpine::ChangeNext()
 
 gp_Lin ChFiDS_ElSpine::Line() const 
 {
- return curve.Line();  
+ return curve.Line();
 }
 
 //=======================================================================
@@ -473,7 +507,7 @@ gp_Elips ChFiDS_ElSpine::Ellipse() const
 
 gp_Hypr ChFiDS_ElSpine::Hyperbola() const 
 {
-  return curve.Hyperbola();  
+  return curve.Hyperbola();
 }
 
 //=======================================================================

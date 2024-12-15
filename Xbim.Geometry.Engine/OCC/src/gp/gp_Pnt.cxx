@@ -18,13 +18,14 @@
 
 #define No_Standard_OutOfRange
 
+#include <gp_Pnt.hxx>
 
 #include <gp_Ax1.hxx>
 #include <gp_Ax2.hxx>
-#include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 #include <gp_XYZ.hxx>
+#include <Standard_Dump.hxx>
 #include <Standard_OutOfRange.hxx>
 
 void gp_Pnt::Transform (const gp_Trsf& T)
@@ -85,3 +86,17 @@ gp_Pnt gp_Pnt::Mirrored (const gp_Ax2& A2) const
   return P;
 }
 
+void gp_Pnt::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
+{
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "gp_Pnt", 3, coord.X(), coord.Y(), coord.Z())
+}
+
+Standard_Boolean gp_Pnt::InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+{
+  Standard_Integer aPos = theStreamPos;
+
+  OCCT_INIT_VECTOR_CLASS (Standard_Dump::Text (theSStream), "gp_Pnt", aPos, 3, &coord.ChangeCoord (1), &coord.ChangeCoord (2), &coord.ChangeCoord (3))
+
+  theStreamPos = aPos;
+  return Standard_True;
+}

@@ -17,6 +17,7 @@
 #include <BRepMesh_DiscretRoot.hxx>
 #include <IMeshTools_Parameters.hxx>
 #include <IMeshTools_Context.hxx>
+#include <Standard_NumericError.hxx>
 
 //! Builds the mesh of a shape with respect of their 
 //! correctly triangulated parts 
@@ -50,36 +51,38 @@ public: //! @name mesher API
   //! @param theShape shape to be meshed.
   //! @param theParameters - parameters of meshing
   Standard_EXPORT BRepMesh_IncrementalMesh(const TopoDS_Shape&          theShape,
-                                           const IMeshTools_Parameters& theParameters);
+                                           const IMeshTools_Parameters& theParameters,
+                                           const Message_ProgressRange& theRange = Message_ProgressRange());
 
-  //! Performs meshing ot the shape.
-  Standard_EXPORT virtual void Perform() Standard_OVERRIDE;
+  //! Performs meshing of the shape.
+  Standard_EXPORT virtual void Perform(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
 
   //! Performs meshing using custom context;
-  Standard_EXPORT void Perform(const Handle(IMeshTools_Context)& theContext);
+  Standard_EXPORT void Perform(const Handle(IMeshTools_Context)& theContext,
+                               const Message_ProgressRange& theRange = Message_ProgressRange());
   
 public: //! @name accessing to parameters.
 
   //! Returns meshing parameters
-  inline const IMeshTools_Parameters& Parameters() const
+  const IMeshTools_Parameters& Parameters() const
   {
     return myParameters;
   }
 
   //! Returns modifiable meshing parameters
-  inline IMeshTools_Parameters& ChangeParameters()
+  IMeshTools_Parameters& ChangeParameters()
   {
     return myParameters;
   }
 
   //! Returns modified flag.
-  inline Standard_Boolean IsModified() const
+  Standard_Boolean IsModified() const
   {
     return myModified;
   }
   
   //! Returns accumulated status flags faced during meshing.
-  inline Standard_Integer GetStatusFlags() const
+  Standard_Integer GetStatusFlags() const
   {
     return myStatus;
   }
@@ -87,8 +90,12 @@ public: //! @name accessing to parameters.
 private:
 
   //! Initializes specific parameters
-  inline void initParameters()
+  void initParameters()
   {
+    if (myParameters.Deflection < Precision::Confusion())
+    {
+      throw Standard_NumericError ("BRepMesh_IncrementalMesh::initParameters : invalid parameter value");
+    }
     if (myParameters.DeflectionInterior < Precision::Confusion())
     {
       myParameters.DeflectionInterior = myParameters.Deflection;
@@ -102,6 +109,10 @@ private:
             Precision::Confusion());
     }
 
+    if (myParameters.Angle < Precision::Angular())
+    {
+      throw Standard_NumericError ("BRepMesh_IncrementalMesh::initParameters : invalid parameter value");
+    }
     if (myParameters.AngleInterior < Precision::Angular())
     {
       myParameters.AngleInterior = 2.0 * myParameters.Angle;
@@ -129,7 +140,7 @@ public: //! @name plugin API
   //! Discret() static method (thus applied only to Mesh Factories).
   Standard_EXPORT static void SetParallelDefault(const Standard_Boolean isInParallel);
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_IncrementalMesh, BRepMesh_DiscretRoot)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_IncrementalMesh, BRepMesh_DiscretRoot)
 
 protected:
 

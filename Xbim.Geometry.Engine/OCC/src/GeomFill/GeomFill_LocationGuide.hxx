@@ -35,12 +35,6 @@
 #include <TColgp_HArray1OfPnt2d.hxx>
 class GeomFill_TrihedronWithGuide;
 class GeomFill_SectionLaw;
-class Adaptor3d_HCurve;
-class Standard_NotImplemented;
-class Standard_ConstructionError;
-class Standard_OutOfRange;
-class gp_Mat;
-class GeomFill_LocationLaw;
 class gp_Vec;
 class gp_Pnt;
 class Geom_Curve;
@@ -62,9 +56,9 @@ public:
   
   Standard_EXPORT void EraseRotation();
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C) Standard_OVERRIDE;
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
-  Standard_EXPORT virtual const Handle(Adaptor3d_HCurve)& GetCurve() const Standard_OVERRIDE;
+  Standard_EXPORT virtual const Handle(Adaptor3d_Curve)& GetCurve() const Standard_OVERRIDE;
   
   Standard_EXPORT virtual void SetTrsf (const gp_Mat& Transfo) Standard_OVERRIDE;
   
@@ -78,12 +72,12 @@ public:
   
   //! compute location 2d  points and  associated
   //! first derivatives.
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d) Standard_OVERRIDE;
   
   //! compute location 2d  points and associated
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, gp_Mat& D2M, gp_Vec& D2V, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d, TColgp_Array1OfVec2d& D2Poles2d) Standard_OVERRIDE;
   
   //! Say if the first restriction is defined in this class.
@@ -98,7 +92,7 @@ public:
   //! Returns Standard_False (default implementation)
   Standard_EXPORT virtual Standard_Boolean HasLastRestriction() const Standard_OVERRIDE;
   
-  //! Give the number of trace (Curves 2d wich are not restriction)
+  //! Give the number of trace (Curves 2d which are not restriction)
   //! Returns 1 (default implementation)
   Standard_EXPORT virtual Standard_Integer TraceNumber() const Standard_OVERRIDE;
   
@@ -114,7 +108,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -133,7 +127,7 @@ public:
   //! SetValue method
   Standard_EXPORT virtual void GetDomain (Standard_Real& First, Standard_Real& Last) const Standard_OVERRIDE;
   
-  //! Is usefull, if (me) have to run numerical
+  //! Is useful, if (me) have to run numerical
   //! algorithm to perform D0, D1 or D2
   //! The default implementation make nothing.
   Standard_EXPORT virtual void SetTolerance (const Standard_Real Tol3d, const Standard_Real Tol2d) Standard_OVERRIDE;
@@ -164,7 +158,7 @@ public:
   
   Standard_EXPORT Handle(Geom_Curve) Section() const;
   
-  Standard_EXPORT Handle(Adaptor3d_HCurve) Guide() const;
+  Standard_EXPORT Handle(Adaptor3d_Curve) Guide() const;
   
   Standard_EXPORT void SetOrigine (const Standard_Real Param1, const Standard_Real Param2);
   
@@ -190,9 +184,9 @@ private:
 
   Handle(GeomFill_TrihedronWithGuide) myLaw;
   Handle(GeomFill_SectionLaw) mySec;
-  Handle(Adaptor3d_HCurve) myCurve;
-  Handle(Adaptor3d_HCurve) myGuide;
-  Handle(Adaptor3d_HCurve) myTrimmed;
+  Handle(Adaptor3d_Curve) myCurve;
+  Handle(Adaptor3d_Curve) myGuide;
+  Handle(Adaptor3d_Curve) myTrimmed;
   Standard_Integer myNbPts;
   Standard_Boolean rotation;
   Standard_Real OrigParam1;

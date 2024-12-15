@@ -24,8 +24,6 @@
 #include <GC_Root.hxx>
 #include <Geom_Plane.hxx>
 
-class StdFail_NotDone;
-class gp_Ax2;
 class gp_Pln;
 class gp_Pnt;
 class gp_Dir;
@@ -74,7 +72,7 @@ public:
   //! In the first case the result is at the distance
   //! <Dist> to the plane <Pln> in the direction of the
   //! normal to <Pln>.
-  //! Otherwize it is in the oposite direction.
+  //! Otherwise it is in the opposite direction.
   Standard_EXPORT GC_MakePlane(const gp_Pln& Pln, const Standard_Real Dist);
   
   //! Make a Plane from Geom <ThePlane> passing through 3

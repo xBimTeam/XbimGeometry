@@ -51,6 +51,11 @@ les algorithmes math_FunctionRoot et math_FunctionRoots.
 //purpose  : 
 //=======================================================================
  Extrema_FuncExtCS::Extrema_FuncExtCS()
+ : myC(NULL),
+   myS(NULL),
+   myt(0.0),
+   myU(0.0),
+   myV(0.0)
 {
   myCinit = Standard_False;
   mySinit = Standard_False;
@@ -75,8 +80,8 @@ les algorithmes math_FunctionRoot et math_FunctionRoots.
 void Extrema_FuncExtCS::Initialize(const Adaptor3d_Curve& C, 
 				   const Adaptor3d_Surface& S)
 {
-  myC = (Adaptor3d_CurvePtr)&C;
-  myS = (Adaptor3d_SurfacePtr)&S;
+  myC = &C;
+  myS = &S;
   myCinit = Standard_True;
   mySinit = Standard_True;
   myPoint1.Clear();
@@ -203,12 +208,13 @@ Standard_Integer Extrema_FuncExtCS::GetStateNumber()
   std::cout <<"F(1)= "<<Sol(1)<<" F(2)= "<<Sol(2)<<" F(3)= "<<Sol(3)<<std::endl;
 #endif
   //comparison of solution with previous solutions
-  Standard_Real tol2d = Precision::PConfusion() * Precision::PConfusion();
+  Standard_Real tol2d = Precision::SquarePConfusion();
   Standard_Integer i = 1, nbSol = mySqDist.Length();
   for( ; i <=  nbSol; i++)
   {
     Standard_Real aT = myPoint1(i).Parameter();
-    if( (myt - aT) * (myt - aT) <= tol2d )
+    aT -= myt; aT *= aT;
+    if( aT <= tol2d )
       break;
   }
   if (i <= nbSol)
@@ -261,24 +267,3 @@ const Extrema_POnSurf& Extrema_FuncExtCS::PointOnSurface(const Standard_Integer 
   if (!myCinit || !mySinit) throw Standard_TypeMismatch();
   return myPoint2.Value(N);
 }
-
-//=======================================================================
-//function : Bidon1
-//purpose  : 
-//=======================================================================
-
-Adaptor3d_SurfacePtr Extrema_FuncExtCS::Bidon1() const 
-{
-  return (Adaptor3d_SurfacePtr)0L;
-}
-
-//=======================================================================
-//function : Bidon2
-//purpose  : 
-//=======================================================================
-
-Adaptor3d_CurvePtr Extrema_FuncExtCS::Bidon2() const 
-{
-  return (Adaptor3d_CurvePtr)0L;
-}
-

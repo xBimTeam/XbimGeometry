@@ -38,11 +38,14 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <NCollection_LocalArray.hxx>
+#include <Approx_ParametrizationType.hxx>
 
 class math_Vector;
 template <class A> class NCollection_Sequence;
 template <class A> class NCollection_List;
 template <class A> class NCollection_Vector;
+
+class IntPatch_WLine;
 
 // Corresponds for debug information output.
 // Debug information is also printed when OCCT_DEBUG defined.
@@ -68,7 +71,7 @@ public:
   //! @param thePntsXYZ - Set of 3d points.
   //! @param thePntsU1V1 - Set of 2d points.
   //! @param thePntsU2V2 - Set of 2d points.
-  //! @param thePars - Expected parameters assoiated with set.
+  //! @param thePars - Expected parameters associated with set.
   //! @param theApproxXYZ - Flag, existence of 3d set.
   //! @param theApproxU1V1 - Flag existence of first 2d set.
   //! @param theApproxU2V2 - Flag existence of second 2d set.
@@ -83,6 +86,22 @@ public:
                                          const Standard_Boolean theApproxU2V2,
                                          const Standard_Integer theMinNbPnts,
                                          NCollection_Vector<Standard_Integer>& theKnots);
+
+  //! Builds discrete curvature
+  Standard_EXPORT static void BuildCurvature(
+    const NCollection_LocalArray<Standard_Real>& theCoords,
+    const Standard_Integer theDim,
+    const math_Vector& thePars,
+    TColStd_Array1OfReal& theCurv,
+    Standard_Real& theMaxCurv);
+
+  //! Defines preferable parametrization type for theWL 
+  Standard_EXPORT static Approx_ParametrizationType DefineParType(const Handle(IntPatch_WLine)& theWL,
+    const Standard_Integer theFpar, const Standard_Integer theLpar,
+    const Standard_Boolean theApproxXYZ,
+    const Standard_Boolean theApproxU1V1,
+    const Standard_Boolean theApproxU2V2);
+
 
 private:
 
@@ -121,7 +140,7 @@ private:
   //!
   //! I: Filter too big number of points per knot interval.
   //!
-  //! II: Filter poins with too small amount of points per knot interval.
+  //! II: Filter points with too small amount of points per knot interval.
   //!
   //! III: Fill Last Knot.
   static void FilterKnots(NCollection_Sequence<Standard_Integer>& theInds, 

@@ -41,31 +41,31 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
 //
 // ******************************************************************** 
 {
-  Standard_Integer I,N = 0,SaveN = 0;
-  Standard_Real aBornInf[2], aBornSup[2], aUVap[2];
+  Standard_Integer I = 0, N = 0,SaveN = 0;
+  Standard_Real aBornInf[2] = {}, aBornSup[2] = {}, aUVap[2] = {};
   math_Vector BornInf(aBornInf,1,2), BornSup(aBornSup,1,2);
   math_Vector Uvap(aUVap,1,2);// parameters of current approach
-  Standard_Real PasC;  // step of advancement on the tangent
-  Standard_Real PasCu; // step of advancement current by U
-  Standard_Real PasCv; // step of advancement current by V
-  Standard_Real PasSav; // save first step of advancement
-  Standard_Boolean Arrive;// show if line ends
-  Standard_Boolean Cadre; // show if on border of the  domains
-  Standard_Boolean ArretAjout; // show if on the added point
+  Standard_Real PasC = 0.0;  // step of advancement on the tangent
+  Standard_Real PasCu = 0.0; // step of advancement current by U
+  Standard_Real PasCv = 0.0; // step of advancement current by V
+  Standard_Real PasSav = 0.0; // save first step of advancement
+  Standard_Boolean Arrive = false;// show if line ends
+  Standard_Boolean Cadre = false; // show if on border of the  domains
+  Standard_Boolean ArretAjout = false; // show if on the added point
   IntSurf_PntOn2S Psol;
   Handle(IntWalk_TheIWLine)  CurrentLine; //line under construction
   ThePointOfPath PathPnt;
   ThePointOfLoop LoopPnt;
 
-  Standard_Boolean Tgtbeg,Tgtend;
+  Standard_Boolean Tgtbeg = false, Tgtend = false;
 
-  Standard_Integer StepSign;
+  Standard_Integer StepSign = 0;
   
   IntWalk_StatusDeflection aStatus = IntWalk_OK, StatusPrecedent;
-  Standard_Integer NbDivision ;   // number of divisions of step 
+  Standard_Integer NbDivision = 0;   // number of divisions of step
   // during calculation of  1 section
 
-  Standard_Integer Ipass ;
+  Standard_Integer Ipass = 0;
   //index in the iterator of points on edge of point of passage  
 
 
@@ -178,7 +178,8 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
 #ifdef CHRONO
         Chronrsnld.Stop();
 #endif
-
+        Standard_Boolean isOnDegeneratedBorder = Standard_False;
+        
         if (Cadre) { // update of limits.
           BornInf(1) = Um;BornSup(1) = UM;BornInf(2) = Vm;BornSup(2) = VM;
         }
@@ -228,7 +229,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
           else { // there is a solution
             Rsnld.Root(Uvap);
 
-            // Avoid unitialized memory access.
+            // Avoid uninitialized memory access.
             if (CurrentLine->NbPoints() > 2)
             {
               for(Standard_Integer aCoordIdx = 1; aCoordIdx <= 2; aCoordIdx++)
@@ -262,6 +263,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                                       /  (uv[aCoordIdx - 1] - uvprev[aCoordIdx - 1]) );
                     Standard_Integer aFixIdx =  aCoordIdx == 1? 2 : 1; // Fixing index;
                     Uvap(aFixIdx) = uv[aFixIdx - 1] + (uv[aFixIdx - 1] - uvprev[aFixIdx - 1]) * aScaleCoeff;
+                    isOnDegeneratedBorder = Standard_True;
                   }
                 }
               }
@@ -307,6 +309,8 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                 if (N <= 0) { // jag 941017
                   MakeWalkingPoint(2,Uvap(1),Uvap(2),Func,Psol);
                   Tgtend = Func.IsTangent(); // jag 940616
+                  if (isOnDegeneratedBorder)
+                    Tgtend = Standard_True;
                   N = -N;
                 }
                 Arrive = (wd2[I].etat == 12); // the line is open
@@ -315,6 +319,9 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
             aStatus = TestDeflection(Func, Arrive,Uvap,StatusPrecedent,
                                                 NbDivision,PasC,StepSign);
 
+            if (isOnDegeneratedBorder && Tgtend)
+              aStatus = IntWalk_ArretSurPoint;
+            
             StatusPrecedent = aStatus;
             if (aStatus == IntWalk_PasTropGrand) {// division of the step
               Arrive = Standard_False;
@@ -379,12 +386,16 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                 StepSign = -1;
                 StatusPrecedent = IntWalk_OK;
                 PasC = PasSav;
-                if (aStatus == IntWalk_ArretSurPointPrecedent) {
-                  CurrentLine->AddPoint(Psol);
-                  OpenLine(0,Psol,Pnts1,Func,CurrentLine);
-                }
-                else {
-                  OpenLine(-lines.Length()-1,Psol,Pnts1,Func,CurrentLine);
+                //Check if <Psol> has been really updated
+                if (Arrive || Rajout || (!ArretAjout && Cadre && SaveN <= 0))
+                {
+                  if (aStatus == IntWalk_ArretSurPointPrecedent) {
+                    CurrentLine->AddPoint(Psol);
+                    OpenLine(0,Psol,Pnts1,Func,CurrentLine);
+                  }
+                  else {
+                    OpenLine(-lines.Length()-1,Psol,Pnts1,Func,CurrentLine);
+                  }
                 }
                 //Remove <SaveN> from <seqAlone> and, if it is first found point,
                 //from <seqAjout> too

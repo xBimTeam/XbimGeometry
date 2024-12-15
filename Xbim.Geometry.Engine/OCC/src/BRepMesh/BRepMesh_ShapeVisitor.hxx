@@ -26,8 +26,6 @@
 class TopoDS_Face;
 class TopoDS_Edge;
 class TopoDS_Wire;
-class IMeshTools_Context;
-class IMeshData_Wire;
 
 //! Builds discrete model of a shape by adding faces and free edges.
 //! Computes deflection for corresponded shape and checks whether it
@@ -49,7 +47,7 @@ public:
   //! Handles TopoDS_Edge object.
   Standard_EXPORT virtual void Visit (const TopoDS_Edge& theEdge) Standard_OVERRIDE;
 
-  DEFINE_STANDARD_RTTI_INLINE(BRepMesh_ShapeVisitor, IMeshTools_ShapeVisitor)
+  DEFINE_STANDARD_RTTIEXT(BRepMesh_ShapeVisitor, IMeshTools_ShapeVisitor)
 
 private:
 

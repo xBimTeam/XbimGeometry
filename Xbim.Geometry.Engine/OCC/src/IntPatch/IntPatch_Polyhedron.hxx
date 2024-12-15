@@ -17,22 +17,9 @@
 #ifndef _IntPatch_Polyhedron_HeaderFile
 #define _IntPatch_Polyhedron_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
+#include <Adaptor3d_Surface.hxx>
 #include <Bnd_Box.hxx>
 #include <Bnd_HArray1OfBox.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Address.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_OutOfRange;
-class Adaptor3d_HSurface;
-class gp_Pnt;
-class Bnd_Box;
-class gp_XYZ;
-
 
 //! This class provides a linear approximation of the PSurface.
 //! preview a constructor on a zone of  a surface
@@ -45,9 +32,9 @@ public:
   
   //! MaTriangle constructor with an double array of pnt for the
   //! representation of a double array of triangles.
-  Standard_EXPORT IntPatch_Polyhedron(const Handle(Adaptor3d_HSurface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV);
+  Standard_EXPORT IntPatch_Polyhedron(const Handle(Adaptor3d_Surface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV);
   
-  Standard_EXPORT IntPatch_Polyhedron(const Handle(Adaptor3d_HSurface)& Surface);
+  Standard_EXPORT IntPatch_Polyhedron(const Handle(Adaptor3d_Surface)& Surface);
   
   Standard_EXPORT void Destroy();
 ~IntPatch_Polyhedron()
@@ -55,11 +42,11 @@ public:
   Destroy();
 }
   
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HSurface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_Surface)& Surface, const Standard_Integer nbdU, const Standard_Integer nbdV);
   
   Standard_EXPORT void DeflectionOverEstimation (const Standard_Real flec);
   
-  Standard_EXPORT Standard_Real DeflectionOnTriangle (const Handle(Adaptor3d_HSurface)& Surface, const Standard_Integer Index) const;
+  Standard_EXPORT Standard_Real DeflectionOnTriangle (const Handle(Adaptor3d_Surface)& Surface, const Standard_Integer Index) const;
   
   Standard_EXPORT void UMinSingularity (const Standard_Boolean Sing);
   
@@ -76,11 +63,11 @@ public:
   //! triangles (nbdu*nbdv*2).
   Standard_EXPORT Standard_Integer NbTriangles() const;
   
-  //! Give the 3 points of the triangle of addresse Index in
+  //! Give the 3 points of the triangle of address Index in
   //! the double array of triangles.
   Standard_EXPORT void Triangle (const Standard_Integer Index, Standard_Integer& P1, Standard_Integer& P2, Standard_Integer& P3) const;
   
-  //! Give the addresse Tricon of the triangle connexe to the
+  //! Give the address Tricon of the triangle connexe to the
   //! triangle of address Triang by the edge Pivot Pedge and
   //! the third point of this connexe triangle. When we are
   //! on a free edge TriCon==0 but the function return the
@@ -126,10 +113,10 @@ public:
   
   Standard_EXPORT Standard_Boolean HasVMaxSingularity() const;
   
-  //! Give the plane equation of the triangle of addresse Triang.
+  //! Give the plane equation of the triangle of address Triang.
   Standard_EXPORT void PlaneEquation (const Standard_Integer Triang, gp_XYZ& NormalVector, Standard_Real& PolarDistance) const;
   
-  //! Give the plane equation of the triangle of addresse Triang.
+  //! Give the plane equation of the triangle of address Triang.
   Standard_EXPORT Standard_Boolean Contain (const Standard_Integer Triang, const gp_Pnt& ThePnt) const;
   
   Standard_EXPORT void Parameters (const Standard_Integer Index, Standard_Real& U, Standard_Real& V) const;

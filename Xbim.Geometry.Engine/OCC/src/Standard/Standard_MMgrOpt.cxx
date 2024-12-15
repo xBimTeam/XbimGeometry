@@ -120,10 +120,10 @@ extern "C" int getpagesize() ;
 
 /* In the allocated block, first bytes are used for storing of memory manager's data.
    (size of block). The minimal size of these data is sizeof(int).
-   The memory allocated in system usually alligned by 16 bytes.Tthe aligment of the 
-   data area in the memory block is shfted on BLOCK_SHIFT*sizeof(Standard_Size) 
+   The memory allocated in system usually aligned by 16 bytes. The alignment of the
+   data area in the memory block is shfted on BLOCK_SHIFT*sizeof(Standard_Size)
    bytes.
-   It is OK for WNT, SUN and Linux systems, but on SGI aligment should be 8 bytes.
+   It is OK for WNT, SUN and Linux systems, but on SGI alignment should be 8 bytes.
    So, BLOCK_SHIFT is formed as macro for support on other possible platforms.
 */
 
@@ -538,6 +538,8 @@ Standard_Integer Standard_MMgrOpt::Purge(Standard_Boolean )
       aNextPool = * (Standard_Size **) aNextPool; // get next pool
     }
     const Standard_Integer iLast = iPool - 1;
+
+    (void )nPool; // unused but set for debug
     nPool += iPool;
 
     // scan free blocks, find corresponding pools and increment
@@ -631,6 +633,7 @@ Standard_Integer Standard_MMgrOpt::Purge(Standard_Boolean )
     aPrevPool = (aFreePools[iLastFree] == iLast
                  ? aPrev
                  : aPools[iLast]);
+    (void )nPoolFreed; // unused but set for debug
     nPoolFreed += iLastFree + 1;
   }
 

@@ -16,12 +16,13 @@
 
 #define No_Standard_OutOfRange
 
+#include <gp_Pnt2d.hxx>
 
 #include <gp_Ax2d.hxx>
-#include <gp_Pnt2d.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec2d.hxx>
 #include <gp_XY.hxx>
+#include <Standard_Dump.hxx>
 #include <Standard_OutOfRange.hxx>
 
 void gp_Pnt2d::Transform (const gp_Trsf2d& T)
@@ -69,3 +70,7 @@ gp_Pnt2d gp_Pnt2d::Mirrored (const gp_Ax2d& A) const
   return P;
 }
 
+void gp_Pnt2d::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
+{
+  OCCT_DUMP_VECTOR_CLASS (theOStream, "gp_Pnt2d", 2, coord.X(), coord.Y())
+}

@@ -30,10 +30,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class Standard_NegativeValue;
-class Standard_OutOfRange;
-class GccEnt_BadQualifier;
-class StdFail_NotDone;
 class Geom2dGcc_QualifiedCurve;
 class Geom2dAdaptor_Curve;
 class Geom2d_Point;
@@ -58,7 +54,7 @@ class gp_Pnt2d;
 //! centered on a line OnLine with a radius Radius and with
 //! a tolerance Tolerance.
 //! If we did not used Tolerance it is impossible to
-//! find a solution in the the following case : OnLine is
+//! find a solution in the following case : OnLine is
 //! outside Cu1. There is no intersection point between Cu1
 //! and OnLine. The distance between the line and the
 //! circle is greater than Radius.
@@ -127,8 +123,8 @@ public:
   
   //! Returns the solution number Index and raises OutOfRange
   //! exception if Index is greater than the number of solutions.
-  //! Be carefull: the Index is only a way to get all the
-  //! solutions, but is not associated to theses outside the context
+  //! Be careful: the Index is only a way to get all the
+  //! solutions, but is not associated to these outside the context
   //! of the algorithm-object.
   //! Exceptions
   //! Standard_OutOfRange if Index is less than zero or
@@ -152,7 +148,7 @@ public:
   //! StdFail_NotDone if the construction fails.
   Standard_EXPORT void WhichQualifier (const Standard_Integer Index, GccEnt_Position& Qualif1) const;
   
-  //! Returns informations about the tangency point between the
+  //! Returns information about the tangency point between the
   //! result number Index and the first argument.
   //! ParSol is the intrinsic parameter of the point on the solution curv.
   //! ParArg is the intrinsic parameter of the point on the argument curv.

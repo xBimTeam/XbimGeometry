@@ -18,8 +18,8 @@
 //                         Optimisation, use of GetCircle
 // Modified 20/02/1998 PMN Singular surfaces management
 
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HSurface.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor3d_Surface.hxx>
 #include <Blend_Point.hxx>
 #include <BlendFunc.hxx>
 #include <BlendFunc_ConstRad.hxx>
@@ -47,26 +47,28 @@
 //purpose  : 
 //=======================================================================
 
-BlendFunc_ConstRad::BlendFunc_ConstRad(const Handle(Adaptor3d_HSurface)& S1,
-                                       const Handle(Adaptor3d_HSurface)& S2,
-                                       const Handle(Adaptor3d_HCurve)& C)
+BlendFunc_ConstRad::BlendFunc_ConstRad(const Handle(Adaptor3d_Surface)& S1,
+                                       const Handle(Adaptor3d_Surface)& S2,
+                                       const Handle(Adaptor3d_Curve)& C)
                                  :
-				  surf1(S1),surf2(S2),
-				  curv(C), tcurv(C),
-				  istangent(Standard_True),
-				  xval(1,4), 
-				  E(1,4), DEDX(1,4,1,4),  DEDT(1,4), 
-				  D2EDX2(4,4,4),
-				  D2EDXDT(1,4,1,4), D2EDT2(1,4),
-				  maxang(RealFirst()), minang(RealLast()),
-				  distmin(RealLast()),
-				  mySShape(BlendFunc_Rational)
+                  surf1(S1),surf2(S2),
+                  curv(C), tcurv(C),
+                  istangent(Standard_True), param(0.0),
+                  ray1(0.0), ray2(0.0),
+                  choix(0), xval(1, 4),
+                  E(1,4), DEDX(1,4,1,4),  DEDT(1,4), 
+                  D2EDX2(4,4,4),
+                  D2EDXDT(1,4,1,4), D2EDT2(1,4),
+                  maxang(RealFirst()), minang(RealLast()),
+                  distmin(RealLast()),
+                  mySShape(BlendFunc_Rational)
 { 
 // Initialisaton of cash control variables.
   tval = -9.876e100;
   xval.Init(-9.876e100);
   myXOrder = -1;
   myTOrder = -1;
+  myTConv = Convert_TgtThetaOver2;
 }
 
 //=======================================================================

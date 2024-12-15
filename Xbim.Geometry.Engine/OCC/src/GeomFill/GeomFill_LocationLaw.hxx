@@ -17,25 +17,16 @@
 #ifndef _GeomFill_LocationLaw_HeaderFile
 #define _GeomFill_LocationLaw_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
-#include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <GeomAbs_Shape.hxx>
+#include <GeomFill_PipeError.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
-#include <Standard_Integer.hxx>
-#include <GeomFill_PipeError.hxx>
-#include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Standard_NotImplemented;
-class Standard_OutOfRange;
-class Adaptor3d_HCurve;
+
 class gp_Mat;
 class gp_Vec;
 class gp_Pnt;
-
 
 class GeomFill_LocationLaw;
 DEFINE_STANDARD_HANDLE(GeomFill_LocationLaw, Standard_Transient)
@@ -49,9 +40,9 @@ class GeomFill_LocationLaw : public Standard_Transient
 public:
 
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C) = 0;
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) = 0;
   
-  Standard_EXPORT virtual const Handle(Adaptor3d_HCurve)& GetCurve() const = 0;
+  Standard_EXPORT virtual const Handle(Adaptor3d_Curve)& GetCurve() const = 0;
   
   //! Set a transformation Matrix like   the law M(t) become
   //! Mat * M(t)
@@ -67,12 +58,12 @@ public:
   
   //! compute location 2d  points and  associated
   //! first derivatives.
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d);
   
   //! compute location 2d  points and associated
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Mat& M, gp_Vec& V, gp_Mat& DM, gp_Vec& DV, gp_Mat& D2M, gp_Vec& D2V, TColgp_Array1OfPnt2d& Poles2d, TColgp_Array1OfVec2d& DPoles2d, TColgp_Array1OfVec2d& D2Poles2d);
   
   //! get the number of  2d  curves (Restrictions  +  Traces)
@@ -91,7 +82,7 @@ public:
   //! Returns Standard_False (default implementation)
   Standard_EXPORT virtual Standard_Boolean HasLastRestriction() const;
   
-  //! Give the number of trace (Curves 2d wich are not restriction)
+  //! Give the number of trace (Curves 2d which are not restriction)
   //! Returns 0 (default implementation)
   Standard_EXPORT virtual Standard_Integer TraceNumber() const;
   
@@ -107,7 +98,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const = 0;
   
@@ -131,7 +122,7 @@ public:
   //! 2d approximation.
   Standard_EXPORT virtual void Resolution (const Standard_Integer Index, const Standard_Real Tol, Standard_Real& TolU, Standard_Real& TolV) const;
   
-  //! Is usefull, if (me) have to run numerical
+  //! Is useful, if (me) have to run numerical
   //! algorithm to perform D0, D1 or D2
   //! The default implementation make nothing.
   Standard_EXPORT virtual void SetTolerance (const Standard_Real Tol3d, const Standard_Real Tol2d);

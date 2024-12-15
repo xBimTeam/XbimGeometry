@@ -52,12 +52,12 @@ public:
   //! Given an input matrix Cont, two input vectors Secont
   //! and StartingPoint, it solves Cont*X = Secont (only
   //! = equations) with a minimization of Norme(X-X0).
-  //! The maximun iterations number allowed is fixed to
+  //! The maximum iterations number allowed is fixed to
   //! NbIterations.
   //! The tolerance EpsLic is fixed for the dual variable
   //! convergence. The tolerance EpsLix is used for the
   //! convergence of X.
-  //! Exception ConstuctionError is raised if the line number
+  //! Exception ConstructionError is raised if the line number
   //! of Cont is different from the length of Secont.
   Standard_EXPORT math_Uzawa(const math_Matrix& Cont, const math_Vector& Secont, const math_Vector& StartingPoint, const Standard_Real EpsLix = 1.0e-06, const Standard_Real EpsLic = 1.0e-06, const Standard_Integer NbIterations = 500);
   
@@ -66,13 +66,13 @@ public:
   //! first equations are equal equations and the Nci last
   //! equations are inequalities <) with a minimization
   //! of Norme(X-X0).
-  //! The maximun iterations number allowed is fixed to
+  //! The maximum iterations number allowed is fixed to
   //! NbIterations.
   //! The tolerance EpsLic is fixed for the dual variable
   //! convergence. The tolerance EpsLix is used for the
   //! convergence of X.
   //! There are no conditions on Nce and Nci.
-  //! Exception ConstuctionError is raised if the line number
+  //! Exception ConstructionError is raised if the line number
   //! of Cont is different from the length of Secont and from
   //! Nce + Nci.
   Standard_EXPORT math_Uzawa(const math_Matrix& Cont, const math_Vector& Secont, const math_Vector& StartingPoint, const Standard_Integer Nci, const Standard_Integer Nce, const Standard_Real EpsLix = 1.0e-06, const Standard_Real EpsLic = 1.0e-06, const Standard_Integer NbIterations = 500);

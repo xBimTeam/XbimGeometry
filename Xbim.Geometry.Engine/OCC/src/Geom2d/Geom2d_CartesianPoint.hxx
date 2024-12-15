@@ -23,7 +23,6 @@
 #include <gp_Pnt2d.hxx>
 #include <Geom2d_Point.hxx>
 #include <Standard_Real.hxx>
-class gp_Pnt2d;
 class gp_Trsf2d;
 class Geom2d_Geometry;
 
@@ -75,6 +74,9 @@ public:
   Standard_EXPORT void Transform (const gp_Trsf2d& T) Standard_OVERRIDE;
   
   Standard_EXPORT Handle(Geom2d_Geometry) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

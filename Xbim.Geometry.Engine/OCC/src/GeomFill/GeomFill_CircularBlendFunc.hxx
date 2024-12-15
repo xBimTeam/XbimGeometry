@@ -33,9 +33,7 @@
 #include <TColgp_Array1OfVec2d.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <GeomAbs_Shape.hxx>
-class Adaptor3d_HCurve;
-class Standard_OutOfRange;
-class gp_Pnt;
+
 
 
 class GeomFill_CircularBlendFunc;
@@ -58,7 +56,7 @@ public:
   //! parameterisation  matches  the  circle  one.  --
   //! ChFi3d_Polynomial corresponds to a polynomial --
   //! representation of circles.
-  Standard_EXPORT GeomFill_CircularBlendFunc(const Handle(Adaptor3d_HCurve)& Path, const Handle(Adaptor3d_HCurve)& Curve1, const Handle(Adaptor3d_HCurve)& Curve2, const Standard_Real Radius, const Standard_Boolean Polynomial = Standard_False);
+  Standard_EXPORT GeomFill_CircularBlendFunc(const Handle(Adaptor3d_Curve)& Path, const Handle(Adaptor3d_Curve)& Curve1, const Handle(Adaptor3d_Curve)& Curve2, const Standard_Real Radius, const Standard_Boolean Polynomial = Standard_False);
   
   //! compute the section for v = param
   Standard_EXPORT virtual Standard_Boolean D0 (const Standard_Real Param, const Standard_Real First, const Standard_Real Last, TColgp_Array1OfPnt& Poles, TColgp_Array1OfPnt2d& Poles2d, TColStd_Array1OfReal& Weigths) Standard_OVERRIDE;
@@ -93,7 +91,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const Standard_OVERRIDE;
   
@@ -115,18 +113,18 @@ public:
   Standard_EXPORT virtual void SetTolerance (const Standard_Real Tol3d, const Standard_Real Tol2d) Standard_OVERRIDE;
   
   //! Get    the   barycentre of   Surface.   An   very  poor
-  //! estimation is sufficent. This information is usefull
-  //! to perform well conditionned rational approximation.
+  //! estimation is sufficient. This information is useful
+  //! to perform well conditioned rational approximation.
   Standard_EXPORT virtual gp_Pnt BarycentreOfSurf() const Standard_OVERRIDE;
   
   //! Returns the   length of the maximum section. This
-  //! information is usefull to perform well conditionned rational
+  //! information is useful to perform well conditioned rational
   //! approximation.
   Standard_EXPORT virtual Standard_Real MaximalSection() const Standard_OVERRIDE;
   
   //! Compute the minimal value of weight for each poles
-  //! of all  sections.  This information is  usefull to
-  //! perform well conditionned rational approximation.
+  //! of all  sections.  This information is  useful to
+  //! perform well conditioned rational approximation.
   Standard_EXPORT virtual void GetMinimalWeight (TColStd_Array1OfReal& Weigths) const Standard_OVERRIDE;
 
 
@@ -149,12 +147,12 @@ private:
   Standard_Real maxang;
   Standard_Real minang;
   Standard_Real distmin;
-  Handle(Adaptor3d_HCurve) myPath;
-  Handle(Adaptor3d_HCurve) myCurve1;
-  Handle(Adaptor3d_HCurve) myCurve2;
-  Handle(Adaptor3d_HCurve) myTPath;
-  Handle(Adaptor3d_HCurve) myTCurve1;
-  Handle(Adaptor3d_HCurve) myTCurve2;
+  Handle(Adaptor3d_Curve) myPath;
+  Handle(Adaptor3d_Curve) myCurve1;
+  Handle(Adaptor3d_Curve) myCurve2;
+  Handle(Adaptor3d_Curve) myTPath;
+  Handle(Adaptor3d_Curve) myTCurve1;
+  Handle(Adaptor3d_Curve) myTCurve2;
   Standard_Integer myDegree;
   Standard_Integer myNbKnots;
   Standard_Integer myNbPoles;

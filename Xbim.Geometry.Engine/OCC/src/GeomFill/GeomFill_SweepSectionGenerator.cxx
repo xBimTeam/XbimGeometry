@@ -15,7 +15,7 @@
 // commercial license or contractual agreement.
 
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <ElCLib.hxx>
 #include <GCPnts_QuasiUniformDeflection.hxx>
 #include <Geom_BSplineCurve.hxx>
@@ -51,8 +51,12 @@ static Standard_Integer NbSECTIONS = 0;
 //=======================================================================
 
 GeomFill_SweepSectionGenerator::GeomFill_SweepSectionGenerator()
+: myRadius(0.0),
+  myIsDone(Standard_False),
+  myNbSections(0),
+  myType(-1),
+  myPolynomial(Standard_False)
 {
-  myIsDone = Standard_False;
 }
 
 
@@ -102,9 +106,9 @@ GeomFill_SweepSectionGenerator::GeomFill_SweepSectionGenerator
 //=======================================================================
 
 GeomFill_SweepSectionGenerator::GeomFill_SweepSectionGenerator
-  (const Handle(Adaptor3d_HCurve)& Path,
-   const Handle(Adaptor3d_HCurve)& Curve1,
-   const Handle(Adaptor3d_HCurve)& Curve2,
+  (const Handle(Adaptor3d_Curve)& Path,
+   const Handle(Adaptor3d_Curve)& Curve1,
+   const Handle(Adaptor3d_Curve)& Curve2,
    const Standard_Real       Radius)
 {
   Init(Path,Curve1,Curve2,Radius);
@@ -241,16 +245,16 @@ void GeomFill_SweepSectionGenerator::Init
 //=======================================================================
 
 void GeomFill_SweepSectionGenerator::Init
-  (const Handle(Adaptor3d_HCurve)& Path,
-   const Handle(Adaptor3d_HCurve)& Curve1,
-   const Handle(Adaptor3d_HCurve)& Curve2,
+  (const Handle(Adaptor3d_Curve)& Path,
+   const Handle(Adaptor3d_Curve)& Curve1,
+   const Handle(Adaptor3d_Curve)& Curve2,
    const Standard_Real       Radius)
 {
   myIsDone = Standard_False;
   myRadius = Radius;
   myType   = 0;
 
-  Handle(Geom_Curve) CC = GeomAdaptor::MakeCurve(Path->Curve());
+  Handle(Geom_Curve) CC = GeomAdaptor::MakeCurve(*Path);
   myPath         = GeomConvert::CurveToBSplineCurve(CC);
   myAdpPath      = Path;
   myAdpFirstSect = Curve1;
@@ -334,7 +338,7 @@ void GeomFill_SweepSectionGenerator::Perform(const Standard_Boolean Polynomial)
     
     myFirstSect = GeomConvert::CurveToBSplineCurve(Circ,Convert_QuasiAngular);
   }
-  
+
   if (myType <= 3 && myType >=1 ) {
     
     for (Standard_Integer i = 2; i <= myNbSections; i++) {
@@ -601,16 +605,33 @@ void GeomFill_SweepSectionGenerator::Section
     Standard_Real Alpha = U - myAdpPath->FirstParameter();
     Alpha /= myAdpPath->LastParameter() - myAdpPath->FirstParameter();
     
-    Standard_Real U1 = 
-      ( 1- Alpha) * myAdpFirstSect->FirstParameter() +
-	Alpha     * myAdpFirstSect->LastParameter();
-    
+    Standard_Real U1 = ( 1- Alpha) * myAdpFirstSect->FirstParameter() +
+      Alpha     * myAdpFirstSect->LastParameter();
+
+    if (myAdpFirstSect->GetType() == GeomAbs_Line)
+    {
+      if (Precision::IsInfinite(myAdpFirstSect->FirstParameter()) ||
+        Precision::IsInfinite(myAdpFirstSect->LastParameter()))
+      {
+        gp_Lin aLine = myAdpFirstSect->Line();
+        U1 = ElCLib::Parameter(aLine, PPath);
+      }
+    }
     gp_Pnt P1 = myAdpFirstSect->Value(U1);
     
     Standard_Real U2 = 
       ( 1- Alpha) * myAdpLastSect->FirstParameter() +
 	Alpha     * myAdpLastSect->LastParameter();
-    
+
+    if (myAdpLastSect->GetType() == GeomAbs_Line)
+    {
+      if (Precision::IsInfinite(myAdpLastSect->FirstParameter()) ||
+        Precision::IsInfinite(myAdpLastSect->LastParameter()))
+      {
+        gp_Lin aLine = myAdpLastSect->Line();
+        U2 = ElCLib::Parameter(aLine, PPath);
+      }
+    }
     gp_Pnt P2 = myAdpLastSect->Value(U2);
     
     gp_Ax2 Axis;

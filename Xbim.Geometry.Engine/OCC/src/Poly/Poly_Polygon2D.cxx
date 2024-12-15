@@ -14,17 +14,24 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <gp_Pnt2d.hxx>
 #include <Poly_Polygon2D.hxx>
-#include <Standard_NullObject.hxx>
-#include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Poly_Polygon2D,Standard_Transient)
 
 //=======================================================================
 //function : Poly_Polygon2D
-//purpose  : 
+//purpose  :
+//=======================================================================
+Poly_Polygon2D::Poly_Polygon2D (const Standard_Integer theNbNodes)
+: myDeflection (0.0),
+  myNodes (1, theNbNodes)
+{
+  //
+}
+
+//=======================================================================
+//function : Poly_Polygon2D
+//purpose  :
 //=======================================================================
 Poly_Polygon2D::Poly_Polygon2D(const TColgp_Array1OfPnt2d& Nodes): 
     myDeflection(0.),
@@ -36,33 +43,13 @@ Poly_Polygon2D::Poly_Polygon2D(const TColgp_Array1OfPnt2d& Nodes):
 }
 
 //=======================================================================
-//function : Deflection
+//function : DumpJson
 //purpose  : 
 //=======================================================================
-
-Standard_Real Poly_Polygon2D::Deflection() const 
+void Poly_Polygon2D::DumpJson (Standard_OStream& theOStream, Standard_Integer) const
 {
-  return myDeflection;
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myDeflection)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myNodes.Size())
 }
-
-//=======================================================================
-//function : Deflection
-//purpose  : 
-//=======================================================================
-
-void Poly_Polygon2D::Deflection(const Standard_Real D)
-{
-  myDeflection = D;
-}
-
-//=======================================================================
-//function : Nodes
-//purpose  : 
-//=======================================================================
-
-const TColgp_Array1OfPnt2d& Poly_Polygon2D::Nodes() const 
-{
-  return myNodes;
-}
-
-

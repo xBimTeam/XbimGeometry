@@ -29,7 +29,6 @@
 #include <TopTools_Array1OfShape.hxx>
 #include <Geom_Curve.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <Adaptor3d_HCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_Parabola.hxx>
@@ -43,7 +42,6 @@
 #include <Geom_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <BRepAdaptor_CompCurve.hxx>
-#include <BRepAdaptor_HCompCurve.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
@@ -70,8 +68,6 @@
 #include <ShapeFix_Edge.hxx>
 #include <BOPAlgo_Tools.hxx>
 #include <Geom_OffsetCurve.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <BRepAdaptor_HCurve.hxx>
 #include <ShapeAnalysis_WireOrder.hxx>
 using namespace Xbim::Common;
 using namespace System::Linq;
@@ -405,7 +401,8 @@ namespace Xbim
 				*pWire = segWire;
 			}
 		}
-		///Special case to allow polylines to be create as compound edges not as a single bpline
+
+		///Special case to allow polylines to be created as compound edges not as a single bpline
 		// In this case the pline may or ma not be closed it may or may not lie on a surface, it may be self intersecting
 		void XbimWire::Init(IIfcPolyline^ pline, ILogger^ logger, XbimConstraints constraints)
 		{
@@ -423,11 +420,8 @@ namespace Xbim
 			bool tryAgain = true;
 			while (!done)
 			{
-
-
 				TColgp_SequenceOfPnt pointSeq;
 				BRepBuilderAPI_MakeWire wireMaker;
-
 
 				for (int i = 0; i < originalCount; i++)
 				{
@@ -437,13 +431,11 @@ namespace Xbim
 				bool notSelfIntersecting = (constraints & XbimConstraints::NotSelfIntersecting) == XbimConstraints::NotSelfIntersecting;
 				bool isClosed = XbimFace::RemoveDuplicatePoints(pointSeq, close, tolerance);
 
-
 				if (pointSeq.Length() < 2)
 				{
 					XbimGeometryCreator::LogWarning(logger, pline, "Polyline with less than 2 points is an empty line. It has been ignored");
 					return;
 				}
-
 
 				BRepBuilderAPI_MakePolygon polyMaker;
 				for (int i = 1; i <= pointSeq.Length(); ++i)
@@ -457,7 +449,8 @@ namespace Xbim
 				if (polyMaker.IsDone())
 				{
 					if (notSelfIntersecting)
-					{//check for no self intersection
+					{
+						//check for no self intersection
 						TopoDS_Wire wire = polyMaker.Wire(); //get a handle to the wire to avoid garbage collection
 
 						//double tolerance = profile->Model->ModelFactors->Precision;
@@ -486,10 +479,7 @@ namespace Xbim
 							bool fixed = wireFixer.Perform();
 							if (!fixed) // we have a self intersection but the tools cannot fix it, normally means two points are too near
 							{
-
-
 								tolerance = pline->Model->ModelFactors->OneMilliMeter / 10; //use a normal modelling precision
-
 								if (tryAgain)
 								{
 									tryAgain = false; //only do this once
@@ -1207,19 +1197,21 @@ namespace Xbim
 			try
 			{
 				gp_Dir dir = NormalDir(*pWire);
-				return  XbimVector3D(dir.X(), dir.Y(), dir.Z());
+				if (XbimConvert::IsInvalid(dir, 0)) // even with tolerance 0 checks for NaN
+					return XbimVector3D();
+				return XbimVector3D(dir.X(), dir.Y(), dir.Z());
 			}
 			catch (Standard_Failure sf)
 			{
-				String^ err = gcnew String(sf.GetMessageString());
-				throw gcnew Exception("Invalid normal: " + err);
+				// this returns a vector that can be checked for IsInvalid, 
+				// this seems better than throwing another exception.
+				return XbimVector3D();
 			}
 
 		}
 
 		gp_Dir XbimWire::NormalDir(const TopoDS_Wire& wire)
 		{
-
 			double x = 0, y = 0, z = 0;
 			gp_Pnt currentStart, previousEnd, first;
 			int count = 0;
@@ -1243,16 +1235,17 @@ namespace Xbim
 							first = currentStart;
 						previousEnd = currentStart;
 					}
-					else if (wEx.Current().Closed() && ((cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if (wEx.Current().Closed() && (
+						(cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)))) //it is a conic
 					{
 						Handle(Geom_Conic) conic = Handle(Geom_Conic)::DownCast(c3dptr);
 						return conic->Axis().Direction();
-
 					}
-					else if ((cType == STANDARD_TYPE(Geom_Circle)) ||
+					else if (
+						(cType == STANDARD_TYPE(Geom_Circle)) ||
 						(cType == STANDARD_TYPE(Geom_Ellipse)) ||
 						(cType == STANDARD_TYPE(Geom_Parabola)) ||
 						(cType == STANDARD_TYPE(Geom_Hyperbola)) ||
@@ -2170,32 +2163,60 @@ namespace Xbim
 			BRepBuilderAPI_MakeWire wireMaker;
 			if (dG > 0)
 			{
-				gp_Pnt p1(-dX, dY, 0);
-				gp_Pnt p2(dX, dY, 0);
-				gp_Pnt p3(dX, dY - dG, 0);
-				gp_Pnt p4(dX - tW, dY - dG, 0);
-				gp_Pnt p5(dX - tW, dY - tW, 0);
-				gp_Pnt p6(-dX + tW, dY - tW, 0);
-				gp_Pnt p7(-dX + tW, -dY + tW, 0);
-				gp_Pnt p8(dX - tW, -dY + tW, 0);
-				gp_Pnt p9(dX - tW, -dY + dG, 0);
-				gp_Pnt p10(dX, -dY + dG, 0);
-				gp_Pnt p11(dX, -dY, 0);
-				gp_Pnt p12(-dX, -dY, 0);
+				if (fabs(tW - dG) < Precision::Confusion())
+				{
+					gp_Pnt p1(-dX, dY, 0);
+					gp_Pnt p2(dX, dY, 0);
+					gp_Pnt p3(dX, dY - dG, 0);
+					gp_Pnt p4(dX - tW, dY - dG, 0);
+					gp_Pnt p6(-dX + tW, dY - tW, 0);
+					gp_Pnt p7(-dX + tW, -dY + tW, 0);
+					gp_Pnt p9(dX - tW, -dY + dG, 0);
+					gp_Pnt p10(dX, -dY + dG, 0);
+					gp_Pnt p11(dX, -dY, 0);
+					gp_Pnt p12(-dX, -dY, 0);
 
 
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p9));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
-				wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p6));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p9));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+				}
+				else
+				{
+					gp_Pnt p1(-dX, dY, 0);
+					gp_Pnt p2(dX, dY, 0);
+					gp_Pnt p3(dX, dY - dG, 0);
+					gp_Pnt p4(dX - tW, dY - dG, 0);
+					gp_Pnt p5(dX - tW, dY - tW, 0);
+					gp_Pnt p6(-dX + tW, dY - tW, 0);
+					gp_Pnt p7(-dX + tW, -dY + tW, 0);
+					gp_Pnt p8(dX - tW, -dY + tW, 0);
+					gp_Pnt p9(dX - tW, -dY + dG, 0);
+					gp_Pnt p10(dX, -dY + dG, 0);
+					gp_Pnt p11(dX, -dY, 0);
+					gp_Pnt p12(-dX, -dY, 0);
+
+
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p9));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+					wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+				}
 			}
 			else
 			{
@@ -2939,7 +2960,7 @@ namespace Xbim
 
 #pragma region Helper functions
 
-		void XbimWire::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& x, double& y, double& z)
+		void XbimWire::AddNewellPoint(const gp_Pnt& previous, const gp_Pnt& current, double& normalX, double& normalY, double& normalZ)
 		{
 			const double& xn = previous.X();
 			const double& yn = previous.Y();
@@ -2947,16 +2968,18 @@ namespace Xbim
 			const double& xn1 = current.X();
 			const double& yn1 = current.Y();
 			const double& zn1 = current.Z();
-			/*
-			Debug::WriteLine("_.LINE");
-			Debug::WriteLine("{0},{1},{2}", xn, yn, zn);
-			Debug::WriteLine("{0},{1},{2}", xn1, yn1, zn1);
-			Debug::WriteLine("");
-			*/
+			
+			// Debug::WriteLine("_.LINE");
+			// System::Diagnostics::Debug::WriteLine("from {0},{1},{2} ", xn, yn, zn);
+			// System::Diagnostics::Debug::WriteLine("to {0},{1},{2}", xn1, yn1, zn1);
+			//Debug::WriteLine("");
+			
+			// this has been checked, the factors are passed in a different order than the 
+			// canonical pseudocode at kronos, but the results are identical
+			normalX += (yn - yn1) * (zn + zn1);
+			normalY += (xn + xn1) * (zn - zn1);
+			normalZ += (xn - xn1) * (yn + yn1);
 
-			x += (yn - yn1) * (zn + zn1);
-			y += (xn + xn1) * (zn - zn1);
-			z += (xn - xn1) * (yn + yn1);
 			/*
 			Debug::WriteLine("-HYPERLINK I O l  {0},{1},{2}", x, y, z);
 			Debug::WriteLine("");

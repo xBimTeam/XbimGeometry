@@ -29,9 +29,7 @@
 #include <gp_Pnt.hxx>
 class GeomFill_LocationLaw;
 class Geom_Curve;
-class StdFail_NotDone;
 class Geom_Geometry;
-class Adaptor3d_HCurve;
 class gp_Trsf;
 class gp_Mat;
 class gp_Vec;
@@ -52,7 +50,7 @@ public:
   
   Standard_EXPORT void Perform (const Standard_Real Tol);
   
-  Standard_EXPORT void Perform (const Handle(Adaptor3d_HCurve)& Path, const Standard_Real Tol);
+  Standard_EXPORT void Perform (const Handle(Adaptor3d_Curve)& Path, const Standard_Real Tol);
   
   Standard_EXPORT void Perform (const Standard_Real ParamOnPath, const Standard_Real Tol);
   
@@ -68,16 +66,16 @@ public:
   
   Standard_EXPORT gp_Trsf Transformation (const Standard_Boolean WithTranslation, const Standard_Boolean WithCorrection = Standard_False) const;
   
-  //! Compute the Section, in the coordinate syteme given by
+  //! Compute the Section, in the coordinate system given by
   //! the Location Law.
-  //! If <WithTranslation> contact beetween
+  //! If <WithTranslation> contact between
   //! <Section> and <Path> is forced.
   Standard_EXPORT Handle(Geom_Curve) Section (const Standard_Boolean WithTranslation) const;
   
-  //! Compute the Section, in the coordinate syteme given by
+  //! Compute the Section, in the coordinate system given by
   //! the Location Law.
   //! To have the Normal to section equal to the Location
-  //! Law Normal.  If <WithTranslation> contact beetween
+  //! Law Normal.  If <WithTranslation> contact between
   //! <Section> and <Path> is forced.
   Standard_EXPORT Handle(Geom_Curve) ModifiedSection (const Standard_Boolean WithTranslation) const;
 

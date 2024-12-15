@@ -18,7 +18,7 @@
 
 #include <Standard_Type.hxx>
 #include <gp_Pnt2d.hxx>
-#include <BRepAdaptor_HSurface.hxx>
+#include <BRepAdaptor_Surface.hxx>
 #include <IMeshData_Types.hxx>
 #include <IMeshData_Face.hxx>
 
@@ -70,7 +70,7 @@ public:
 
   //! Returns point in 3d space corresponded to the given 
   //! point defined in parameteric space of surface.
-  inline gp_Pnt Point(const gp_Pnt2d& thePoint2d) const
+  gp_Pnt Point(const gp_Pnt2d& thePoint2d) const
   {
     return GetSurface()->Value(thePoint2d.X(), thePoint2d.Y());
   }
@@ -78,47 +78,43 @@ public:
 protected:
 
   //! Computes parametric tolerance taking length along U and V into account.
-  virtual void computeTolerance(
-    const Standard_Real theLenU,
-    const Standard_Real theLenV);
+  Standard_EXPORT virtual void computeTolerance (const Standard_Real theLenU, const Standard_Real theLenV);
 
   //! Computes parametric delta taking length along U and V and value of tolerance into account.
-  virtual void computeDelta(
-    const Standard_Real theLengthU,
-    const Standard_Real theLengthV);
+  Standard_EXPORT virtual void computeDelta (const Standard_Real theLengthU, const Standard_Real theLengthV);
 
 public:
   //! Returns face model.
-  inline const IMeshData::IFaceHandle& GetDFace() const
+  const IMeshData::IFaceHandle& GetDFace() const
   {
     return myDFace;
   }
 
   //! Returns surface.
-  inline const Handle(BRepAdaptor_HSurface)& GetSurface() const
+  const Handle(BRepAdaptor_Surface)& GetSurface() const
   {
     return myDFace->GetSurface();
   }
 
   //! Returns U range.
-  inline const std::pair<Standard_Real, Standard_Real>& GetRangeU() const
+  const std::pair<Standard_Real, Standard_Real>& GetRangeU() const
   {
     return myRangeU;
   }
 
   //! Returns V range.
-  inline const std::pair<Standard_Real, Standard_Real>& GetRangeV() const
+  const std::pair<Standard_Real, Standard_Real>& GetRangeV() const
   {
     return myRangeV;
   }
 
   //! Returns delta.
-  inline const std::pair<Standard_Real, Standard_Real>& GetDelta () const
+  const std::pair<Standard_Real, Standard_Real>& GetDelta () const
   {
     return myDelta;
   }
 
-  inline const std::pair<Standard_Real, Standard_Real>& GetToleranceUV() const
+  const std::pair<Standard_Real, Standard_Real>& GetToleranceUV() const
   {
     return myTolerance;
   }

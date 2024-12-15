@@ -31,7 +31,7 @@
 //!    math_IntegerVector V1(-3, 5); // an IntegerVector with range [-3..5]
 //! @endcode
 //!
-//! IntegerVector is copied through assignement :
+//! IntegerVector is copied through assignment:
 //! @code
 //!    math_IntegerVector V2( 1, 9);
 //!    ....
@@ -58,10 +58,10 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  //! contructs an IntegerVector in the range [Lower..Upper]
+  //! constructs an IntegerVector in the range [Lower..Upper]
   Standard_EXPORT math_IntegerVector(const Standard_Integer theFirst, const Standard_Integer theLast);
 
-  //! contructs an IntegerVector in the range [Lower..Upper]
+  //! constructs an IntegerVector in the range [Lower..Upper]
   //! with all the elements set to theInitialValue.
   Standard_EXPORT math_IntegerVector(const Standard_Integer theFirst, const Standard_Integer theLast, const Standard_Integer theInitialValue);
 
@@ -133,7 +133,7 @@ public:
   }
 
   //! returns the product of an IntegerVector by an integer value.
-  Standard_EXPORT Standard_NODISCARD math_IntegerVector Multiplied(const Standard_Integer theRight) const;
+  Standard_NODISCARD Standard_EXPORT math_IntegerVector Multiplied(const Standard_Integer theRight) const;
 
   Standard_NODISCARD math_IntegerVector operator*(const Standard_Integer theRight) const
   {
@@ -141,7 +141,7 @@ public:
   }
 
   //! returns the product of a vector and a real value.
-  Standard_EXPORT Standard_NODISCARD math_IntegerVector TMultiplied(const Standard_Integer theRight) const;
+  Standard_NODISCARD Standard_EXPORT math_IntegerVector TMultiplied(const Standard_Integer theRight) const;
 
   friend inline math_IntegerVector operator* (const Standard_Integer theLeft, const math_IntegerVector& theRight)
   {
@@ -161,7 +161,7 @@ public:
   //! adds the IntegerVector "theRight" to an IntegerVector.
   //! An exception is raised if the IntegerVectors have not the same length.
   //! An exception is raised if the lengths are not equal.
-  Standard_EXPORT Standard_NODISCARD math_IntegerVector Added(const math_IntegerVector& theRight) const;
+  Standard_NODISCARD Standard_EXPORT math_IntegerVector Added(const math_IntegerVector& theRight) const;
 
   Standard_NODISCARD math_IntegerVector operator+(const math_IntegerVector& theRight) const
   {
@@ -210,7 +210,7 @@ public:
 
   //! returns the inner product of 2 IntegerVectors.
   //! An exception is raised if the lengths are not equal.
-  Standard_EXPORT Standard_NODISCARD Standard_Integer Multiplied(const math_IntegerVector& theRight) const;
+  Standard_NODISCARD Standard_EXPORT Standard_Integer Multiplied(const math_IntegerVector& theRight) const;
 
   Standard_NODISCARD Standard_Integer operator*(const math_IntegerVector& theRight) const
   {
@@ -236,7 +236,7 @@ public:
 
   //! returns the subtraction of "theRight" from "me".
   //! An exception is raised if the IntegerVectors have not the same length.
-  Standard_EXPORT Standard_NODISCARD math_IntegerVector Subtracted(const math_IntegerVector& theRight) const;
+  Standard_NODISCARD Standard_EXPORT math_IntegerVector Subtracted(const math_IntegerVector& theRight) const;
 
   Standard_NODISCARD math_IntegerVector operator-(const math_IntegerVector& theRight) const
   {

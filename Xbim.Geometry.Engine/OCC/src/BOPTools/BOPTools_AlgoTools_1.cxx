@@ -14,8 +14,6 @@
 
 
 #include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_HCurve.hxx>
-#include <Adaptor3d_HCurveOnSurface.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BOPTools_Parallel.hxx>
 #include <BRep_Builder.hxx>
@@ -31,12 +29,12 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepLib_CheckCurveOnSurface.hxx>
+#include <BRepLib_ValidateEdge.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <Extrema_LocateExtPC.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2dAdaptor.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dAdaptor_HCurve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Plane.hxx>
@@ -44,8 +42,6 @@
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <GeomAdaptor_HCurve.hxx>
-#include <GeomAdaptor_HSurface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomProjLib.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
@@ -87,12 +83,6 @@ static
                              const TopoDS_Face& S,
                              const Standard_Real aMaxTol,
                              const TopTools_IndexedMapOfShape& aMapToAvoid);
-static 
-  Standard_Boolean Validate(const Adaptor3d_Curve& CRef,
-                            const Adaptor3d_Curve& Other,
-                            const Standard_Real Tol,
-                            const Standard_Boolean SameParameter,
-                            Standard_Real& aNewTolerance);
 
 static
   void CorrectVertexTolerance(const TopoDS_Edge& aE,
@@ -525,6 +515,7 @@ namespace {
   struct EdgeData {
     const TopoDS_Edge* Edge; // Edge
     Standard_Real VParameter; // Parameter of the vertex on the edge
+    Standard_Boolean IsClosed; // Closed flag of the edge
     Geom2dAdaptor_Curve GAdaptor; // 2D adaptor for PCurve of the edge on the face
     Standard_Real First; // First parameter in the range
     Standard_Real Last; // Last parameter in the rage
@@ -610,9 +601,9 @@ static
       continue;
     }
     //
-    if (Abs(aTint1 - aT1) > aHalfR1 ||
-        Abs(aTint2 - aT2) > aHalfR2) {
-      // intersection on the other end of the closed edge
+    if ((!theEData1.IsClosed && Abs (aTint1 - aT1) > aHalfR1) ||
+        (!theEData2.IsClosed && Abs (aTint2 - aT2) > aHalfR2)) {
+      // intersection is on the other end of the edge
       continue;
     }
     //
@@ -634,7 +625,7 @@ void CorrectWires(const TopoDS_Face& aFx,
                   const TopTools_IndexedMapOfShape& aMapToAvoid)
 {
   Standard_Integer i, aNbV;
-  Standard_Real aTol, aTol2, aD2, aD2max, aT1, aT2, aT;
+  Standard_Real aTol, aTol2, aD2, aD2max, aT1, aT2;
   gp_Pnt aP, aPV;
   gp_Pnt2d aP2D;
   TopoDS_Face aF;
@@ -644,11 +635,9 @@ void CorrectWires(const TopoDS_Face& aFx,
   aF=aFx;
   aF.Orientation(TopAbs_FORWARD);
   const Handle(Geom_Surface)& aS=BRep_Tool::Surface(aFx);
-  //
-  TopExp::MapShapesAndAncestors(aF, 
-                                TopAbs_VERTEX, 
-                                TopAbs_EDGE, 
-                                aMVE);
+
+  TopExp::MapShapesAndUniqueAncestors (aF, TopAbs_VERTEX, TopAbs_EDGE, aMVE, Standard_True);
+
   NCollection_DataMap<TopoDS_Shape, Standard_Real> aMapEdgeLen;
   aNbV=aMVE.Extent();
   for (i=1; i<=aNbV; ++i) {
@@ -666,7 +655,13 @@ void CorrectWires(const TopoDS_Face& aFx,
       const TopoDS_Edge& aE=*(TopoDS_Edge*)(&aIt.Value());
       const Handle(Geom2d_Curve)& aC2D=
         BRep_Tool::CurveOnSurface(aE, aF, aT1, aT2);
-      aT=BRep_Tool::Parameter(aV, aE);
+      Standard_Real aT = BRep_Tool::Parameter (aV, aE);
+      Standard_Boolean isClosed = Standard_False;
+      {
+        TopoDS_Vertex aV1, aV2;
+        TopExp::Vertices (aE, aV1, aV2);
+        isClosed = aV1.IsSame (aV2);
+      }
       //
       aC2D->D0(aT, aP2D);
       aS->D0(aP2D.X(), aP2D.Y(), aP);
@@ -674,7 +669,7 @@ void CorrectWires(const TopoDS_Face& aFx,
       if (aD2>aD2max) {
         aD2max=aD2;
       }
-      EdgeData anEData = {&aE, aT, Geom2dAdaptor_Curve(aC2D), aT1, aT2};
+      EdgeData anEData = {&aE, aT, isClosed, Geom2dAdaptor_Curve(aC2D), aT1, aT2};
       aLEPars.Append(anEData);
     }
     //
@@ -718,7 +713,7 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
   // 
   // 1. Minimum of conditions to Perform
   Handle (BRep_CurveRepresentation) myCref;
-  Handle (Adaptor3d_HCurve) myHCurve;
+  Handle (Adaptor3d_Curve) myHCurve;
 
   myCref.Nullify();
 
@@ -786,19 +781,19 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
           (myCref->Curve3D()->Transformed 
            (myCref->Location().Transformation()));
         GeomAdaptor_Curve GAC3d(C3dx, First, Last);
-        myHCurve = new GeomAdaptor_HCurve(GAC3d);
+        myHCurve = new GeomAdaptor_Curve(GAC3d);
       }
       else { // curve on surface
         Handle(Geom_Surface) Sref = myCref->Surface();
         Sref = Handle(Geom_Surface)::
           DownCast(Sref->Transformed(myCref->Location().Transformation()));
         const  Handle(Geom2d_Curve)& PCref = myCref->PCurve();
-        Handle(GeomAdaptor_HSurface) GAHSref = 
-          new GeomAdaptor_HSurface(Sref);
-        Handle(Geom2dAdaptor_HCurve) GHPCref = 
-          new Geom2dAdaptor_HCurve(PCref, First, Last);
+        Handle(GeomAdaptor_Surface) GAHSref = 
+          new GeomAdaptor_Surface(Sref);
+        Handle(Geom2dAdaptor_Curve) GHPCref = 
+          new Geom2dAdaptor_Curve(PCref, First, Last);
         Adaptor3d_CurveOnSurface ACSref(GHPCref,GAHSref);
-        myHCurve = new Adaptor3d_HCurveOnSurface(ACSref);
+        myHCurve = new Adaptor3d_CurveOnSurface(ACSref);
       }
     }
   }
@@ -808,7 +803,6 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
   {
     if (myCref.IsNull()) 
       return;
-    Standard_Boolean ok=Standard_True;;
 
     Handle(BRep_TEdge)& TE = *((Handle(BRep_TEdge)*)&myShape.TShape());
     Standard_Real Tol = BRep_Tool::Tolerance(TopoDS::Edge(myShape));
@@ -818,7 +812,6 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
     Standard_Boolean SameRange = TE->SameRange();
     Standard_Real First = myHCurve->FirstParameter();
     Standard_Real Last  = myHCurve->LastParameter();
-    Standard_Real Delta =1.e-12;
 
     Handle(BRep_TFace)& TF = *((Handle(BRep_TFace)*) &S.TShape());
     const TopLoc_Location& Floc = S.Location();
@@ -843,28 +836,34 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
         Sb = Handle(Geom_Surface)::
           DownCast (Su->Transformed(L.Transformation()));
         Handle(Geom2d_Curve) PC = cr->PCurve();
-        Handle(GeomAdaptor_HSurface) GAHS = 
-          new GeomAdaptor_HSurface(Sb);
-        Handle(Geom2dAdaptor_HCurve) GHPC = 
-          new Geom2dAdaptor_HCurve(PC,f,l);
-        Adaptor3d_CurveOnSurface ACS(GHPC,GAHS);
-        ok = Validate(myHCurve->Curve(), ACS, 
-                      Tol, SameParameter, aNewTol);
-        if (ok) {
+        Handle(GeomAdaptor_Surface) GAHS = 
+          new GeomAdaptor_Surface(Sb);
+        Handle(Geom2dAdaptor_Curve) GHPC = 
+          new Geom2dAdaptor_Curve(PC,f,l);
+        Handle(Adaptor3d_CurveOnSurface) ACS = new Adaptor3d_CurveOnSurface(GHPC,GAHS);
+
+        BRepLib_ValidateEdge aValidateEdge(myHCurve, ACS, SameParameter);
+        aValidateEdge.Process();
+        aValidateEdge.UpdateTolerance(aNewTol);
+        if (aValidateEdge.IsDone() && !aValidateEdge.CheckTolerance(Tol))
+        {
           if (aNewTol<aMaxTol) {
-            UpdateShape(myShape, aNewTol+Delta, aMapToAvoid);
+            UpdateShape(myShape, aNewTol, aMapToAvoid);
             CorrectVertexTolerance(myShape, aMapToAvoid);
           }
         }
         
         if (cr->IsCurveOnClosedSurface()) {
-          //checkclosed = Standard_True;
-          GHPC->ChangeCurve2d().Load(cr->PCurve2(),f,l); // same bounds
-          ACS.Load(GHPC, GAHS); // sans doute inutile
-          ok = Validate(myHCurve->Curve(),ACS,Tol,SameParameter, aNewTol);
-          if (ok) {
+          GHPC->Load(cr->PCurve2(),f,l); // same bounds
+          ACS->Load(GHPC, GAHS); // sans doute inutile
+
+          BRepLib_ValidateEdge aValidateEdgeOnClosedSurf(myHCurve, ACS, SameParameter);
+          aValidateEdgeOnClosedSurf.Process();
+          aValidateEdgeOnClosedSurf.UpdateTolerance(aNewTol);
+          if (aValidateEdgeOnClosedSurf.IsDone() && !aValidateEdgeOnClosedSurf.CheckTolerance(Tol))
+          {
             if (aNewTol<aMaxTol) {
-              UpdateShape(myShape, aNewTol+Delta, aMapToAvoid);
+              UpdateShape(myShape, aNewTol, aMapToAvoid);
               CorrectVertexTolerance(myShape, aMapToAvoid);
             } 
           }
@@ -892,35 +891,36 @@ void CorrectEdgeTolerance (const TopoDS_Edge& myShape,
         P = Handle(Geom_Plane)::
           DownCast(P->Transformed(L.Transformation()));
         //on projette Cref sur ce plan
-        Handle(GeomAdaptor_HSurface) GAHS = new GeomAdaptor_HSurface(P);
+        Handle(GeomAdaptor_Surface) GAHS = new GeomAdaptor_Surface(P);
         
-        // Dub - Normalement myHCurve est une GeomAdaptor_HCurve
-        GeomAdaptor_Curve& Gac = 
-          Handle(GeomAdaptor_HCurve)::DownCast(myHCurve)->ChangeCurve();
-        Handle(Geom_Curve) C3dx = Gac.Curve();
+        // Dub - Normalement myHCurve est une GeomAdaptor_Curve
+        Handle(GeomAdaptor_Curve) Gac = Handle(GeomAdaptor_Curve)::DownCast(myHCurve);
+        Handle(Geom_Curve) C3dx = Gac->Curve();
         Handle(Geom_Curve) ProjOnPlane = 
           GeomProjLib::ProjectOnPlane(new Geom_TrimmedCurve(C3dx,First,Last), 
                                        P, 
                                        P->Position().Direction(), 
                                        Standard_True);
         
-        Handle(GeomAdaptor_HCurve) aHCurve = 
-          new GeomAdaptor_HCurve(ProjOnPlane);
+        Handle(GeomAdaptor_Curve) aHCurve = 
+          new GeomAdaptor_Curve(ProjOnPlane);
         
         ProjLib_ProjectedCurve proj(GAHS,aHCurve);
         Handle(Geom2d_Curve) PC = Geom2dAdaptor::MakeCurve(proj);
-        Handle(Geom2dAdaptor_HCurve) GHPC = 
-          new Geom2dAdaptor_HCurve(PC, 
+        Handle(Geom2dAdaptor_Curve) GHPC = 
+          new Geom2dAdaptor_Curve(PC, 
                                    myHCurve->FirstParameter(), 
                                    myHCurve->LastParameter());
         
-        Adaptor3d_CurveOnSurface ACS(GHPC,GAHS);
+        Handle(Adaptor3d_CurveOnSurface) ACS = new Adaptor3d_CurveOnSurface(GHPC,GAHS);
         
-        Standard_Boolean okx = Validate(myHCurve->Curve(),ACS,
-                                        Tol,Standard_True, aNewTol); 
-        if (okx) {
+        BRepLib_ValidateEdge aValidateProjEdge(myHCurve, ACS, Standard_True);
+        aValidateProjEdge.Process();
+        aValidateProjEdge.UpdateTolerance(aNewTol);
+        if (aValidateProjEdge.IsDone() && !aValidateProjEdge.CheckTolerance(Tol))
+        {
           if (aNewTol<aMaxTol) {
-            UpdateShape(myShape, aNewTol+Delta, aMapToAvoid);
+            UpdateShape(myShape, aNewTol, aMapToAvoid);
             CorrectVertexTolerance(myShape, aMapToAvoid);
           }
         }
@@ -947,120 +947,6 @@ void CorrectVertexTolerance(const TopoDS_Edge& aE,
       UpdateShape(aV, aTolE, aMapToAvoid);
     }
   }
-}
-//=======================================================================
-//function : Validate
-//purpose  : 
-//=======================================================================
-Standard_Boolean Validate(const Adaptor3d_Curve& CRef,
-                          const Adaptor3d_Curve& Other,
-                          const Standard_Real Tol,
-                          const Standard_Boolean SameParameter,
-                          Standard_Real& aNewTolerance)
-{
-  Standard_Real First, Last, MaxDistance, aD, Tol2;
-
-  First = CRef.FirstParameter();
-  Last  = CRef.LastParameter();
-  MaxDistance = 0.;
-  Tol2 = Tol*Tol;
-  //
-  Standard_Integer NCONTROL=23;
-  Standard_Integer i, aNC1=NCONTROL-1;
-
-  Standard_Boolean aFlag=Standard_False;
-  Standard_Boolean proj = (!SameParameter || 
-                           First != Other.FirstParameter() ||
-                           Last  != Other.LastParameter());
-  //
-  // 1. 
-  if (!proj) {
-    for (i = 0; i < NCONTROL; i++) {
-      Standard_Real prm = ((aNC1-i)*First + i*Last)/aNC1;
-      gp_Pnt pref   = CRef.Value(prm);
-      gp_Pnt pother = Other.Value(prm);
-      
-      aD=pref.SquareDistance(pother);
-
-      if (aD > Tol2) {
-        if (aD>MaxDistance) {
-          MaxDistance=aD;
-        }
-        aFlag=Standard_True;
-      }
-    }
-
-    if (aFlag) {
-      aNewTolerance=sqrt(MaxDistance);
-    }
-    return aFlag;
-  }
-  
-  //
-  // 2.
-  else {
-    Extrema_LocateExtPC refd,otherd;
-    Standard_Real OFirst, OLast;
-    OFirst = Other.FirstParameter();
-    OLast  = Other.LastParameter();
-    
-    gp_Pnt pd  = CRef.Value(First);
-    gp_Pnt pdo = Other.Value(OFirst);
-    
-    aD = pd.SquareDistance(pdo);
-    if (aD > Tol2) {
-      if (aD>MaxDistance) {
-        MaxDistance=aD;
-      }
-      aFlag=Standard_True;
-    }
-
-    pd  = CRef.Value(Last);
-    pdo = Other.Value(OLast);
-    aD = pd.SquareDistance(pdo);
-    if (aD > Tol2 && aD > MaxDistance) {
-      MaxDistance=aD;
-      aFlag=Standard_True;
-    }
-
-    refd.Initialize(CRef, First, Last, CRef.Resolution(Tol));
-    otherd.Initialize(Other, OFirst, OLast, Other.Resolution(Tol));
-    
-    for (i = 2; i< aNC1; i++) {
-      Standard_Real rprm = ((aNC1-i)*First + i*Last)/aNC1;
-      gp_Pnt pref = CRef.Value(rprm);
-
-      Standard_Real oprm = ((aNC1-i)*OFirst + i*OLast)/aNC1;
-      gp_Pnt pother = Other.Value(oprm);
-
-      refd.Perform(pother,rprm);
-      if (!refd.IsDone() || refd.SquareDistance() > Tol2) {
-        if (refd.IsDone()) {
-          aD=refd.SquareDistance();
-          if (aD > Tol2 && aD>MaxDistance) {
-            aFlag=Standard_True;
-            MaxDistance=aD;
-          }
-        }
-      }
-
-      otherd.Perform(pref,oprm);
-      if (!otherd.IsDone() || otherd.SquareDistance() > Tol2) {
-        
-        if (otherd.IsDone()) {
-          aD=otherd.SquareDistance();
-          if (aD > Tol2 && aD>MaxDistance) {
-            aFlag=Standard_True;
-            MaxDistance=aD;
-          }
-        }
-      }
-    }
-  }
-  
-  aD=sqrt (MaxDistance);
-  aNewTolerance=aD;
-  return aFlag;
 }
 //=======================================================================
 // Function : UpdateEdges

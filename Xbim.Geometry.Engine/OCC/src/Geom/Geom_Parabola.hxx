@@ -24,8 +24,6 @@
 #include <Geom_Conic.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
-class Standard_RangeError;
 class gp_Parab;
 class gp_Ax2;
 class gp_Ax1;
@@ -222,6 +220,9 @@ public:
   
   //! Creates a new object which is a copy of this parabola.
   Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
+
+  //! Dumps the content of me into the stream
+  Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
 
 

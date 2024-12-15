@@ -104,7 +104,7 @@ const Convert_ConicToBSplineCurve&  Convert
 
    gp_Ax22d Axis = TheConic->Position();
    if ( ( Axis.XDirection() ^ Axis.YDirection()) < 0.) {
-     // Then the axis is left-handed, apply a symetry to the curve.
+     // Then the axis is left-handed, apply a symmetry to the curve.
      gp_Trsf2d Sym;
      Sym.SetMirror(gp::OX2d());
      TheCurve->Transform(Sym);
@@ -1480,7 +1480,7 @@ void Geom2dConvert::C0BSplineToC1BSplineCurve(Handle(Geom2d_BSplineCurve)& BS,
    BS->D1(BS->FirstParameter(),point1,V1);  //a verifier
    BS->D1(BS->LastParameter(),point2,V2);
 
-   if ((point1.SquareDistance(point2) < tolerance) &&
+   if ((point1.SquareDistance(point2) < tolerance * tolerance) &&
        (V1.IsParallel(V2, anAngularToler)))
    {
      closed_flag = Standard_True;

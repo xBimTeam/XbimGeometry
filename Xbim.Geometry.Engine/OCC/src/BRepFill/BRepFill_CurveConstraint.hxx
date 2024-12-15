@@ -23,10 +23,6 @@
 #include <GeomPlate_CurveConstraint.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
-class Standard_ConstructionError;
-class Adaptor3d_HCurveOnSurface;
-class Adaptor3d_HCurve;
-
 
 class BRepFill_CurveConstraint;
 DEFINE_STANDARD_HANDLE(BRepFill_CurveConstraint, GeomPlate_CurveConstraint)
@@ -48,9 +44,9 @@ public:
   //! TolAng is the maximum error to satisfy for G1 constraints
   //! TolCurv is the maximum error to satisfy for G2 constraints
   //! These errors can be replaced by laws of criterion.
-  Standard_EXPORT BRepFill_CurveConstraint(const Handle(Adaptor3d_HCurveOnSurface)& Boundary, const Standard_Integer Order, const Standard_Integer NPt = 10, const Standard_Real TolDist = 0.0001, const Standard_Real TolAng = 0.01, const Standard_Real TolCurv = 0.1);
+  Standard_EXPORT BRepFill_CurveConstraint(const Handle(Adaptor3d_CurveOnSurface)& Boundary, const Standard_Integer Order, const Standard_Integer NPt = 10, const Standard_Real TolDist = 0.0001, const Standard_Real TolAng = 0.01, const Standard_Real TolCurv = 0.1);
   
-  Standard_EXPORT BRepFill_CurveConstraint(const Handle(Adaptor3d_HCurve)& Boundary, const Standard_Integer Tang, const Standard_Integer NPt = 10, const Standard_Real TolDist = 0.0001);
+  Standard_EXPORT BRepFill_CurveConstraint(const Handle(Adaptor3d_Curve)& Boundary, const Standard_Integer Tang, const Standard_Integer NPt = 10, const Standard_Real TolDist = 0.0001);
 
 
 

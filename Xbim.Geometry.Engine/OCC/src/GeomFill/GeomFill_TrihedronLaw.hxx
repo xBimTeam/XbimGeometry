@@ -17,19 +17,11 @@
 #ifndef _GeomFill_TrihedronLaw_HeaderFile
 #define _GeomFill_TrihedronLaw_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
-#include <Standard_Transient.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <GeomFill_PipeError.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Adaptor3d_HCurve;
-class Standard_OutOfRange;
-class Standard_NotImplemented;
+
 class gp_Vec;
 
 
@@ -43,7 +35,7 @@ class GeomFill_TrihedronLaw : public Standard_Transient
 public:
 
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_HCurve)& C);
+  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C);
   
   Standard_EXPORT virtual Handle(GeomFill_TrihedronLaw) Copy() const = 0;
   
@@ -56,12 +48,12 @@ public:
   
   //! compute Triedrhon and  derivative Trihedron  on curve
   //! at parameter <Param>
-  //! Warning : It used only for C1 or C2 aproximation
+  //! Warning : It used only for C1 or C2 approximation
   Standard_EXPORT virtual Standard_Boolean D1 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& BiNormal, gp_Vec& DBiNormal);
   
   //! compute  Trihedron on curve
   //! first and seconde  derivatives.
-  //! Warning : It used only for C2 aproximation
+  //! Warning : It used only for C2 approximation
   Standard_EXPORT virtual Standard_Boolean D2 (const Standard_Real Param, gp_Vec& Tangent, gp_Vec& DTangent, gp_Vec& D2Tangent, gp_Vec& Normal, gp_Vec& DNormal, gp_Vec& D2Normal, gp_Vec& BiNormal, gp_Vec& DBiNormal, gp_Vec& D2BiNormal);
   
   //! Returns  the number  of  intervals for  continuity
@@ -72,7 +64,7 @@ public:
   //! Stores in <T> the  parameters bounding the intervals
   //! of continuity <S>.
   //!
-  //! The array must provide  enough room to  accomodate
+  //! The array must provide  enough room to  accommodate
   //! for the parameters. i.e. T.Length() > NbIntervals()
   Standard_EXPORT virtual void Intervals (TColStd_Array1OfReal& T, const GeomAbs_Shape S) const = 0;
   
@@ -94,7 +86,7 @@ public:
   Standard_EXPORT virtual Standard_Boolean IsConstant() const;
   
   //! Say if the law is defined, only by the 3d Geometry of
-  //! the setted Curve
+  //! the set Curve
   //! Return False by Default.
   Standard_EXPORT virtual Standard_Boolean IsOnlyBy3dCurve() const;
 
@@ -106,8 +98,8 @@ public:
 protected:
 
 
-  Handle(Adaptor3d_HCurve) myCurve;
-  Handle(Adaptor3d_HCurve) myTrimmed;
+  Handle(Adaptor3d_Curve) myCurve;
+  Handle(Adaptor3d_Curve) myTrimmed;
 
 
 private:

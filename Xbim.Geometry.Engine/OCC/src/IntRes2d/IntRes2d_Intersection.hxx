@@ -26,8 +26,6 @@
 #include <IntRes2d_SequenceOfIntersectionSegment.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
 class IntRes2d_IntersectionPoint;
 class IntRes2d_IntersectionSegment;
 
@@ -87,6 +85,16 @@ protected:
   
     IntRes2d_Intersection(const IntRes2d_Intersection& Other);
 
+    //! Assignment
+    IntRes2d_Intersection& operator= (const IntRes2d_Intersection& theOther)
+    {
+      done = theOther.done;
+      reverse = theOther.reverse;
+      lpnt = theOther.lpnt;
+      lseg = theOther.lseg;
+      return *this;
+    }
+
   //! Destructor is protected, for safe inheritance
   ~IntRes2d_Intersection () {}
   
@@ -104,18 +112,12 @@ protected:
   
     Standard_Boolean ReversedParameters() const;
 
+protected:
 
-  Standard_Boolean done;
-
-
-private:
-
-
-
-  Standard_Boolean reverse;
   IntRes2d_SequenceOfIntersectionPoint lpnt;
   IntRes2d_SequenceOfIntersectionSegment lseg;
-
+  Standard_Boolean done;
+  Standard_Boolean reverse;
 
 };
 

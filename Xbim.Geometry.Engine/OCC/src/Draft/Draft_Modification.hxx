@@ -33,11 +33,6 @@
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TopAbs_Orientation.hxx>
-class StdFail_NotDone;
-class Standard_NoSuchObject;
-class Standard_ConstructionError;
-class TopoDS_Shape;
-class TopoDS_Face;
 class gp_Dir;
 class gp_Pln;
 class Geom_Surface;
@@ -87,7 +82,7 @@ public:
   //! be given by ProblematicShape
   Standard_EXPORT void Perform();
   
-  //! Returns  True  if   Perform has  been  succesfully
+  //! Returns  True  if   Perform has  been  successfully
   //! called. Otherwise more information can be obtained
   //! using the methods Error() and ProblematicShape().
   Standard_EXPORT Standard_Boolean IsDone() const;
@@ -95,7 +90,7 @@ public:
   Standard_EXPORT Draft_ErrorStatus Error() const;
   
   //! Returns the shape (Face,  Edge or Vertex) on which
-  //! an error occured.
+  //! an error occurred.
   Standard_EXPORT const TopoDS_Shape& ProblematicShape() const;
   
   //! Returns all  the  faces   which  have been   added
@@ -145,7 +140,7 @@ public:
   //! <Tol> are not significant.
   //!
   //! <NewE> is the new  edge created from  <E>.  <NewF>
-  //! is the new face created from <F>. They may be usefull.
+  //! is the new face created from <F>. They may be useful.
   Standard_EXPORT Standard_Boolean NewCurve2d (const TopoDS_Edge& E, const TopoDS_Face& F, const TopoDS_Edge& NewE, const TopoDS_Face& NewF, Handle(Geom2d_Curve)& C, Standard_Real& Tol) Standard_OVERRIDE;
   
   //! Returns Standard_True if the Vertex  <V> has a new

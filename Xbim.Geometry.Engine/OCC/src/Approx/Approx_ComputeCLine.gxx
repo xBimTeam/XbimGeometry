@@ -54,7 +54,11 @@ const AppParCurves_Constraint LastC)
   mylastC = LastC;
   myMaxSegments = MAXSEGM;
   myInvOrder = Standard_True;
+  myHangChecking = Standard_True;
   alldone = Standard_False;
+  tolreached = Standard_False;
+  currenttol3d = 0.0;
+  currenttol2d = 0.0;
   Perform(Line);
 }
 
@@ -82,6 +86,10 @@ const AppParCurves_Constraint LastC)
   mylastC = LastC;
   myMaxSegments = MAXSEGM;
   myInvOrder = Standard_True;
+  myHangChecking = Standard_True;
+  tolreached = Standard_False;
+  currenttol3d = 0.0;
+  currenttol2d = 0.0;
 }
 
 //=======================================================================
@@ -97,12 +105,20 @@ void Approx_ComputeCLine::Perform(const MultiLine& Line)
   Standard_Real thetol3d = Precision::Confusion(), thetol2d = Precision::Confusion();
   UFirst = Line.FirstParameter();
   ULast = Line.LastParameter();
-  Standard_Real TolU = Max((ULast - UFirst)*1.e-03, Precision::Confusion());
+  Standard_Real TolU = 0.;
+  if (myHangChecking)
+  {
+    TolU = Max((ULast - UFirst)*1.e-03, Precision::Confusion());
+  }
+  else
+  {
+    TolU = Max((ULast - UFirst)*1.e-05, Precision::PApproximation());
+  }
   Standard_Real myfirstU = UFirst;
   Standard_Real mylastU = ULast;
   Standard_Integer aMaxSegments = 0;
   Standard_Integer aMaxSegments1 = myMaxSegments - 1;
-  Standard_Integer aNbCut = 0, aNbImp = 0, aNbComp = 5;
+  Standard_Integer aNbCut = 0, aNbImp = 0, aNbComp = 10;
 
   if (!mycut)
   {
@@ -150,7 +166,7 @@ void Approx_ComputeCLine::Perform(const MultiLine& Line)
         }
         else
         {
-          // keep best decison
+          // keep best decision
           if ((thetol3d + thetol2d) < (KeptT3d + KeptT2d))
           {
             KeptMultiCurve = TheMultiCurve;
@@ -176,12 +192,14 @@ void Approx_ComputeCLine::Perform(const MultiLine& Line)
 
       //cout << myfirstU << " - " << mylastU << "  tol : " << thetol3d << " " << thetol2d << endl;
       Standard_Boolean aStopCutting = Standard_False;
-      if (aNbCut >= aNbComp)
+      if (myHangChecking && aNbCut >= aNbComp)
       {
-        if (aNbCut > aNbImp)
+        if (aNbCut > aNbImp + 1)
         {
           aStopCutting = Standard_True;
         }
+        aNbCut = 0;
+        aNbImp = 0;
       }
       // is new decision better?
       if (!Ok && (Abs(myfirstU - mylastU) <= TolU || aMaxSegments >= aMaxSegments1 || aStopCutting ))
@@ -430,6 +448,15 @@ void Approx_ComputeCLine::SetMaxSegments(const Standard_Integer theMaxSegments)
 void Approx_ComputeCLine::SetInvOrder(const Standard_Boolean theInvOrder)
 {
   myInvOrder = theInvOrder;
+}
+
+//=======================================================================
+//function : SetHangChecking
+//purpose  : 
+//=======================================================================
+void Approx_ComputeCLine::SetHangChecking(const Standard_Boolean theHangChecking)
+{
+  myHangChecking = theHangChecking;
 }
 
 //=======================================================================

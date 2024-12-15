@@ -41,13 +41,9 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 
-#include <Message_ProgressIndicator.hxx>
+#include <Message_ProgressRange.hxx>
 
 class BRepTools_ReShape;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Shape;
-class Message_ProgressIndicator;
 class TopoDS_Edge;
 class TopoDS_Face;
 class Geom_Surface;
@@ -61,10 +57,10 @@ DEFINE_STANDARD_HANDLE(BRepBuilderAPI_Sewing, Standard_Transient)
 
 //! Provides methods to
 //!
-//! - identify possible contigous boundaries (for control
+//! - identify possible contiguous boundaries (for control
 //! afterwards (of continuity: C0, C1, ...))
 //!
-//! - assemble contigous shapes into one shape.
+//! - assemble contiguous shapes into one shape.
 //! Only manifold shapes will be found. Sewing will not
 //! be done in case of multiple edges.
 //!
@@ -105,8 +101,8 @@ public:
   Standard_EXPORT void Add (const TopoDS_Shape& shape);
   
   //! Computing
-  //! thePI - progress indicator of algorithm
-  Standard_EXPORT void Perform (const Handle(Message_ProgressIndicator)& thePI = 0);
+  //! theProgress - progress indicator of algorithm
+  Standard_EXPORT void Perform (const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   //! Gives the sewed shape
   //! a null shape if nothing constructed
@@ -132,13 +128,13 @@ public:
   //! Gives each multiple edge
   Standard_EXPORT const TopoDS_Edge& MultipleEdge (const Standard_Integer index) const;
   
-  //! Gives the number of contigous edges (edge shared by two faces)
+  //! Gives the number of contiguous edges (edge shared by two faces)
   Standard_EXPORT Standard_Integer NbContigousEdges() const;
   
-  //! Gives each contigous edge
+  //! Gives each contiguous edge
   Standard_EXPORT const TopoDS_Edge& ContigousEdge (const Standard_Integer index) const;
   
-  //! Gives the sections (edge) belonging to a contigous edge
+  //! Gives the sections (edge) belonging to a contiguous edge
   Standard_EXPORT const TopTools_ListOfShape& ContigousEdgeCouple (const Standard_Integer index) const;
   
   //! Indicates if a section is bound (before use SectionToBoundary)
@@ -172,7 +168,7 @@ public:
   //! Gives a modifieded subshape
   Standard_EXPORT TopoDS_Shape ModifiedSubShape (const TopoDS_Shape& shape) const;
   
-  //! print the informations
+  //! print the information
   Standard_EXPORT void Dump() const;
   
   //! Gives the number of deleted faces (faces smallest than tolerance)
@@ -236,7 +232,7 @@ public:
   
   //! Gets mode for non-manifold sewing.
   //!
-  //! INTERNAL FUCTIONS ---
+  //! INTERNAL FUNCTIONS ---
     Standard_Boolean NonManifoldMode() const;
 
 
@@ -248,10 +244,10 @@ protected:
 
   
   //! Performs cutting of sections
-  //! thePI - progress indicator of processing
-  Standard_EXPORT void Cutting (const Handle(Message_ProgressIndicator)& thePI = 0);
+  //! theProgress - progress indicator of processing
+  Standard_EXPORT void Cutting (const Message_ProgressRange& theProgress = Message_ProgressRange());
   
-  Standard_EXPORT void Merging (const Standard_Boolean passage, const Handle(Message_ProgressIndicator)& thePI = 0);
+  Standard_EXPORT void Merging (const Standard_Boolean passage, const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   Standard_EXPORT Standard_Boolean IsMergedClosed (const TopoDS_Edge& Edge1, const TopoDS_Edge& Edge2, const TopoDS_Face& fase) const;
   
@@ -262,10 +258,10 @@ protected:
   //! Merged nearest edges.
   Standard_EXPORT Standard_Boolean MergedNearestEdges (const TopoDS_Shape& edge, TopTools_SequenceOfShape& SeqMergedEdge, TColStd_SequenceOfBoolean& SeqMergedOri);
   
-  Standard_EXPORT void EdgeProcessing (const Handle(Message_ProgressIndicator)& thePI = 0);
+  Standard_EXPORT void EdgeProcessing (const Message_ProgressRange& theProgress = Message_ProgressRange());
 
   //! Recompute regularity on merged edges
-  Standard_EXPORT void EdgeRegularity (const Handle(Message_ProgressIndicator)& thePI = 0);
+  Standard_EXPORT void EdgeRegularity (const Message_ProgressRange& theProgress = Message_ProgressRange());
   
   Standard_EXPORT void CreateOutputInformations();
   
@@ -277,8 +273,8 @@ protected:
   
 
   //! This method is called from Perform only
-  //! thePI - progress indicator of processing
-  Standard_EXPORT virtual void FaceAnalysis (const Handle(Message_ProgressIndicator)& thePI = 0);
+  //! theProgress - progress indicator of processing
+  Standard_EXPORT virtual void FaceAnalysis (const Message_ProgressRange& theProgress = Message_ProgressRange());
   
 
   //! This method is called from Perform only
@@ -286,8 +282,8 @@ protected:
   
 
   //! This method is called from Perform only
-  //! thePI - progress indicator of processing
-  Standard_EXPORT virtual void VerticesAssembling (const Handle(Message_ProgressIndicator)& thePI = 0);
+  //! theProgress - progress indicator of processing
+  Standard_EXPORT virtual void VerticesAssembling (const Message_ProgressRange& theProgress = Message_ProgressRange());
   
 
   //! This method is called from Perform only

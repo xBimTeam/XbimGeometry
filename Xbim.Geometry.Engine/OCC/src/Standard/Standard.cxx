@@ -30,7 +30,7 @@
 
 #if defined(_MSC_VER) || defined(__ANDROID__) || defined(__QNX__)
   #include <malloc.h>
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1)) && (defined(__i386) || defined(__x86_64)))
   #include <mm_malloc.h>
 #else
   extern "C" int posix_memalign (void** thePtr, size_t theAlign, size_t theSize);
@@ -101,14 +101,14 @@ Standard_MMgrFactory::Standard_MMgrFactory()
   aVar = getenv ("MMGT_OPT");
   Standard_Integer anAllocId   = (aVar ?  atoi (aVar): OCCT_MMGT_OPT_DEFAULT);
 
-#if defined(_WIN32) && !defined(_WIN64) && !defined(__MINGW32__)
-  static const DWORD _SSE2_FEATURE_BIT(0x04000000);
-  if ( anAllocId == 2 )
+#if defined(HAVE_TBB) && defined(_M_IX86)
+  if (anAllocId == 2)
   {
-    // CR25396: Check if SSE2 instructions are supported, if not then use MMgrRaw
-    // instead of MMgrTBBalloc. It is to avoid runtime crash when running on a 
-    // CPU that supports SSE but does not support SSE2 (some modifications of
-    // AMD Sempron).
+    // CR25396: Check if SSE2 instructions are supported on 32-bit x86 processor on Windows platform,
+    // if not then use MMgrRaw instead of MMgrTBBalloc.
+    // It is to avoid runtime crash when running on a CPU
+    // that supports SSE but does not support SSE2 (some modifications of AMD Sempron).
+    static const DWORD _SSE2_FEATURE_BIT(0x04000000);
     DWORD volatile dwFeature;
     _asm
     {
@@ -208,7 +208,7 @@ Standard_MMgrFactory::~Standard_MMgrFactory()
 // WNT MSVC++) to put destructing function in code segment that is called
 // after destructors of other (even static) objects. However, this is not 
 // done by the moment since it is compiler-dependent and there is no guarantee 
-// thatsome other object calling memory manager is not placed also in that segment...
+// that some other object calling memory manager is not placed also in that segment...
 //
 // Note that C runtime function atexit() could not help in this problem 
 // since its behaviour is the same as for destructors of static objects 
@@ -283,7 +283,7 @@ Standard_Address Standard::AllocateAligned (const Standard_Size theSize,
   return _aligned_malloc (theSize, theAlign);
 #elif defined(__ANDROID__) || defined(__QNX__)
   return memalign (theAlign, theSize);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1)) && (defined(__i386) || defined(__x86_64)))
   return _mm_malloc (theSize, theAlign);
 #else
   void* aPtr;
@@ -306,7 +306,7 @@ void Standard::FreeAligned (Standard_Address thePtrAligned)
   _aligned_free (thePtrAligned);
 #elif defined(__ANDROID__) || defined(__QNX__)
   free (thePtrAligned);
-#elif (defined(__GNUC__) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 1 && (defined(__i386) || defined(__x86_64)))
+#elif (defined(__GNUC__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 1)) && (defined(__i386) || defined(__x86_64)))
   _mm_free (thePtrAligned);
 #else
   free (thePtrAligned);

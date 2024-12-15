@@ -505,31 +505,33 @@ void Geom_BezierSurface::ExchangeUV ()
   Standard_Integer LR = poles->LowerRow();
   Standard_Integer UR = poles->UpperRow();
 
-  Handle(TColgp_HArray2OfPnt) npoles = 
-    new TColgp_HArray2OfPnt (LC, UC, LR, UR);
-  Handle(TColStd_HArray2OfReal) nweights =
-    new TColStd_HArray2OfReal (LC, UC, LR, UR);
-
-  const TColgp_Array2OfPnt   & spoles   = poles->Array2();
-  const TColStd_Array2OfReal & sweights = weights->Array2();
-
-  TColgp_Array2OfPnt&   snpoles   = npoles->ChangeArray2();
-  TColStd_Array2OfReal& snweights = nweights->ChangeArray2();
- 
-  Standard_Integer i, j;
-  for (i = LC; i <= UC; i++) {
-    for (j = LR; j <= UR; j++) {
-      snpoles   (i,j) = spoles   (j,i);
-      snweights (i,j) = sweights (j,i);
-    }
+  Handle(TColgp_HArray2OfPnt) npoles = new TColgp_HArray2OfPnt (LC, UC, LR, UR);
+  Handle(TColStd_HArray2OfReal) nweights;
+  if (!weights.IsNull())
+  {
+    nweights = new TColStd_HArray2OfReal (LC, UC, LR, UR);
   }
 
+  const TColgp_Array2OfPnt& spoles = poles->Array2();
+  const TColStd_Array2OfReal* sweights = !weights.IsNull() ? &weights->Array2() : NULL;
+
+  TColgp_Array2OfPnt& snpoles = npoles->ChangeArray2();
+  TColStd_Array2OfReal* snweights = !nweights.IsNull() ? &nweights->ChangeArray2() : NULL;
+  for (Standard_Integer i = LC; i <= UC; i++)
+  {
+    for (Standard_Integer j = LR; j <= UR; j++)
+    {
+      snpoles (i, j) = spoles (j, i);
+      if (snweights != NULL)
+      {
+        snweights->ChangeValue (i, j) = sweights->Value (j, i);
+      }
+    }
+  }
   poles   = npoles;
   weights = nweights;
 
-  Standard_Boolean temp = urational;
-  urational = vrational;
-  vrational = temp;
+  std::swap (urational, vrational);
 }
 
 //=======================================================================
@@ -1385,14 +1387,14 @@ void Geom_BezierSurface::D0 (const Standard_Real U,
 			     const Standard_Real V,
 			           gp_Pnt&       P ) const
 {
-  Standard_Real array_u[2];
-  Standard_Real array_v[2];
-  Standard_Integer mult_u[2];
-  Standard_Integer mult_v[2];
-  TColStd_Array1OfReal biduknots(array_u[0], 1, 2); biduknots(1) = 0.; biduknots(2) = 1.;
-  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2); bidumults.Init(UDegree() + 1);
-  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2); bidvknots(1) = 0.; bidvknots(2) = 1.;
-  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2); bidvmults.Init(VDegree() + 1);
+  Standard_Real array_u[2] = { 0.0, 1.0 };
+  Standard_Real array_v[2] = { 0.0, 1.0 };
+  Standard_Integer mult_u[2] = { UDegree() + 1, UDegree() + 1 };
+  Standard_Integer mult_v[2] = { VDegree() + 1, VDegree() + 1 };
+  TColStd_Array1OfReal biduknots(array_u[0], 1, 2);
+  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2);
+  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2);
+  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2);
   if (urational || vrational) {
     BSplSLib::D0(U, V, 1, 1, poles->Array2(),
       &weights->Array2(),
@@ -1424,14 +1426,14 @@ void Geom_BezierSurface::D1
          gp_Vec&       D1U,
          gp_Vec&       D1V ) const
 {
-  Standard_Real array_u[2];
-  Standard_Real array_v[2];
-  Standard_Integer mult_u[2];
-  Standard_Integer mult_v[2];
-  TColStd_Array1OfReal biduknots(array_u[0], 1, 2); biduknots(1) = 0.; biduknots(2) = 1.;
-  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2); bidumults.Init(UDegree() + 1);
-  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2); bidvknots(1) = 0.; bidvknots(2) = 1.;
-  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2); bidvmults.Init(VDegree() + 1);
+  Standard_Real array_u[2] = { 0.0, 1.0 };
+  Standard_Real array_v[2] = { 0.0, 1.0 };
+  Standard_Integer mult_u[2] = { UDegree() + 1, UDegree() + 1 };
+  Standard_Integer mult_v[2] = { VDegree() + 1, VDegree() + 1 };
+  TColStd_Array1OfReal biduknots(array_u[0], 1, 2);
+  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2);
+  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2);
+  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2);
   if (urational || vrational) {
     BSplSLib::D1(U, V, 1, 1, poles->Array2(),
       &weights->Array2(),
@@ -1462,14 +1464,14 @@ void Geom_BezierSurface::D2
          gp_Vec&       D1U, gp_Vec& D1V, 
          gp_Vec&       D2U, gp_Vec& D2V, gp_Vec& D2UV ) const
 {
-  Standard_Real array_u[2];
-  Standard_Real array_v[2];
-  Standard_Integer mult_u[2];
-  Standard_Integer mult_v[2];
-  TColStd_Array1OfReal biduknots(array_u[0], 1, 2); biduknots(1) = 0.; biduknots(2) = 1.;
-  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2); bidumults.Init(UDegree() + 1);
-  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2); bidvknots(1) = 0.; bidvknots(2) = 1.;
-  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2); bidvmults.Init(VDegree() + 1);
+  Standard_Real array_u[2] = { 0.0, 1.0 };
+  Standard_Real array_v[2] = { 0.0, 1.0 };
+  Standard_Integer mult_u[2] = { UDegree() + 1, UDegree() + 1 };
+  Standard_Integer mult_v[2] = { VDegree() + 1, VDegree() + 1 };
+  TColStd_Array1OfReal biduknots(array_u[0], 1, 2);
+  TColStd_Array1OfInteger bidumults(mult_u[0], 1, 2);
+  TColStd_Array1OfReal bidvknots(array_v[0], 1, 2);
+  TColStd_Array1OfInteger bidvmults(mult_v[0], 1, 2);
   if (urational || vrational) {
     //-- ATTENTION a l'ORDRE d'appel ds BSPLSLIB 
     BSplSLib::D2(U, V, 1, 1, poles->Array2(),
@@ -1937,3 +1939,23 @@ void Geom_BezierSurface::Init
     weights.Nullify();
 }
 
+//=======================================================================
+//function : DumpJson
+//purpose  : 
+//=======================================================================
+void Geom_BezierSurface::DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth) const
+{
+  OCCT_DUMP_TRANSIENT_CLASS_BEGIN (theOStream)
+
+  OCCT_DUMP_BASE_CLASS (theOStream, theDepth, Geom_BoundedSurface)
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, urational)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vrational)
+  if (!poles.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, poles->Size())
+  if (!weights.IsNull())
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, weights->Size())
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, umaxderivinv)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, vmaxderivinv)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, maxderivinvok)
+}

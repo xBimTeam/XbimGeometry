@@ -53,10 +53,6 @@ public:
   //! taking account the orientation of Edge.
   Standard_EXPORT static void EdgeVertices (const TopoDS_Edge& E, TopoDS_Vertex& V1, TopoDS_Vertex& V2);
   
-  //! returns the cumul  of the orientation  of <Edge>
-  //! and thc containing wire in <Face>
-  Standard_EXPORT static TopAbs_Orientation OriEdgeInFace (const TopoDS_Edge& E, const TopoDS_Face& F);
-  
   //! <E> is a section  between <F1> and <F2>.  Computes
   //! <O1> the orientation of <E> in <F1> influenced by <F2>.
   //! idem for <O2>.
@@ -91,9 +87,10 @@ public:
                                        const TopoDS_Face& F2,
                                        TopTools_ListOfShape& LInt1,
                                        TopTools_ListOfShape& LInt2,
-                                       const TopAbs_State Side,
-                                       const TopoDS_Edge& RefEdge,
-                                       const Standard_Boolean IsRefEdgeDefined = Standard_False);
+                                       const TopAbs_State    Side,
+                                       const TopoDS_Edge&    RefEdge,
+                                       const TopoDS_Face&    RefFace1,
+                                       const TopoDS_Face&    RefFace2);
   
   //! Find if the edges <Edges> of the face <F2> are on
   //! the face <F1>.
@@ -187,8 +184,8 @@ public:
   //! 1 - Remove all the free boundary  and the faces
   //! connex to such edges.
   //! 2 - Remove all the shapes not  valid in the result
-  //! (according to the side of offseting)
-  //! in this verion only the first point is implemented.
+  //! (according to the side of offsetting)
+  //! in this version only the first point is implemented.
   Standard_EXPORT static TopoDS_Shape Deboucle3D (const TopoDS_Shape& S,
                                                   const TopTools_MapOfShape& Boundary);
   

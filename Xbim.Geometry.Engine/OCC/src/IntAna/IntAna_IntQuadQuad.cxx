@@ -183,7 +183,8 @@ TrigonometricRoots::TrigonometricRoots(const Standard_Real CC,
 				       const Standard_Real S,
 				       const Standard_Real Cte,
 				       const Standard_Real Binf,
-				       const Standard_Real Bsup) 
+				       const Standard_Real Bsup)
+: infinite_roots(Standard_False)
 {
   Standard_Integer i, j, SvNbRoots;
   Standard_Boolean Triee;
@@ -317,6 +318,8 @@ IntAna_IntQuadQuad::IntAna_IntQuadQuad(void) {
   myNbMaxCurves=12;
   myEpsilon=0.00000001;
   myEpsilonCoeffPolyNull=0.00000001;
+  memset (nextcurve, 0, sizeof (nextcurve));
+  memset (previouscurve, 0, sizeof (previouscurve));
 }
 //=======================================================================
 //function : IntAna_IntQuadQuad::IntAna_IntQuadQuad
@@ -933,7 +936,7 @@ void IntAna_IntQuadQuad::Perform(const gp_Cone& Cone,
 	// f(z,to)=B(to)*z + C(to)=0, B(to)!=0. 
 	//                   
 	// z=-C(to)/B(to) is one and only
-	// solution inspite of the fact that D(t)>0 for any value of t.
+	// solution in spite of the fact that D(t)>0 for any value of t.
 	//
 	if(to<NewMax && to>NewMin) {
 	  //-----------------------------------------------------------------

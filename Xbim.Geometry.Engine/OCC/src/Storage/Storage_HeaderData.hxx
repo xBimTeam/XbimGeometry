@@ -45,7 +45,7 @@ public:
   
   Standard_EXPORT Storage_HeaderData();
 
-  Standard_EXPORT Standard_Boolean Read (Storage_BaseDriver& theDriver);
+  Standard_EXPORT Standard_Boolean Read (const Handle(Storage_BaseDriver)& theDriver);
   
   //! return the creation date
   Standard_EXPORT TCollection_AsciiString CreationDate() const;
@@ -77,19 +77,19 @@ public:
   //! returns data type
   Standard_EXPORT TCollection_ExtendedString DataType() const;
   
-  //! add <theUserInfo> to the user informations
+  //! add <theUserInfo> to the user information
   Standard_EXPORT void AddToUserInfo (const TCollection_AsciiString& theUserInfo);
   
-  //! return the user informations
+  //! return the user information
   Standard_EXPORT const TColStd_SequenceOfAsciiString& UserInfo() const;
   
-  //! add <theUserInfo> to the user informations
+  //! add <theUserInfo> to the user information
   Standard_EXPORT void AddToComments (const TCollection_ExtendedString& aComment);
   
-  //! return the user informations
+  //! return the user information
   Standard_EXPORT const TColStd_SequenceOfExtendedString& Comments() const;
   
-  //! the the number of persistent objects
+  //! the number of persistent objects
   //! Return:
   //! the number of persistent objects readed
   Standard_EXPORT Standard_Integer NumberOfObjects() const;
@@ -111,7 +111,12 @@ public:
   Standard_EXPORT void SetNumberOfObjects (const Standard_Integer anObjectNumber);
   
   Standard_EXPORT void SetStorageVersion (const TCollection_AsciiString& aVersion);
-  
+
+  void SetStorageVersion (const Standard_Integer theVersion)
+  {
+    SetStorageVersion (TCollection_AsciiString (theVersion));
+  }
+
   Standard_EXPORT void SetCreationDate (const TCollection_AsciiString& aDate);
   
   Standard_EXPORT void SetSchemaVersion (const TCollection_AsciiString& aVersion);

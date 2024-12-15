@@ -27,7 +27,7 @@
 #include <Geom2d_Curve.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Pnt.hxx>
-#include <Poly_Triangulation.hxx>
+#include <Poly_ListOfTriangulation.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <Poly_Polygon2D.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
@@ -63,17 +63,33 @@ public:
   //! Returns the geometric  surface of the face. It can
   //! be a copy if there is a Location.
   Standard_EXPORT static Handle(Geom_Surface) Surface (const TopoDS_Face& F);
-  
-  //! Returns  the Triangulation of  the  face. It  is a
-  //! null handle if there is no triangulation.
-  Standard_EXPORT static const Handle(Poly_Triangulation)& Triangulation (const TopoDS_Face& F, TopLoc_Location& L);
-  
+
+  //! Returns the triangulation of the face according to the mesh purpose.
+  //! @param theFace [in] the input face to find triangulation.
+  //! @param theLocation [out] the face location.
+  //! @param theMeshPurpose [in] a mesh purpose to find appropriate triangulation (NONE by default).
+  //! @return an active triangulation in case of NONE purpose,
+  //!         the first triangulation appropriate for the input purpose,
+  //!         just the first triangulation if none matching other criteria and input purpose is AnyFallback
+  //!         or null handle if there is no any suitable triangulation.
+  Standard_EXPORT static const Handle(Poly_Triangulation)& Triangulation (const TopoDS_Face& theFace, TopLoc_Location& theLocation,
+                                                                          const Poly_MeshPurpose theMeshPurpose = Poly_MeshPurpose_NONE);
+
+  //! Returns all triangulations of the face.
+  //! @param theFace [in] the input face.
+  //! @param theLocation [out] the face location.
+  //! @return list of all available face triangulations.
+  Standard_EXPORT static const Poly_ListOfTriangulation& Triangulations (const TopoDS_Face& theFace, TopLoc_Location& theLocation);
+
   //! Returns the tolerance of the face.
   Standard_EXPORT static Standard_Real Tolerance (const TopoDS_Face& F);
   
   //! Returns the  NaturalRestriction  flag of the  face.
   Standard_EXPORT static Standard_Boolean NaturalRestriction (const TopoDS_Face& F);
   
+  //! Returns True if <F> has a surface, false otherwise.
+  Standard_EXPORT static Standard_Boolean IsGeometric (const TopoDS_Face& F);
+
   //! Returns True if <E> is a 3d curve or a curve on
   //! surface.
   Standard_EXPORT static Standard_Boolean IsGeometric (const TopoDS_Edge& E);
@@ -252,7 +268,17 @@ public:
   //! Returns the tolerance.
   Standard_EXPORT static Standard_Real Tolerance (const TopoDS_Vertex& V);
   
+  //! Finds the parameter of <theV> on <theE>.
+  //! @param theV [in] input vertex
+  //! @param theE [in] input edge
+  //! @param theParam  [out] calculated parameter on the curve
+  //! @return TRUE if done
+  Standard_EXPORT static Standard_Boolean Parameter (const TopoDS_Vertex& theV,
+	                                                   const TopoDS_Edge& theE,
+	                                                   Standard_Real &theParam);
+
   //! Returns the parameter of <V> on <E>.
+  //! Throws Standard_NoSuchObject if no parameter on edge
   Standard_EXPORT static Standard_Real Parameter (const TopoDS_Vertex& V, const TopoDS_Edge& E);
   
   //! Returns the  parameters  of   the  vertex   on the

@@ -17,13 +17,11 @@
 #ifndef _IntPatch_ALineToWLine_HeaderFile
 #define _IntPatch_ALineToWLine_HeaderFile
 
+#include <Adaptor3d_Surface.hxx>
 #include <IntPatch_SequenceOfLine.hxx>
 #include <IntSurf_Quadric.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-#include <Standard_Macro.hxx>
+#include <IntSurf_LineOn2S.hxx>
 
-class Adaptor3d_HSurface;
 class IntPatch_ALine;
 class IntSurf_PntOn2S;
 
@@ -34,8 +32,8 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Constructor
-  Standard_EXPORT IntPatch_ALineToWLine(const Handle(Adaptor3d_HSurface)& theS1,
-                                        const Handle(Adaptor3d_HSurface)& theS2,
+  Standard_EXPORT IntPatch_ALineToWLine(const Handle(Adaptor3d_Surface)& theS1,
+                                        const Handle(Adaptor3d_Surface)& theS2,
                                         const Standard_Integer theNbPoints = 200);
   
   Standard_EXPORT void SetTolOpenDomain (const Standard_Real aT);
@@ -55,7 +53,7 @@ public:
   Standard_EXPORT void MakeWLine (const Handle(IntPatch_ALine)& aline,
                                   IntPatch_SequenceOfLine& theLines) const;
   
-  //! Converts aline (limitted by paraminf and paramsup) to the set of 
+  //! Converts aline (limited by paraminf and paramsup) to the set of
   //! Walking-lines and adds them in theLines.
   Standard_EXPORT void MakeWLine (const Handle(IntPatch_ALine)& aline,
                                   const Standard_Real paraminf,
@@ -93,11 +91,18 @@ protected:
   //! This check is made for cone and sphere only.
   Standard_EXPORT Standard_Real GetSectionRadius(const gp_Pnt& thePnt3d) const;
 
+  //! Corrects the U-parameter of an end point (first or last) of the line
+  //! if this end point is a pole.
+  //! The line must contain at least 3 points.
+  //! This is made for cone and sphere only.
+  Standard_EXPORT void CorrectEndPoint(Handle(IntSurf_LineOn2S)& theLine,
+                                       const Standard_Integer    theIndex) const;
+
 private:
 
 
-  Handle(Adaptor3d_HSurface) myS1;
-  Handle(Adaptor3d_HSurface) myS2;
+  Handle(Adaptor3d_Surface) myS1;
+  Handle(Adaptor3d_Surface) myS2;
   IntSurf_Quadric myQuad1;
   IntSurf_Quadric myQuad2;
 

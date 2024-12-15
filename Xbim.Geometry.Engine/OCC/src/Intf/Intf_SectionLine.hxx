@@ -24,7 +24,6 @@
 #include <Intf_SeqOfSectionPoint.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
 class Intf_SectionPoint;
 
 
@@ -67,6 +66,14 @@ Standard_Boolean operator == (const Intf_SectionLine& Other) const
   //! Copies a SectionLine.
   Standard_EXPORT Intf_SectionLine(const Intf_SectionLine& Other);
   
+  //! Assignment
+  Intf_SectionLine& operator= (const Intf_SectionLine& theOther)
+  {
+    //closed = theOther.closed; // not copied as in copy constructor
+    myPoints = theOther.myPoints;
+    return *this;
+  }
+
   //! Adds a point at the end of the SectionLine.
   Standard_EXPORT void Append (const Intf_SectionPoint& Pi);
   

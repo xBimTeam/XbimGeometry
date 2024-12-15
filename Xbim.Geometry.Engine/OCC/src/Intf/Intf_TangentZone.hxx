@@ -25,7 +25,6 @@
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_OutOfRange;
 class Intf_SectionPoint;
 
 
@@ -63,11 +62,11 @@ Standard_Boolean operator == (const Intf_TangentZone& Other) const
   //! argument of the Interference. (Usable only for polygon)
     void ParamOnSecond (Standard_Real& paraMin, Standard_Real& paraMax) const;
   
-  //! Gives information  about  the    first argument   of   the
+  //! Gives  information  about  the    first argument   of   the
   //! Interference. (Usable only for polygon)
   Standard_EXPORT void InfoFirst (Standard_Integer& segMin, Standard_Real& paraMin, Standard_Integer& segMax, Standard_Real& paraMax) const;
   
-  //! Gives   informations  about  the  second   argument of  the
+  //! Gives   information   about  the  second   argument of  the
   //! Interference. (Usable only for polygon)
   Standard_EXPORT void InfoSecond (Standard_Integer& segMin, Standard_Real& paraMin, Standard_Integer& segMax, Standard_Real& paraMax) const;
   
@@ -81,10 +80,7 @@ Standard_Boolean operator == (const Intf_TangentZone& Other) const
   
   //! Builds an empty tangent zone.
   Standard_EXPORT Intf_TangentZone();
-  
-  //! Copies a Tangent zone.
-  Standard_EXPORT Intf_TangentZone(const Intf_TangentZone& Other);
-  
+
   //! Adds a SectionPoint to the TangentZone.
   Standard_EXPORT void Append (const Intf_SectionPoint& Pi);
   

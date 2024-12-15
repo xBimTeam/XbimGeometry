@@ -14,8 +14,9 @@
 
 #include <GeomEvaluator_SurfaceOfRevolution.hxx>
 
-#include <Adaptor3d_HCurve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <gp_Trsf.hxx>
+#include <Precision.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(GeomEvaluator_SurfaceOfRevolution,GeomEvaluator_Surface)
 
@@ -30,7 +31,7 @@ GeomEvaluator_SurfaceOfRevolution::GeomEvaluator_SurfaceOfRevolution(
 }
 
 GeomEvaluator_SurfaceOfRevolution::GeomEvaluator_SurfaceOfRevolution(
-        const Handle(Adaptor3d_HCurve)& theBase,
+        const Handle(Adaptor3d_Curve)& theBase,
         const gp_Dir& theRevolDir,
         const gp_Pnt& theRevolLoc)
   : GeomEvaluator_Surface(),
@@ -200,5 +201,22 @@ gp_Vec GeomEvaluator_SurfaceOfRevolution::DN(
 
   aResult.Transform(aRotation);
   return aResult;
+}
+
+Handle(GeomEvaluator_Surface) GeomEvaluator_SurfaceOfRevolution::ShallowCopy() const
+{
+  Handle(GeomEvaluator_SurfaceOfRevolution) aCopy;
+  if (!myBaseAdaptor.IsNull())
+  {
+    aCopy = new GeomEvaluator_SurfaceOfRevolution(myBaseAdaptor->ShallowCopy(), 
+                                                  myRotAxis.Direction(), myRotAxis.Location());
+  }
+  else
+  {
+    aCopy = new GeomEvaluator_SurfaceOfRevolution(myBaseCurve, 
+                                                  myRotAxis.Direction(), myRotAxis.Location());
+  }
+
+  return aCopy;
 }
 
