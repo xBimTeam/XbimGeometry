@@ -1842,11 +1842,14 @@ namespace Xbim
 
 				// Informal Proposition:
 				// SegmentStart and SegmentStart shall be of type IfcLengthMeasure
-				if (startLen == nullptr || curveLength == nullptr)
-					throw RaiseGeometryFactoryException("IfcCurveSegment SegmentStart and SegmentEnd should be of type IfcLengthMeasure", segment);
+				if (startLen == nullptr )
+					LogWarning(segment, "IfcCurveSegment SegmentStart should be of type IfcLengthMeasure but found {0}", segment->SegmentStart->GetType()->Name);
+				if (curveLength == nullptr)
+					LogWarning(segment, "IfcCurveSegment SegmentLength should be of type IfcLengthMeasure but found {0}", segment->SegmentLength->GetType()->Name);
+					
 
-				double startParam = startLen->Value;
-				double length = curveLength->Value;
+				double startParam = static_cast<double>(segment->SegmentStart->Value);
+				double length = static_cast<double>(segment->SegmentLength->Value);
 				double endParam = startParam + length;
 				Geom2d_Spiral::IntegrationSteps = (int)((endParam - startParam) / _modelService->OneMeter);
 

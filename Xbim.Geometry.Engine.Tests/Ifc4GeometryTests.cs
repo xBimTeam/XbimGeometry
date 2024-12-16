@@ -108,6 +108,23 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Theory]
+        [InlineData(@"TestFiles\IFC4x3\Viadotto Acerno.ifc")]
+        public void CanBuildCurveNotFollowingImplementersAgreement(string filePath)
+        {
+            // Model contains IfcCurveSegments that don't follow IA precisely. E.g. use of IfcParameterValue vs IfcLengthMeasure
+            // Arrange
+            using var model = MemoryModel.OpenRead(filePath);
+            var curve = model.Instances.FirstOrDefault(g => g is IIfcCompositeCurve) as IIfcCompositeCurve;
+            var modelSvc = factory.CreateModelGeometryService(model, _loggerFactory);
+            
+            // Act
+            var xCurve = modelSvc.CurveFactory.Build(curve);
+
+            // Assert
+            xCurve.Should().NotBeNull();
+        }
+
+        [Theory]
         // [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
         public void CentreLineProfileTest(XGeometryEngineVersion engineVersion)
