@@ -72,7 +72,7 @@ namespace Xbim
 			{
 				return gcnew XPoint(x, y, z);
 			};
-			
+
 			IXPoint^ GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ pointByDistanceExpression)
 			{
 				gp_Pnt result;
@@ -299,7 +299,7 @@ namespace Xbim
 					return ToLocation(static_cast<IIfcAxis2Placement3D^>(axis), location);
 
 			}
-			
+
 			bool GeometryFactory::ToTransform(IfcAxis2PlacementLinear^ axisPlacement, gp_Trsf& trsf)
 			{
 				IfcPointByDistanceExpression^ point = dynamic_cast<IfcPointByDistanceExpression^>(axisPlacement->Location);
@@ -322,7 +322,7 @@ namespace Xbim
 						tangent.Normalize();
 						hasRef = true;
 					}
-					
+
 					if (axisPlacement->Axis != nullptr)
 					{
 						if (!BuildDirection3d(axisPlacement->Axis, axis))
@@ -330,11 +330,11 @@ namespace Xbim
 						axis.Normalize();
 						hasAxis = true;
 					}
-					
+
 					//if(!hasAxis && !hasRef) axis = tangent.Crossed(axis.Crossed(tangent));
 
 					trsf.SetTransformation(gp_Ax3(loc, axis, tangent), gp_Ax3(gp_Pnt(), gp_Dir(0, 0, 1), gp_Dir(1, 0, 0)));
-					
+
 					return true;
 				}
 
@@ -343,8 +343,8 @@ namespace Xbim
 
 			Standard_Real GeometryFactory::GetDistanceAlong(IfcPointByDistanceExpression^ point)
 			{
-				Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^ lengthValue =
-					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^>(point->DistanceAlong);
+				Xbim::Ifc4::Interfaces::IIfcLengthMeasure^ lengthValue =
+					dynamic_cast<Xbim::Ifc4::Interfaces::IIfcLengthMeasure^>(point->DistanceAlong);
 				Xbim::Ifc4x3::MeasureResource::IfcParameterValue^ parameterValue =
 					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcParameterValue^>(point->DistanceAlong);
 				auto conic = (dynamic_cast<IIfcConic^>(point->BasisCurve));
@@ -393,7 +393,7 @@ namespace Xbim
 				return BuildPoint3d(point, loc, tangent, axis, distanceAlong);
 			}
 
-			
+
 			bool GeometryFactory::ToLocation(IfcAxis2PlacementLinear^ axis, TopLoc_Location& location)
 			{
 				gp_Trsf trsf;
@@ -405,19 +405,19 @@ namespace Xbim
 			bool GeometryFactory::BuildPoint3d(IfcPointByDistanceExpression^ point, gp_Pnt& result, gp_Vec& tangent, gp_Vec& axis, Standard_Real& len)
 			{
 
-				Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(point->BasisCurve); 
+				Handle(Geom_Curve) curve = CURVE_FACTORY->BuildCurve(point->BasisCurve);
 
 				GeomAdaptor_Curve curveAdaptor(curve);
 				Standard_Real firstParam = curve->FirstParameter();
 				Standard_Real lastParam = curve->LastParameter();
 				Standard_Real length = GCPnts_AbscissaPoint::Length(curveAdaptor, firstParam, lastParam, ModelGeometryService->Precision);
 
-				Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^ lengthValue = 
-					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcLengthMeasure^>(point->DistanceAlong);
+				Xbim::Ifc4::Interfaces::IIfcLengthMeasure^ lengthValue =
+					dynamic_cast<Xbim::Ifc4::Interfaces::IIfcLengthMeasure^>(point->DistanceAlong);
 				Xbim::Ifc4x3::MeasureResource::IfcParameterValue^ parameterValue =
 					dynamic_cast<Xbim::Ifc4x3::MeasureResource::IfcParameterValue^>(point->DistanceAlong);
 				auto conic = (dynamic_cast<IIfcConic^>(point->BasisCurve));
-				 
+
 				if (lengthValue != nullptr)
 				{
 					len = static_cast<Standard_Real>(lengthValue->Value);
@@ -429,7 +429,7 @@ namespace Xbim
 						auto param = static_cast<double>(parameterValue->Value) * ModelGeometryService->RadianFactor;
 						curve->D1(param, result, tangent);
 					}
-					else 
+					else
 					{
 						auto param = static_cast<double>(parameterValue->Value);
 						len = param * length;
@@ -437,7 +437,7 @@ namespace Xbim
 					}
 				}
 				else throw RaiseGeometryFactoryException("DistanceAlong must be specified", point);
-				
+
 				tangent.Normalize();
 				gp_Vec up(0, 0, 1);
 				gp_Vec y = up.Crossed(tangent);
@@ -447,7 +447,7 @@ namespace Xbim
 
 				Handle(Geom_SegmentedReferenceCurve) segmentedRef = Handle(Geom_SegmentedReferenceCurve)::DownCast(curve);
 
-				if (segmentedRef) 
+				if (segmentedRef)
 				{
 					auto superElevationAndTilt = segmentedRef->GetSuperelevationAndCantTiltAt(len);
 					Standard_Real tilt = std::get<1>(superElevationAndTilt);
@@ -455,7 +455,7 @@ namespace Xbim
 					axis.Rotate(rotationAxis, tilt);
 					y.Rotate(rotationAxis, tilt);
 				}
-				
+
 				if (point->OffsetLateral.HasValue && ((double)point->OffsetLateral.Value.Value) != 0)
 				{
 					double lateralOffset = point->OffsetLateral.Value;
@@ -603,7 +603,7 @@ namespace Xbim
 				IIfcAxis2Placement^ axis2 = dynamic_cast<IIfcAxis2Placement^>(placement);
 				if (linear != nullptr)
 					return BuildLocation(linear);
-				if(axis2 != nullptr)
+				if (axis2 != nullptr)
 					return BuildLocation(linear);
 				throw RaiseGeometryFactoryException("Not supported type of IfcPlacement");
 			}
@@ -698,7 +698,7 @@ namespace Xbim
 
 				IIfcLocalPlacement^ localPlacement = dynamic_cast<IIfcLocalPlacement^>(objPlacement);
 				IIfcGridPlacement^ gridPlacement = dynamic_cast<IIfcGridPlacement^>(objPlacement);
-				Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^ linearPlacement = 
+				Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^ linearPlacement =
 					dynamic_cast<Xbim::Ifc4x3::GeometricConstraintResource::IfcLinearPlacement^>(objPlacement);
 				gp_Trsf trsf;
 
@@ -817,7 +817,7 @@ namespace Xbim
 							ToTransform(linearPlacement->RelativePlacement, relTrsf);
 							trsf.PreMultiply(relTrsf);
 						}
-						else 
+						else
 						{
 							throw RaiseGeometryFactoryException("RelativePlacement for LinearPlacement must be specified");
 						}
@@ -900,7 +900,7 @@ namespace Xbim
 			XMatrix^ GeometryFactory::ToTransform(IIfcCartesianTransformationOperator2D^ ct)
 			{
 				auto nonUniform = dynamic_cast<IIfcCartesianTransformationOperator2DnonUniform^>(ct);
-				auto matrix =  gcnew XMatrix(ToTrsf2d(ct));
+				auto matrix = gcnew XMatrix(ToTrsf2d(ct));
 				if (nonUniform != nullptr)
 				{
 					matrix->SetScale(nonUniform->Scl, nonUniform->Scl2, 1.0);
@@ -1096,7 +1096,7 @@ namespace Xbim
 					IIfcDirection^ dir = ct2D->Axis1;
 					U1 = gp_Dir(dir->X, dir->Y, dir->Z);
 				}
-				
+
 				auto dotU1_U3 = U1.Dot(U3);
 				auto xVec = dotU1_U3 * U3;
 				gp_Dir xAxis = gp_Vec(U1) - xVec;

@@ -282,8 +282,8 @@ namespace Xbim
 				Handle(Geom_Curve) spine;
 				auto sweptArea = PROFILE_FACTORY->BuildProfileFace(directrixDerivedReferenceSweptAreaSolid->SweptArea);
 				
-				Ifc4x3::MeasureResource::IfcLengthMeasure^ startLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
-				Ifc4x3::MeasureResource::IfcLengthMeasure^ endLen = dynamic_cast<Ifc4x3::MeasureResource::IfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
+				Ifc4::Interfaces::IIfcLengthMeasure^ startLen = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
+				Ifc4::Interfaces::IIfcLengthMeasure^ endLen = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
 				Ifc4x3::MeasureResource::IfcParameterValue^ startParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
 				Ifc4x3::MeasureResource::IfcParameterValue^ endParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
 				double firstParam;
