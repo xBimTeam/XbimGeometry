@@ -18,8 +18,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="6.0.445" />
-    <PackageReference Include="Xbim.Tessellator" Version="6.0.445" />
+    <PackageReference Include="Xbim.Ifc" Version="6.0.489" />
+    <PackageReference Include="Xbim.Tessellator" Version="6.0.489" />
   </ItemGroup>
 
   <ItemGroup>
