@@ -32,9 +32,9 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
         [Theory]
         [InlineData(@"TestFiles\IFC4x3\test.ifc")]
-        //[InlineData(@"TestFiles\IFC4x3\Viadotto Acerno.ifc")]
-        //[InlineData(@"TestFiles\IFC4x3\SectionedSolidHorizontal-1.ifc")]
-        //[InlineData(@"TestFiles\IFC4x3\PlacmentOfSignal.ifc")]
+        [InlineData(@"TestFiles\IFC4x3\Viadotto Acerno.ifc")]
+        [InlineData(@"TestFiles\IFC4x3\SectionedSolidHorizontal-1.ifc")]
+        [InlineData(@"TestFiles\IFC4x3\PlacmentOfSignal.ifc")]
         public void CanBuildIfcGradientCurve(string filePath)
         {
             // Arrange
