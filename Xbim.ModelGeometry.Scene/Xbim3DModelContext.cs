@@ -301,9 +301,17 @@ namespace Xbim.ModelGeometry.Scene
                 var compoundElementsDictionary = XbimMultiValueDictionary<IIfcObjectDefinition, IIfcObjectDefinition>.Create<HashSet<IIfcObjectDefinition>>();
                 foreach (var aggRel in Model.Instances.OfType<IIfcRelAggregates>())
                 {
+                    if (aggRel == null)
+                    {
+                        continue;
+                    }
+
                     foreach (var relObj in aggRel.RelatedObjects)
                     {
-                        compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
+                        if (aggRel.RelatingObject != null)
+                        {
+                            compoundElementsDictionary.Add(aggRel.RelatingObject, relObj);
+                        }
                     }
 
                 }

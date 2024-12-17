@@ -172,11 +172,11 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             u2 = yAxis;
             u1 = xAxis;
 
-            double localOriginZ = ct3D.LocalOrigin.Z;
+            double localOriginZ = ct3D.LocalOrigin?.Z ?? 0.0;
             if (double.IsNaN(localOriginZ))
                 localOriginZ = 0;
-            
-            var lo = new XbimPoint3D(ct3D.LocalOrigin.X,ct3D.LocalOrigin.Y, localOriginZ); //local origin
+
+            var lo = new XbimPoint3D(ct3D.LocalOrigin?.X ?? 0.0, ct3D.LocalOrigin?.Y ?? 0.0, localOriginZ); //local origin
 
             return new XbimMatrix3D(u1.X, u1.Y, u1.Z, 0,
                                            u2.X, u2.Y, u2.Z, 0,
