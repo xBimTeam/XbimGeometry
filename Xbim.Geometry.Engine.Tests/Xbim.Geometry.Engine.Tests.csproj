@@ -9,6 +9,14 @@
 		<GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/</GeometryInteropDirectory>
 	</PropertyGroup>
 
+  <PropertyGroup  Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x64.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+  <PropertyGroup  Condition="'$(Platform)' == 'xx86'">
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x86.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
 	<PropertyGroup>
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 	  <NoWarn>CS8602;CS8604</NoWarn>
@@ -16,12 +24,12 @@
 	<ItemGroup>
 		<PackageReference Include="FluentAssertions" Version="6.10.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="Moq" Version="4.18.4" />
-		<PackageReference Include="xunit" Version="2.6.2" />
+		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.abstractions" Version="2.0.3" />
 		<PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.1" />
-		<PackageReference Include="xunit.runner.visualstudio" Version="2.5.4">
+		<PackageReference Include="xunit.runner.visualstudio" Version="3.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -523,11 +531,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-
-		<ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj">
-			<Private>True</Private>
-		</ProjectReference>
-
 		<ProjectReference Include="..\Xbim.ModelGeometry.Scene\Xbim.ModelGeometry.Scene.csproj">
 			
 			<Private>True</Private>
