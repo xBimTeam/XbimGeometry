@@ -39,9 +39,6 @@ namespace Xbim.Geometry.Engine.NetFramework.Tests
             Assert.NotNull(logFactory);
 
             Assert.IsType<LoggerFactory>(logFactory);
-
-            var expectedVersion = new Version(2, 1, 0,0);
-            Assert.Equal(expectedVersion, logFactory.GetType().Assembly.GetName().Version);
         }
 
         

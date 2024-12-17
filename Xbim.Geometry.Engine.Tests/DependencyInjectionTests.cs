@@ -11,19 +11,11 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
-using Xunit.DependencyInjection;
-using Xunit.DependencyInjection.Logging;
 
 namespace Xbim.Geometry.Engine.Tests
 {
     public class DependencyInjectionTests
     {
-        private readonly ITestOutputHelperAccessor testOutputHelper;
-
-        public DependencyInjectionTests(ITestOutputHelperAccessor testOutputHelper)
-        {
-            this.testOutputHelper = testOutputHelper;
-        }
 
         [InlineData(typeof(IXShapeService))]
         [InlineData(typeof(ILoggerFactory))]
@@ -156,7 +148,7 @@ namespace Xbim.Geometry.Engine.Tests
             // Act 
             engine.RegisterModel(model);
             model.Tag.Should().BeOfType(typeof(Dictionary<string, object>));
-            model.GetTagValue("ModelGeometryService", out IXModelGeometryService service).Should().BeTrue();
+            model.GetTagValue("ModelGeometryService", out IXModelGeometryService? service).Should().BeTrue();
             service.Should().NotBeNull();
 
             engine.UnregisterModel(model);
@@ -236,7 +228,7 @@ namespace Xbim.Geometry.Engine.Tests
 
             IServiceCollection services = new ServiceCollection();
             services
-                .AddLogging(opt => opt.AddProvider(new XunitTestOutputLoggerProvider(testOutputHelper)))
+                .AddLogging(opt => opt.AddXUnit())
                 .AddXbimToolkit(conf => conf.AddGeometryServices(opt => opt.Configure(o => o.GeometryEngineVersion = XGeometryEngineVersion.V5)))
             ;
 

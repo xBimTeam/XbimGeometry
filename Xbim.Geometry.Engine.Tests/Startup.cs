@@ -14,12 +14,10 @@ namespace Xbim.Geometry.Engine.Tests
 #else
         const LogLevel DefaultLogLevel = LogLevel.Information;
 #endif
-        public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor, IServiceProvider serviceProvider)
+        public void Configure(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
 
-            loggerFactory.AddProvider(
-                new XunitTestOutputLoggerProvider(accessor, (name, level) => level is >= DefaultLogLevel and < LogLevel.None)
-                );
+          // Nothing to do
 
         }
 
@@ -29,6 +27,7 @@ namespace Xbim.Geometry.Engine.Tests
             services
                 .AddLogging(configure => configure
                     .SetMinimumLevel(DefaultLogLevel)
+                    .AddXunitOutput()
                     .AddConsole())
                 .AddXbimToolkit(configure => configure
                     .AddMemoryModel()
@@ -47,4 +46,5 @@ namespace Xbim.Geometry.Engine.Tests
 
         }
     }
+
 }

@@ -2,10 +2,8 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using Xbim.Common.Configuration;
 using Xbim.Geometry.Abstractions;
-using Xunit.DependencyInjection;
 using Xunit.DependencyInjection.Logging;
 namespace Xbim.Geometry.Engine.NetFramework.Tests
 {
@@ -17,12 +15,8 @@ namespace Xbim.Geometry.Engine.NetFramework.Tests
 #else
         const LogLevel DefaultLogLevel = LogLevel.Information;
 #endif
-        public void Configure(ILoggerFactory loggerFactory, ITestOutputHelperAccessor accessor, IServiceProvider serviceProvider)
+        public void Configure(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
-
-            loggerFactory.AddProvider(
-                new XunitTestOutputLoggerProvider(accessor, (name, level) => level is >= DefaultLogLevel and < LogLevel.None)
-                );
 
         }
 
@@ -31,6 +25,7 @@ namespace Xbim.Geometry.Engine.NetFramework.Tests
 
             services
                 .AddLogging(configure => configure
+                    .AddXunitOutput()
                     .SetMinimumLevel(DefaultLogLevel)
                    // .AddConsole()
                    )

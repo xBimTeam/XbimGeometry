@@ -127,8 +127,8 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
             var polynomialSpiral = model.Instances.New<IfcThirdOrderPolynomialSpiral>(p =>
             {
-                p.CubicTerm = -110.668191970032;
-                p.QuadraticTerm = 100;
+                p.CubicTerm = cubicTerm;
+                p.QuadraticTerm = quadraticTerm;
                 p.Position = model.Instances.New<IfcAxis2Placement2D>(placement =>
                 {
                     placement.Location = model.Instances.New<IfcCartesianPoint>(pnt =>

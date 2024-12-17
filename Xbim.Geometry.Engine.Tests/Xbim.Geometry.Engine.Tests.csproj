@@ -9,11 +9,11 @@
 		<GeometryInteropDirectory>../Xbim.Geometry.Engine.Interop/bin/$(Configuration)/</GeometryInteropDirectory>
 	</PropertyGroup>
 
-  <PropertyGroup  Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'">
+  <PropertyGroup Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'">
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x64.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
-  <PropertyGroup  Condition="'$(Platform)' == 'xx86'">
+  <PropertyGroup Condition="'$(Platform)' == 'xx86'">
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x86.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
@@ -23,12 +23,11 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="FluentAssertions" Version="6.10.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="Moq" Version="4.18.4" />
 		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.abstractions" Version="2.0.3" />
-		<PackageReference Include="Xunit.DependencyInjection.Logging" Version="8.0.1" />
+		<PackageReference Include="Xunit.DependencyInjection.Logging" Version="9.0.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="3.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -165,6 +164,9 @@
 		<None Update="TestFiles\IFC4x3\Viadotto Acerno.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+    <None Update="TestFiles\IFC4x3\Viadotto Acernov2.ifc">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
 		<None Update="TestFiles\IfcExamples\beam-standard-case.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

@@ -28,7 +28,6 @@
 #include <GProp_GProps.hxx>
 #include <BRepGProp.hxx>
 
-
 #include "../BRep/XCompound.h"
 #include "../BRep/XEdge.h"
 #include "../BRep/XSolid.h"
@@ -40,7 +39,6 @@
 #include "../visual//VisualMaterial.h"
 #include "../visual//XbimShapeColour.h"
 #include "../BRep/XMatrix.h"
-#include "../BRep/XAxisPlacement2d.h"
 #include "../BRep/XPlane.h"
 #include <ShapeAnalysis_Surface.hxx>
 #include <GeomLProp_SLProps.hxx>

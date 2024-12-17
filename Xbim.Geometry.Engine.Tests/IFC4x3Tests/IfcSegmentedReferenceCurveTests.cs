@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc;
 using Xbim.Ifc4x3.GeometryResource;
 using Xbim.IO.Memory;
 using Xunit;
@@ -41,6 +42,28 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
             // Assert
             xCurve.Should().NotBeNull();
         }
+
+
+       
+
+        [Theory]
+        //[InlineData(@"TestFiles\IFC4x3\Viadotto Acernov2.ifc")]
+        [InlineData(@"C:\Users\AndyWard\source\repos\IFC4.x-IF\IFC-files\ACCA\Bridge-for-MINnD\Viadotto Acerno.zip")]
+        public void CanBuildIfcSegmentedCurve2(string filePath)
+        {
+            // Arrange
+            using var model = IfcStore.Open(filePath);
+            var curve = model.Instances.OfType<IfcCompositeCurve>().FirstOrDefault();
+            var modelSvc = _factory.CreateModelGeometryService(model, _loggerFactory);
+
+            // Act
+            var xCurve = modelSvc.CurveFactory.Build(curve);
+
+            // Assert
+            xCurve.Should().NotBeNull();
+
+        }
+
 
         [Theory]
         [InlineData(@"TestFiles\IFC4x3\PlacmentOfSignal.ifc")]

@@ -83,8 +83,8 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
                  List<double> widths,
                  List<double> slopes,
                  bool horizontalWidths,
-                 IfcCartesianPoint offsetPoint = null,
-                 List<string> tags = null)
+                 IfcCartesianPoint? offsetPoint = null,
+                 List<string>? tags = null)
         {
             if (widths.Count != slopes.Count)
             {
