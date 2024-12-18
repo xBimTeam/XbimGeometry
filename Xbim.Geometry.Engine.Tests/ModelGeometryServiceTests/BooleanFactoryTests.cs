@@ -1,6 +1,7 @@
 ﻿
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
+using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
@@ -21,16 +22,19 @@ namespace Xbim.Geometry.Engine.Tests
 
         private readonly MemoryModel _dummyModel = new MemoryModel(new EntityFactoryIfc4());
         private readonly IXModelGeometryService _modelSvc;
-        const double minGap = 0.2;
         private readonly IXbimGeometryServicesFactory factory;
         private readonly ILoggerFactory _loggerFactory;
+
+        const double Precision = 1e-5;
+        const double PrecisionMax = 0.1;
+
 
         public BooleanFactoryTests(IXbimGeometryServicesFactory factory, ILoggerFactory loggerFactory)
         {
             this.factory = factory;
             _loggerFactory = loggerFactory;
+            _dummyModel.ModelFactors = new XbimModelFactors(angToRads: 1, 0.001, Precision);
             _modelSvc = factory.CreateModelGeometryService(_dummyModel, loggerFactory);
-            _modelSvc.MinimumGap = minGap;
         }
 
 
@@ -73,10 +77,10 @@ namespace Xbim.Geometry.Engine.Tests
         /// <param name="dispZ"></param>
         /// <param name="singleSolid"></param>
         [Theory]
-        [InlineData(-10 - (minGap * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
-        [InlineData(10 + (minGap * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
-        [InlineData(-10 - minGap, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
-        [InlineData(10.0 + minGap, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
+        [InlineData(-10 - (PrecisionMax * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
+        [InlineData(10 + (PrecisionMax * 1.01), 0, 0, false)] //x2 face  more than Minimum gap apart, should not be read as coincidental
+        [InlineData(-10 - PrecisionMax, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
+        [InlineData(10.0 + PrecisionMax, 0, 0)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
         [InlineData(0, 0, -30)] //z-2 face coincidental
         [InlineData(0, -20, 0)] //-y2 face coincidental
         [InlineData(-10, 0, 0)] //-x2 face coincidental
@@ -86,8 +90,6 @@ namespace Xbim.Geometry.Engine.Tests
         // [InlineData(0, 0, 0)] //all faces connected
         public void Can_union_two_face_connected_blocks(double dispX, double dispY, double dispZ, bool singleSolid = true)
         {
-
-
             //by default these blocks are all lenX =10, lenY = 20, lenZ = 30
             var booleanResult = IfcMoq.IfcBooleanResultMoq(displacementX: dispX, displacementY: dispY, displacementZ: dispZ);
             var booleanFactory = _modelSvc.BooleanFactory;
@@ -128,10 +130,10 @@ namespace Xbim.Geometry.Engine.Tests
         /// <param name="dispY"></param>
         /// <param name="dispZ"></param>
         [Theory]
-        [InlineData(10, -10 - (minGap * 1.01), false)] //x2 face  more than Minimum gap apart, should not be read as coincidental, so first shape is untouched
-        [InlineData(10, 10 + (minGap * 1.01), false)] //x2 face  more than Minimum gap apart, should not be read as coincidental, so first shape is untouched
-        [InlineData(10, -10 - minGap, true)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental, first shape smaller
-        [InlineData(10, 10 + minGap, true)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
+        [InlineData(10, -10 - (PrecisionMax * 1.01), false)] //x2 face  more than Minimum gap apart, should not be read as coincidental, so first shape is untouched
+        [InlineData(10, 10 + (PrecisionMax * 1.01), false)] //x2 face  more than Minimum gap apart, should not be read as coincidental, so first shape is untouched
+        [InlineData(10, -10 - PrecisionMax, true)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental, first shape smaller
+        [InlineData(10, 10 + PrecisionMax, true)] //x2 face  less than or equal to Minimum gap apart, should be read as coincidental
 
         public void Can_cut_two_face_connected_blocks(double lenX, double dispX, bool intersects)
         {
@@ -153,18 +155,18 @@ namespace Xbim.Geometry.Engine.Tests
             if (intersects)
             {
                 var growth = 2 * (Math.Abs(dispX) - lenX);
-                box.LenX.Should().BeApproximately(lenX + growth, 1e-5);
+                box.LenX.Should().BeApproximately(lenX + growth, Precision);
             }
             else //should be the first parameter block
             {
-                box.LenX.Should().BeApproximately(lenX, 1e-5);
+                box.LenX.Should().BeApproximately(lenX, Precision);
             }
         }
         [Theory]
         [InlineData(10, 5, true)] //should result in a block of length x = 5
         [InlineData(10, -5, true)] //should result in a block of length x = 5
-        [InlineData(10, 10 - (minGap * 0.9), false)] //technically a failure to intersect is  within tolerance  of MinumumGap
-        [InlineData(10, -10 - (minGap * 0.9), false)] //technicially a failure to intersect as  within tolerance  of MinumumGap
+        [InlineData(10, 10 - (Precision * 0.9), false)] //technically a failure to intersect is  within tolerance  of MinumumGap
+        [InlineData(10, -10 - (Precision * 0.9), false)] //technicially a failure to intersect as  within tolerance  of MinumumGap
         public void Can_intersect_two_blocks(double lenX, double dispX, bool intersects)
         {
 
@@ -190,7 +192,7 @@ namespace Xbim.Geometry.Engine.Tests
 #endif
 
                 var box = solid.Bounds();
-                box.LenX.Should().BeApproximately(lenX - Math.Abs(dispX), 1e-5);
+                box.LenX.Should().BeApproximately(lenX - Math.Abs(dispX), Precision);
             }
         }
 
@@ -214,7 +216,7 @@ namespace Xbim.Geometry.Engine.Tests
             var shape = geomEngine.Build(booleanOp);
             shape.Should().NotBeNull();
             shape.Should().BeAssignableTo<IXSolid>();
-            ((IXSolid)shape).Volume.Should().BeApproximately(125458771.93626986, 1e-5);
+            ((IXSolid)shape).Volume.Should().BeApproximately(125458771.93626986, Precision);
         }
 
 
@@ -230,7 +232,7 @@ namespace Xbim.Geometry.Engine.Tests
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Create(booleanOp) as IXbimSolid;
             shape.Should().NotBeNull();
-            shape.Volume.Should().BeApproximately(3.4498500000004735, 1e-5);
+            shape.Volume.Should().BeApproximately(3.4498500000004735, Precision);
         }
 
 #if !DEBUG
@@ -275,7 +277,7 @@ namespace Xbim.Geometry.Engine.Tests
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Create(booleanOp) as IXbimSolid;
             shape.Should().NotBeNull();
-            shape.Volume.Should().BeApproximately(1.832928042298613e-5, 1e-5);
+            shape.Volume.Should().BeApproximately(1.832928042298613e-5, Precision);
         }
         [Fact]
         public void Can_build_boolean_result_with_bad_polygonal_half_space_bounds()
@@ -285,7 +287,25 @@ namespace Xbim.Geometry.Engine.Tests
             var booleanOp = model.Instances[1] as IIfcBooleanClippingResult;
             var shape = geomEngine.Create(booleanOp) as IXbimSolid;
             shape.Should().NotBeNull();
-            shape.Volume.Should().BeApproximately(0.91613407890247534, 1e-5);
+            shape.Volume.Should().BeApproximately(0.91613407890247534, Precision);
         }
+
+
+        [Theory]
+        [InlineData(@"TestFiles\IFC4TestFiles\wffdmcc3-_Navis - Existing.ifc")]
+        public void CanBuildIfcClippingBooleanResult(string filePath)
+        {
+            // Arrange
+            using var model = MemoryModel.OpenRead(filePath);
+            var booleanResult = model.Instances[206469] as IIfcBooleanClippingResult;
+            var modelSvc = factory.CreateModelGeometryService(model, _loggerFactory);
+
+            // Act
+            var solid = modelSvc.BooleanFactory.Build(booleanResult);
+
+            // Assert
+            solid.Should().NotBeNull();
+        }
+
     }
 }

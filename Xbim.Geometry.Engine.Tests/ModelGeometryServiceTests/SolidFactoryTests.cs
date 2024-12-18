@@ -5,6 +5,7 @@ using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4;
 using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4x3.GeometryResource;
 using Xbim.IO.Memory;
 using Xunit;
 
@@ -16,12 +17,12 @@ namespace Xbim.Geometry.Engine.Tests
         #region Setup
 
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IXbimGeometryServicesFactory factory;
+        private readonly IXbimGeometryServicesFactory _factory;
         readonly IXModelGeometryService _modelSvc;
         public SolidFactoryTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory factory)
         {
             _loggerFactory = loggerFactory;
-            this.factory = factory;
+            _factory = factory;
             var dummyModel = new MemoryModel(new EntityFactoryIfc4());
             dummyModel.ModelFactors = new XbimModelFactors(1, 0.001, 1e-5);
             _modelSvc = factory.CreateModelGeometryService(dummyModel, _loggerFactory);
@@ -337,7 +338,7 @@ namespace Xbim.Geometry.Engine.Tests
         public void Can_extrude_arbitrary_profile_def_with_voids()
         {
             using var model = MemoryModel.OpenRead("testfiles/ExtrudedAreaSolidFailsOnExtrusion.ifc");
-            var engine = factory.CreateGeometryEngineV6(model, _loggerFactory);
+            var engine = _factory.CreateGeometryEngineV6(model, _loggerFactory);
             var ifcExtrudedAreaSolid = model.Instances[1] as IIfcExtrudedAreaSolid;
             var v6Solid = engine.SolidFactory.Build(ifcExtrudedAreaSolid) as IXSolid;
             Assert.NotNull(v6Solid);
@@ -346,9 +347,6 @@ namespace Xbim.Geometry.Engine.Tests
             v5Solid.Volume.Should().BeApproximately(v6Solid.Volume, 1e-5);
         }
         #endregion
-   
-    
-    
     }
 
 }

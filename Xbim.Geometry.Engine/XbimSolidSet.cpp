@@ -974,7 +974,7 @@ namespace Xbim
 				return;
 			}
 
-
+			
 
 			IXbimSolidSet^ result;
 			try
@@ -982,15 +982,15 @@ namespace Xbim
 
 				switch (boolOp->Operator)
 				{
-				case IfcBooleanOperator::UNION:
-					result = left->Union(right, _modelServices->Precision, logger);
-					break;
-				case IfcBooleanOperator::INTERSECTION:
-					result = left->Intersection(right, _modelServices->Precision, logger);
-					break;
-				case IfcBooleanOperator::DIFFERENCE:
-					result = left->Cut(right, _modelServices->Precision, logger);
-					break;
+					case IfcBooleanOperator::UNION:
+						result = left->Union(right, _modelServices->Model->ModelFactors->PrecisionBoolean, logger);
+						break;
+					case IfcBooleanOperator::INTERSECTION:
+						result = left->Intersection(right, _modelServices->Model->ModelFactors->PrecisionBoolean, logger);
+						break;
+					case IfcBooleanOperator::DIFFERENCE:
+						result = left->Cut(right, _modelServices->Model->ModelFactors->PrecisionBoolean, logger);
+						break;
 				}
 				//XbimOccWriter::Write(result, "c:/tmp/bop" + boolOp->ToString()->Replace(";","") +".txt");
 			}

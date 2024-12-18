@@ -127,6 +127,9 @@
 		<None Update="TestFiles\Github\Github_issue_473_minimal.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\Ifc4TestFiles\wffdmcc3-_Navis - Existing.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\IFC4x3\01 - ACCA - RFI - Track - Cancello - San Felice a Cancello.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
