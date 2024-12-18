@@ -185,22 +185,22 @@ namespace Xbim
                 XShapeType shapeType = shape->ShapeType;
                 switch (shapeType)
                 {
-                case XShapeType::Vertex:
-                    return gcnew XVertex(TopoDS::Vertex(Transform(*static_cast<XVertex^>(shape)->Ptr(), matrix)));
-                case XShapeType::Edge:
-                    return gcnew XEdge(TopoDS::Edge(Transform(*static_cast<XEdge^>(shape)->Ptr(), matrix)));
-                case XShapeType::Wire:
-                    return gcnew XWire(TopoDS::Wire(Transform(*static_cast<XWire^>(shape)->Ptr(), matrix)));
-                case XShapeType::Face:
-                    return gcnew XFace(TopoDS::Face(Transform(*static_cast<XFace^>(shape)->Ptr(), matrix)));
-                case XShapeType::Shell:
-                    return gcnew XShell(TopoDS::Shell(Transform(*static_cast<XShell^>(shape)->Ptr(), matrix)));
-                case XShapeType::Solid:
-                    return gcnew XSolid(TopoDS::Solid(Transform(*static_cast<XSolid^>(shape)->Ptr(), matrix)));
-                case XShapeType::Compound:
-                    return gcnew XCompound(TopoDS::Compound(Transform(*static_cast<XCompound^>(shape)->Ptr(), matrix)));
-                default:
-                    break;
+                    case XShapeType::Vertex:
+                        return gcnew XVertex(TopoDS::Vertex(Transform(*static_cast<XVertex^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Edge:
+                        return gcnew XEdge(TopoDS::Edge(Transform(*static_cast<XEdge^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Wire:
+                        return gcnew XWire(TopoDS::Wire(Transform(*static_cast<XWire^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Face:
+                        return gcnew XFace(TopoDS::Face(Transform(*static_cast<XFace^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Shell:
+                        return gcnew XShell(TopoDS::Shell(Transform(*static_cast<XShell^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Solid:
+                        return gcnew XSolid(TopoDS::Solid(Transform(*static_cast<XSolid^>(shape)->Ptr(), matrix)));
+                    case XShapeType::Compound:
+                        return gcnew XCompound(TopoDS::Compound(Transform(*static_cast<XCompound^>(shape)->Ptr(), matrix)));
+                    default:
+                        break;
                 }
                 throw gcnew XbimGeometryServiceException(
                     "Transform not supported for this shape type: " + shapeType.ToString());

@@ -54,18 +54,17 @@ namespace Xbim
 				TopoDS_Shape result;
 				switch (boolResult->Operator)
 				{
-				case IfcBooleanOperator::UNION:
-					result = EXEC_NATIVE->Union(firstSolid, secondSolid, _modelService->MinimumGap, hasWarnings);
-					break;
-				case IfcBooleanOperator::DIFFERENCE:
-					result = EXEC_NATIVE->Cut(firstSolid, secondSolid, _modelService->MinimumGap, hasWarnings);
-					break;
-				case IfcBooleanOperator::INTERSECTION:
-					result = EXEC_NATIVE->Intersect(firstSolid, secondSolid, _modelService->MinimumGap, hasWarnings);
-					break;
-				default:
-					throw RaiseGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString(), boolResult);
-					//break;
+					case IfcBooleanOperator::UNION:
+						result = EXEC_NATIVE->Union(firstSolid, secondSolid, _modelService->Model->ModelFactors->PrecisionBoolean, hasWarnings);
+						break;
+					case IfcBooleanOperator::DIFFERENCE:
+						result = EXEC_NATIVE->Cut(firstSolid, secondSolid, _modelService->Model->ModelFactors->PrecisionBoolean, hasWarnings);
+						break;
+					case IfcBooleanOperator::INTERSECTION:
+						result = EXEC_NATIVE->Intersect(firstSolid, secondSolid, _modelService->Model->ModelFactors->PrecisionBoolean, hasWarnings);
+						break;
+					default:
+						throw RaiseGeometryFactoryException("Not implemented. BooleanOperation type: " + boolResult->Operator.ToString(), boolResult);
 				}
 				if (hasWarnings)
 					LogDebug(boolResult, "Boolean Result of {0} issued warnings. See logs", boolResult->Operator.ToString());
@@ -73,7 +72,6 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Boolean Result returned an empty shape", boolResult);
 				else
 				{
-					/*auto resultStr = result.IsNull() ? "" : XShape::GetXbimShape(result)->BrepString();*/
 					return result;
 				}
 			}
@@ -100,7 +98,7 @@ namespace Xbim
 
 			TopoDS_Shape BooleanFactory::Cut(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
 			{
-				return Cut(arguments, tools, ModelGeometryService->MinimumGap);
+				return Cut(arguments, tools, ModelGeometryService->Model->ModelFactors->PrecisionBoolean);
 			}
 
 			TopoDS_Shape BooleanFactory::Cut(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
@@ -117,7 +115,7 @@ namespace Xbim
 
 			TopoDS_Shape BooleanFactory::Union(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
 			{
-				return Union(arguments, tools, ModelGeometryService->MinimumGap);
+				return Union(arguments, tools, ModelGeometryService->Model->ModelFactors->PrecisionBoolean);
 			}
 
 			TopoDS_Shape BooleanFactory::Union(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
@@ -134,7 +132,7 @@ namespace Xbim
 
 			TopoDS_Shape BooleanFactory::Intersect(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools)
 			{
-				return Intersect(arguments, tools, ModelGeometryService->MinimumGap);
+				return Intersect(arguments, tools, ModelGeometryService->Model->ModelFactors->PrecisionBoolean);
 			}
 
 			TopoDS_Shape BooleanFactory::Intersect(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double tolerance)
