@@ -25,6 +25,7 @@
 		<PackageReference Include="FluentAssertions" Version="6.10.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
 		<PackageReference Include="Moq" Version="4.18.4" />
+		<PackageReference Include="NetTopologySuite.IO.SpatiaLite" Version="2.0.0" />
 		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.abstractions" Version="2.0.3" />
 		<PackageReference Include="Xunit.DependencyInjection.Logging" Version="9.0.0" />
@@ -92,6 +93,9 @@
 		<None Update="TestFiles\Brep\Flow Terminal.brep">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\Brep\IfcClippingResult.brep">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\closed_shell_is_valid_test.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -132,6 +136,9 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\Github\Github_issue_473_minimal.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\Ifc4TestFiles\wffdmcc3-_Navis - Existing.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\IFC4x3\01 - ACCA - RFI - Track - Cancello - San Felice a Cancello.ifc">
