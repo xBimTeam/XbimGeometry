@@ -1,17 +1,20 @@
 #pragma once
-#include "XbimSolid.h"
-#include "XbimShell.h"
-#include "XbimFace.h"
+
 
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopExp_Explorer.hxx>
 #include <Precision.hxx>
 
-using namespace System::Collections::Generic;
+#include "XbimSolid.h"
+#include "XbimShell.h"
+#include "XbimFace.h"
+
+
+using namespace Microsoft::Extensions::Logging;
 using namespace Xbim::Ifc4;
 using namespace Xbim::Common::Geometry;
-
+using namespace Xbim::Ifc4::Interfaces;
 namespace Xbim
 {
 	namespace Geometry
@@ -21,22 +24,22 @@ namespace Xbim
 		{
 		private:
 			
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property TopoDS_Compound* pCompound
 			{
 				TopoDS_Compound* get() sealed { return (TopoDS_Compound*)ptrContainer.ToPointer(); }
-				void set(TopoDS_Compound* val)sealed { ptrContainer = IntPtr(val); }
+				void set(TopoDS_Compound* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
-			XbimCompound(){};
-			static XbimCompound^ empty = gcnew XbimCompound();
+			XbimCompound(ModelGeometryService^ modelService) :XbimOccShape(modelService) {};
+			
 			bool _isSewn;
 			double _sewingTolerance;
 			void InstanceCleanup();
 			bool WithinTolerance(const  TopoDS_Wire& topoOuterLoop, const TopoDS_Face& topoAdvancedFace, double _sewingTolerance);
 			//Initialisers
 			void Init(IIfcConnectedFaceSet^ faceSet,  ILogger^ logger);
-			TopoDS_Shape InitFaces(IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
-			TopoDS_Shape InitAdvancedFaces(IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
+			TopoDS_Shape InitFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ faces,IIfcRepresentationItem^ theItem, ILogger^ logger);
+			TopoDS_Shape InitAdvancedFaces(System::Collections::Generic::IEnumerable<IIfcFace^>^ faces, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
 			void Init(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
@@ -49,30 +52,31 @@ namespace Xbim
 			void Init(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
 			
 			//Helpers
-			XbimFace^ BuildFace(List<Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
+			XbimFace^ BuildFace(List<System::Tuple<XbimWire^, IIfcPolyLoop^, bool>^>^ wires, IIfcFace^ face, ILogger^ logger);
 			static void  GetConnected(HashSet<XbimSolid^>^ connected, Dictionary<XbimSolid^, HashSet<XbimSolid^>^>^ clusters, XbimSolid^ clusterAround);
 			
 			
 		public:
 			~XbimCompound(){ InstanceCleanup(); }
 			!XbimCompound(){ InstanceCleanup(); }
-			XbimCompound(double sewingTolerance);
-			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance);
-			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag);
-			XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger);
-			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger);
-			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger);
-			XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
-			XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger);
-			XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger);
-			XbimCompound(IIfcClosedShell^ solid, ILogger^ logger);
-			XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger);
-			XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger);
-			static property XbimCompound^ Empty{XbimCompound^ get(){ return empty; }};
+			XbimCompound(double sewingTolerance, ModelGeometryService^ modelService);
+			XbimCompound(const TopoDS_Shape& shape,ModelGeometryService^ modelService); 
+			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, ModelGeometryService^ modelService);
+			XbimCompound(const TopoDS_Compound& compound, bool sewn, double tolerance, Object^ tag, ModelGeometryService^ modelService);
+			XbimCompound(IIfcConnectedFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcShellBasedSurfaceModel^ sbsm, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcFaceBasedSurfaceModel^ fbsm, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcFacetedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcAdvancedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcAdvancedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcClosedShell^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcTriangulatedFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimCompound(IIfcPolygonalFaceSet^ faceSet, ILogger^ logger, ModelGeometryService^ modelService);
+			
 #pragma region IXbimCompound Interface
-			virtual property bool IsValid {bool get() override { return ptrContainer != IntPtr::Zero && Count > 0; }; }
+			virtual property bool IsValid {bool get() override { return ptrContainer != System::IntPtr::Zero && Count > 0; }; }
 			virtual property bool IsSet{bool get() override { return true; }; }
 			virtual property  XbimGeometryObjectType GeometryType  {XbimGeometryObjectType  get()override { return XbimGeometryObjectType::XbimCompoundType; }}
 			virtual property int Count{int get(); }
@@ -104,12 +108,12 @@ namespace Xbim
 			operator const TopoDS_Compound& () { return *pCompound; }
 			virtual operator const TopoDS_Shape& () override { return *pCompound; }
 			virtual property bool IsSewn{bool get(){ return _isSewn; }}
-			virtual IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimGeometryObject^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{return GetEnumerator();}
 			//Upgrades the result to the highest level and simplest object without loss of representation
 			IXbimGeometryObject^ Upgrade();
 			IXbimShell^ MakeShell();
-			static XbimCompound^ Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
+			static XbimCompound^ Merge(IXbimSolidSet^ solids, double tolerance, ILogger^ logger, ModelGeometryService^ modelServices);
 			XbimCompound^ Cut(XbimCompound^ solids, double tolerance, ILogger^ logger);
 			XbimCompound^ Union(XbimCompound^ solids, double tolerance, ILogger^ logger);
 			XbimCompound^ Intersection(XbimCompound^ solids, double tolerance, ILogger^ logger);

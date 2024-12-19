@@ -1,11 +1,14 @@
-﻿using System;
+﻿#if NETWORKFRAMEWORK
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Win32;
 
+
 // ReSharper disable once CheckNamespace
 namespace Xbim.ModelGeometry
 {
+
     public static class XbimEnvironment
     {
         /// <summary>
@@ -80,3 +83,4 @@ namespace Xbim.ModelGeometry
         }
     }
 }
+#endif

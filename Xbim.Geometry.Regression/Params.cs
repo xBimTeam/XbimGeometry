@@ -19,7 +19,7 @@ namespace XbimRegression
         public bool AdjustWcs = true;
         public bool ReportProgress = false;
         public List<int> WriteBreps = null;
-        public bool GeometryV1;
+        public bool GeometryV1; 
 
         public Params(string[] args)
         {

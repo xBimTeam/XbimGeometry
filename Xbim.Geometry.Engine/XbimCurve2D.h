@@ -1,8 +1,12 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <Geom2d_Curve.hxx>
+#include "XbimGeometryObject.h"
+#include <Geom2d_TrimmedCurve.hxx>
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Geometry;
+using namespace Microsoft::Extensions::Logging;
+using namespace Xbim::Geometry::Services;
 namespace Xbim
 {
 	namespace Geometry
@@ -10,11 +14,11 @@ namespace Xbim
 		ref class XbimCurve2D : IXbimCurve, XbimGeometryObject
 		{
 		private:
-			IntPtr ptrContainer;
+			System::IntPtr ptrContainer;
 			virtual property Handle(Geom2d_Curve)* pCurve2D
 			{
 				Handle(Geom2d_Curve)* get() sealed { return (Handle(Geom2d_Curve)*)ptrContainer.ToPointer(); }
-				void set(Handle(Geom2d_Curve)* val)sealed { ptrContainer = IntPtr(val); }
+				void set(Handle(Geom2d_Curve)* val)sealed { ptrContainer = System::IntPtr(val); }
 			}
 			void InstanceCleanup();
 			void Init(IIfcGridAxis^ axis, ILogger^ logger);
@@ -30,23 +34,31 @@ namespace Xbim
 			void Init(IIfcOffsetCurve2D^ offset, ILogger^ logger);
 			void Init(IIfcPcurve^ curve, ILogger^ logger);
 		public:
-			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d);
-			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2);
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, ModelGeometryService^ modelService) :XbimGeometryObject(modelService)
+			{
+				this->pCurve2D = new Handle(Geom2d_Curve);
+				*pCurve2D = curve2d;
+			};
+			XbimCurve2D(const Handle(Geom2d_Curve)& curve2d, double p1, double p2, ModelGeometryService^ modelService) :XbimGeometryObject(modelService)
+			{
+				this->pCurve2D = new Handle(Geom2d_Curve);
+				*pCurve2D = new Geom2d_TrimmedCurve(curve2d, p1, p2, true);
+			}
 			
 			//destructors
 			~XbimCurve2D(){ InstanceCleanup(); }
 			!XbimCurve2D(){ InstanceCleanup(); }
 
-		    XbimCurve2D(IIfcGridAxis^ axis, ILogger^ logger) { Init(axis,logger); }
-			XbimCurve2D(IIfcCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcPolyline^ curv, ILogger^ logger) { Init(curv, logger); }
-			XbimCurve2D(IIfcCircle^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcEllipse^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcLine^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcTrimmedCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcBSplineCurve^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger) { Init(curve, logger); }
-			XbimCurve2D(IIfcOffsetCurve2D^ curve, ILogger^ logger){ Init(curve, logger); }
+		    XbimCurve2D(IIfcGridAxis^ axis, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(axis,logger); }
+			XbimCurve2D(IIfcCurve^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcPolyline^ curv, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curv, logger); }
+			XbimCurve2D(IIfcCircle^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcEllipse^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcLine^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcTrimmedCurve^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcBSplineCurve^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcBSplineCurveWithKnots^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
+			XbimCurve2D(IIfcOffsetCurve2D^ curve, ILogger^ logger, ModelGeometryService^ modelService) :XbimGeometryObject(modelService) { Init(curve, logger); }
 
 #pragma region operators
 			operator const Handle(Geom2d_Curve)& () { return *pCurve2D; }
@@ -58,7 +70,7 @@ namespace Xbim
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() override { return XbimGeometryObjectType::XbimCurveType; }; }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) override;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D)override;
-			virtual IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector,double tolerance, ILogger^logger);
+			virtual System::Collections::Generic::IEnumerable<XbimPoint3D>^ Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ logger);
 			virtual property XbimPoint3D Start{XbimPoint3D get(); }
 			virtual property XbimPoint3D End{XbimPoint3D get(); }
 			virtual property double Length{double get(); }

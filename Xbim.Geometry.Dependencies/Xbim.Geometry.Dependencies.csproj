@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net472</TargetFramework>
+		<Configurations>Debug;Release</Configurations>
+		<Platforms>x64;x86;AnyCPU</Platforms>
+		<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+		<RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
+		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
+		<PlatformTarget>x86</PlatformTarget>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(PlatformTarget)'=='x86'">
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(PlatformTarget)'=='x64'">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
+	
+	<ItemGroup>
+	  <None Include="..\xbim-toolkit-icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+	<ItemGroup>
+    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.363-develop" />
+	</ItemGroup>
+	
+	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">
+		<Message Importance="high" Text="Building x64 Platform: $(Platform)" />
+		<MSBuild Projects="$(MSBuildProjectFile)" Properties="Platform = AnyCPU;PlatformTarget=x64;Configuration=$(Configuration);RunTimeIdentifier=win-x64" RunEachTargetSeparately="true" />
+	</Target>
+
+</Project>

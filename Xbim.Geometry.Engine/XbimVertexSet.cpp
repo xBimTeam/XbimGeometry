@@ -1,18 +1,36 @@
-#include "XbimVertexSet.h"
-#include "XbimConvert.h"
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>
+#include "XbimVertexSet.h"
+#include "XbimConvert.h"
+#include <BRep_Builder.hxx>
 
-
-using namespace System;
+#include "./BRep/XCompound.h"
+#include "XbimGeometryObjectSet.h"
 namespace Xbim
 {
 	namespace Geometry
 	{
+		IXCompound^ XbimVertexSet::ToXCompound()
+		{
+			return gcnew Xbim::Geometry::BRep::XCompound(XbimGeometryObjectSet::CreateCompound(Enumerable::Cast<IXbimGeometryObject^>(vertices)));
+		}
+		XbimVertexSet::operator  TopoDS_Shape ()
+		{
+			BRep_Builder builder;
+			TopoDS_Compound bodyCompound;
+			builder.MakeCompound(bodyCompound);
+			for each (IXbimVertex ^ vertex in vertices)
+			{
+				builder.Add(bodyCompound, (XbimVertex^) vertex);
+			}
+			return bodyCompound;
+		}
 #pragma region Constructors
 		
 
-		XbimVertexSet::XbimVertexSet(const TopoDS_Shape& shape)
+
+		XbimVertexSet::XbimVertexSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService) : XbimSetObject(modelService)
 		{
 			TopTools_IndexedMapOfShape map;
 			TopExp::MapShapes(shape, TopAbs_VERTEX, map);
@@ -21,7 +39,7 @@ namespace Xbim
 				vertices->Add(gcnew XbimVertex(TopoDS::Vertex(map(i))));
 		}
 
-		XbimVertexSet::XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices)
+		XbimVertexSet::XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices, ModelGeometryService^ modelService) : XbimSetObject(modelService)
 		{
 			this->vertices = gcnew List<IXbimVertex^>(vertices);
 		}
@@ -47,7 +65,7 @@ namespace Xbim
 			{
 				result->Add((IXbimVertex^)vertex->Transform(matrix3D));
 			}
-			return gcnew XbimVertexSet(result);
+			return gcnew XbimVertexSet(result, _modelServices);
 		}
 
 		IXbimGeometryObject^ XbimVertexSet::TransformShallow(XbimMatrix3D matrix3D)
@@ -57,13 +75,13 @@ namespace Xbim
 			{
 				result->Add((IXbimVertex^)((XbimVertex^)vertex)->TransformShallow(matrix3D));
 			}
-			return gcnew XbimVertexSet(result);
+			return gcnew XbimVertexSet(result, _modelServices);
 		}
 
 		IXbimGeometryObject ^ XbimVertexSet::Transformed(IIfcCartesianTransformationOperator ^ transformation)
 		{
 			if (!IsValid) return this;
-			XbimVertexSet^ result = gcnew XbimVertexSet();
+			XbimVertexSet^ result = gcnew XbimVertexSet(_modelServices);
 			for each (XbimVertex^ vertex in vertices)
 				result->Add((XbimVertex^)vertex->Transformed(transformation));
 			return result;
@@ -72,7 +90,7 @@ namespace Xbim
 		IXbimGeometryObject ^ XbimVertexSet::Moved(IIfcPlacement ^ placement)
 		{
 			if (!IsValid) return this;
-			XbimVertexSet^ result = gcnew XbimVertexSet();
+			XbimVertexSet^ result = gcnew XbimVertexSet(_modelServices);
 			TopLoc_Location loc = XbimConvert::ToLocation(placement);
 			for each (IXbimVertex^ vertex in vertices)
 			{
@@ -86,8 +104,8 @@ namespace Xbim
 		IXbimGeometryObject ^ XbimVertexSet::Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger )
 		{
 			if (!IsValid) return this;
-			XbimVertexSet^ result = gcnew XbimVertexSet();
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger);
+			XbimVertexSet^ result = gcnew XbimVertexSet(_modelServices);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement, logger, _modelServices);
 			for each (IXbimVertex^ vertex in vertices)
 			{
 				XbimVertex^ copy = gcnew XbimVertex((XbimVertex^)vertex, Tag);
@@ -99,7 +117,7 @@ namespace Xbim
 
 		void XbimVertexSet::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/, double /*deflection*/, double /*angle*/)
 		{
-			throw gcnew NotImplementedException("XbimVertexSet::Mesh");
+			throw gcnew System::NotImplementedException("XbimVertexSet::Mesh");
 		}
 
 

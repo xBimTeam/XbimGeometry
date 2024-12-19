@@ -1,10 +1,10 @@
 #pragma once
-#include "XbimFace.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include "XbimFace.h"
 
-using namespace System::Collections::Generic;
 namespace Xbim
 {
 	namespace Geometry
@@ -13,19 +13,21 @@ namespace Xbim
 		{
 		private:
 			List<IXbimFace^>^ faces;
-			static XbimFaceSet^ empty = gcnew XbimFaceSet();
-			XbimFaceSet::XbimFaceSet(){ faces = gcnew List<IXbimFace^>(1); }
+			
+			
 			void InstanceCleanup()
 			{
 				faces = nullptr;
 			};
 		public:
-			static property XbimFaceSet^ Empty{XbimFaceSet^ get(){ return empty; }};
+			
 
 #pragma region Constructors
-			XbimFaceSet(const TopoDS_Shape& shape);
-			XbimFaceSet(const TopTools_ListOfShape & shapes);
-			XbimFaceSet(List<IXbimFace^>^ faces);
+			IXCompound^ ToXCompound();
+			XbimFaceSet(ModelGeometryService^ modelService) :XbimSetObject(modelService) { faces = gcnew List<IXbimFace^>(1); }
+			XbimFaceSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			XbimFaceSet(const TopTools_ListOfShape & shapes, ModelGeometryService^ modelService);
+			XbimFaceSet(List<IXbimFace^>^ faces, ModelGeometryService^ modelService);
 #pragma endregion
 
 #pragma region destructors
@@ -37,7 +39,7 @@ namespace Xbim
 
 
 #pragma region operators
-
+			operator TopoDS_Shape () override;
 			virtual property IXbimFace^ default[int]
 			{
 				IXbimFace^ get(int index)
@@ -74,7 +76,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimFaceSetType; }}
-			virtual IEnumerator<IXbimFace^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimFace^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);

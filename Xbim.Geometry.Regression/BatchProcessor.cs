@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xbim.Common;
+using Xbim.Common.Configuration;
+using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
@@ -21,10 +22,45 @@ namespace XbimRegression
     {
 
         readonly Params _params;
+        private readonly ILoggerFactory _loggerFactory;
+        private string _currentLogFileName = "BatchProcessor.log";
+        private readonly ILogger<BatchProcessor> _logger;
 
         public BatchProcessor(Params arguments)
         {
             _params = arguments;
+            _loggerFactory = LoggerFactory.Create(builder => builder
+                .AddConsole().SetMinimumLevel(LogLevel.Trace)
+                .AddFile("{0}", fileLoggerOpts =>
+                {
+                    fileLoggerOpts.FormatLogFileName = fName =>
+                    {
+                        return String.Format(fName, _currentLogFileName);
+                    };
+                    fileLoggerOpts.FormatLogEntry = (msg) =>
+                    {
+                        var sb = new System.Text.StringBuilder();
+                        StringWriter sw = new StringWriter(sb);
+                        var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
+                        jsonWriter.WriteStartArray();
+                        jsonWriter.WriteValue(DateTime.Now.ToString("o"));
+                        jsonWriter.WriteValue(msg.LogLevel.ToString());
+                        jsonWriter.WriteValue(msg.EventId.Id);
+                        jsonWriter.WriteValue(msg.Message);
+                        jsonWriter.WriteValue(msg.Exception?.ToString());
+                        jsonWriter.WriteEndArray();
+                        return sb.ToString();
+                    };
+                    fileLoggerOpts.MinLevel = LogLevel.Trace;
+                }));
+            // Configure xbim services / logging & geometry
+            XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    // .AddHeuristicModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+            
+            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
         public Params Params
@@ -34,50 +70,35 @@ namespace XbimRegression
 
         public void Run()
         {
-            FileInfo f = new FileInfo(Params.ResultsFile);
-            Console.WriteLine($"Reporting to \"{f.FullName}\"");
+            FileInfo csvFileInfo = new FileInfo(Params.ResultsFile);
+            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");
 
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
+
             // ParallelOptions opts = new ParallelOptions() { MaxDegreeOfParallelism = 12 };
 
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
             {
+                
                 //set up a  log file for this file run                 
-                var logFile = Path.ChangeExtension(file.FullName, "log");
-                ProcessResult result;
-                using (var loggerFactory = new LoggerFactory())
-                {
-                    loggerFactory.AddConsole(LogLevel.Error)
-                        .AddProvider(new NReco.Logging.File.FileLoggerProvider(logFile, false)
-                            {
-                                FormatLogEntry = (msg) =>
-                                {
-                                    var sb = new System.Text.StringBuilder();
-                                    StringWriter sw = new StringWriter(sb);
-                                    var jsonWriter = new Newtonsoft.Json.JsonTextWriter(sw);
-                                    jsonWriter.WriteStartArray();
-                                    jsonWriter.WriteValue(DateTime.Now.ToString("o"));
-                                    jsonWriter.WriteValue(msg.LogLevel.ToString());
-                                    jsonWriter.WriteValue(msg.EventId.Id);
-                                    jsonWriter.WriteValue(msg.Message);
-                                    jsonWriter.WriteValue(msg.Exception?.ToString());
-                                    jsonWriter.WriteEndArray();
-                                    return sb.ToString();
-                                },
-                                MinLevel = Params.MaxThreads == 1 ? LogLevel.Trace : LogLevel.Information // if doing one at a time, we want to trace progress.
-                            });
-                    var logger = loggerFactory.CreateLogger<BatchProcessor>();
-                    Console.WriteLine($"Processing {file}");
-                    result = ProcessFile(file.FullName, writer, Params.AdjustWcs, logger);
-
-                }
-
-                var txt = File.ReadAllText(logFile);
+                _currentLogFileName = Path.ChangeExtension(file.FullName, "log");
+                var runLogFileName = _currentLogFileName;
+                if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
+                Console.WriteLine($"Processing {file}");
+                ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
+                
+                _logger.LogInformation($"Processed {file.FullName}");
+                _currentLogFileName = "BatchProcessor.log";
+                _logger.LogInformation($"Processing {file.FullName}");
+                Console.WriteLine($"Processing run results from log file {runLogFileName}");
+               
+                var txt = File.ReadAllText(runLogFileName);
+                
                 if (string.IsNullOrEmpty(txt))
                 {
-                    File.Delete(logFile);
+                    File.Delete(runLogFileName);
                     result.Errors = 0;
                     result.Warnings = 0;
                     result.Information = 0;
@@ -99,11 +120,12 @@ namespace XbimRegression
                 }
                 result.FileName = file.Name;
                 writer.WriteLine(result.ToCsv());
+                _logger.LogInformation($"Writing run results to {csvFileInfo.FullName}");
                 writer.Flush();
             }
 
             writer.Close();
-            
+
             Console.WriteLine("Finished. Press Enter to continue...");
 
             Console.ReadLine();
@@ -129,7 +151,7 @@ namespace XbimRegression
                 Console.WriteLine("");
             }
             if (userState.ToString() != lastState)
-        {
+            {
                 lastState = userState.ToString();
                 if (!stateIsComplete)
                     Console.WriteLine("");
@@ -145,8 +167,10 @@ namespace XbimRegression
             stateIsComplete = false;
         }
 
-        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILogger logger)
+        private ProcessResult ProcessFile(string ifcFile, StreamWriter writer, bool adjustWCS, ILoggerFactory loggerFactory)
         {
+            // var logger = loggerFactory.CreateLogger<BatchProcessor>();
+
             RemoveFiles(ifcFile);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
@@ -161,11 +185,11 @@ namespace XbimRegression
                         progress = progressReport;
                     }
                     watch.Start();
-                    using (var model = ParseModelFile(ifcFile, Params.Caching, logger, progress))
+                    using (var model = ParseModelFile(ifcFile, Params.Caching, _logger, progress))
                     {
                         var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        var context = new Xbim3DModelContext(model, logger: logger);
+                        var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, XGeometryEngineVersion.V6);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
@@ -217,7 +241,7 @@ namespace XbimRegression
                             var path = Path.Combine(
                                     Path.GetDirectoryName(ifcFile),
                                     Path.GetFileName(ifcFile) + ".brep.unclassified");
-                            IXbimGeometryEngine engine = new XbimGeometryEngine();
+                            var engine = new XbimGeometryEngine(model, loggerFactory);
                             if (!Directory.Exists(path))
                                 Directory.CreateDirectory(path);
                             IfcStore s = model as IfcStore;
@@ -268,9 +292,9 @@ namespace XbimRegression
                                     {
                                         Xbim.Common.Geometry.IXbimGeometryObject created = null;
                                         if (ent is IIfcGeometricRepresentationItem igri)
-                                            created = engine.Create(igri);
+                                            created = engine.Create(igri, _logger);
                                         if (ent is IIfcConnectedFaceSet icfs)
-                                            created = engine.CreateShell(icfs);
+                                            created = engine.CreateShell(icfs, _logger);
                                         // IIfcConnectedFaceSet
                                         if (created != null)
                                         {
@@ -307,16 +331,18 @@ namespace XbimRegression
 
                 catch (Exception ex)
                 {
-                    logger.LogError(string.Format("Problem converting file: {0}", ifcFile), ex);
+                    Console.WriteLine(ex.Message);
+                    _logger.LogError(ex, "Problem converting file: {ifcFile}", ifcFile);
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
+                
 
                 return result;
             }
         }
 
-        
+
 
         private Xbim3DModelContext.MeshingBehaviourResult CustomMeshingBehaviour(int elementId, int typeId, ref double linearDeflection, ref double angularDeflection)
         {
@@ -333,7 +359,7 @@ namespace XbimRegression
             IModel ret = null;
             if (string.IsNullOrWhiteSpace(ifcFileName))
             {
-                logger.LogError("Missing file to parse: '{0}'", ifcFileName);
+                logger.LogError("Missing file to parse: '{ifcFileName}'", ifcFileName);
                 return null;
             }
             // create a callback for progress

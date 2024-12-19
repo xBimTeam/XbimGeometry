@@ -1,34 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net472</TargetFrameworks>
-    <Title>Xbim ModelGeometry Scene</Title>
-    <IsPackable>true</IsPackable>
-    <Description>Provides support for the Geometry Scene creation.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
-    <PackageIcon>xbim-toolkit-icon.png</PackageIcon>
-    <Version>5.1.0.0-Dev</Version>
-    <AssemblyVersion>5.1.0.1</AssemblyVersion>
-    <FileVersion>5.1.0.1</FileVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net472;net6.0</TargetFrameworks>
+		<Title>Xbim ModelGeometry Scene</Title>
+		<Description>Provides support for the Geometry Scene creation.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
+    <NoWarn>CS1591</NoWarn>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-  </PropertyGroup>
+	
+	<ItemGroup>
+		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.1" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Xbim.Ifc" Version="6.0.489" />
-    <PackageReference Include="Xbim.Tessellator" Version="6.0.489" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Configuration" />
-  </ItemGroup>
 </Project>

@@ -1,8 +1,8 @@
 #pragma once
-#include "XbimVertex.h"
+
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
+#include "XbimVertex.h"
 using namespace System::Collections::Generic;
 namespace Xbim
 {
@@ -12,18 +12,20 @@ namespace Xbim
 		{
 		private:			
 			List<IXbimVertex^>^ vertices;
-			static XbimVertexSet^ empty = gcnew XbimVertexSet();
-			XbimVertexSet::XbimVertexSet(){ vertices = gcnew List<IXbimVertex^>(1); }
+			
+			
 			void InstanceCleanup()
 			{
 				vertices = nullptr;
 			};
 		public:
-			static property XbimVertexSet^ Empty{XbimVertexSet^ get(){ return empty; }};
-
+			
+			IXCompound^ ToXCompound();
+			virtual operator  TopoDS_Shape () override;
 #pragma region Constructors
-			XbimVertexSet(const TopoDS_Shape& shape);
-			XbimVertexSet(IEnumerable<IXbimVertex^>^ vertices);
+			XbimVertexSet(ModelGeometryService^ modelService) : XbimSetObject(modelService) { vertices = gcnew List<IXbimVertex^>(1); }
+			XbimVertexSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			XbimVertexSet(System::Collections::Generic::IEnumerable<IXbimVertex^>^ vertices, ModelGeometryService^ modelService);
 #pragma endregion
 
 #pragma region destructors
@@ -70,7 +72,7 @@ namespace Xbim
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
 			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimVertexSetType; }}
-			virtual IEnumerator<IXbimVertex^>^ GetEnumerator();
+			virtual System::Collections::Generic::IEnumerator<IXbimVertex^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); }
 			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);

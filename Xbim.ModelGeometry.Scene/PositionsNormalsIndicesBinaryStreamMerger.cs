@@ -13,10 +13,8 @@ namespace Xbim.ModelGeometry.Scene
         UInt32 iPosNormalOffset = 0;
         public UInt32 iTotPosNormals = 0;
         public UInt32 iTotTriangles = 0;
-
-
-        MemoryStream msPosNormals = new MemoryStream();
-        MemoryStream msIndices = new MemoryStream();
+        readonly MemoryStream msPosNormals = new MemoryStream();
+        readonly MemoryStream msIndices = new MemoryStream();
 
         private byte[] _TransformData = null;
         public byte[] TransformData

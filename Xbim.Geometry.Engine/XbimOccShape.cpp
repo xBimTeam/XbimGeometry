@@ -1,10 +1,4 @@
-#include "XbimOccShape.h"
-#include "XbimFaceSet.h"
-#include "XbimShell.h"
-#include "XbimSolid.h"
-#include "XbimCompound.h"
-#include "XbimPoint3DWithTolerance.h"
-#include "XbimConvert.h"
+
 #include <BRepCheck_Analyzer.hxx>
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <Poly_Triangulation.hxx>
@@ -16,7 +10,6 @@
 #include <Bnd_Box.hxx>
 #include <BRepBndLib.hxx>
 #include <gp_Quaternion.hxx>
-#include "XbimWire.h"
 #include <TopExp.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Geom_Line.hxx>
@@ -25,6 +18,14 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <Geom_Plane.hxx>
 
+#include "XbimOccShape.h"
+#include "XbimFaceSet.h"
+#include "XbimShell.h"
+#include "XbimSolid.h"
+#include "XbimCompound.h"
+#include "XbimPoint3DWithTolerance.h"
+#include "XbimConvert.h"
+#include "XbimWire.h"
 using namespace System::Threading;
 using namespace System::Collections::Generic;
 
@@ -33,17 +34,14 @@ namespace Xbim
 {
 	namespace Geometry
 	{
-		XbimOccShape::XbimOccShape()
-		{
-		}
-
+		
 
 
 		void XbimOccShape::WriteTriangulation(TextWriter^ textWriter, double tolerance, double deflection, double angle)
 		{
 
 			if (!IsValid) return;
-			XbimFaceSet^ faces = gcnew XbimFaceSet(this);
+			XbimFaceSet^ faces = gcnew XbimFaceSet(this,_modelServices);
 
 			if (faces->Count == 0) return;
 
@@ -76,6 +74,7 @@ namespace Xbim
 					continue;
 				gp_Trsf transform = loc.Transformation();
 				gp_Quaternion quaternion = transform.GetRotation();
+				
 				triangleCount += mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
 				bool isPolygonal = face->IsPolygonal;
@@ -85,7 +84,7 @@ namespace Xbim
 				{
 					Poly::ComputeNormals(mesh); //we need the normals
 					norms = gcnew List<size_t>(mesh->NbNodes());
-					for (Standard_Integer i = 1; i <= mesh->NbNodes(); i++) //visit each node (it's 1-based)
+					for (Standard_Integer i = 1; i <= mesh->NbNodes() * 3; i += 3) //visit each node
 					{
 						gp_Dir dir = mesh->Normal(i);
 						if (faceReversed) 
@@ -134,13 +133,13 @@ namespace Xbim
 				faceIndex++;
 			}
 			// Write out header
-			textWriter->WriteLine(String::Format("P {0} {1} {2} {3} {4}", 1, points->Count, faces->Count, triangleCount, normals->Count));
+			textWriter->WriteLine(System::String::Format("P {0} {1} {2} {3} {4}", 1, points->Count, faces->Count, triangleCount, normals->Count));
 			//write out vertices and normals  
 			textWriter->Write("V");
-			for each (XbimPoint3D p in points) textWriter->Write(String::Format(" {0},{1},{2}", p.X, p.Y, p.Z));
+			for each (XbimPoint3D p in points) textWriter->Write(System::String::Format(" {0},{1},{2}", p.X, p.Y, p.Z));
 			textWriter->WriteLine();
 			textWriter->Write("N");
-			for each (XbimVector3D n in normals) textWriter->Write(String::Format(" {0},{1},{2}", n.X, n.Y, n.Z));
+			for each (XbimVector3D n in normals) textWriter->Write(System::String::Format(" {0},{1},{2}", n.X, n.Y, n.Z));
 			textWriter->WriteLine();
 
 			//now write out the faces
@@ -154,29 +153,29 @@ namespace Xbim
 				TopLoc_Location loc;
 				const Handle(Poly_Triangulation)& mesh = BRep_Tool::Triangulation(face, loc);
 				/*const TColgp_Array1OfPnt & nodes = mesh->Nodes();*/
-				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
+				
 				Standard_Integer nbTriangles = mesh->NbTriangles();
 				bool faceReversed = face->IsReversed;
 				Standard_Integer t[3];
 				for (Standard_Integer i = 1; i <= nbTriangles; i++) //add each triangle as a face
 				{
 					if (faceReversed) //get nodes in the correct order of triangulation
-						triangles(i).Get(t[2], t[1], t[0]);
+						mesh->Triangle(i).Get(t[2], t[1], t[0]);
 					else
-						triangles(i).Get(t[0], t[1], t[2]);
+						mesh->Triangle(i).Get(t[0], t[1], t[2]);
 					if (isPlanar)
 						if (i == 1)
-							textWriter->Write(String::Format(" {0}/{3},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[0]));
+							textWriter->Write(System::String::Format(" {0}/{3},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[0]));
 						else
-							textWriter->Write(String::Format(" {0},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1]));
+							textWriter->Write(System::String::Format(" {0},{1},{2}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1]));
 					else //need to write every one
-						textWriter->Write(String::Format(" {0}/{3},{1}/{4},{2}/{5}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[t[0] - 1], norms[t[1] - 1], norms[t[2] - 1]));
+						textWriter->Write(System::String::Format(" {0}/{3},{1}/{4},{2}/{5}", nodeLookup[t[0] - 1], nodeLookup[t[1] - 1], nodeLookup[t[2] - 1], norms[t[0] - 1], norms[t[1] - 1], norms[t[2] - 1]));
 				}
 				faceIndex++;
 				textWriter->WriteLine();
 			}
 			textWriter->Flush();
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 		}
 
 		void XbimOccShape::WriteTriangulation(IXbimMeshReceiver^ meshReceiver, double tolerance, double deflection, double angle)
@@ -238,16 +237,13 @@ namespace Xbim
 				if (hasSeam)
 				{
 
-					TColStd_Array1OfReal norms(1, mesh->NbNodes());
+					
 					for (Standard_Integer i = 1; i <= mesh->NbNodes(); i++) //visit each node
 					{
 						gp_Dir dir = mesh->Normal(i);
-						if (faceReversed) 
-							dir.Reverse();
+						if (faceReversed) dir.Reverse();
 						dir = quaternion.Multiply(dir);
-						norms.SetValue(i, dir.X());
-						norms.SetValue(i + 1, dir.Y());
-						norms.SetValue(i + 2, dir.Z());
+						mesh->SetNormal(i, dir);
 					}
 					Dictionary<XbimPoint3DWithTolerance^, int>^ uniquePointsOnFace = gcnew Dictionary<XbimPoint3DWithTolerance^, int>(mesh->NbNodes());
 					for (Standard_Integer j = 1; j <= mesh->NbNodes(); j++) //visit each node for vertices
@@ -258,16 +254,12 @@ namespace Xbim
 						if (uniquePointsOnFace->TryGetValue(pt, nodeIndex)) //we have a duplicate point on face need to smooth the normal
 						{
 							//balance the two normals
-							gp_Vec normalA(norms.Value(nodeIndex), norms.Value(nodeIndex) + 1, norms.Value(nodeIndex) + 2);
-							gp_Vec normalB(norms.Value(j), norms.Value(j) + 1, norms.Value(j) + 2);
+							gp_Vec normalA = mesh->Normal(nodeIndex);
+							gp_Vec normalB = mesh->Normal(j);
 							gp_Vec normalBalanced = normalA + normalB;
 							normalBalanced.Normalize();
-							norms.SetValue(nodeIndex, normalBalanced.X());
-							norms.SetValue(nodeIndex + 1, normalBalanced.Y());
-							norms.SetValue(nodeIndex + 2, normalBalanced.Z());
-							norms.SetValue(j, normalBalanced.X());
-							norms.SetValue(j + 1, normalBalanced.Y());
-							norms.SetValue(j + 2, normalBalanced.Z());
+							mesh->SetNormal(nodeIndex, normalBalanced);	
+							mesh->SetNormal(j, normalBalanced);
 						}
 						else
 							uniquePointsOnFace->Add(pt, j);
@@ -280,7 +272,7 @@ namespace Xbim
 						Standard_Real py = p.Y();
 						Standard_Real pz = p.Z();
 						transform.Transforms(px, py, pz); //transform the point to the right location
-						gp_Dir dir(norms.Value((j * 3) + 1), norms.Value((j * 3) + 2), norms.Value((j * 3) + 3));
+						gp_Dir dir =  mesh->Normal(j + 1);
 						meshReceiver->AddNode(faceId, px, py, pz, dir.X(), dir.Y(), dir.Z()); //add the node to the face
 					}
 				}
@@ -293,53 +285,50 @@ namespace Xbim
 						Standard_Real py = p.Y();
 						Standard_Real pz = p.Z();
 						transform.Transforms(px, py, pz); //transform the point to the right location
-
 						gp_Dir dir = mesh->Normal(j + 1);
-						if (faceReversed) 
-							dir.Reverse();
+						if (faceReversed) dir.Reverse();
 						dir = quaternion.Multiply(dir); //rotate the norm to the new location
 						meshReceiver->AddNode(faceId, px, py, pz, dir.X(), dir.Y(), dir.Z()); //add the node to the face
 					}
 				}
 
 				Standard_Integer t[3];
-				const Poly_Array1OfTriangle& triangles = mesh->Triangles();
-
+				
 				for (Standard_Integer j = 1; j <= mesh->NbTriangles(); j++) //add each triangle as a face
 				{
 					if (faceReversed) //get nodes in the correct order of triangulation
-						triangles(j).Get(t[2], t[1], t[0]);
+						mesh->Triangle(j).Get(t[2], t[1], t[0]);
 					else
-						triangles(j).Get(t[0], t[1], t[2]);
+						mesh->Triangle(j).Get(t[0], t[1], t[2]);
 					meshReceiver->AddTriangle(faceId, t[0] - 1, t[1] - 1, t[2] - 1);
 				}
 			}
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 
 		}
 
 
 
-
-
-
-		void XbimOccShape::WriteIndex(BinaryWriter^ bw, UInt32 index, UInt32 maxInt)
+		void XbimOccShape::WriteIndex(BinaryWriter^ bw, System::UInt32 index, System::UInt32 maxInt)
 		{
 			if (maxInt <= 0xFF)
 				bw->Write((unsigned char)index);
 			else if (maxInt <= 0xFFFF)
-				bw->Write((UInt16)index);
+				bw->Write((System::UInt16)index);
 			else
 				bw->Write(index);
 		}
 
 		void XbimOccShape::WriteTriangulation(BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle)
 		{
+			if (IsValid)  WriteTriangulation(this, binaryWriter, tolerance, deflection, angle);
+			System::GC::KeepAlive(this);
+		}
+		void XbimOccShape::WriteTriangulation(const TopoDS_Shape& shape, BinaryWriter^ binaryWriter, double tolerance, double deflection, double angle)
+		{
 
-			if (!IsValid) return;
-			
 			TopTools_IndexedMapOfShape faceMap;
-			TopoDS_Shape shape = this; //hold on to it
+			
 			TopExp::MapShapes(shape, TopAbs_FACE, faceMap);
 			int faceCount = faceMap.Extent();
 			if (faceCount == 0) return;
@@ -356,7 +345,7 @@ namespace Xbim
 			List<List<int>^>^ tessellations = gcnew List<List<int>^>(faceCount);
 			bool isPolyhedron = true;
 			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
-			//we check if the shape is a faceted poltgon, i.e. all faces are planar and all edges are linear, if so then we do not need to use OCC meshing which is general purpose and a little slower than LibMesh
+			//we check if the shape is a faceted polygon, i.e. all faces are planar and all edges are linear, if so then we do not need to use OCC meshing which is general purpose and a little slower than LibMesh
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
@@ -411,7 +400,7 @@ namespace Xbim
 			}
 
 			if (!isPolyhedron)
-				BRepMesh_IncrementalMesh incrementalMesh(this, deflection, Standard_False, angle); //triangulate the first time							
+				BRepMesh_IncrementalMesh incrementalMesh(shape, deflection, Standard_False, angle); //triangulate the first time							
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
 				const TopoDS_Face& face = TopoDS::Face(faceMap(f));
@@ -431,17 +420,17 @@ namespace Xbim
 					bool hasSeam = hasSeams[f - 1];
 					gp_Trsf transform = loc.Transformation();
 					gp_Quaternion quaternion = transform.GetRotation();
+					
 					triangleCount += mesh->NbTriangles();
 					pointLookup->Add(gcnew List<int>(mesh->NbNodes()));
 					if (!isPlanar)
 					{
 						Poly::ComputeNormals(mesh); //we need the normals
 						norms = gcnew List<XbimPackedNormal>(mesh->NbNodes());
-						for (Standard_Integer i = 1; i <= mesh->NbNodes(); i ++) //visit each node
+						for (Standard_Integer i = 1; i <= mesh->NbNodes() ; i ++) //visit each node
 						{
 							gp_Dir dir = mesh->Normal(i);
-							if (faceReversed) 
-								dir.Reverse();
+							if (faceReversed) dir.Reverse();
 
 							dir = quaternion.Multiply(dir);
 							XbimPackedNormal packedNormal = XbimPackedNormal(dir.X(), dir.Y(), dir.Z());
@@ -491,15 +480,15 @@ namespace Xbim
 						}
 					}
 					Standard_Integer t[3];
-					const Poly_Array1OfTriangle& triangles = mesh->Triangles();
+					
 
 					List<int>^ elems = gcnew List<int>(mesh->NbTriangles() * 3);
 					for (Standard_Integer j = 1; j <= mesh->NbTriangles(); j++) //add each triangle as a face
 					{
 						if (faceReversed) //get nodes in the correct order of triangulation
-							triangles(j).Get(t[2], t[1], t[0]);
+							mesh->Triangle(j).Get(t[2], t[1], t[0]);
 						else
-							triangles(j).Get(t[0], t[1], t[2]);
+							mesh->Triangle(j).Get(t[0], t[1], t[2]);
 						elems->Add(t[0] - 1);
 						elems->Add(t[1] - 1);
 						elems->Add(t[2] - 1);
@@ -600,8 +589,8 @@ namespace Xbim
 			// Write out header
 			binaryWriter->Write((unsigned char)1); //stream format version
 			int numVertices = points->Count;
-			binaryWriter->Write((UInt32)numVertices); //number of vertices
-			binaryWriter->Write((UInt32)triangleCount); //number of triangles
+			binaryWriter->Write((System::UInt32)numVertices); //number of vertices
+			binaryWriter->Write((System::UInt32)triangleCount); //number of triangles
 			//write out vertices 
 			for each (XbimPoint3D p in points)
 			{
@@ -612,7 +601,7 @@ namespace Xbim
 
 			//now write out the faces
 			faceIndex = 0;
-			binaryWriter->Write((Int32)tessellations->Count);
+			binaryWriter->Write((System::Int32)tessellations->Count);
 			for each (List<int> ^ tess in tessellations)
 			{
 				List<XbimPackedNormal>^ norms = normalLookup[faceIndex];
@@ -620,11 +609,11 @@ namespace Xbim
 				List<int>^ nodeLookup = pointLookup[faceIndex];
 				if (isPlanar)
 				{
-					binaryWriter->Write((Int32)tess->Count / 3);
+					binaryWriter->Write((System::Int32)tess->Count / 3);
 					norms[0].Write(binaryWriter); //write the normal for the face
 				}
 				else
-					binaryWriter->Write((Int32)(-tess->Count / 3)); //use negative count to indicate that every index has a normal			
+					binaryWriter->Write((System::Int32)(-tess->Count / 3)); //use negative count to indicate that every index has a normal			
 				for (int i = 0; i < tess->Count; i++)
 				{
 					if (isPlanar)
@@ -639,7 +628,7 @@ namespace Xbim
 				}
 				faceIndex++;
 			}
-			GC::KeepAlive(this);
+			
 			binaryWriter->Flush();
 		}
 	}

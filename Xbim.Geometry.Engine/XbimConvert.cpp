@@ -1,6 +1,4 @@
-#include "XbimConvert.h"
-#include "XbimCurve.h"
-#include "XbimCurve2d.h"
+
 #include <gp_Dir2d.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Dir2d.hxx>
@@ -14,12 +12,15 @@
 #include <gp_Ax2d.hxx>
 #include <gp_Ax3.hxx>
 #include <gp_Mat2d.hxx>
+#include "XbimConvert.h"
+#include "XbimCurve.h"
+#include "XbimCurve2d.h"
 
-using namespace System;
+
 using namespace System::Linq;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::Interfaces;
-
+using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -28,10 +29,17 @@ namespace Xbim
 		{
 		}
 
+		
+
 		// Converts an ObjectPlacement into a TopLoc_Location
-		TopLoc_Location XbimConvert::ToLocation(IIfcObjectPlacement^ objPlacement, ILogger^ logger)
+		TopLoc_Location XbimConvert::ToLocation(IIfcObjectPlacement^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices)
 		{
-						
+			return TopLoc_Location(XbimConvert::ToTransform(objPlacement,logger, modelServices));
+		}
+
+		gp_Trsf XbimConvert::ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices)
+		{
+
 			IIfcLocalPlacement^ localPlacement = dynamic_cast<IIfcLocalPlacement^>(objPlacement);
 			IIfcGridPlacement^ gridPlacement = dynamic_cast<IIfcGridPlacement^>(objPlacement);
 			gp_Trsf trsf;
@@ -65,14 +73,14 @@ namespace Xbim
 					localPlacement = dynamic_cast<IIfcLocalPlacement^>(localPlacement->PlacementRelTo);
 				}
 				else if (gridPlacement != nullptr)//gridplacement;
-				{ 					
+				{
 					IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
 					List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
-					double tolerance = vi->Model->ModelFactors->Precision;
+					double tolerance = modelServices->MinimumGap;;
 					//its 2d, it should always be		
-					XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0],logger);
-					XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger);
-					IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, tolerance,logger);
+					XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0], logger, modelServices);
+					XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger, modelServices);
+					IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, tolerance, logger);
 					if (!Enumerable::Any(intersects)) return trsf;
 
 					XbimPoint3D intersection = Enumerable::First(intersects);
@@ -93,9 +101,9 @@ namespace Xbim
 						IIfcVirtualGridIntersection^ v2 = (IIfcVirtualGridIntersection^)gridPlacement->PlacementRefDirection;
 						List<IIfcGridAxis^>^ axisesv2 = Enumerable::ToList(v2->IntersectingAxes);
 						//its 2d, it should always be		
-						XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0],logger);
-						XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1],logger);
-						IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, tolerance,logger);
+						XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0], logger, modelServices);
+						XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1], logger, modelServices);
+						IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, tolerance, logger);
 
 						XbimPoint3D intersectionv = Enumerable::First(intersectsv);
 						XbimVector3D vec2 = intersectionv - intersection;
@@ -106,7 +114,7 @@ namespace Xbim
 					gp_XY xy(v.X(), v.Y());
 					gp_Trsf2d tr;
 					tr.SetTransformation(ax);
-					tr.Transforms(xy);	
+					tr.Transforms(xy);
 					gp_Trsf localTrans;
 					localTrans.SetTranslationPart(gp_Vec(xy.X() + intersection.X, xy.Y() + intersection.Y, v.Z()));
 					trsf.PreMultiply(localTrans);
@@ -116,9 +124,9 @@ namespace Xbim
 					if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfV);
 					if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfW);
 					//we must have one now
-					
-					TopLoc_Location gridLoc = ToLocation(grid->ObjectPlacement,logger);
-					trsf.PreMultiply(gridLoc.Transformation());				
+
+					TopLoc_Location gridLoc = ToLocation(grid->ObjectPlacement, logger, modelServices);
+					trsf.PreMultiply(gridLoc.Transformation());
 					localPlacement = nullptr;
 					gridPlacement = nullptr;
 				}
@@ -126,11 +134,10 @@ namespace Xbim
 				{
 					localPlacement = nullptr;
 					gridPlacement = nullptr;
-				}				
-			} 
-			return TopLoc_Location(trsf); 
+				}
+			}
+			return trsf;
 		}
-
 
 		// Converts an Axis2Placement3D into a TopLoc_Location
 		TopLoc_Location XbimConvert::ToLocation(IIfcPlacement^ placement)
@@ -147,7 +154,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
 			}
 		}
 
@@ -169,7 +176,7 @@ namespace Xbim
 				return TopLoc_Location();
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to implement Grid Placement"));
 			}
 
 		}
@@ -189,7 +196,7 @@ namespace Xbim
 			else if (dynamic_cast<IIfcAxis2Placement2D^>(placement))
 				return XbimConvert::ToAx3((IIfcAxis2Placement2D^)placement);	
 			else
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, need to be Axis2 or Axis3"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, need to be Axis2 or Axis3"));
 		}
 
 		gp_Ax3 XbimConvert::ToAx3(IIfcAxis2Placement2D^ axis2D)
@@ -298,7 +305,7 @@ namespace Xbim
 			else if (tForm == nullptr)
 				return gp_Trsf();
 			else
-				throw(gcnew ArgumentOutOfRangeException("XbimConvert. Unsupported CartesianTransformationOperator type"));
+				throw(gcnew System::ArgumentOutOfRangeException("XbimConvert. Unsupported CartesianTransformationOperator type"));
 		}
 
 		gp_Trsf XbimConvert::ToTransform(IIfcCartesianTransformationOperator3D^ ct3D)
@@ -430,6 +437,7 @@ namespace Xbim
 			trsf.SetValues( m3D.M11, m3D.M21, m3D.M31, m3D.OffsetX,
 							m3D.M12, m3D.M22, m3D.M32, m3D.OffsetY,
 							m3D.M13, m3D.M23, m3D.M33, m3D.OffsetZ);
+			trsf.SetScaleFactor(m3D.M44);
 			//trsf.SetTranslationPart(gp_Vec(m3D.OffsetX, m3D.OffsetY, m3D.OffsetZ));
 			return trsf;
 		}
@@ -553,7 +561,7 @@ namespace Xbim
 		}
 
 		// Builds a windows Matrix3D from an ObjectPlacement
-		XbimMatrix3D XbimConvert::ConvertMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger)
+		XbimMatrix3D XbimConvert::ConvertMatrix3D(IIfcObjectPlacement ^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelService)
 		{
 			if (dynamic_cast<IIfcLocalPlacement^>(objPlacement))
 			{
@@ -563,7 +571,7 @@ namespace Xbim
 					XbimMatrix3D ucsTowcs =ToMatrix3D((IIfcAxis2Placement3D^)(locPlacement->RelativePlacement));
 					if (locPlacement->PlacementRelTo != nullptr)
 					{
-						return XbimMatrix3D::Multiply(ucsTowcs, ConvertMatrix3D(locPlacement->PlacementRelTo,logger));
+						return XbimMatrix3D::Multiply(ucsTowcs, ConvertMatrix3D(locPlacement->PlacementRelTo,logger, modelService));
 					}
 					else
 						return ucsTowcs;
@@ -581,10 +589,10 @@ namespace Xbim
 
 				IIfcVirtualGridIntersection^ vi = gridPlacement->PlacementLocation;
 				List<IIfcGridAxis^>^ axises = Enumerable::ToList(vi->IntersectingAxes);
-				double tolerance = vi->Model->ModelFactors->Precision;
+				double tolerance = modelService->MinimumGap;;
 				//its 2d, it should always be		
-				XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0],logger);
-				XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger);
+				XbimCurve2D^ axis1 = gcnew XbimCurve2D(axises[0],logger, modelService);
+				XbimCurve2D^ axis2 = gcnew XbimCurve2D(axises[1], logger, modelService);
 				IEnumerable<XbimPoint3D>^ intersects = axis1->Intersections(axis2, tolerance, logger);
 				if (!Enumerable::Any(intersects)) return XbimMatrix3D::Identity;
 				
@@ -606,8 +614,8 @@ namespace Xbim
 					IIfcVirtualGridIntersection^ v2 = (IIfcVirtualGridIntersection^)gridPlacement->PlacementRefDirection;
 					List<IIfcGridAxis^>^ axisesv2 = Enumerable::ToList(v2->IntersectingAxes);
 					//its 2d, it should always be		
-					XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0],logger);
-					XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1],logger);
+					XbimCurve2D^ axis1v = gcnew XbimCurve2D(axisesv2[0],logger, modelService);
+					XbimCurve2D^ axis2v = gcnew XbimCurve2D(axisesv2[1],logger, modelService);
 					IEnumerable<XbimPoint3D>^ intersectsv = axis1v->Intersections(axis2v, tolerance, logger);
 
 					XbimPoint3D intersectionv = Enumerable::First(intersectsv);
@@ -628,7 +636,7 @@ namespace Xbim
 				if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfV);
 				if (grid == nullptr) grid = Enumerable::FirstOrDefault(axises[0]->PartOfW);
 				//we must have one now
-				XbimMatrix3D gridTransform = ConvertMatrix3D(grid->ObjectPlacement, logger);
+				XbimMatrix3D gridTransform = ConvertMatrix3D(grid->ObjectPlacement, logger, modelService);
 				return XbimMatrix3D::Multiply(localTrans, gridTransform);
 
 			}
@@ -716,7 +724,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
 			}
 		}
 
@@ -734,7 +742,7 @@ namespace Xbim
 			}
 			else
 			{
-				throw(gcnew NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
+				throw(gcnew System::NotImplementedException("XbimConvert. Unsupported Placement type, must axis 2D or 3D"));
 			}
 		}
 		gp_Vec XbimConvert::GetAxisDir3d(IIfcAxis2Placement^ /*placement*/)
@@ -765,21 +773,6 @@ namespace Xbim
 				if (sides > 2)return true;
 			}
 			return false;
-		}
-
-		bool XbimConvert::IsInvalid(const gp_Dir& dir, double tolerance)
-		{
-			return (
-				isnan(dir.X())
-				|| isnan(dir.Y())
-				|| isnan(dir.Z())
-				||
-				sqrt(
-					dir.X() * dir.X() +
-					dir.Y() * dir.Y() +
-					dir.Z() * dir.Z()
-					) < tolerance
-				);
 		}
 #pragma warning( pop )
 		/// <summary>

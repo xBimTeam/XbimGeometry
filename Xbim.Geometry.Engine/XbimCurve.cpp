@@ -1,8 +1,3 @@
-#include "XbimCurve.h"
-#include "XbimCurve2D.h"
-#include "XbimFace.h"
-#include "XbimConvert.h"
-#include "XbimGeometryCreator.h"
 #include <gce_MakeLin.hxx>
 #include <GC_MakeLine.hxx>
 #include <GC_MakeCircle.hxx>
@@ -25,8 +20,12 @@
 #include <GCPnts_AbscissaPoint.hxx>
 #include <GC_MakeArcOfCircle.hxx>
 #include <gp_Circ.hxx>
+#include "XbimCurve.h"
+#include "XbimCurve2D.h"
+#include "XbimFace.h"
+#include "XbimConvert.h"
+#include "XbimGeometryCreator.h"
 
-using namespace System;
 using namespace System::Linq;
 namespace Xbim
 {
@@ -35,17 +34,13 @@ namespace Xbim
 		/*Ensures native pointers are deleted and garbage collected*/
 		void XbimCurve::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (Handle(Geom_Curve)*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
 
-		XbimCurve::XbimCurve(const Handle(Geom_Curve)& curve)
-		{
-			this->pCurve = new Handle(Geom_Curve);
-			*pCurve = curve;
-		}
+
 
 		XbimRect3D XbimCurve::BoundingBox::get()
 		{
@@ -56,7 +51,7 @@ namespace Xbim
 			BndLib_Add3dCurve::Add(myAdpSection, 0., b1);
 			Standard_Real srXmin, srYmin, srZmin, srXmax, srYmax, srZmax;
 			b1.Get(srXmin, srYmin, srZmin, srXmax, srYmax, srZmax);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimRect3D(srXmin, srYmin, srZmin, (srXmax - srXmin), (srYmax - srYmin), (srZmax - srZmin));
 		}
 
@@ -105,15 +100,15 @@ namespace Xbim
 
 		IXbimGeometryObject^ XbimCurve::Transform(XbimMatrix3D /*matrix3D*/)
 		{
-			throw gcnew Exception("Tranformation of curves is not currently supported");
+			throw gcnew System::Exception("Tranformation of curves is not currently supported");
 		}
 
 		IXbimGeometryObject^ XbimCurve::TransformShallow(XbimMatrix3D /*matrix3D*/)
 		{
-			throw gcnew Exception("TransformShallow of curves is not currently supported");
+			throw gcnew System::Exception("TransformShallow of curves is not currently supported");
 		}
 
-		IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
+		System::Collections::Generic::IEnumerable<XbimPoint3D>^ XbimCurve::Intersections(IXbimCurve^ intersector, double tolerance, ILogger^ /*logger*/)
 		{
 			List<XbimPoint3D>^ intersects = gcnew List<XbimPoint3D>();
 			if (!intersector->Is3D) intersector = ((XbimCurve2D^)intersector)->ToCurve3D();
@@ -151,7 +146,7 @@ namespace Xbim
 			else if (curve == nullptr)
 				XbimGeometryCreator::LogWarning(logger, curve, "Curve is null");
 			else
-				throw gcnew Exception(String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
+				throw gcnew System::Exception(System::String::Format("Unsupported Curve Type {0}", curve->GetType()->Name));
 		}
 
 #pragma region IfcBoundedCurve
@@ -222,7 +217,7 @@ namespace Xbim
 		void XbimCurve::Init(IIfcCompositeCurve^ cCurve, ILogger^ logger)
 		{
 
-			double tolerance = cCurve->Model->ModelFactors->Precision;
+			double tolerance = _modelServices->MinimumGap;
 			GeomConvert_CompCurveToBSplineCurve converter;
 
 			gp_Pnt lastVertex;
@@ -242,7 +237,7 @@ namespace Xbim
 					XbimGeometryCreator::LogWarning(logger, seg, "Composite curve contains a segment whih is not a bounded curve. It has been ignored");
 					return;
 				}
-				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger);
+				XbimCurve^ curve = gcnew XbimCurve(seg->ParentCurve, logger, _modelServices);
 				if (dynamic_cast<IIfcTrimmedCurve^>(seg->ParentCurve)) //we have to treat sense agreement differently
 				{
 					IIfcTrimmedCurve^ tc = ((IIfcTrimmedCurve^)seg->ParentCurve);
@@ -287,7 +282,7 @@ namespace Xbim
 						double actualGap = nextVertex.Distance(lastVertex);
 						if (actualGap > tolerance)
 						{
-							double fiveMilli = 5 * cCurve->Model->ModelFactors->OneMilliMeter; //we are going to accept that a gap of 5mm is not a gap
+							double fiveMilli = 5 * _modelServices->OneMillimeter; //we are going to accept that a gap of 5mm is not a gap
 							if (actualGap > fiveMilli)
 							{
 								XbimGeometryCreator::LogWarning(logger, seg, "Failed to join composite curve segment. It has been ignored");
@@ -326,7 +321,7 @@ namespace Xbim
 
 		void  XbimCurve::Init(IIfcIndexedPolyCurve^ polyCurve, ILogger^ logger)
 		{
-			double tolerance = polyCurve->Model->ModelFactors->Precision;
+			double tolerance = _modelServices->MinimumGap;
 
 			IItemSet<IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^>^ coordList;
 			IIfcCartesianPointList3D^ points3D = dynamic_cast<IIfcCartesianPointList3D^>(polyCurve->Points);
@@ -354,7 +349,7 @@ namespace Xbim
 			int i = 1;
 			for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure>^ coll in coordList)
 			{
-				IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+				System::Collections::Generic::IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
 				enumer->MoveNext();
 				gp_Pnt p;
 				p.SetX((double)enumer->Current);
@@ -552,9 +547,9 @@ namespace Xbim
 			bool isLine = (dynamic_cast<IIfcLine^>(curve->BasisCurve) != nullptr);
 			bool isEllipse = (dynamic_cast<IIfcEllipse^>(curve->BasisCurve) != nullptr);
 
-			double parameterFactor = isConic ? curve->Model->ModelFactors->AngleToRadiansConversionFactor : 1;
-			double precision = curve->Model->ModelFactors->Precision;
-			bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
+				double parameterFactor = isConic ? _modelServices->RadianFactor : 1;
+				double precision = _modelServices->MinimumGap;
+				bool trim_cartesian = (curve->MasterRepresentation == IfcTrimmingPreference::CARTESIAN);
 
 			double u1;
 			double u2;
@@ -628,7 +623,7 @@ namespace Xbim
 				if (!u2Found)  GeomLib_Tool::Parameter(*pCurve, p2, precision * 10, u2);
 			}
 
-			if (Math::Abs(u1 - u2) < Precision::Confusion())
+			if (System::Math::Abs(u1 - u2) < Precision::Confusion())
 			{
 				pCurve->Nullify();
 				pCurve = nullptr;
@@ -644,16 +639,16 @@ namespace Xbim
 					// should not correct parameters if they were calculated from cartesian points
 					// because they are calculated from already rotated geometry
 					if (!u1Override)
-						u1 -= Math::PI / 2;
+						u1 -= System::Math::PI / 2;
 					if (!u2Override)
-						u2 -= Math::PI / 2;
+						u2 -= System::Math::PI / 2;
 				}
 			}
 
 			if (isConic)
 			{
 				if (abs(u2 - 0) <= Precision::Confusion()) //the end parameter is zero, make it 360 to ensure correct direction
-					u2 = 2 * Math::PI;
+					u2 = 2 * System::Math::PI;
 			}
 
 			//now just go with
@@ -685,8 +680,8 @@ namespace Xbim
 			}
 			else
 			{
-				Type^ type = circle->Position->GetType();
-				XbimGeometryCreator::LogError(logger, circle, "Placement of type {0} is not implemented", type->Name);
+				System::Type^ type = circle->Position->GetType();
+				XbimGeometryCreator::LogError(logger, circle, "Placement of type {ifcType} is not implemented", type->Name);
 				return;
 			}
 
@@ -707,7 +702,7 @@ namespace Xbim
 				return;
 			}
 			gp_Ax3 ax3 = XbimConvert::ToAx3(ellipse->Position);
-			if (Math::Abs(semiAx1 - semiAx2) < gp::Resolution()) //its a circle
+			if (System::Math::Abs(semiAx1 - semiAx2) < gp::Resolution()) //its a circle
 			{
 				GC_MakeCircle maker(ax3.Ax2(), semiAx1);
 				pCurve = new Handle(Geom_Curve)(maker.Value());
@@ -755,7 +750,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcOffsetCurve2D^ offset, ILogger^ logger)
 		{
-			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger);
+			XbimCurve2D^ c2d = gcnew XbimCurve2D(offset, logger, _modelServices);
 			if (c2d->IsValid)
 			{
 				pCurve = new Handle(Geom_Curve)();
@@ -765,12 +760,12 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcPcurve^ curve, ILogger^ logger)
 		{
-			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger);
+			XbimFace^ face = gcnew XbimFace(curve->BasisSurface, logger, _modelServices);
 			if (face->IsValid)
 			{
 				ShapeConstruct_ProjectCurveOnSurface projector;
-				projector.Init(face->GetSurface(), curve->Model->ModelFactors->Precision);
-				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger);
+				projector.Init(face->GetSurface(), _modelServices->MinimumGap);
+				XbimCurve^ baseCurve = gcnew XbimCurve(curve->ReferenceCurve, logger, _modelServices);
 				Standard_Real first = baseCurve->FirstParameter;
 				Standard_Real last = baseCurve->LastParameter;
 				Handle(Geom2d_Curve) c2d;
@@ -785,7 +780,7 @@ namespace Xbim
 
 		void XbimCurve::Init(IIfcSurfaceCurve^ /*curve*/, ILogger^ /*logger*/)
 		{
-			throw gcnew NotImplementedException("IIfcSurfaceCurve is not yet implemented");
+			throw gcnew System::NotImplementedException("IIfcSurfaceCurve is not yet implemented");
 		}
 
 		void XbimCurve::Reverse()

@@ -31,8 +31,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
             else
             {
 
-                object transform;
-                if (maps.TryGetValue(ct3D.EntityLabel, out transform)) //already converted it just return cached
+                if (maps.TryGetValue(ct3D.EntityLabel, out object transform)) //already converted it just return cached
                     return (XbimMatrix3D)transform;
                 var matrix = ConvertCartesianTranformOperator3D(ct3D);
                 maps.TryAdd(ct3D.EntityLabel, matrix);
@@ -59,8 +58,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                 return ConvertCartesianTransformationOperator3DnonUniform(ct3D);
             else
             {
-                object transform;
-                if (maps.TryGetValue(ct3D.EntityLabel, out transform)) //already converted it just return cached
+                if (maps.TryGetValue(ct3D.EntityLabel, out object transform)) //already converted it just return cached
                     return (XbimMatrix3D)transform;
                 var matrix = ConvertCartesianTransformationOperator3DnonUniform(ct3D);
                 maps.TryAdd(ct3D.EntityLabel, matrix);

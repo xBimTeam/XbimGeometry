@@ -8,7 +8,7 @@ namespace Xbim.ModelGeometry.Scene
 {
     public class XbimEmptyGeometryGroup : List<IXbimGeometryModel>, IXbimGeometryModelGroup, IXbimPolyhedron
     {
-        static XbimEmptyGeometryGroup _empty;
+        static readonly XbimEmptyGeometryGroup _empty;
         public static XbimEmptyGeometryGroup Empty { get { return _empty; } }
         static XbimEmptyGeometryGroup()
         {

@@ -1,10 +1,10 @@
-#include "XbimVertex.h"
-#include "XbimConvert.h"
+
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <TopoDS.hxx>
-using namespace System;
+#include "XbimVertex.h"
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry
@@ -13,8 +13,8 @@ namespace Xbim
 		/*Ensures native pointers are deleted and garbage collected*/
 		void XbimVertex::InstanceCleanup()
 		{
-			IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, IntPtr::Zero);
-			if (temp != IntPtr::Zero)
+			System::IntPtr temp = System::Threading::Interlocked::Exchange(ptrContainer, System::IntPtr::Zero);
+			if (temp != System::IntPtr::Zero)
 				delete (TopoDS_Vertex*)(temp.ToPointer());
 			System::GC::SuppressFinalize(this);
 		}
@@ -22,7 +22,7 @@ namespace Xbim
 
 #pragma region Constructors
 		/*Constructs an topological vertex with no geometry*/
-		XbimVertex::XbimVertex()
+		XbimVertex::XbimVertex() : XbimOccShape(nullptr) //vertices will be obsolete and do not need to track in a model context
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -34,7 +34,7 @@ namespace Xbim
 			Tag = tag;
 		}
 
-		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex)
+		XbimVertex::XbimVertex(IIfcCartesianPoint^ vertex) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -42,14 +42,14 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, vertex->Model->ModelFactors->Precision);
 		}
 
-		XbimVertex::XbimVertex(double x, double y, double z, double precision)
+		XbimVertex::XbimVertex(double x, double y, double z, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
 			gp_Pnt pnt(x, y, z);
 			b.MakeVertex(*pVertex, pnt, precision);
 		}
-		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D)
+		XbimVertex::XbimVertex(XbimPoint3DWithTolerance^ point3D) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -57,7 +57,7 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, point3D->Tolerance);
 		}
 
-		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision)
+		XbimVertex::XbimVertex(XbimPoint3D point3D, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -65,13 +65,13 @@ namespace Xbim
 			b.MakeVertex(*pVertex, pnt, precision);
 		}
 
-		XbimVertex::XbimVertex(const TopoDS_Vertex& occVertex)
+		XbimVertex::XbimVertex(const TopoDS_Vertex& occVertex) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			*pVertex = occVertex;
 		}
 
-		XbimVertex::XbimVertex(IXbimVertex^ vertex, double precision)
+		XbimVertex::XbimVertex(IXbimVertex^ vertex, double precision) : XbimVertex()
 		{
 			pVertex = new TopoDS_Vertex();
 			BRep_Builder b;
@@ -96,7 +96,7 @@ namespace Xbim
 		IXbimGeometryObject^ XbimVertex::TransformShallow(XbimMatrix3D matrix3D)
 		{
 			TopoDS_Vertex vertex = TopoDS::Vertex(pVertex->Moved(XbimConvert::ToTransform(matrix3D)));
-			GC::KeepAlive(this);			
+			System::GC::KeepAlive(this);
 			return gcnew XbimVertex(vertex);
 		}
 
@@ -134,14 +134,14 @@ namespace Xbim
 		{
 			if (!IsValid) return this;			
 			XbimVertex^ copy = gcnew XbimVertex(this, Tag); //take a copy of the shape
-			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger);
+			TopLoc_Location loc = XbimConvert::ToLocation(objectPlacement,logger, nullptr);
 			copy->Move(loc);
 			return copy;
 		}
 
 		void XbimVertex::Mesh(IXbimMeshReceiver ^ /*mesh*/, double /*precision*/ , double /*deflection*/ , double /*angle*/  )
 		{
-			throw gcnew NotImplementedException("XbimVertex::Mesh");
+			throw gcnew System::NotImplementedException("XbimVertex::Mesh");
 		}
 
 #pragma endregion
@@ -209,7 +209,7 @@ namespace Xbim
 		{
 			if (!IsValid) return XbimPoint3D();
 			gp_Pnt p = BRep_Tool::Pnt(*pVertex);
-			GC::KeepAlive(this);
+			System::GC::KeepAlive(this);
 			return XbimPoint3D(p.X(), p.Y(), p.Z());
 		}
 	}

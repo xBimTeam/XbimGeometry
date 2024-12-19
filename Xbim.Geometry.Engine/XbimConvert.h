@@ -1,16 +1,19 @@
 #pragma once
-#include "XbimGeometryObject.h"
+
 #include <TopLoc_Location.hxx>
 #include <gp_GTrsf.hxx> 
 #include <gp_Trsf.hxx> 
 #include <gp_Pln.hxx> 
 #include <TColgp_Array1OfPnt.hxx>
+#include "Services/ModelGeometryService.h"
+#include "XbimGeometryObject.h"
 using namespace Xbim::Ifc4::Interfaces;
 using namespace Xbim::Common::Exceptions;
 using namespace Xbim::Common::Geometry;
 using namespace Xbim::Ifc4::MeasureResource;
+using namespace Xbim::Ifc4::GeometryResource;
+using namespace Microsoft::Extensions::Logging;
 
- 
 namespace Xbim
 {
 	namespace Geometry
@@ -20,11 +23,12 @@ namespace Xbim
 	    public ref class XbimConvert
 		{
 		private:
-			static Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Ifc4::GeometryResource::IfcDimensionCount(3);
+			static Xbim::Ifc4::GeometryResource::IfcDimensionCount dimensions3D = Xbim::Ifc4::GeometryResource::IfcDimensionCount(3);
 		public:
 			XbimConvert(void);
-			// Converts a Local Placement into a TopLoc_Location
-			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger);
+		// Converts a Local Placement into a TopLoc_Location
+			static TopLoc_Location ToLocation(IIfcObjectPlacement^ placement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
+			static gp_Trsf ToTransform(IIfcObjectPlacement^ objPlacement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelServices);
 			// Converts a Placement into a TopLoc_Location
 			static TopLoc_Location ToLocation(IIfcPlacement^ placement);
 			// Converts a IfcAxis2Placement into a TopLoc_Location
@@ -54,13 +58,12 @@ namespace Xbim
 			static XbimMatrix3D ToMatrix3D(IIfcAxis2Placement3D^ axis3);
 			// Builds a windows Matrix3D from a CartesianTransformationOperator3D
 			static XbimMatrix3D ConvertMatrix3D(IIfcCartesianTransformationOperator3D ^ stepTransform);
-			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement, ILogger^ logger);
+			static XbimMatrix3D ConvertMatrix3D(IIfcObjectPlacement ^ placement, ILogger^ logger, Xbim::Geometry::Services::ModelGeometryService^ modelService);
 			static bool IsEqual(IIfcCartesianPoint^ ptA, IIfcCartesianPoint^ ptB, double tolerance);
 			static double DistanceSquared(IIfcCartesianPoint^ pt1, IIfcCartesianPoint^ pt2);
 			static bool Is3D(IIfcPolyline^ pline);
 			static bool Is3D(IIfcPolyLoop^ pLoop);
 			static bool IsPolygon(IIfcPolyLoop^ pLoop);
-			static bool IsInvalid(const gp_Dir& dir, double tolerance);
 			static double GetZValueOrZero(IIfcCartesianPoint^ point);
 			static double GetZValueOrZero(IIfcDirection^ dir);
 			static double GetZValueOrZero(IIfcVector^ vec);
@@ -69,8 +72,8 @@ namespace Xbim
 			static gp_Pnt2d GetPoint2d(IIfcCartesianPoint^ cartesian);
 			static gp_Dir GetDir3d(IIfcDirection^ dir);
 			static gp_Dir2d GetDir2d(IIfcDirection^ dir);
-			static gp_Vec2d GetDir2d(IEnumerable<IfcLengthMeasure>^ offsets);
-			static gp_Vec GetDir3d(IEnumerable<IfcLengthMeasure>^ offsets);
+			static gp_Vec2d GetDir2d(System::Collections::Generic::IEnumerable<IfcLengthMeasure>^ offsets);
+			static gp_Vec GetDir3d(System::Collections::Generic::IEnumerable<IfcLengthMeasure>^ offsets);
 			static gp_Pnt GetPoint3d(IIfcAxis2Placement^ placement);
 			static gp_Vec GetRefDir3d(IIfcAxis2Placement^ placement);
 			static gp_Vec GetAxisDir3d(IIfcAxis2Placement^ placement);

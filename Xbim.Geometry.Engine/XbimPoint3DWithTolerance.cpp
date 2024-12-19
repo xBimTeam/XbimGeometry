@@ -1,8 +1,9 @@
+
+#include <cmath>
 #include "XbimPoint3DWithTolerance.h"
 #include "XbimWire.h"
 #include "XbimFace.h"
-#include <cmath>
-using namespace System;
+#include "XbimConvert.h"
 namespace Xbim
 {
 	namespace Geometry
@@ -37,29 +38,28 @@ namespace Xbim
 		{
 			point = p->Point;
 			tolerance = p->Tolerance;
-			CalculateHashCode();
-			
+			CalculateHashCode();	
 		}
 
-		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, ILogger^ logger)
+		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnCurve^ point, double minGap,ILogger^ logger)
 		{
-			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger, XbimConstraints::None);
+			XbimWire^ w = gcnew XbimWire(point->BasisCurve, logger, nullptr);
 			this->point = w->PointAtParameter(point->PointParameter);
-			this->tolerance = point->Model->ModelFactors->Precision;
+			this->tolerance = minGap;
 			CalculateHashCode();
 		}
 
-		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, ILogger^ logger)
+		XbimPoint3DWithTolerance::XbimPoint3DWithTolerance(IIfcPointOnSurface^ point, double minGap, ILogger^ logger)
 		{
-			XbimFace^ f = gcnew XbimFace(point->BasisSurface, logger);
+			XbimFace^ f = gcnew XbimFace(point->BasisSurface, logger, nullptr);
 			this->point = f->PointAtParameters(point->PointParameterU, point->PointParameterV);
-			this->tolerance = point->Model->ModelFactors->Precision;
+			this->tolerance = minGap;
 			CalculateHashCode();
 		}
 
-		String^ XbimPoint3DWithTolerance::ToBRep::get()
+		System::String^ XbimPoint3DWithTolerance::ToBRep::get()
 		{
-			return String::Empty;
+			return System::String::Empty;
 		}
 
 #pragma region Equality Overrides
@@ -111,7 +111,7 @@ namespace Xbim
 			dd = x1; dd -= x2; dd *= dd; d += dd;
 			dd = y1; dd -= y2; dd *= dd; d += dd;
 			dd = z1; dd -= z2; dd *= dd; d += dd;
-			double mt = Math::Max(left->Tolerance, right->Tolerance);
+			double mt = System::Math::Max(left->Tolerance, right->Tolerance);
 			return d <= mt*mt;
 
 		}

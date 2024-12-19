@@ -74,8 +74,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                                 for (var k = 0; k < 3; k++)
                                 {
                                     var idx = ReadIndex(br, numVertices);
-                                    int writtenIdx;
-                                    if (!uniqueIndices.TryGetValue(idx, out writtenIdx)) //we haven't got it, so add it
+                                    if (!uniqueIndices.TryGetValue(idx, out int writtenIdx)) //we haven't got it, so add it
                                     {
                                         writtenIdx = vertices.Count;
                                         vertices.Add(uniqueVertices[idx]);
@@ -96,8 +95,7 @@ namespace Xbim.ModelGeometry.Scene.Extensions
                                 {
                                     var idx = ReadIndex(br, numVertices);
                                     var normal = br.ReadPackedNormal().Normal;
-                                    int writtenIdx;
-                                    if (!uniqueIndices.TryGetValue(idx, out writtenIdx)) //we haven't got it, so add it
+                                    if (!uniqueIndices.TryGetValue(idx, out int writtenIdx)) //we haven't got it, so add it
                                     {
                                         writtenIdx = vertices.Count;
                                         vertices.Add(uniqueVertices[idx]);

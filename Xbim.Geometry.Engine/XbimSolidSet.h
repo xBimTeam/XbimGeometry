@@ -1,13 +1,14 @@
 #pragma once
+
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+
 #include "XbimSolid.h"
 #include "XbimCompound.h"
 #include "XbimGeometryObjectSet.h"
-#include <TopExp_Explorer.hxx>
-#include <TopoDS.hxx>
-using namespace System;
-using namespace Xbim::Common;
-using namespace System::Collections::Generic;
 
+using namespace Xbim::Common;
+using namespace Xbim::Geometry::Abstractions;
 namespace Xbim
 {
 	namespace Geometry
@@ -18,27 +19,28 @@ namespace Xbim
 		const int BOOLEAN_SUCCESS = 1; //first attempt with all  tools worked
 		const int BOOLEAN_FAIL = 0;
 		const int BOOLEAN_TIMEDOUT = -1;
-		
-	
-	    int DoBoolean(const TopoDS_Shape& body, const TopTools_ListOfShape& tools, BOPAlgo_Operation op, double tolerance, double fuzzTolerance, TopoDS_Shape& result, int timeout);
 
-		private ref class VolumeComparer : IComparer<Tuple<double, XbimSolid^>^>
+
+		
+
+		private ref class VolumeComparer : System::Collections::Generic::IComparer<System::Tuple<double, XbimSolid^>^>
 		{
 		public:
-			virtual int Compare(Tuple<double, XbimSolid^>^ x, Tuple<double, XbimSolid^>^ y)
+			virtual int Compare(System::Tuple<double, XbimSolid^>^ x, System::Tuple<double, XbimSolid^>^ y)
 			{
 				// Compare y and x in reverse order. 
-				return y->Item1.CompareTo(x->Item1); 
+				return y->Item1.CompareTo(x->Item1);
 			}
 		};
 
-		
+
 
 		ref class XbimSolidSet :XbimSetObject, IXbimSolidSet
 		{
 		private:
+			
 			List<IXbimSolid^>^ solids;
-			static XbimSolidSet^ empty = gcnew XbimSolidSet();
+			
 			void Init(IIfcBooleanOperand^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanResult^ boolOp, ILogger^ logger);
 			void Init(IIfcBooleanClippingResult^ solid, ILogger^ logger);
@@ -51,6 +53,7 @@ namespace Xbim
 			void Init(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger);
 			void Init(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
 			void Init(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
+			void Init(IIfcExtrudedAreaSolidTapered^ repItem, ILogger^ logger);
 			void Init(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
 			static VolumeComparer^ _volumeComparer = gcnew VolumeComparer();
 			static int _maxOpeningsToCut = 100;
@@ -61,48 +64,50 @@ namespace Xbim
 			{
 				solids = nullptr;
 			};
-		    IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
-			
+			//IXbimSolidSet^ DoBoolean(IXbimSolidSet^ arguments, BOPAlgo_Operation operation, double tolerance, ILogger^ logger);
+
 		public:
 
 #pragma region destructors
 
-			~XbimSolidSet(){ InstanceCleanup(); }
-			!XbimSolidSet(){ InstanceCleanup(); }
+			~XbimSolidSet() { InstanceCleanup(); }
+			!XbimSolidSet() { InstanceCleanup(); }
 
 #pragma endregion
 
-			static property XbimSolidSet^ Empty{XbimSolidSet^ get(){ return empty; }};
-			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger);
-			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger);
-			XbimSolidSet();
-			XbimSolidSet(const TopoDS_Shape& shape);
-			XbimSolidSet(XbimCompound^ shape);
-			XbimSolidSet(IXbimSolid^ solid);
-			XbimSolidSet(IEnumerable<IXbimSolid^>^ solids);
-			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger);
-			XbimSolidSet(IIfcBooleanClippingResult^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger);
-			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger);
-			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger);
-			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger);
-
+			
+			static XbimSolidSet^ BuildClippingList(IIfcBooleanClippingResult^ solid, List<IIfcBooleanOperand^>^ clipList, ILogger^ logger, ModelGeometryService^ modelService);
+			static XbimSolidSet^ BuildBooleanResult(IIfcBooleanResult^ solid, IfcBooleanOperator operatorType, XbimSolidSet^ ops, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(ModelGeometryService^ modelService);
+			IXCompound^ ToXCompound();
+			XbimSolidSet(const TopoDS_Shape& shape, ModelGeometryService^ modelService);
+			void InitSolidsFromShape(const TopoDS_Shape& shape);
+			XbimSolidSet(XbimCompound^ shape, ModelGeometryService^ modelService);
+			XbimSolidSet(IXbimSolid^ solid, ModelGeometryService^ modelService);
+			XbimSolidSet(System::Collections::Generic::IEnumerable<IXbimSolid^>^ solids, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanResult^ boolOp, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanClippingResult^ solid,  ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcBooleanOperand^ boolOp, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcManifoldSolidBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFacetedBrep^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFacetedBrepWithVoids^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcClosedShell^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcCsgSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcSweptAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcSurfaceCurveSweptAreaSolid^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcExtrudedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcRevolvedAreaSolid^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcTriangulatedFaceSet^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcPolygonalFaceSet^ IIfcSolid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcFaceBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			XbimSolidSet(IIfcShellBasedSurfaceModel^ solid, ILogger^ logger, ModelGeometryService^ modelService);
+			
 			virtual property bool IsValid
-			{ 
+			{
 				bool get()
 				{
 					if (solids == nullptr) return false;
-					for each (IXbimSolid^ solid in solids)
+					for each (IXbimSolid ^ solid in solids)
 					{
 						if (solid->IsValid) return true; //we have at least one valid solid
 					}
@@ -116,12 +121,12 @@ namespace Xbim
 			virtual property int Count {int get() override; }
 			virtual IXbimGeometryObject^ Trim()  override { if (Count == 1) return First; else if (Count == 0) return nullptr; else return this; };
 			virtual property XbimRect3D BoundingBox {XbimRect3D get(); }
-			virtual property  XbimGeometryObjectType GeometryType{XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimSolidSetType; }}
-			virtual IEnumerator<IXbimSolid^>^ GetEnumerator();
+			virtual property  XbimGeometryObjectType GeometryType {XbimGeometryObjectType  get() { return XbimGeometryObjectType::XbimSolidSetType; }}
+			virtual System::Collections::Generic::IEnumerator<IXbimSolid^>^ GetEnumerator();
 			virtual System::Collections::IEnumerator^ GetEnumerator2() = System::Collections::IEnumerable::GetEnumerator{ return GetEnumerator(); };
 			virtual void Add(IXbimGeometryObject^ solid);
 			virtual void Reverse();
-			
+
 			virtual IXbimSolidSet^ Cut(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 
 			virtual IXbimSolidSet^ Cut(IXbimSolid^ solid, double tolerance, ILogger^ logger);
@@ -129,30 +134,30 @@ namespace Xbim
 			virtual IXbimSolidSet^ Union(IXbimSolid^ solid, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Intersection(IXbimSolidSet^ solids, double tolerance, ILogger^ logger);
 			virtual IXbimSolidSet^ Intersection(IXbimSolid^ solid, double tolerance, ILogger^ logger);
-			virtual property String^  ToBRep{String^ get(); }
-			virtual property bool IsPolyhedron{ bool get(); }
-			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D) ;
+			virtual property System::String^ ToBRep {System::String^ get(); }
+			virtual property bool IsPolyhedron { bool get(); }
+			virtual IXbimGeometryObject^ Transform(XbimMatrix3D matrix3D);
 			virtual IXbimGeometryObject^ TransformShallow(XbimMatrix3D matrix3D);
-			virtual property double Volume{double get(); }
+			virtual property double Volume {double get(); }
 			virtual IXbimSolidSet^ Range(int start, int count);
 			//moves the solid set to the new position
 			void Move(IIfcAxis2Placement3D^ position);
-			
-
-			// Inherited via XbimSetObject
-			virtual IXbimGeometryObject ^ Transformed(IIfcCartesianTransformationOperator ^ transformation) override;
 
 
 			// Inherited via XbimSetObject
-			
-			virtual IXbimGeometryObject ^ Moved(IIfcPlacement ^ placement) override;
-
-			virtual IXbimGeometryObject ^ Moved(IIfcObjectPlacement ^ objectPlacement, ILogger^ logger) override;
+			virtual IXbimGeometryObject^ Transformed(IIfcCartesianTransformationOperator^ transformation) override;
 
 
 			// Inherited via XbimSetObject
-			virtual void Mesh(IXbimMeshReceiver ^ mesh, double precision, double deflection, double angle) override;
 
+			virtual IXbimGeometryObject^ Moved(IIfcPlacement^ placement) override;
+
+			virtual IXbimGeometryObject^ Moved(IIfcObjectPlacement^ objectPlacement, ILogger^ logger) override;
+
+
+			// Inherited via XbimSetObject
+			virtual void Mesh(IXbimMeshReceiver^ mesh, double precision, double deflection, double angle) override;
+			operator TopoDS_Shape () override;
 		};
 
 		ref class XbimSolidSetBoolOpParams

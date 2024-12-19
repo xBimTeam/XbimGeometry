@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if NETFRAMEWORK
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -14,9 +15,9 @@ namespace Xbim.ModelGeometry.Scene
     /// </summary>
     public class XbimFloatEncodedBitmap
     {
-        private Bitmap _bmp;
-        private int _size;
-        private int _arity;
+        private readonly Bitmap _bmp;
+        private readonly int _size;
+        private readonly int _arity;
 
         //current index within actual image
         private long _dataIndex = -1;
@@ -266,3 +267,4 @@ namespace Xbim.ModelGeometry.Scene
         }
     }
 }
+#endif

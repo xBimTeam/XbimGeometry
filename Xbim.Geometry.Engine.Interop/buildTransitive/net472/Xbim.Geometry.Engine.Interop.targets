@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+Ensure native assemblies are copied when referenced transitively, using Nuget 5.0's buildTransitive mechanism. 
+Setting $(XbimCustomBinPath) in host msbuild allows override of the base output folder. E.g. as workaround for:
+https://github.com/Azure/azure-functions-vs-build-sdk/issues/298
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Condition="'$(OS)' == 'Windows_NT' ">
+    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\*.dll; $(MSBuildThisFileDirectory)..\..\lib\net472\win-x86\Xbim.Geometry.Engine.pdb; $(MSBuildThisFileDirectory)..\..\lib\net472\win-x86\Xbim.Geometry.Engine.dll">
+      <Link>$(XbimCustomBinPath)win-x86\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+      <Visible>false</Visible>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\*.dll;$(MSBuildThisFileDirectory)..\..\lib\net472\win-x64\Xbim.Geometry.Engine.pdb;$(MSBuildThisFileDirectory)..\..\lib\net472\win-x64\Xbim.Geometry.Engine.dll">
+      <Link>$(XbimCustomBinPath)win-x64\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>false</Pack>
+      <Visible>false</Visible>
+    </Content>
+  </ItemGroup>
+    <!-- TODO: ARM/Linux-->
+ 
+</Project>

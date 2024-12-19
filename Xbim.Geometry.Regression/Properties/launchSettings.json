@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Data\\Ifc\\_NDA\\2022 08 15 - STR regressioni\\files.txt\" /caching",
+      "commandLineArgs": "\"C:\\Users\\Steve\\Source\\Repos\\xBimTeam\\XbimGeometry\\Xbim.Geometry.Engine.Tests\\TestFiles\\assembly_is_processed.ifc\" /MaxThreads 0",
       "nativeDebugging": true
     }
   }
