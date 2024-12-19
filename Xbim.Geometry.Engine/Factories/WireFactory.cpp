@@ -276,7 +276,7 @@ namespace Xbim
 			IXWire^ WireFactory::BuildWire(array<IXPoint^>^ xPoints)
 			{
 				//validate
-				if (xPoints->Length == 0)
+				if (xPoints == nullptr || xPoints->Length == 0)
 					throw RaiseGeometryFactoryException("Points has zero length");
 				TColgp_Array1OfPnt points(1, xPoints->Length);
 				int id = 0;

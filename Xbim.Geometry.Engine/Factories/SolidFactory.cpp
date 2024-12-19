@@ -286,8 +286,8 @@ namespace Xbim
 				Ifc4::Interfaces::IIfcLengthMeasure^ endLen = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
 				Ifc4x3::MeasureResource::IfcParameterValue^ startParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->StartParam);
 				Ifc4x3::MeasureResource::IfcParameterValue^ endParam = dynamic_cast<Ifc4x3::MeasureResource::IfcParameterValue^>(directrixDerivedReferenceSweptAreaSolid->EndParam);
-				double firstParam;
-				double lastParam;
+				double firstParam = 0;
+				double lastParam = 0;
 
 				if (startLen && endLen)
 				{
@@ -366,8 +366,8 @@ namespace Xbim
 					gp_Vec normal;
 					gp_Vec refVec;
 					gp_Vec up;
-					bool hasAxis;
-					bool hasRef;
+					bool hasAxis = false;
+					bool hasRef = false;
 
 					// The profile placement is not necessarily derived 
 					// from the spine curve if the Axis and RefDirection is specified

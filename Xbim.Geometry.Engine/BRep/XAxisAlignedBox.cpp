@@ -79,7 +79,7 @@ namespace Xbim
 			{
 				if (IsVoid) return this;
 				auto xbimMat = dynamic_cast<XMatrix^>(transformation);
-				if (xbimMat == nullptr || xbimMat == nullptr || xbimMat->IsIdentity) return this;
+				if (xbimMat == nullptr || xbimMat->IsIdentity) return this;
 				Bnd_Box bBox(gp_Pnt(CornerMin->X, CornerMin->Y, CornerMin->Z),
 					gp_Pnt(CornerMax->X, CornerMax->Y, CornerMax->Z));
 				gp_Trsf transform = xbimMat->Transform();

@@ -354,7 +354,7 @@ namespace Xbim
 				gp_Pnt result;
 				gp_Vec tangent;
 				gp_Vec  axis;
-				Standard_Real len;
+				Standard_Real len = 0;
 				if (lengthValue != nullptr)
 				{
 					len = static_cast<Standard_Real>(lengthValue->Value);

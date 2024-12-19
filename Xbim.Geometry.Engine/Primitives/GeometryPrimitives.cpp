@@ -36,6 +36,10 @@ namespace Xbim
 			}
 			IXMatrix^ GeometryPrimitives::BuildMatrix(array<double>^ values)
 			{
+				if (values == nullptr)
+				{
+					throw gcnew System::ArgumentNullException("values");
+				}
 				Graphic3d_Mat4d mat4d;
 				int i = 0;
 				for (int r = 0; r < 4 && i < 16; r++)

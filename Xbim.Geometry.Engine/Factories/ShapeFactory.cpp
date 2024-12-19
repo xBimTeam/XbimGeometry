@@ -321,6 +321,10 @@ namespace Xbim
 
             IXFace^ ShapeFactory::Add(IXFace^ toFace, array<IXWire^>^ wires)
             {
+                if (wires == nullptr)
+                {
+                    throw RaiseGeometryFactoryException("wires array is null");
+                }
                 TopoDS_Face occFace = TOPO_FACE(toFace);
 
                 BRep_Builder b;
