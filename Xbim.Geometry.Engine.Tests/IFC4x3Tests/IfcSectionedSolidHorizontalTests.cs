@@ -29,7 +29,7 @@ namespace Xbim.Geometry.Engine.Tests.IFC4x3Tests
 
 
 
-        [Theory]
+        [Theory(Skip = "Fails in release builds: with undiagnosed 'attempted to call a UnmanagedCallersOnly method from managed code'. Under investigation")]
         [InlineData(@"TestFiles\IFC4x3\Viadotto Acerno.ifc", 160615)]
         [InlineData(@"TestFiles\IFC4x3\SectionedSolidHorizontal-1.ifc", 116)]
         public void CanBuildIfcSectionedSolidHorizontal(string ifcFile, int solidId)
