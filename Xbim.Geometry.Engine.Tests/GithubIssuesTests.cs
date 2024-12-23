@@ -86,6 +86,28 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Issue_483(XGeometryEngineVersion engineVersion)
+        {
+
+            using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
+            {
+                m.LoadStep21("TestFiles\\Github\\GitHub_issue_483_minimal.ifc");
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                c.CreateContext(null, false);
+
+                var store = m.GeometryStore as InMemoryGeometryStore;
+
+                var geom = store.ShapeGeometries.Values.First(c => c.IfcShapeLabel == 60035);
+
+                geom.FaceCount.Should().Be(56);
+                geom.Length.Should().Be(4317);
+
+            }
+        }
+
 
     }
 }
