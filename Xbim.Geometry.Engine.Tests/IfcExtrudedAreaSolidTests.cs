@@ -105,6 +105,22 @@ namespace Xbim.Geometry.Engine.Tests
                 sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
         }
+
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void IfcCShapeProfileDefGirthTest(XGeometryEngineVersion engineVersion)
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\test_rebro.ifc"))
+            {
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory, new Interop.Configuration.GeometryEngineOptions { GeometryEngineVersion = engineVersion});
+                var extrudedAreaSolid = model.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault();
+                extrudedAreaSolid.Should().NotBeNull();
+                var solid = geomEngine.CreateSolid(extrudedAreaSolid, _logger);
+                solid.Should().NotBeNull();
+            }
+        }
+
         [Fact]
         public void can_build_empty_rectangle_profile_extrusion()
         {

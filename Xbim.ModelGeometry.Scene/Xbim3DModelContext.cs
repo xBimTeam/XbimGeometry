@@ -834,12 +834,12 @@ namespace Xbim.ModelGeometry.Scene
                     progDelegate?.Invoke(101, "WriteProductShapes");
                     //Write out the actual representation item reference count
 
-
+                    int nextRegionNumber = 1;
                     //Write out the regions of the model
                     progDelegate?.Invoke(-1, "WriteRegionsToDb");
                     foreach (var cluster in contextHelper.Clusters)
                     {
-                        WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction, contextHelper.PlacementTree.WorldCoordinateSystem);
+                        nextRegionNumber = WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction, contextHelper.PlacementTree.WorldCoordinateSystem, nextRegionNumber);
                     }
                     progDelegate?.Invoke(101, "WriteRegionsToDb");
 
@@ -1583,6 +1583,8 @@ namespace Xbim.ModelGeometry.Scene
 
                     if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
                         LogDebug(_model.Instances[shapeId], "Is an empty shape");
+                    else if (shapeGeom.BoundingBox.SizeX >= 1e100)   // Short cut for Infinite BBox
+                        LogWarning(_model.Instances[shapeId], "Is an invalid shape");
                     else
                     {
                         shapeGeom.IfcShapeLabel = shapeId;
@@ -1716,7 +1718,7 @@ namespace Xbim.ModelGeometry.Scene
         //    }
         //}
 
-        private void WriteRegionsToStore(IIfcRepresentationContext context, IEnumerable<XbimBBoxClusterElement> elementsToCluster, IGeometryStoreInitialiser txn, XbimMatrix3D WorldCoordinateSystem)
+        private int WriteRegionsToStore(IIfcRepresentationContext context, IEnumerable<XbimBBoxClusterElement> elementsToCluster, IGeometryStoreInitialiser txn, XbimMatrix3D WorldCoordinateSystem, int nextRegionNumber)
         {
             //set up a world to partition the model
             var metre = _model.ModelFactors.OneMetre;
@@ -1726,10 +1728,11 @@ namespace Xbim.ModelGeometry.Scene
             // if the maximum size is a problem they could then be split using other algorithms that divide spaces equally
             //
             var v = XbimDbscan.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
-            var i = 1;
-            regions.AddRange(v.Select(item => new XbimRegion("Region " + i++, item.Bound, item.GeometryIds.Count, WorldCoordinateSystem)));
+            
+            regions.AddRange(v.Select(item => new XbimRegion("Region " + nextRegionNumber++, item.Bound, item.GeometryIds.Count, WorldCoordinateSystem)));
             regions.ContextLabel = context.EntityLabel;
             txn.AddRegions(regions);
+            return nextRegionNumber;
         }
 
         // todo: is xbimShapeInstance the right place for the context id? should it be in the shape instead? 

@@ -621,33 +621,61 @@ TopoDS_Wire NProfileFactory::BuildCShape(double width, double depth, double girt
 		double tW = wallThickness;
 
 		BRepBuilderAPI_MakeWire wireMaker;
-		if (dG > 0)
+		if (dG > 0)	// has Girth
 		{
-			gp_Pnt p1(-dX, dY, 0);
-			gp_Pnt p2(dX, dY, 0);
-			gp_Pnt p3(dX, dY - dG, 0);
-			gp_Pnt p4(dX - tW, dY - dG, 0);
-			gp_Pnt p5(dX - tW, dY - tW, 0);
-			gp_Pnt p6(-dX + tW, dY - tW, 0);
-			gp_Pnt p7(-dX + tW, -dY + tW, 0);
-			gp_Pnt p8(dX - tW, -dY + tW, 0);
-			gp_Pnt p9(dX - tW, -dY + dG, 0);
-			gp_Pnt p10(dX, -dY + dG, 0);
-			gp_Pnt p11(dX, -dY, 0);
-			gp_Pnt p12(-dX, -dY, 0);
+			if (fabs(tW - dG) < Precision::Confusion())
+			{
+				// Girth < wall thickness
+				gp_Pnt p1(-dX, dY, 0);
+				gp_Pnt p2(dX, dY, 0);
+				gp_Pnt p3(dX, dY - dG, 0);
+				gp_Pnt p4(dX - tW, dY - dG, 0);
+				gp_Pnt p6(-dX + tW, dY - tW, 0);
+				gp_Pnt p7(-dX + tW, -dY + tW, 0);
+				gp_Pnt p9(dX - tW, -dY + dG, 0);
+				gp_Pnt p10(dX, -dY + dG, 0);
+				gp_Pnt p11(dX, -dY, 0);
+				gp_Pnt p12(-dX, -dY, 0);
 
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p9));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
-			wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p6));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p9));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+			}
+			else
+			{
+				gp_Pnt p1(-dX, dY, 0);
+				gp_Pnt p2(dX, dY, 0);
+				gp_Pnt p3(dX, dY - dG, 0);
+				gp_Pnt p4(dX - tW, dY - dG, 0);
+				gp_Pnt p5(dX - tW, dY - tW, 0);
+				gp_Pnt p6(-dX + tW, dY - tW, 0);
+				gp_Pnt p7(-dX + tW, -dY + tW, 0);
+				gp_Pnt p8(dX - tW, -dY + tW, 0);
+				gp_Pnt p9(dX - tW, -dY + dG, 0);
+				gp_Pnt p10(dX, -dY + dG, 0);
+				gp_Pnt p11(dX, -dY, 0);
+				gp_Pnt p12(-dX, -dY, 0);
+
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p1, p2));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p2, p3));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p3, p4));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p4, p5));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p5, p6));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p6, p7));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p7, p8));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p8, p9));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p9, p10));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p10, p11));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p11, p12));
+				wireMaker.Add(BRepBuilderAPI_MakeEdge(p12, p1));
+			}
 		}
 		else
 		{

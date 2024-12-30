@@ -1,8 +1,13 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Xbim.Common.Configuration;
+using Xbim.Common.Geometry;
 using Xbim.Common.Model;
 using Xbim.Geometry.Abstractions;
+using Xbim.Geometry.Engine.Interop;
+using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
@@ -13,10 +18,12 @@ namespace Xbim.Geometry.Engine.Tests
 
     {
         private readonly ILoggerFactory _loggerFactory;
+        private readonly IXbimGeometryServicesFactory _geometryfactory;
 
-        public GithubIssuesTests(ILoggerFactory loggerFactory)
+        public GithubIssuesTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory geometryfactory)
         {
             _loggerFactory = loggerFactory;
+            _geometryfactory = geometryfactory;
         }
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -38,6 +45,35 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_447(XGeometryEngineVersion engineVersion)
+        {
+            // This file contains a trimmed curve based on ellipse which has semiaxis1 < semiaxis2
+            // and trimmed curve is parameterized with cartesian points.
+            // This test checks for a bug in XBimCurve geometry creation procedure when incorrect parameter values
+            // are calculated for these specific conditions described above.
+            using (var model = MemoryModel.OpenRead(@"TestFiles\Github\Github_issue_447.ifc"))
+            {
+                var shape = model.Instances.OfType<IIfcTrimmedCurve>().FirstOrDefault();
+                shape.Should().NotBeNull();
+                var trimPoint1 = shape.Trim1.OfType<IIfcCartesianPoint>().FirstOrDefault();
+                trimPoint1.Should().NotBeNull();
+                var trimPoint2 = shape.Trim2.OfType<IIfcCartesianPoint>().FirstOrDefault();
+                trimPoint2.Should().NotBeNull();
+
+                var trimStart = new XbimPoint3D(trimPoint2.X, trimPoint2.Y + 360, trimPoint2.Z);
+                var trimEnd = new XbimPoint3D(trimPoint1.X, trimPoint1.Y, trimPoint1.Z);
+
+                IXbimGeometryEngine geomEngine = _geometryfactory.CreateGeometryEngine(engineVersion, model, _loggerFactory);
+                var geom = geomEngine.CreateCurve(shape);
+                geom.Should().NotBeNull();
+
+                trimEnd.Should().Be(geom.End);
+                trimStart.Should().Be(geom.Start);
+            }
+        }
 
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
@@ -83,6 +119,75 @@ namespace Xbim.Geometry.Engine.Tests
                 geom.FaceCount.Should().Be(58);
                 geom.Length.Should().Be(2221);
 
+            }
+        }
+
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Issue_483(XGeometryEngineVersion engineVersion)
+        {
+
+            using (var m = new MemoryModel(new Ifc2x3.EntityFactoryIfc2x3()))
+            {
+                m.LoadStep21("TestFiles\\Github\\GitHub_issue_483_minimal.ifc");
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                c.CreateContext(null, false);
+
+                var store = m.GeometryStore as InMemoryGeometryStore;
+
+                var geom = store.ShapeGeometries.Values.First(c => c.IfcShapeLabel == 60035);
+
+                geom.FaceCount.Should().Be(56);
+                geom.Length.Should().Be(4317);
+
+            }
+        }
+
+        [Theory(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_512(XGeometryEngineVersion engineVersion)
+        {
+            //var loggerFactory = new LoggerFactory();
+            //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
+            var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
+            }
+        }
+
+        [Fact(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
+        public void Github_Issue_512b()
+        {
+            //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
+            //Common.Configuration.XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
+            var ifcFile = @"TestFiles\Github\Github_issue_512b.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
+
+                using (var reader = m.GeometryStore.BeginRead())
+                {
+                    var regions = reader.ContextRegions.Where(cr => cr.MostPopulated() != null).Select(cr => cr.MostPopulated());
+
+                    var region = regions.FirstOrDefault();
+
+                    region.Size.Length.Should().BeApproximately(1.747, 0.001);
+                }
             }
         }
 
