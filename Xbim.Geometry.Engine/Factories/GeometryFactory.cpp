@@ -307,8 +307,8 @@ namespace Xbim
 				gp_Pnt loc;
 				gp_Vec tangent;
 				gp_Vec axis(0, 0, 1);
-				bool hasAxis;
-				bool hasRef;
+				bool hasAxis = false;
+				bool hasRef = false;
 				Standard_Real distanceAlong;
 
 				if (BuildPoint3d(point, loc, tangent, axis, distanceAlong))

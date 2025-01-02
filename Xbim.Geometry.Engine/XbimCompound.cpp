@@ -76,8 +76,6 @@
 #include "./Factories//BooleanFactory.h"
 
 
-using namespace System;
-using namespace System::Linq;
 using namespace Xbim::Common;
 using namespace Xbim::Common::XbimExtensions;
 using namespace Xbim::Ifc4::Interfaces;
@@ -690,7 +688,7 @@ namespace Xbim
 				std::string errMsg;
 				if (!XbimNativeApi::SewShape(shape, _sewingTolerance, XbimGeometryCreator::BooleanTimeOut, errMsg) && logger != nullptr)
 				{
-					String^ err = gcnew String(errMsg.c_str());
+					System::String^ err = gcnew System::String(errMsg.c_str());
 					XbimGeometryCreator::LogWarning(logger, nullptr, "Failed to sew shape: " + err);
 				}
 				builder.Add(newCompound, shape);
@@ -1072,7 +1070,7 @@ namespace Xbim
 								}
 								catch (Standard_Failure sf)
 								{
-									String^ err = gcnew String(sf.GetMessageString());
+									System::String^ err = gcnew System::String(sf.GetMessageString());
 									XbimGeometryCreator::LogWarning(logger, advancedFace, "Could not fill face #{ifcEntityLabel}: {occError}, it has been ignored", advancedFace->EntityLabel, err);
 								}
 							}

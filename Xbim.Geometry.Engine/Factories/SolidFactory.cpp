@@ -366,8 +366,8 @@ namespace Xbim
 					gp_Vec normal;
 					gp_Vec refVec;
 					gp_Vec up;
-					bool hasAxis;
-					bool hasRef;
+					bool hasAxis = false;
+					bool hasRef = false;
 
 					// The profile placement is not necessarily derived 
 					// from the spine curve if the Axis and RefDirection is specified

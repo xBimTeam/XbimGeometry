@@ -15,9 +15,6 @@ namespace Xbim.Geometry.Engine.Tests
 
     public class Ifc4GeometryTests
     {
-
-
-
         private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory factory;
         private readonly ILogger _logger;
@@ -28,6 +25,7 @@ namespace Xbim.Geometry.Engine.Tests
             this.factory = factory;
             _logger = _loggerFactory.CreateLogger<Ifc4GeometryTests>();
         }
+
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
@@ -54,7 +52,6 @@ namespace Xbim.Geometry.Engine.Tests
                 }
             }
         }
-
 
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]

@@ -82,10 +82,10 @@ namespace Xbim.Geometry.Engine.Tests
 
                     solid.Faces.Count.Should().Be(3, "3 faces are required of a cylinder");
                     solid.Vertices.Count.Should().Be(2,"2 vertices are required of a cylinder");
-                    //var meshRec = new MeshHelper();
-                    //geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
-                    //meshRec.FaceCount == 3, "3 mesh faces are required of a cylinder");
-                    //meshRec.PointCount == 18, "18 mesh points are required of a cylinder");
+                    var meshRec = new MeshHelper();
+                    geomEngineV5.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
+                    meshRec.FaceCount.Should().Be(3, "3 mesh faces are required of a cylinder");
+                    meshRec.PointCount.Should().Be(18, "18 mesh points are required of a cylinder");
                     txn.Commit();
                 }
             }
@@ -113,10 +113,10 @@ namespace Xbim.Geometry.Engine.Tests
 
                     solid.Faces.Count.Should().Be(2, "2 faces are required of a cone");
                     solid.Vertices.Count.Should().Be(2, "2 vertices are required of a cone");
-                    //var meshRec = new MeshHelper();
-                    //geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
-                    //meshRec.FaceCount == 2, "2 mesh faces are required of a cone");
-                    //meshRec.PointCount == 23, "23 mesh points are required of a cone");
+                    var meshRec = new MeshHelper();
+                    geomEngine.Mesh(meshRec, solid, m.ModelFactors.Precision, m.ModelFactors.DeflectionTolerance * 10);
+                    meshRec.FaceCount.Should().Be(2, "2 mesh faces are required of a cone");
+                    meshRec.PointCount.Should().Be(23, "23 mesh points are required of a cone");
                     txn.Commit();
                 }
             }

@@ -842,4 +842,9 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="OCC\LICENSE_LGPL_21.txt" />
+    <Text Include="OCC\OCCT_LGPL_EXCEPTION.txt" />
+    <Text Include="OCC\update.txt" />
+  </ItemGroup>
 </Project>

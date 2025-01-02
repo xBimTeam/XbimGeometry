@@ -511,6 +511,11 @@
       <Version>6.2.363-develop</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="OCC\LICENSE_LGPL_21.txt" />
+    <Text Include="OCC\OCCT_LGPL_EXCEPTION.txt" />
+    <Text Include="OCC\update.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
     <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta\build\Xbim.Geometry.Occt.targets')" />
