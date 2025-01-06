@@ -727,8 +727,6 @@ namespace Xbim
 			builder.MakeShell(shell);
 			try
 			{
-
-
 				IIfcFace^ aFace = Enumerable::FirstOrDefault(faces);
 				if (aFace == nullptr) return shell;
 				IModel^ model = aFace->Model;
@@ -737,7 +735,6 @@ namespace Xbim
 				_sewingTolerance = _modelServices->MinimumGap;
 
 				//collect all the geometry components				
-
 				TopTools_DataMapOfIntegerShape edgeCurves;
 				TopTools_DataMapOfIntegerShape vertexGeometries;
 

@@ -1980,7 +1980,7 @@ namespace Xbim
 		int XbimFace::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pFace->HashCode(System::Int32::MaxValue);
+			return std::hash<TopoDS_Shape>()(*pFace);
 		}
 
 		bool XbimFace::operator ==(XbimFace^ left, XbimFace^ right)

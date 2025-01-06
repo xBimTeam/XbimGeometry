@@ -480,6 +480,9 @@
     <ClInclude Include="Services\ShapeBinarySerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Helpers\NativeAdvancedFaces.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="XbimCompound.cpp">
@@ -825,6 +828,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Services\ShapeBinarySerializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\NativeAdvancedFaces.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

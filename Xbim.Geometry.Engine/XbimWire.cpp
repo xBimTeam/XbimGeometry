@@ -186,7 +186,7 @@ namespace Xbim
 		int XbimWire::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pWire->HashCode(System::Int32::MaxValue);
+			return std::hash<TopoDS_Wire>()(*pWire);
 		}
 
 		bool XbimWire::operator ==(XbimWire^ left, XbimWire^ right)

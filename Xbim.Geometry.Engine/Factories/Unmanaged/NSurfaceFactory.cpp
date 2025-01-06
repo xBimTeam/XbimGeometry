@@ -1,6 +1,7 @@
 #include "NSurfaceFactory.h"
 #include <BRep_Tool.hxx>
 #include <GeomPlate_BuildAveragePlane.hxx>
+#include <ShapeFix_Edge.hxx>
 
 
 Handle(Geom_Plane) NSurfaceFactory::BuildPlane(double originX, double originY, double originZ, double normalX, double normalY, double normalZ)
@@ -169,4 +170,12 @@ TopoDS_Wire NSurfaceFactory::CreateWireFromTag
 	}
 
 	return polygon.Wire();
+}
+
+void NSurfaceFactory::FixInvalidEdges(const TopoDS_Face& face) {
+	ShapeFix_Edge sfe;
+	for (TopExp_Explorer exp(face, TopAbs_EDGE); exp.More(); exp.Next())
+	{
+		sfe.FixAddPCurve(TopoDS::Edge(exp.Current()), face, Standard_False);
+	}
 }

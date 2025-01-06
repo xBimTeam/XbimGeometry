@@ -24,5 +24,7 @@ public:
 	};
 	TopoDS_Shell BuildConnectedFaceSet(const std::vector<std::vector<std::vector<int>>>& faceData, const std::unordered_map<int, gp_XYZ>& points, const std::vector<int>& planeIndices, const TColgp_SequenceOfAx1& planes, double tolerance, double oneMillimeter, bool& needsFixing);
 	TopoDS_Shape TrimTopology(const TopoDS_Shape& shape);
+	TopoDS_Shape FixShell(TopoDS_Shell& shell, bool& isFixed);
+
 };
 

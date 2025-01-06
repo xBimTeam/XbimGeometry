@@ -165,28 +165,9 @@ namespace Xbim
 
 			TopoDS_Shape ShellFactory::FixShell(TopoDS_Shell& shell, IPersistEntity^ entity, bool& isFixed)
 			{
-				BRepCheck_Shell checker(shell);
-				const BRepCheck_Status shellStatus = checker.Orientation();
-				if (shellStatus == BRepCheck_Status::BRepCheck_NoError)
-				{
-					isFixed = true;
-					return shell;
-				}
-				
-				isFixed = false;
-				ShapeFix_Shell shapeFixer(shell);
-				bool fixed = shapeFixer.Perform();
-				if (!fixed) return shell;
-				if (shapeFixer.Shape().IsNull()) return shell;
-				if (shapeFixer.Shape().ShapeType() == TopAbs_SHELL)
-				{
-					isFixed = true;
-					return shapeFixer.Shell();
-				}
-				if (shapeFixer.Shape().ShapeType() == TopAbs_COMPOUND)
-				{
-					isFixed = true;
-					return shapeFixer.Shape();
+				auto fixed = EXEC_NATIVE->FixShell(shell, isFixed);
+				if (isFixed) {
+					return fixed;
 				}
 				LogWarning(entity, "Connected face set has definition errors that could not be fixed");
 				return shell;

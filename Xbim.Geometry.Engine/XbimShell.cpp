@@ -168,7 +168,7 @@ namespace Xbim
 		int XbimShell::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pShell->HashCode(System::Int32::MaxValue);
+			return std::hash<TopoDS_Shell>()(*pShell);
 		}
 
 		bool XbimShell::operator ==(XbimShell^ left, XbimShell^ right)
