@@ -85,7 +85,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>$(ProjectName)$(ManagedPlatform)</TargetName>
+    <!--<TargetName>$(ProjectName)$(ManagedPlatform)</TargetName>-->
+    <TargetName>Xbim.Geometry.Engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <EnableMicrosoftCodeAnalysis>true</EnableMicrosoftCodeAnalysis>
