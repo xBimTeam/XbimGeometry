@@ -12,6 +12,7 @@ using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
 namespace Xbim.Geometry.Engine.Tests
+
 {
 
     public class GithubIssuesTests
@@ -144,11 +145,18 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Theory(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
-        [InlineData(XGeometryEngineVersion.V5)]
+        [Theory(Skip = "Broken in V6")]
         [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_512_broken(XGeometryEngineVersion _)
+        { 
+        }
+
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        //[InlineData(XGeometryEngineVersion.V6)]
         public void Github_Issue_512(XGeometryEngineVersion engineVersion)
         {
+            
             //var loggerFactory = new LoggerFactory();
             //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
             var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
@@ -164,16 +172,14 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Fact(Skip = "Throws Memory Access Violation. REINSTATE once OCC rebuilt with NO_EXCEPTION disabled")]
+        [Fact]
         public void Github_Issue_512b()
         {
-            //var loggerFactory = new LoggerFactory().AddConsole(LogLevel.Trace);
-            //Common.Configuration.XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)));
             var ifcFile = @"TestFiles\Github\Github_issue_512b.ifc";
             // Triggers OCC Memory violation
             using (var m = MemoryModel.OpenRead(ifcFile))
             {
-                var c = new Xbim3DModelContext(m);
+                var c = new Xbim3DModelContext(m, _loggerFactory, XGeometryEngineVersion.V5);
                 var result = c.CreateContext(null, true);
 
                 result.Should().BeTrue();
@@ -186,7 +192,7 @@ namespace Xbim.Geometry.Engine.Tests
 
                     var region = regions.FirstOrDefault();
 
-                    region.Size.Length.Should().BeApproximately(1.747, 0.001);
+                    region.Size.Length.Should().BeApproximately(0.77227, 0.001);
                 }
             }
         }

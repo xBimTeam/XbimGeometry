@@ -15,7 +15,7 @@
 
 	<!--This creates the nuget package-->
 	<PropertyGroup>
-		<TargetsForTfmSpecificContentInPackage>GetNativeOccFiles;GetGeometryEngineFiles;GetIjwHostFiles</TargetsForTfmSpecificContentInPackage>
+		<TargetsForTfmSpecificContentInPackage>GetGeometryEngineFiles;GetIjwHostFiles</TargetsForTfmSpecificContentInPackage>
 	</PropertyGroup>
 
 	<Target Name="GetGeometryEngineFiles">
@@ -38,21 +38,7 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="GetNativeOccFiles" Condition="'$(TargetFramework)'=='net6.0'">
-		<!--only need one version net 6.0 is random choice, they are all the same-->
-		<ItemGroup>
-			<Occ64Files Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)net6.0\win-x64\TK*.dll">
-				<WinPlatform>runtimes/win-x64/native</WinPlatform>
-			</Occ64Files>
-			<Occ86Files Condition="'$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)net6.0\win-x86\TK*.dll">
-				<WinPlatform>runtimes/win-x86/native</WinPlatform>
-			</Occ86Files>
-			<OccPackageFile Include="@(Occ64Files);@(Occ86Files)">
-				<PackagePath>%(WinPlatform)/@(OccPackageFile->'%(Filename)%(Extension)')</PackagePath>
-			</OccPackageFile>
-			<TfmSpecificPackageFile Include="@(OccPackageFile)"></TfmSpecificPackageFile>
-		</ItemGroup>
-	</Target>
+
 
 	<Target Name="GetIjwHostFiles" Condition="'$(TargetFramework)'!='net472' and '$(TargetFramework)'!=''">
 		<ItemGroup>
@@ -75,14 +61,6 @@
 		</Touch>
 	</Target>-->
 	<ItemGroup>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\TK*.dll" Visible="true" Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win-x64\%(Filename)%(Extension)</Link>
-		</None>
-		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\TK*.dll" Visible="true" Condition="'$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU'">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Link>win-x86\%(Filename)%(Extension)</Link>
-		</None>
 		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)' != 'net472' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU')">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>win-x64\%(Filename)%(Extension)</Link>
@@ -125,6 +103,7 @@
   <ItemGroup>
 		
 		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.363-develop" />
+		<PackageReference Include="Xbim.Geometry.Occt" Version="7.7.0-beta.0.3" />
 	</ItemGroup>
 
 </Project>
