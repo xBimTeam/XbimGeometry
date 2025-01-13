@@ -28,6 +28,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <OutputFolder>net6.0</OutputFolder>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <ProjectName>Xbim.Geometry.Engine.net6</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -511,12 +512,12 @@
       <Version>6.2.363-develop</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
-      <Version>7.7.0-beta.0.3</Version>
+      <Version>7.7.0</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
-    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets')" />
+    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets')" />
   </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
     <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
@@ -526,6 +527,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets'))" />
+    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets'))" />
   </Target>
 </Project>
