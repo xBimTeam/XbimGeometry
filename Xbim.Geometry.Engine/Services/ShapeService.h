@@ -29,6 +29,7 @@ namespace Xbim
                     auto logger = LoggerFactoryExtensions::CreateLogger<ModelGeometryService^>(loggerFactory);
                     _loggingService = gcnew Xbim::Geometry::Services::LoggingService(logger);
                     Ptr()->SetLogger(static_cast<WriteLog>(_loggingService->LogDelegatePtr.ToPointer()));
+
                 };
 
                 virtual IXShape^ Convert(System::String^ brepString);
@@ -85,6 +86,7 @@ namespace Xbim
 
                 virtual array<System::Byte>^ CreateWexBimMesh(IXShape^ shape, double tolerance, double linearDeflection, double angularDeflection, double scale, IXAxisAlignedBoundingBox^% bounds);
 
+                bool DO();
             };
 		}
 	}

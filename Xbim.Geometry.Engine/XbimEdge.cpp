@@ -799,7 +799,7 @@ namespace Xbim
 		int XbimEdge::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return std::hash<TopoDS_Edge>()(*pEdge);
+			return (int)std::hash<TopoDS_Edge>()(*pEdge);
 		}
 
 		bool XbimEdge::operator ==(XbimEdge^ left, XbimEdge^ right)

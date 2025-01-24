@@ -1,5 +1,6 @@
 #pragma once
 #include "../XbimHandle.h"
+#include "../Helpers/XbimNativeApi.h"
 #include <Geom2d_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
@@ -37,7 +38,7 @@ namespace Xbim
 				virtual IXPoint^ GetPoint(double uParam);
 				virtual IXPoint^ GetFirstDerivative(double uParam, [System::Runtime::InteropServices::Out] IXDirection^% direction);
 				virtual IXPoint^ GetSecondDerivative(double uParam, [System::Runtime::InteropServices::Out] IXDirection^% direction, [System::Runtime::InteropServices::Out] IXDirection^% normal);
-				virtual property double Length { double get() { return 0;/*GCPnts_AbscissaPoint::Length(Geom2dAdaptor_Curve(OccHandle()));*/ } };
+				virtual property double Length { double get() { return XbimNativeApi::Length(OccHandle()); } };
 			};
 		}
 	}

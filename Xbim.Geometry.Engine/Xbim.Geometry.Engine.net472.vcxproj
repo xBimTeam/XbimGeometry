@@ -396,7 +396,11 @@
     <ClInclude Include="XbimGeometryObjectSet.h" />
     <ClInclude Include="XbimHandle.h" />
     <ClInclude Include="XbimMesh.h" />
-    <ClInclude Include="XbimNativeApi.h" />
+    <ClInclude Include="Helpers\XbimNativeApi.h" />
+    <ClInclude Include="Helpers\NativeFacesBuilder.h" />
+    <ClInclude Include="Helpers\NativeFaceBuilder.h" />
+    <ClInclude Include="Helpers\NativeAdvancedFacesBuilder.h" />
+    <ClInclude Include="Helpers\CanLogBase.h" />
     <ClInclude Include="XbimOccShape.h" />
     <ClInclude Include="XbimOccWriter.h" />
     <ClInclude Include="XbimPoint3DWithTolerance.h" />
@@ -533,7 +537,10 @@
     <ClCompile Include="XbimGeometryObject.cpp" />
     <ClCompile Include="XbimGeometryObjectSet.cpp" />
     <ClCompile Include="XbimMesh.cpp" />
-    <ClCompile Include="XbimNativeApi.cpp" />
+    <ClCompile Include="Helpers\XbimNativeApi.cpp" />
+    <ClCompile Include="Helpers\NativeFacesBuilder.cpp" />
+    <ClCompile Include="Helpers\NativeFaceBuilder.cpp" />
+    <ClCompile Include="Helpers\NativeAdvancedFacesBuilder.cpp" />
     <ClCompile Include="XbimOccShape.cpp" />
     <ClCompile Include="XbimOccWriter.cpp" />
     <ClCompile Include="XbimPoint3DWithTolerance.cpp" />
@@ -575,7 +582,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
-    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets')" />
+    <Import Project="..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets')" />
   </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
     <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
@@ -585,6 +592,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0-beta.0.3\build\Xbim.Geometry.Occt.targets'))" />
+    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets'))" />
   </Target>
 </Project>

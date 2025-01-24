@@ -719,6 +719,7 @@ namespace Xbim
 		//Surface Models containing one or more shells or solids
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcShellBasedSurfaceModel^ IIfcSurface, ILogger^)
 		{
+			// TODO: v6 impl. missing
 			return gcnew XbimCompound(IIfcSurface, Logger(), this);
 		};
 
@@ -731,6 +732,7 @@ namespace Xbim
 
 		IXbimGeometryObjectSet^ XbimGeometryCreatorV6::CreateSurfaceModel(IIfcTessellatedFaceSet^ faceSet, ILogger^)
 		{
+			// TODO: v6 impl. missing
 			IIfcTriangulatedFaceSet^ tfs = dynamic_cast<IIfcTriangulatedFaceSet^>(faceSet);
 			if (tfs != nullptr)  return gcnew XbimCompound(tfs, Logger(), this);
 			IIfcPolygonalFaceSet^ pfs = dynamic_cast<IIfcPolygonalFaceSet^>(faceSet);

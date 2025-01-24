@@ -307,7 +307,7 @@ namespace Xbim
 		int XbimSolid::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return std::hash<TopoDS_Solid>()(*pSolid);
+			return (int)std::hash<TopoDS_Solid>()(*pSolid);
 		}
 
 		bool XbimSolid::operator ==(XbimSolid^ left, XbimSolid^ right)

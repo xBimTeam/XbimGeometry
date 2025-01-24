@@ -1,6 +1,5 @@
 #include "ShapeService.h"
 #include "Unmanaged/NWexBimMesh.h"
-#include "Unmanaged/NShapeProximityUtils.h"
 #include "Unmanaged/NShapeService.h"
 
 #include <BRepBuilderAPI_Transform.hxx>
@@ -255,12 +254,37 @@ namespace Xbim
 				}return compound;
 			}
 
+			bool ShapeService::DO() {
+
+				_CrtMemState state1, state2, state3;
+				_CrtMemCheckpoint(&state1);
+
+				TopoDS_Edge edge1;
+				TopoDS_Edge edge2;
+
+				_CrtMemCheckpoint(&state2);
+
+
+				BRepExtrema_ShapeProximity proximity(edge1, edge2, 0.01);
+				proximity.Perform();
+
+				_CrtMemCheckpoint(&state3);
+
+				if (_CrtMemDifference(&state3, &state2, &state1)) {
+					_CrtMemDumpStatistics(&state3);
+				}
+
+				return proximity.IsDone();
+			}
+
 			bool ShapeService::IsOverlapping(IXShape^ shape1, IXShape^ shape2, IXMeshFactors^ meshFactors)
 			{
+				/*DO();
+				return false;*/
 				TopoDS_Shape topoShape1 = static_cast<XShape^>(shape1)->GetTopoShape();
 				TopoDS_Shape topoShape2 = static_cast<XShape^>(shape2)->GetTopoShape();
 
-				return NShapeProximityUtils::IsOverlapping
+				return Ptr()->IsOverlapping
 							(topoShape1, topoShape2, meshFactors->Tolerance, meshFactors->LinearDefection, meshFactors->AngularDeflection);
 			}
 

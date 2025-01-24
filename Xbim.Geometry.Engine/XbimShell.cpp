@@ -35,7 +35,7 @@
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <GeomLib_IsPlanarSurface.hxx>
 #include <Standard_CString.hxx>
-#include "XbimNativeApi.h"
+#include "./Helpers/XbimNativeApi.h"
 #include "XbimCompound.h"
 #include "XbimSolid.h"
 #include "XbimShell.h"
@@ -168,7 +168,7 @@ namespace Xbim
 		int XbimShell::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return std::hash<TopoDS_Shell>()(*pShell);
+			return (int)std::hash<TopoDS_Shell>()(*pShell);
 		}
 
 		bool XbimShell::operator ==(XbimShell^ left, XbimShell^ right)
@@ -268,10 +268,8 @@ namespace Xbim
 		bool XbimShell::IsClosed::get()
 		{
 			if (!IsValid) return false;
-			BRepCheck_Shell checker(*pShell);
-			BRepCheck_Status result = checker.Closed();
 			System::GC::KeepAlive(this);
-			return result == BRepCheck_NoError;
+			return XbimNativeApi::IsClosed(*pShell);
 
 		}
 

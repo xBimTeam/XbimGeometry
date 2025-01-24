@@ -63,9 +63,6 @@
     <ClInclude Include="XbimMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="XbimNativeApi.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="XbimOccShape.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -480,7 +477,19 @@
     <ClInclude Include="Services\ShapeBinarySerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Helpers\NativeAdvancedFaces.h">
+    <ClInclude Include="Helpers\CanLogBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\NativeAdvancedFacesBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\NativeFacesBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\NativeFaceBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\XbimNativeApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -519,9 +528,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XbimNativeApi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="XbimOccShape.cpp">
@@ -830,7 +836,16 @@
     <ClCompile Include="Services\ShapeBinarySerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Helpers\NativeAdvancedFaces.cpp">
+    <ClCompile Include="Helpers\NativeAdvancedFacesBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\NativeFacesBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\NativeFaceBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\XbimNativeApi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

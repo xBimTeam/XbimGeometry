@@ -64,6 +64,7 @@
 #include "./Services//ModelGeometryService.h"
 #include <ShapeBuild_ReShape.hxx>
 #include "Factories/ProfileFactory.h"
+#include "Helpers/NativeFaceBuilder.h"
 
 using namespace Xbim::Geometry::Services;
 namespace Xbim
@@ -166,6 +167,7 @@ namespace Xbim
 
 			return isClosed;
 		}
+		
 		XbimFace::XbimFace(XbimPoint3D l, XbimVector3D n, ILogger^ /*logger*/, ModelGeometryService^ modelService) : XbimOccShape(modelService)
 		{
 			gp_Pln plane(gp_Pnt(l.X, l.Y, l.Z), gp_Dir(n.X, n.Y, n.Z));
@@ -609,109 +611,22 @@ namespace Xbim
 				return;
 			}
 
-			TColgp_SequenceOfPnt pointSeq;
+			std::vector<gp_Pnt> points;
 
-			BRepBuilderAPI_MakeWire wireMaker;
 			for (int i = 0; i < originalCount; i++)
 			{
-				pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
-
+				points.push_back(XbimConvert::GetPoint3d(polygon[i]));
 			}
 
-			XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);
-
-			if (pointSeq.Length() != originalCount)
-			{
-				XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop with duplicate points. Ifc rule: first point shall not be repeated at the end of the list. It has been removed");
-			}
-
-			if (pointSeq.Length() < 3)
-			{
-				XbimGeometryCreator::LogWarning(logger, polyloop, "Polyloop with less than 3 points is an empty loop. It has been ignored");
-				return;
-			}
-			//get the basic properties
-			TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
-			for (int i = 1; i <= pointSeq.Length(); i++)
-			{
-				pointArray.SetValue(i, pointSeq.Value(i));
-			}
-
-
-			//limit the tolerances for the vertices and edges
-			BRepBuilderAPI_MakePolygon polyMaker;
-			for (int i = 1; i <= pointSeq.Length(); ++i) {
-				polyMaker.Add(pointSeq.Value(i));
-			}
-			polyMaker.Close();
-
-			if (polyMaker.IsDone())
-			{
-				bool isPlanar;
-				gp_Vec normal = XbimConvert::NewellsNormal(pointArray, isPlanar);
-				if (!isPlanar)
-				{
-
-					XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop is a line. Empty loop built");
-					return;
-				}
-				gp_Pnt centre = GProp_PGProps::Barycentre(pointArray);
-				gp_Pln thePlane(centre, normal);
-				TopoDS_Wire theWire = polyMaker.Wire();
-				TopoDS_Face theFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
-
-				//limit the tolerances for the vertices and edges
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(theWire, tolerance); //set all tolerances
-				//adjust vertex tolerances for bad planar fit if we have anything more than a triangle (which will alway fit a plane)
-
-				if (pointSeq.Length() > 3)
-				{
-					TopTools_IndexedMapOfShape map;
-					TopExp::MapShapes(theWire, TopAbs_EDGE, map);
-					ShapeFix_Edge ef;
-					bool fixed = false;
-					for (int i = 1; i <= map.Extent(); i++)
-					{
-						const TopoDS_Edge edge = TopoDS::Edge(map(i));
-						if (ef.FixVertexTolerance(edge, theFace)) fixed = true;
-
-					}
-					if (fixed)
-						XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop is slightly mis-aligned to a plane. It has been adjusted");
-				}
-				//need to check for self intersecting edges to comply with Ifc rules
-				double maxTol = BRep_Tool::MaxTolerance(theWire, TopAbs_VERTEX);
-				Handle(ShapeAnalysis_Wire) wa = new ShapeAnalysis_Wire(theWire, theFace, maxTol);
-
-				if (wa->CheckSelfIntersection()) //some edges are self intersecting or not on plane within tolerance, fix them
-				{
-					ShapeFix_Wire wf;
-					wf.Init(wa);
-					wf.SetPrecision(tolerance);
-					wf.SetMinTolerance(tolerance);
-					wf.SetMaxTolerance(maxTol);
-					if (!wf.Perform())
-					{
-						XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to fix self-interecting wire edges");
-
-					}
-					else
-					{
-						theWire = wf.Wire();
-						theFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
-					}
-
-				}
+			NativeFaceBuilder builder(tolerance, originalCount);
+			builder.SetLogger(static_cast<WriteLog>(_modelServices->LoggingService->LogDelegatePtr.ToPointer()));
+			bool success;
+			TopoDS_Wire wire;
+			auto face = builder.Init(points, wire, success);
+			if (success) {
 				pFace = new TopoDS_Face();
-				*pFace = theFace;
-
+				*pFace = face;
 			}
-			else
-			{
-				XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to build Polyloop"); //nothing more to say to the log			
-			}
-
 		}
 
 		void XbimFace::Init(IXbimWire^ xbimWire, XbimPoint3D pointOnFace, XbimVector3D faceNormal, ILogger^ /*logger*/)
@@ -789,7 +704,8 @@ namespace Xbim
 			double outerLoopArea = 0;
 			ShapeFix_ShapeTolerance tolFixer;
 			TopoDS_Face theFace;
-			TopoDS_ListOfShape innerBounds;
+			std::vector<TopoDS_Face> innerBounds;
+			
 			for each (IIfcFaceBound ^ bound in ifcFace->Bounds)
 			{
 				IIfcPolyLoop^ polyloop = dynamic_cast<IIfcPolyLoop^>(bound->Bound);
@@ -808,201 +724,43 @@ namespace Xbim
 					continue;
 				}
 
-				TColgp_SequenceOfPnt pointSeq;
 				std::vector<int> handles;
-				BRepBuilderAPI_MakeWire wireMaker;
+				std::vector<gp_Pnt> points;
+
 				for (int i = 0; i < originalCount; i++)
-				{
-					pointSeq.Append(XbimConvert::GetPoint3d(polyloop->Polygon[i]));
-					if (useVertexMap) handles.push_back(polyloop->Polygon[i]->EntityLabel);
-				}
-				if (useVertexMap)
-					XbimFace::RemoveDuplicatePoints(pointSeq, handles, true, tolerance);
-				else
-					XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance);
+				{ 
+					points.push_back(XbimConvert::GetPoint3d(polyloop->Polygon[i]));
 
-				if (pointSeq.Length() != originalCount)
-				{
-					XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop with duplicate points. Ifc rule: first point shall not be repeated at the end of the list. It has been removed");
+					if(useVertexMap) handles.push_back(polyloop->Polygon[i]->EntityLabel);
 				}
-
-				if (pointSeq.Length() < 3)
-				{
-					XbimGeometryCreator::LogWarning(logger, polyloop, "Polyloop with less than 3 points is an empty loop. It has been ignored");
-					continue;
+				
+				NativeFaceBuilder builder(tolerance, originalCount, useVertexMap, handles);
+				builder.SetLogger(static_cast<WriteLog>(_modelServices->LoggingService->LogDelegatePtr.ToPointer()));
+				bool success;
+				TopoDS_Wire theWire;
+				auto aFace = builder.Init(points, theWire, success);
+				if (!success) {
+					return;
 				}
-				//get the basic properties
-				TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
-				for (int i = 1; i <= pointSeq.Length(); i++)
+				 
+				double area = ShapeAnalysis::ContourArea(theWire);
+				if (area > outerLoopArea)
 				{
-					pointArray.SetValue(i, pointSeq.Value(i));
-				}
-
-				BRep_Builder builder;
-				//limit the tolerances for the vertices and edges
-				BRepBuilderAPI_MakePolygon polyMaker;
-				if (!bound->Orientation) //reverse the points
-				{
-					for (int i = pointSeq.Length(); i > 0; i--)
+					if (!theFace.IsNull())
 					{
-						TopoDS_Vertex vertex;
-						int entityLabel = handles.at(i - 1);
-						if (!vertexMap.Find(entityLabel, vertex))
-						{
-							builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
-							vertexMap.Bind(entityLabel, vertex);
-						}
-						polyMaker.Add(vertex);
+						innerBounds.push_back(theFace); //save the face to go inside as a loop
 					}
+					theFace = aFace;
+					outerLoopArea = area;
 				}
 				else
 				{
-					for (int i = 1; i <= pointSeq.Length(); ++i)
-					{
-						TopoDS_Vertex vertex;
-						if (useVertexMap)
-						{
-							int entityLabel = handles.at(i - 1);
-							if (!vertexMap.Find(entityLabel, vertex))
-							{
-								builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
-								vertexMap.Bind(entityLabel, vertex);
-							}
-						}
-						else
-							builder.MakeVertex(vertex, pointSeq.Value(i), tolerance);
-						polyMaker.Add(vertex);
-					}
-				}
-
-				polyMaker.Close();
-
-
-				if (polyMaker.IsDone())
-				{
-
-					bool isPlanar;
-					gp_Vec normal = XbimConvert::NewellsNormal(pointArray, isPlanar);
-					if (!isPlanar)
-					{
-						XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop is a line. Empty loop built");
-						continue;
-					}
-					gp_Pnt centre = GProp_PGProps::Barycentre(pointArray);
-					gp_Pln thePlane(centre, normal);
-					TopoDS_Wire theWire = polyMaker.Wire();
-					tolFixer.LimitTolerance(theWire, tolerance); //set all tolerances
-
-					TopoDS_Face aFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
-					//need to check for self intersecting edges to comply with Ifc rules
-					TopTools_IndexedMapOfShape map;
-					TopExp::MapShapes(aFace, TopAbs_EDGE, map);
-					ShapeFix_Edge ef;
-					bool fixed = false;
-					for (int i = 1; i <= map.Extent(); i++)
-					{
-						const TopoDS_Edge edge = TopoDS::Edge(map(i));
-						if (ef.FixVertexTolerance(edge, aFace)) fixed = true;
-					}
-					if (fixed)
-						XbimGeometryCreator::LogDebug(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
-					double maxTol = BRep_Tool::MaxTolerance(theWire, TopAbs_VERTEX);
-					Handle(ShapeAnalysis_Wire) wa = new ShapeAnalysis_Wire(theWire, aFace, maxTol);
-
-					if (wa->CheckSelfIntersection()) //some edges are self intersecting or not on plane within tolerance, fix them
-					{
-						ShapeFix_Wire wf;
-						wf.Init(wa);
-						wf.SetPrecision(tolerance);
-						wf.SetMinTolerance(tolerance);
-						wf.SetMaxTolerance(std::max(tolerance, maxTol));
-						if (!wf.Perform())
-						{
-							XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to fix self-interecting wire edges");
-						}
-						else
-						{
-							theWire = wf.Wire();
-							aFace = BRepBuilderAPI_MakeFace(thePlane, theWire, false);
-						}
-
-					}
-
-					double area = ShapeAnalysis::ContourArea(theWire);
-					if (area > outerLoopArea)
-					{
-						if (!theFace.IsNull())
-						{
-							innerBounds.Append(theFace); //save the face to go inside as a loop
-						}
-						theFace = aFace;
-						outerLoopArea = area;
-					}
-					else
-					{
-						innerBounds.Append(aFace);
-					}
-				}
-				else
-				{
-					XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to build Polyloop"); //nothing more to say to the log			
+					innerBounds.push_back(aFace);
 				}
 			}
-			if (!theFace.IsNull() && innerBounds.Size() > 0)
-			{
-				//add the other wires to the face
-				BRepBuilderAPI_MakeFace faceMaker(theFace);
 
-				TopoDS_ListIteratorOfListOfShape wireIter(innerBounds);
-				BRepGProp_Face prop(theFace);
-				gp_Pnt centre;
-				gp_Vec theFaceNormal;
-				double u1, u2, v1, v2;
-				prop.Bounds(u1, u2, v1, v2);
-				prop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, theFaceNormal);
-
-				while (wireIter.More())
-				{
-					TopoDS_Face face = TopoDS::Face(wireIter.Value());
-					BRepGProp_Face fprop(face);
-					gp_Vec innerBoundNormalDir;
-					fprop.Bounds(u1, u2, v1, v2);
-					fprop.Normal((u1 + u2) / 2.0, (v1 + v2) / 2.0, centre, innerBoundNormalDir);
-
-					if (!theFaceNormal.IsOpposite(innerBoundNormalDir, angularTolerance))
-					{
-
-						face.Reverse();
-					}
-					faceMaker.Add(BRepTools::OuterWire(face));
-					wireIter.Next();
-				}
-				theFace = faceMaker.Face();
-				//limit the tolerances for the vertices and edges
-
-				tolFixer.LimitTolerance(theFace, tolerance); //set all tolerances
-				//adjust vertex tolerances for bad planar fit if we have anything more than a triangle (which will alway fit a plane)
-
-
-				TopTools_IndexedMapOfShape map;
-				TopExp::MapShapes(theFace, TopAbs_EDGE, map);
-				ShapeFix_Edge ef;
-				bool fixed = false;
-				for (int i = 1; i <= map.Extent(); i++)
-				{
-					const TopoDS_Edge edge = TopoDS::Edge(map(i));
-					if (ef.FixVertexTolerance(edge, theFace)) fixed = true;
-
-				}
-				if (fixed)
-					XbimGeometryCreator::LogDebug(logger, ifcFace, "Face bounds are slightly mis-aligned to a plane. It has been adjusted");
-
-
-			}
-			else
-			{
-				tolFixer.LimitTolerance(theFace, tolerance); //set all tolerances
-			}
+			NativeFaceBuilder builder(tolerance);
+			builder.FixFace(theFace, innerBounds, angularTolerance, tolFixer, tolerance);
 			pFace = new TopoDS_Face();
 			*pFace = theFace;
 		}
@@ -1980,7 +1738,7 @@ namespace Xbim
 		int XbimFace::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return std::hash<TopoDS_Shape>()(*pFace);
+			return (int)std::hash<TopoDS_Shape>()(*pFace);
 		}
 
 		bool XbimFace::operator ==(XbimFace^ left, XbimFace^ right)

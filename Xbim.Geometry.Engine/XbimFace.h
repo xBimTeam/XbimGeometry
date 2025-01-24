@@ -59,6 +59,7 @@ namespace Xbim
 			void Init(double x, double y, double tolerance, ILogger^ logger);
 			void Init(IIfcFace^ face, ILogger^ logger, bool userVertexMap, TopTools_DataMapOfIntegerShape& vertexMap);
 
+
 		public:
 
 			//destructors

@@ -16,7 +16,10 @@
 #include <BRepAlgoAPI_Common.hxx>
 #include <BOPAlgo_BOP.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
+#include <BRepTools.hxx>
 #include "NProgressMonitor.h"
+#include  <memory>
+
 
 int NShapeProximityUtils::GetOverlappingSubShapes1Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection)
 {
@@ -53,11 +56,14 @@ bool NShapeProximityUtils::IsOverlapping(const TopoDS_Shape& shape1, const TopoD
 
 	BRepExtrema_ShapeProximity proximity(shape1, shape2, tolerance);
 	proximity.Perform();
-	 
+
 	if (proximity.IsDone()) {
 
-		bool overlapping = proximity.OverlapSubShapes1().Size() > 0 && 
+		bool overlapping = proximity.OverlapSubShapes1().Size() > 0 &&
 				proximity.OverlapSubShapes2().Size() > 0;
+
+		BRepTools::Clean(shape1);
+		BRepTools::Clean(shape2);
 
 		//TODO (Ibrahim): better tangency check?
 		//  If tolerance is set to zero, the algorithm will detect only intersecting faces
@@ -66,10 +72,10 @@ bool NShapeProximityUtils::IsOverlapping(const TopoDS_Shape& shape1, const TopoD
 		if (overlapping && tolerance == 0) {
 				return NShapeProximityUtils::HasOverlappingGeometry(shape1, shape2, tolerance);
 		}
-
+		//delete proximity;
 		return overlapping;
 	}
-
+	//delete proximity;
 	return false;
 }
 
