@@ -582,7 +582,7 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
-    <Import Project="..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets')" />
+    <Import Project="..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets')" />
   </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
     <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
@@ -592,6 +592,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.8.1-beta\build\Xbim.Geometry.Occt.targets'))" />
+    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets'))" />
   </Target>
 </Project>
