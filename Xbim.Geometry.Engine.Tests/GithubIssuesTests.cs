@@ -147,8 +147,21 @@ namespace Xbim.Geometry.Engine.Tests
 
         [Theory(Skip = "Broken in V6")]
         [InlineData(XGeometryEngineVersion.V6)]
-        public void Github_Issue_512_broken(XGeometryEngineVersion _)
-        { 
+        public void Github_Issue_512_broken(XGeometryEngineVersion engineVersion)
+        {
+            //var loggerFactory = new LoggerFactory();
+            //XbimServices.Current.ConfigureServices(s => s.AddXbimToolkit(b => b.AddLoggerFactory(loggerFactory)).AddLogging(l => l.AddConsole()));
+            var ifcFile = @"TestFiles\Github\Github_issue_512.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
+            }
         }
 
         [Theory]

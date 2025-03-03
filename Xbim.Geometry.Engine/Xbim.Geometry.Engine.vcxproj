@@ -37,6 +37,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <CLRSupport>NetCore</CLRSupport>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>true</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -85,7 +86,6 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
-    <!--<TargetName>$(ProjectName)$(ManagedPlatform)</TargetName>-->
     <TargetName>Xbim.Geometry.Engine</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -123,6 +123,8 @@
       </IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/IGNORE:4099,4098 %(AdditionalOptions)</AdditionalOptions>
       <Profile>true</Profile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
     </Link>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -289,6 +291,10 @@
     <ClInclude Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.h" />
     <ClInclude Include="Factories\MaterialFactory.h" />
     <ClInclude Include="Factories\Unmanaged\NMaterialFactory.h" />
+    <ClInclude Include="Helpers\CanLogBase.h" />
+    <ClInclude Include="Helpers\NativeAdvancedFacesBuilder.h" />
+    <ClInclude Include="Helpers\NativeFacesBuilder.h" />
+    <ClInclude Include="Helpers\NativeFaceBuilder.h" />
     <ClInclude Include="Services\Caching\Cache.h" />
     <ClInclude Include="Services\Caching\ManagedCache.h" />
     <ClInclude Include="Services\ModelPlacementBuilder.h" />
@@ -329,7 +335,7 @@
     <ClInclude Include="XbimGeometryObjectSet.h" />
     <ClInclude Include="XbimHandle.h" />
     <ClInclude Include="XbimMesh.h" />
-    <ClInclude Include="XbimNativeApi.h" />
+    <ClInclude Include="Helpers\XbimNativeApi.h" />
     <ClInclude Include="XbimOccShape.h" />
     <ClInclude Include="XbimOccWriter.h" />
     <ClInclude Include="XbimPoint3DWithTolerance.h" />
@@ -418,6 +424,9 @@
     <ClCompile Include="Factories\Unmanaged\NBIMAuthoringToolWorkArounds.cpp" />
     <ClCompile Include="Factories\MaterialFactory.cpp" />
     <ClCompile Include="Factories\Unmanaged\NMaterialFactory.cpp" />
+    <ClCompile Include="Helpers\NativeAdvancedFacesBuilder.cpp" />
+    <ClCompile Include="Helpers\NativeFacesBuilder.cpp" />
+    <ClCompile Include="Helpers\NativeFaceBuilder.cpp" />
     <ClCompile Include="Services\ModelPlacementBuilder.cpp" />
     <ClCompile Include="Services\Unmanaged\NFaceMeshIterator.cpp" />
     <ClCompile Include="Services\Unmanaged\NShapeProximityUtils.cpp" />
@@ -468,7 +477,7 @@
     <ClCompile Include="XbimGeometryObject.cpp" />
     <ClCompile Include="XbimGeometryObjectSet.cpp" />
     <ClCompile Include="XbimMesh.cpp" />
-    <ClCompile Include="XbimNativeApi.cpp" />
+    <ClCompile Include="Helpers\XbimNativeApi.cpp" />
     <ClCompile Include="XbimOccShape.cpp" />
     <ClCompile Include="XbimOccWriter.cpp" />
     <ClCompile Include="XbimPoint3DWithTolerance.cpp" />
@@ -513,12 +522,12 @@
       <Version>6.2.363-develop</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
-      <Version>7.7.0</Version>
+      <Version>7.8.1</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
-    <Import Project="..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets')" />
+    <Import Project="..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets" Condition="Exists('..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets')" />
   </ImportGroup>
   <Target Name="AfterBuild" Condition="'$(Platform)'=='Win32'">
     <Message Text="------ Build started: Project: $(MSBuildProjectFile), Configuration: $(Configuration) x64 ------" Importance="High" />
@@ -528,6 +537,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.7.0\build\Xbim.Geometry.Occt.targets'))" />
+    <Error Condition="!Exists('..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xbim.Geometry.Occt.7.8.1\build\Xbim.Geometry.Occt.targets'))" />
   </Target>
 </Project>

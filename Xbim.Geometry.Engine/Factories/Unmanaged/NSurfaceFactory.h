@@ -29,7 +29,7 @@ public:
 	Handle(Geom_SurfaceOfLinearExtrusion) BuildSurfaceOfLinearExtrusion(const TopoDS_Edge& sweptEdge, const gp_Vec& sweepDirection, bool hasRevitBSplineIssue);
 	TopoDS_Shape CreateSurfaceShape
 		(const std::vector<std::vector<TaggedPoint>> &allPoints, const std::vector<TopLoc_Location>& locations, const std::vector<std::string>& tags);
-
+	void FixInvalidEdges(const TopoDS_Face& face);
 
 private:
 	TopoDS_Wire CreateWireFromTag

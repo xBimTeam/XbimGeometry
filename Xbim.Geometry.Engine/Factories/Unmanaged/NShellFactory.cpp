@@ -37,23 +37,26 @@
 #include <BRepGProp.hxx>
 #include <GeomPlate_BuildAveragePlane.hxx>
 #include <TColGeom_SequenceOfSurface.hxx>
+#include <BRepCheck_Shell.hxx>
+
+
 struct EdgeId
 {
-public:
-	const int Start;
-	const int End;
-	int LowIndex() const { return Reversed ? End : Start; };
-	int HighIndex()const { return Reversed ? Start : End; };
-	const bool Reversed;
-	EdgeId(int a, int b) : Start(a), End(b), Reversed(a > b) {}
-	const bool IsValid() { return Start != End; }
-	int Hash() const { return LowIndex() ^ (HighIndex() << 1); }
-	bool Equals(const EdgeId& rhs)const
-	{
-		//and edge Id is unique regardless of the order of the low and high index
-		return	(Start == rhs.Start && End == rhs.End) ||
-			(Start == rhs.End && End == rhs.Start);
-	}
+	public:
+		const int Start;
+		const int End;
+		int LowIndex() const { return Reversed ? End : Start; };
+		int HighIndex()const { return Reversed ? Start : End; };
+		const bool Reversed;
+		EdgeId(int a, int b) : Start(a), End(b), Reversed(a > b) {}
+		const bool IsValid() { return Start != End; }
+		int Hash() const { return LowIndex() ^ (HighIndex() << 1); }
+		bool Equals(const EdgeId& rhs)const
+		{
+			//and edge Id is unique regardless of the order of the low and high index
+			return	(Start == rhs.Start && End == rhs.End) ||
+				(Start == rhs.End && End == rhs.Start);
+		}
 };
 
 struct EdgeIdHash {
@@ -351,3 +354,32 @@ TopoDS_Shape NShellFactory::TrimTopology(const TopoDS_Shape& shape)
 	auto child = exp.Value();
 	return TrimTopology(child);
 }
+
+TopoDS_Shape NShellFactory::FixShell(TopoDS_Shell& shell,  bool& isFixed)
+{
+	BRepCheck_Shell checker(shell);
+	const BRepCheck_Status shellStatus = checker.Orientation();
+	if (shellStatus == BRepCheck_Status::BRepCheck_NoError)
+	{
+		isFixed = true;
+		return shell;
+	}
+
+	isFixed = false;
+	ShapeFix_Shell shapeFixer(shell);
+	bool fixed = shapeFixer.Perform();
+	if (!fixed) return shell;
+	if (shapeFixer.Shape().IsNull()) return shell;
+	if (shapeFixer.Shape().ShapeType() == TopAbs_SHELL)
+	{
+		isFixed = true;
+		return shapeFixer.Shell();
+	}
+	if (shapeFixer.Shape().ShapeType() == TopAbs_COMPOUND)
+	{
+		isFixed = true;
+		return shapeFixer.Shape();
+	}
+	return shell;
+}
+

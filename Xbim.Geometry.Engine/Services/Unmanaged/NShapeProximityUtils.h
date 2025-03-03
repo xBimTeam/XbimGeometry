@@ -9,10 +9,11 @@
 class NShapeProximityUtils
 {
 public:
-	static int GetOverlappingSubShapes1Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection);
-	static int GetOverlappingSubShapes2Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection);
-	static bool IsOverlapping(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double tolerance, double linearDeflection, double angularDeflection);
+	NShapeProximityUtils() {};
+	int GetOverlappingSubShapes1Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection);
+	int GetOverlappingSubShapes2Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection);
+	bool IsOverlapping(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double tolerance, double linearDeflection, double angularDeflection);
 private:
-	static bool HasOverlappingGeometry(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double percision);
+	bool HasOverlappingGeometry(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double percision);
 };
 

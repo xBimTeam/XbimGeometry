@@ -86,7 +86,7 @@ namespace Xbim
 				virtual System::Collections::Generic::IEnumerable<IXFace^>^ AllFaces();
 				virtual const TopoDS_Shape& GetTopoShape() { return *(this->Ptr()); };
 				virtual bool IsEqual(IXShape^ shape);
-				virtual int ShapeHashCode() { return OccHandle().HashCode(0xFFFF); }
+				virtual int ShapeHashCode() { return (int)std::hash<TopoDS_Shape>()(OccHandle()); }
 				virtual property XOrientation Orientation { XOrientation get() 
 				{
 					TopAbs_Orientation orientation = OccHandle().Orientation();

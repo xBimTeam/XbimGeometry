@@ -4,17 +4,23 @@
 #include <BRepAlgoAPI_BooleanOperation.hxx>
 #include "../Unmanaged/NLoggingService.h"
 #include "NWexBimMesh.h"
+#include "NShapeProximityUtils.h"
 
 class NShapeService
 {
 private:
 	NLoggingService* pLoggingService;
+	NShapeProximityUtils* _proximityUtils;
+
 	double _timeout;
 public:
-	NShapeService(double timeout) : _timeout(timeout) {};
+	NShapeService(double timeout) : _timeout(timeout) {
+		_proximityUtils = new NShapeProximityUtils();
+	};
 	~NShapeService()
 	{
 		if (pLoggingService != nullptr) delete pLoggingService;
+		if (_proximityUtils != nullptr) delete _proximityUtils;
 		pLoggingService = nullptr;
 	};
 	
@@ -29,6 +35,16 @@ public:
 	TopoDS_Shape NShapeService::TrimTopology(const TopoDS_Shape& shape);
 	TopoDS_Shape PerformBoolean(const TopoDS_ListOfShape& arguments, const TopoDS_ListOfShape& tools, double fuzzyTolerance, BOPAlgo_Operation operation, bool& hasWarnings);
 	 
+	int GetOverlappingSubShapes1Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection) {
+		return _proximityUtils->GetOverlappingSubShapes1Count(shape1, shape2, precision, linearDeflection, angularDeflection);
+	}
+	int GetOverlappingSubShapes2Count(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double precision, double linearDeflection, double angularDeflection) {
+		return _proximityUtils->GetOverlappingSubShapes2Count(shape1, shape2, precision, linearDeflection, angularDeflection);
+	}
+	bool IsOverlapping(const TopoDS_Shape& shape1, const TopoDS_Shape& shape2, double tolerance, double linearDeflection, double angularDeflection) {
+		return _proximityUtils->IsOverlapping(shape1, shape2, tolerance, linearDeflection, angularDeflection);
+	}
+
 	void SetLogger(WriteLog lFunc)
 	{
 		NLoggingService* logService = new NLoggingService();

@@ -16,7 +16,7 @@
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeUpgrade_UnifySameDomain.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-#include "XbimNativeApi.h"
+#include "./Helpers/XbimNativeApi.h"
 #include "XbimGeometryObjectSet.h"
 #include "XbimSolidSet.h"
 #include "XbimShellSet.h"

@@ -78,6 +78,7 @@
 #include "Factories/WireFactory.h"
 #include "Factories/FaceFactory.h"
 #include "Factories/ProfileFactory.h"
+#include "Helpers/NativeFaceBuilder.h"
 
 using namespace Xbim::Geometry::Factories;
 using namespace Xbim::Common;
@@ -186,7 +187,7 @@ namespace Xbim
 		int XbimWire::GetHashCode()
 		{
 			if (!IsValid) return 0;
-			return pWire->HashCode(System::Int32::MaxValue);
+			return (int)std::hash<TopoDS_Wire>()(*pWire);
 		}
 
 		bool XbimWire::operator ==(XbimWire^ left, XbimWire^ right)
@@ -794,111 +795,24 @@ namespace Xbim
 				XbimGeometryCreator::LogWarning(logger, polyloop, "Invalid loop, it has less than three points. Wire discarded");
 				return;
 			}
+			std::vector<gp_Pnt> points;
 
-			TColgp_SequenceOfPnt pointSeq;
-			BRepBuilderAPI_MakeWire wireMaker;
 			for (int i = 0; i < originalCount; i++)
 			{
-				pointSeq.Append(XbimConvert::GetPoint3d(polygon[i]));
+				points.push_back(XbimConvert::GetPoint3d(polygon[i]));
 			}
 
-			XbimFace::RemoveDuplicatePoints(pointSeq, true, tolerance); //must be closed
-
-			if (pointSeq.Length() != originalCount)
-			{
-				XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop with duplicate points. Ifc rule: first point shall not be repeated at the end of the list. It has been removed");
-			}
-
-			if (pointSeq.Length() < 3)
-			{
-				XbimGeometryCreator::LogWarning(logger, polyloop, "Polyloop with less than 3 points is an empty loop. It has been ignored");
-				return;
-			}
-			//get the basic properties
-			TColgp_Array1OfPnt pointArray(1, pointSeq.Length());
-			for (int i = 1; i <= pointSeq.Length(); i++)
-			{
-				pointArray.SetValue(i, pointSeq.Value(i));
-			}
-
-
-			//limit the tolerances for the vertices and edges
-			BRepBuilderAPI_MakePolygon polyMaker;
-			for (int i = 1; i <= pointSeq.Length(); ++i) {
-				polyMaker.Add(pointSeq.Value(i));
-			}
-			polyMaker.Close();
-			//Need to check for self intersection
-			if (polyMaker.IsDone())
-			{
-				bool isPlanar;
-				gp_Vec normal = XbimConvert::NewellsNormal(pointArray, isPlanar);
-				if (!isPlanar)
-				{
-
-					XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop is a line. Empty loop built");
-					return;
-				}
-				gp_Pnt centre = GProp_PGProps::Barycentre(pointArray);
-				gp_Pln thePlane(centre, normal);
-				TopoDS_Wire theWire = polyMaker.Wire();
-				TopoDS_Face theFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
-
-				//limit the tolerances for the vertices and edges
-				ShapeFix_ShapeTolerance tolFixer;
-				tolFixer.LimitTolerance(theWire, tolerance); //set all tolerances
-				//adjust vertex tolerances for bad planar fit if we have anything more than a triangle (which will alway fit a plane)
-
-				if (pointSeq.Length() > 3)
-				{
-					TopTools_IndexedMapOfShape map;
-					TopExp::MapShapes(theWire, TopAbs_EDGE, map);
-					ShapeFix_Edge ef;
-					bool fixed = false;
-					for (int i = 1; i <= map.Extent(); i++)
-					{
-						const TopoDS_Edge edge = TopoDS::Edge(map(i));
-						if (ef.FixVertexTolerance(edge, theFace)) fixed = true;
-
-					}
-					if (fixed)
-						XbimGeometryCreator::LogInfo(logger, polyloop, "Polyloop is slightly mis-aligned to a plane. It has been adjusted");
-				}
-				//need to check for self intersecting edges to comply with Ifc rules
-				double maxTol = BRep_Tool::MaxTolerance(theWire, TopAbs_VERTEX);
-				Handle(ShapeAnalysis_Wire) wa = new ShapeAnalysis_Wire(theWire, theFace, maxTol);
-
-				if (wa->CheckSelfIntersection()) //some edges are self intersecting or not on plane within tolerance, fix them
-				{
-					ShapeFix_Wire wf;
-					wf.Init(wa);
-					wf.SetPrecision(tolerance);
-					wf.SetMinTolerance(tolerance);
-					wf.SetMaxTolerance(maxTol);
-					if (!wf.Perform())
-					{
-						XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to fix self-interecting wire edges");
-
-					}
-					else
-					{
-						theWire = wf.Wire();
-						theFace = BRepBuilderAPI_MakeFace(thePlane, theWire);
-					}
-
-				}
+			NativeFaceBuilder builder(tolerance, originalCount);
+			builder.SetLogger(static_cast<WriteLog>(_modelServices->LoggingService->LogDelegatePtr.ToPointer()));
+			bool success;
+			TopoDS_Wire wire;
+			builder.Init(points, wire, success);
+			if (success) {
 				pWire = new TopoDS_Wire();
-				*pWire = theWire;
-
-			}
-			else
-			{
-				XbimGeometryCreator::LogWarning(logger, polyloop, "Failed to build Polyloop"); //nothing more to say to the log			
+				*pWire = wire;
 			}
 
 		}
-
-
 
 #pragma endregion
 

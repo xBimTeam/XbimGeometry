@@ -26,6 +26,7 @@
 #include "XbimFace.h"
 #include "XbimConvert.h"
 #include "XbimGeometryCreator.h"
+#include "./Helpers/XbimNativeApi.h"
 
 using namespace System::Linq;
 namespace Xbim
@@ -72,8 +73,10 @@ namespace Xbim
 
 		double XbimCurve::Length::get()
 		{
-			return  GCPnts_AbscissaPoint::Length(GeomAdaptor_Curve(*pCurve));
+			return XbimNativeApi::Length(*pCurve);
 		}
+
+
 		bool XbimCurve::IsClosed::get()
 		{
 			if (!IsValid) return false;
