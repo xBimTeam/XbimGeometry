@@ -519,7 +519,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.363-develop</Version>
+      <Version>6.2.364-develop</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
       <Version>7.8.1</Version>

@@ -30,7 +30,7 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
-    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.363-develop" />
+    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.364-develop" />
 	</ItemGroup>
 	
 	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">
