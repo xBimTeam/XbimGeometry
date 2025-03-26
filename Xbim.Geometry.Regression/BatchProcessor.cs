@@ -54,13 +54,22 @@ namespace XbimRegression
                     fileLoggerOpts.MinLevel = LogLevel.Trace;
                 }));
             // Configure xbim services / logging & geometry
-            XbimServices.Current.ConfigureServices(services => services
-                .AddXbimToolkit(opt => opt
-                    .AddLoggerFactory(_loggerFactory)
-                    // .AddHeuristicModel()
-                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
             
-            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
+			if (Params.Caching)
+				XbimServices.Current.ConfigureServices(services => services
+				.AddXbimToolkit(opt => opt
+					.AddLoggerFactory(_loggerFactory)
+					.AddEsentModel()
+					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+            else
+				XbimServices.Current.ConfigureServices(services => services
+				.AddXbimToolkit(opt => opt
+					.AddLoggerFactory(_loggerFactory)
+					// .AddHeuristicModel()
+					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+
+
+			_logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
         public Params Params

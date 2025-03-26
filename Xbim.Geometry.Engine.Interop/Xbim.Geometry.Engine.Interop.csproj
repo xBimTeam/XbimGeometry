@@ -102,7 +102,7 @@
   
   <ItemGroup>
 		
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.364-develop" />
+		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.366-develop" />
 		<PackageReference Include="Xbim.Geometry.Occt" Version="7.8.1" />
 	</ItemGroup>
 

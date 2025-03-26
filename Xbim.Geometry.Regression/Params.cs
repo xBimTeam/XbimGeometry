@@ -15,7 +15,7 @@ namespace XbimRegression
         public int MaxThreads;
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
-        public bool Caching = false;
+        public bool Caching { get; set; } = false;
         public bool AdjustWcs = true;
         public bool ReportProgress = false;
         public List<int> WriteBreps = null;
