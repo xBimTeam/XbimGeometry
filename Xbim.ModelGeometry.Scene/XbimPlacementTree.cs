@@ -1,14 +1,11 @@
-﻿#region Directives
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Extensions;
-
-#endregion
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -88,6 +85,7 @@ namespace Xbim.ModelGeometry.Scene
             get { return Nodes[placementLabel].Matrix; }
         }
 
+        [DebuggerDisplay("#{PlacementLabel} = {Matrix}, {HasParent} / {ChildrenCount}")]
         public class XbimPlacementNode
         {
             private List<XbimPlacementNode> _children;
@@ -115,6 +113,10 @@ namespace Xbim.ModelGeometry.Scene
                 get { return _children ?? (_children = new List<XbimPlacementNode>()); }
             }
 
+            public int ChildrenCount => Children.Count;
+
+            public bool HasParent => Parent != null;
+
             public XbimPlacementNode Parent { get; set; }
 
             internal void ToGlobalMatrix()
@@ -122,7 +124,7 @@ namespace Xbim.ModelGeometry.Scene
                 if (!_isAdjustedToGlobal && Parent != null)
                 {
                     Parent.ToGlobalMatrix();
-                    Matrix = Matrix*Parent.Matrix;
+                    Matrix = Matrix * Parent.Matrix;
                 }
                 _isAdjustedToGlobal = true;
             }

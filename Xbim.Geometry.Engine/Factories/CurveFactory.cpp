@@ -1841,7 +1841,7 @@ namespace Xbim
 				Ifc4::Interfaces::IIfcLengthMeasure^ curveLength = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(segment->SegmentLength);
 
 				// Informal Proposition:
-				// SegmentStart and SegmentStart shall be of type IfcLengthMeasure
+				// SegmentStart and SegmentLength shall be of type IfcLengthMeasure
 				if (startLen == nullptr )
 					LogWarning(segment, "IfcCurveSegment SegmentStart should be of type IfcLengthMeasure but found {0}", segment->SegmentStart->GetType()->Name);
 				if (curveLength == nullptr)
