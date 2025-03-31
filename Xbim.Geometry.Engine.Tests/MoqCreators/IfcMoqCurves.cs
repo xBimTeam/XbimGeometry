@@ -23,7 +23,7 @@ namespace Xbim.Geometry.Engine.Tests
             }.SetupAllProperties();
         }
 
-        private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4().GetType().GetTypeInfo().Module);
+        private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4());
         #region Geometric processor Mocks
         public static IModel IfcModelMock(double millimetre = 1, double precision = 1e-5, double radianFactor = Math.PI/180)
         {

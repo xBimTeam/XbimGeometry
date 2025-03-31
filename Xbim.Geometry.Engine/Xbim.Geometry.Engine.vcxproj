@@ -30,9 +30,6 @@
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <ProjectName>Xbim.Geometry.Engine.net6</ProjectName>
   </PropertyGroup>
-  <ItemGroup>
-    <None Include="MyKey.snk" />
-  </ItemGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
@@ -526,7 +523,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.366-develop</Version>
+      <Version>6.2.369</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
       <Version>7.8.1</Version>

@@ -13,7 +13,7 @@ namespace Xbim.Geometry.Engine.Tests
 {
     public class MoqDefaultBehaviourProvider: LookupOrFallbackDefaultValueProvider
     {
-        private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4().GetType().GetTypeInfo().Module);
+        private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4());
         public MoqDefaultBehaviourProvider()
         {
             //base.Register(typeof(string), (type, mock) => "?");
