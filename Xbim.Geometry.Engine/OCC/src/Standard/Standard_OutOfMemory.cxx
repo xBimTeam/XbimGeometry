@@ -86,11 +86,19 @@ void Standard_OutOfMemory::Raise(Standard_SStream& theMessage)
 //purpose  :
 //=======================================================================
 
+// AW Jan 2025: Replaced static instance with dynamically allocated once since this static resource triggers error code C0020001 to be returned 
+// when the host process exits, due to C's atexit() disposal of managed resources after CLR shutdown. Results in https://github.com/xBimTeam/XbimGeometry/issues/438
+// See https://learn.microsoft.com/en-us/archive/blogs/cbrumme/error-c0020001
+// There may be better workarounds than this, but given future v6 GE integrates OCC dynamically and don't have the issue a tactical fix will have to do
+// This is likely to mean OutOfMemory conditions may not raise an error correctly, at the expense of the majority of cases having a clean exit code.
+// 
 // global instance must be allocated at load-time
-static Handle(Standard_OutOfMemory) anOutOfMemInstance = new Standard_OutOfMemory;
+//static Handle(Standard_OutOfMemory) anOutOfMemInstance = new Standard_OutOfMemory;
 
 Handle(Standard_OutOfMemory) Standard_OutOfMemory::NewInstance (Standard_CString theMessage)
 {
+  Handle(Standard_OutOfMemory) anOutOfMemInstance = new Standard_OutOfMemory;
+
   anOutOfMemInstance->SetMessageString (theMessage);
   return anOutOfMemInstance;
 }
@@ -98,6 +106,7 @@ Handle(Standard_OutOfMemory) Standard_OutOfMemory::NewInstance (Standard_CString
 Handle(Standard_OutOfMemory) Standard_OutOfMemory::NewInstance (Standard_CString theMessage,
                                                                 Standard_CString theStackTrace)
 {
+  Handle(Standard_OutOfMemory) anOutOfMemInstance = new Standard_OutOfMemory;
   anOutOfMemInstance->SetMessageString (theMessage);
   anOutOfMemInstance->SetStackString (theStackTrace);
   return anOutOfMemInstance;
