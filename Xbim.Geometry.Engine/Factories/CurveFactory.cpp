@@ -423,7 +423,10 @@ namespace Xbim
 				if (cached.has_value()) {
 					return Handle(Geom_GradientCurve)::DownCast(cached.value())->Clone();
 				}
-
+				if (attemptedEntityLabels->Contains(ifcGradientCurve->EntityLabel)) {
+					throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed #{label}", ifcGradientCurve);
+				}
+				attemptedEntityLabels->Add(ifcGradientCurve->EntityLabel);
 
 				// The base curve is the horizontal projection
 				XCurveType curveType;
@@ -479,7 +482,7 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) heightFunction = EXEC_NATIVE->BuildCompositeCurve2d(segmentsSequence, ModelGeometryService->MinimumGap);
 
 				if (heightFunction.IsNull())
-					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built", ifcGradientCurve);
+					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built {entityLabel}", ifcGradientCurve);
 
 				gp_Pnt2d pnt;
 				heightFunction->D0(heightFunction->FirstParameter(), pnt);
@@ -883,7 +886,7 @@ namespace Xbim
 					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
 			}
-
+			
 			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve(Ifc4x3::GeometryResource::IfcCompositeCurve^ ifcCompositeCurve)
 			{
 				XCurveType curveType;
@@ -919,9 +922,12 @@ namespace Xbim
 					}
 					else if (curveSegment != nullptr)
 					{
-						//TODO: build segment 3d
-						//segments.Append(seg);
-
+						/* 
+						we need a Geom_BoundedCurve (these are 3D), but BuildCurveSegment2d returns Geom2d_Curve 
+						unfortunately GeomAPI::To3d does not work on clothoids.
+						
+						The AddNotImplemented2DPointByDistanceWorkaround modifies the file to avoid this scenario
+						*/
 					}
 				}
 
@@ -1420,6 +1426,7 @@ namespace Xbim
 					case XCurveType::IfcCircle:
 						return BuildCurve2d(static_cast<IIfcCircle^>(curve));
 					case XCurveType::IfcCompositeCurve:
+					case XCurveType::IfcGradientCurve:
 					{
 						Ifc4x3::GeometryResource::IfcCompositeCurve^ ifc4x3Curve = dynamic_cast<Ifc4x3::GeometryResource::IfcCompositeCurve^>(curve);
 						if (ifc4x3Curve != nullptr)
@@ -1454,7 +1461,7 @@ namespace Xbim
 					case XCurveType::IfcSeventhOrderPolynomialSpiral:
 						throw RaiseGeometryFactoryException("Use BuildSpiral method to build spiral curve types", curve);
 					default:
-						throw RaiseGeometryFactoryException("Unsupported 2d curve type", curve);
+						throw RaiseGeometryFactoryException("Unsupported 2d curve type for {entityLabel}", curve);
 				}
 			}
 
@@ -1558,7 +1565,7 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->OneMeter);
 
 				if (bSpline.IsNull())
-					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
+					throw RaiseGeometryFactoryException("Composite curve could not be built {el}", ifcCompositeCurve);
 				return bSpline;
 			}
 
@@ -1841,7 +1848,7 @@ namespace Xbim
 				Ifc4::Interfaces::IIfcLengthMeasure^ curveLength = dynamic_cast<Ifc4::Interfaces::IIfcLengthMeasure^>(segment->SegmentLength);
 
 				// Informal Proposition:
-				// SegmentStart and SegmentStart shall be of type IfcLengthMeasure
+				// SegmentStart and SegmentLength shall be of type IfcLengthMeasure
 				if (startLen == nullptr )
 					LogWarning(segment, "IfcCurveSegment SegmentStart should be of type IfcLengthMeasure but found {0}", segment->SegmentStart->GetType()->Name);
 				if (curveLength == nullptr)

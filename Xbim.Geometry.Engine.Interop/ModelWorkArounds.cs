@@ -25,13 +25,16 @@ namespace Xbim.Geometry.Engine.Interop
         // we make the model more precise since Archicad is casual about it.
         const string ArchicadPrecisionWorkaround = "#ArchicadPrecisionWorkaround";
 
+		// we do not have an implementation of composite curves used for 3d placement, 
+		// this woraround replaces the curve in 2d point by distance entity with a gradient curve
+		const string NotImplemented2DPointByDistanceWorkaround = "#NotImplemented2DPointByDistanceWorkaround";
 
-        /// <summary>
-        /// Adds ArchiCAD specific workarounds
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="_logger"></param>
-        public static void AddArchicadWorkArounds(this IModel model, Microsoft.Extensions.Logging.ILogger _logger)
+		/// <summary>
+		/// Adds ArchiCAD specific workarounds
+		/// </summary>
+		/// <param name="model"></param>
+		/// <param name="_logger"></param>
+		public static void AddArchicadWorkArounds(this IModel model, Microsoft.Extensions.Logging.ILogger _logger)
         {
             var header = model.Header;
             var modelFactors = model.ModelFactors as XbimModelFactors;
@@ -155,5 +158,81 @@ namespace Xbim.Geometry.Engine.Interop
             modelFactors.AddWorkAround(PolylineTrimLengthOneForEntireLine);
             return PolylineTrimLengthOneForEntireLine;
         }
-    }
+
+		/// <summary>
+		/// Because xbim does not implement some cases for ifcpointbydistanceexpression we adjust the ifc to replace those scenarios 
+        /// with one that can be calculated
+		/// </summary>
+		/// <param name="model">The model to fix</param>
+		/// <param name="logger"></param>
+		public static bool AddNotImplemented2DPointByDistanceWorkaround(this IModel model, ILogger logger)
+		{
+			// we need to replace IfcCompositeCurve but not their subclasses
+            //
+			var curvesToReplace = model.Instances.OfType<Ifc4x3.GeometryResource.IfcPointByDistanceExpression>()
+                .Where(x => 
+                    x.BasisCurve.GetType().Name == nameof (Xbim.Ifc4x3.GeometryResource.IfcCompositeCurve) // testing by name to avoid subclasses
+					).Select(x => x.BasisCurve.EntityLabel).Distinct().ToList();
+			if (!curvesToReplace.Any())
+				return false;
+			var modelFactors = model.ModelFactors as XbimModelFactors;
+			if (modelFactors is null)
+			{
+				logger.LogWarning("Could not evaluated ArchicadPrecisionWorkaround.");
+				return false;
+			}
+			if (modelFactors.ApplyWorkAround(NotImplemented2DPointByDistanceWorkaround)) // if the workadound has been added then the precision is already been changed.
+				return false;
+			logger.LogInformation("Applying NotImplemented2DPointByDistance Workaround.");
+			using (var txn = model.BeginTransaction("Create new entities"))
+			{
+				foreach (var curveId in curvesToReplace)
+				{
+					var curve = model.Instances[curveId] as Xbim.Ifc4x3.GeometryResource.IfcCompositeCurve;
+					if (curve is null)
+						continue;
+					var relavantPoints = model.Instances.OfType<Ifc4x3.GeometryResource.IfcPointByDistanceExpression>().Where(x => x.BasisCurve.EntityLabel == curveId).ToList();
+					var maxDistanceObj = relavantPoints.Select(x => x.DistanceAlong).Max(x => x.Value);
+					if (maxDistanceObj is not double mxD)
+					{
+						logger.LogError("Invalid max distance when NotImplemented2DPointByDistance Workaround on {entityLabel}.", curveId);
+						continue;
+					}
+					// var maxParameterObj = model.Instances.OfType<IfcPointByDistanceExpression>().Where(x => x.DistanceAlong is IfcParameterValue).Select(x => x.DistanceAlong).Max(x => x.Value);
+					// we create an horizontal line segment that covers the entire lenght of the gradient curve (maxDistance)
+					var zeroPoint = model.Instances.New<Xbim.Ifc4x3.GeometryResource.IfcCartesianPoint>((x) => x.SetXY(0, 0));
+					var xDirection = model.Instances.New<Xbim.Ifc4x3.GeometryResource.IfcDirection>((x) => x.SetXY(1, 0));
+					var xVector = model.Instances.New<Xbim.Ifc4x3.GeometryResource.IfcVector>((x) =>
+					{
+						x.Orientation = xDirection;
+						x.Magnitude = new Ifc4x3.MeasureResource.IfcLengthMeasure(1);
+					});
+					var horizontalLine = model.Instances.New<Xbim.Ifc4x3.GeometryResource.IfcLine>((x) => {
+						x.Pnt = zeroPoint;
+						x.Dir = xVector;
+					});
+
+					var segmentPlacement = model.Instances.New<Xbim.Ifc4x3.GeometryResource.IfcAxis2Placement2D>((x) => x.Location = zeroPoint); // direction defaults to 1.0, 0.0 according to specs
+					var curveSegment = model.Instances.New<Ifc4x3.GeometryResource.IfcCurveSegment>((x) =>
+					{
+						x.Transition = Ifc4x3.GeometryResource.IfcTransitionCode.CONTSAMEGRADIENTSAMECURVATURE;
+						x.SegmentStart = new Ifc4x3.MeasureResource.IfcLengthMeasure(0);
+						x.SegmentLength = new Ifc4x3.MeasureResource.IfcLengthMeasure(mxD + modelFactors.OneMeter);
+						x.Placement = segmentPlacement;
+						x.ParentCurve = horizontalLine;
+					});
+					var gradient = model.Instances.New<Ifc4x3.GeometryResource.IfcGradientCurve>((x) => {
+						x.Segments.Add(curveSegment);
+						x.SelfIntersect = false;
+						x.BaseCurve = curve;
+					});
+
+					relavantPoints.ForEach(x => x.BasisCurve = gradient);
+				}
+				txn.Commit();
+				modelFactors.AddWorkAround(NotImplemented2DPointByDistanceWorkaround);
+			}
+			return true;
+		}
+	}
 }
