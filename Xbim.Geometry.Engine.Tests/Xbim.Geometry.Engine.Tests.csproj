@@ -177,6 +177,15 @@
 		<None Update="TestFiles\IFC4x3\SectionedSolidHorizontal-1.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\IFC4x3\T2-mod.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\T2-mod2.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\IFC4x3\T2.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\IFC4x3\test.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>

@@ -72,7 +72,7 @@ namespace Xbim
 					else if (linearPlacement != nullptr)
 					{
 						Xbim::Ifc4x3::GeometryResource::IfcAxis2PlacementLinear^ axislinearPlacement
-							= dynamic_cast<Xbim::Ifc4x3::GeometryResource::IfcAxis2PlacementLinear^>(localPlacement->RelativePlacement);
+							= dynamic_cast<Xbim::Ifc4x3::GeometryResource::IfcAxis2PlacementLinear^>(linearPlacement->RelativePlacement);
 						
 						gp_Trsf relTrsf;
 
