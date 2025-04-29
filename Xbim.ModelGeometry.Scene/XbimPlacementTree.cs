@@ -48,25 +48,25 @@ namespace Xbim.ModelGeometry.Scene
             var localPlacements = model.Instances.OfType<IIfcLocalPlacement>(true).ToList();
             var linearPlacements = model.Instances.OfType<Xbim.Ifc4x3.GeometricConstraintResource.IfcLinearPlacement>(true).ToList();
 
-			var loggerFactory = InternalServiceProvider.GetLoggerFactory();
-			ILogger logger = loggerFactory.CreateLogger(nameof(XbimPlacementTree));
+            var loggerFactory = InternalServiceProvider.GetLoggerFactory();
+            ILogger logger = loggerFactory.CreateLogger(nameof(XbimPlacementTree));
 
-			Nodes = new Dictionary<int, XbimPlacementNode>();
+            Nodes = new Dictionary<int, XbimPlacementNode>();
             foreach (var placement in localPlacements)
                 Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement));
 
             foreach (var placement in linearPlacements)
             {
-				XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
-				try
-				{
-					placementTransform = engine.ToMatrix3D(placement, null);
-				}
-				catch (System.Exception)
-				{
-					logger.LogError("Failed to create linear placement #{entityId}", placement.EntityLabel);
-				}
-				Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement.EntityLabel, placementTransform));
+                XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
+                try
+                {
+                    placementTransform = engine.ToMatrix3D(placement, null);
+                }
+                catch (System.Exception)
+                {
+                    logger.LogError("Failed to create linear placement #{entityId}", placement.EntityLabel);
+                }
+                Nodes.Add(placement.EntityLabel, new XbimPlacementNode(placement.EntityLabel, placementTransform));
             }
 
             foreach (var localPlacement in localPlacements)
@@ -103,8 +103,8 @@ namespace Xbim.ModelGeometry.Scene
         }
 
 
-		[DebuggerDisplay("#{PlacementLabel} = {Matrix}, {HasParent} / {ChildrenCount}")]
-		public class XbimPlacementNode
+        [DebuggerDisplay("#{PlacementLabel} = {Matrix}, {HasParent} / {ChildrenCount}")]
+        public class XbimPlacementNode
         {
             private List<XbimPlacementNode> _children;
             private bool _isAdjustedToGlobal;
@@ -123,17 +123,17 @@ namespace Xbim.ModelGeometry.Scene
                 _isAdjustedToGlobal = false;
             }
 
-			/// <summary>
-			/// Used for debugging display
-			/// </summary>
-			public int ChildrenCount => Children.Count;
+            /// <summary>
+            /// Used for debugging display
+            /// </summary>
+            public int ChildrenCount => Children.Count;
 
-			/// <summary>
-			/// Used for debugging display
-			/// </summary>
-			public bool HasParent => Parent != null;
+            /// <summary>
+            /// Used for debugging display
+            /// </summary>
+            public bool HasParent => Parent != null;
 
-			public int PlacementLabel { get; private set; }
+            public int PlacementLabel { get; private set; }
             public XbimMatrix3D Matrix { get; protected internal set; }
 
             public List<XbimPlacementNode> Children
@@ -148,7 +148,7 @@ namespace Xbim.ModelGeometry.Scene
                 if (!_isAdjustedToGlobal && Parent != null)
                 {
                     Parent.ToGlobalMatrix();
-                    Matrix = Matrix*Parent.Matrix;
+                    Matrix = Matrix * Parent.Matrix;
                 }
                 _isAdjustedToGlobal = true;
             }

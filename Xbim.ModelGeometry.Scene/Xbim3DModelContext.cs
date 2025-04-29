@@ -56,7 +56,7 @@ namespace Xbim.ModelGeometry.Scene
             private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
-            
+
 
 
             public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
@@ -186,8 +186,8 @@ namespace Xbim.ModelGeometry.Scene
             internal ConcurrentDictionary<int, GeometryReference> ShapeLookup;
             private bool _disposed;
             private readonly Xbim3DModelContext _modelContext;
-            
-			public XbimCreateContextHelper(Xbim3DModelContext modelContext, IModel model, IfcRepresentationContextCollection contexts)
+
+            public XbimCreateContextHelper(Xbim3DModelContext modelContext, IModel model, IfcRepresentationContextCollection contexts)
             {
                 _modelContext = modelContext;
                 Model = model;
@@ -213,7 +213,7 @@ namespace Xbim.ModelGeometry.Scene
             internal int Total { get; private set; }
             internal int PercentageParsed { get; set; }
             internal int Tally { get; set; }
-            internal bool GenerateFullGeometry { get; private set;}
+            internal bool GenerateFullGeometry { get; private set; }
             internal Dictionary<int, int> SurfaceStyles { get; private set; }
 
             internal Dictionary<IIfcRepresentationContext, ConcurrentQueue<XbimBBoxClusterElement>> Clusters
@@ -439,10 +439,10 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 catch (Exception productOpeningException)
                 {
-					_modelContext.LogError("Exception thrown products.", productOpeningException);
-				}
+                    _modelContext.LogError("Exception thrown products.", productOpeningException);
+                }
 
-				foreach (var product in products)
+                foreach (var product in products)
                 {
                     if (CustomMeshBehaviour != null)
                     {
@@ -623,7 +623,7 @@ namespace Xbim.ModelGeometry.Scene
             }
         }
 
-       
+
         /// <summary>
         /// Initialises a model context from the model
         /// </summary>
@@ -665,22 +665,22 @@ namespace Xbim.ModelGeometry.Scene
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
             this.engineVersion = engineVersion;
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
-            if(engineVersion == XGeometryEngineVersion.V6) 
-                _modelServices = ((IXGeometryEngineV6)_engine).ModelGeometryService; 
-            else 
-                _modelServices = factory.CreateModelGeometryService(model,loggerFactory);
+            if (engineVersion == XGeometryEngineVersion.V6)
+                _modelServices = ((IXGeometryEngineV6)_engine).ModelGeometryService;
+            else
+                _modelServices = factory.CreateModelGeometryService(model, loggerFactory);
             model.AddRevitWorkArounds();
             var wr2 = model.AddWorkAroundTrimForPolylinesIncorrectlySetToOneForEntireCurve();
             // Get the required context
 
             model.AddArchicadWorkArounds(_logger);
-			model.AddNotImplemented2DPointByDistanceWorkaround(_logger);
+            model.AddNotImplemented2DPointByDistanceWorkaround(_logger);
 
-			// because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 
-			// build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
-			// is fast on xbimModels that have been already generated (without the index).
-			//
-			var builtContextList = new List<IIfcGeometricRepresentationContext>();
+            // because IfcGeometricRepresentationSubContext is indexed but IIfcGeometricRepresentationContext is not we 
+            // build a list starting from subcontexts to speed up the lookup, this is a workaround so that the method
+            // is fast on xbimModels that have been already generated (without the index).
+            //
+            var builtContextList = new List<IIfcGeometricRepresentationContext>();
             builtContextList.AddRange(
                 model.Instances.OfType<IIfcGeometricRepresentationSubContext>()
                 );
@@ -960,13 +960,13 @@ namespace Xbim.ModelGeometry.Scene
             // make sure all the geometries we have cached are sewn
             // contextHelper.SewGeometries(Engine);
             Parallel.ForEach(contextHelper.OpeningsAndProjections, contextHelper.ParallelOptions, elementToFeatureGroup =>
-               //      foreach (IGrouping<IIfcElement, IIfcFeatureElement> elementToFeatureGroup in contextHelper.OpeningsAndProjections)
+            //      foreach (IGrouping<IIfcElement, IIfcFeatureElement> elementToFeatureGroup in contextHelper.OpeningsAndProjections)
             {
                 int context = 0;
                 int styleId = 0; //take the style of any part of the main shape
                 var element = elementToFeatureGroup.Key;
                 using var _ = _logger.BeginScope("WriteProductsWithFeatures {entityLabel}", element.EntityLabel);
-               // _logger.LogTrace("Processing features for {0}", element.EntityLabel);
+                // _logger.LogTrace("Processing features for {0}", element.EntityLabel);
 
                 // here is where the feature's geometry are calculated
                 //
@@ -1079,7 +1079,7 @@ namespace Xbim.ModelGeometry.Scene
                         IXbimGeometryObjectSet nextGeom;
                         try
                         {
-                            
+
                             nextGeom = elementGeom.Cut(openingAndProjectionOp.CutGeometries, _modelServices.MinimumGap, _logger);
                             if (nextGeom.IsValid)
                             {
@@ -1300,11 +1300,12 @@ namespace Xbim.ModelGeometry.Scene
             }
             var contextId = rep.ContextOfItems.EntityLabel;
             //if we are processing opens but the rep identifier is reference we should not perform any booleans operatons, set flag to avoid
-            if(repType == XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded &&
-                string.Compare( rep.RepresentationIdentifier, "reference", true) == 0)
+            if (repType == XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded &&
+                string.Compare(rep.RepresentationIdentifier, "reference", true) == 0)
             {
                 repType = XbimGeometryRepresentationType.OpeningsAndAdditionsOnly;
-            };
+            }
+            ;
             foreach (var representationItem in representationItems)
             {
                 if (representationItem is IIfcMappedItem theMap)
@@ -1754,7 +1755,7 @@ namespace Xbim.ModelGeometry.Scene
             // if the maximum size is a problem they could then be split using other algorithms that divide spaces equally
             //
             var v = XbimDbscan.GetClusters(elementsToCluster, 5 * metre); // .OrderByDescending(x => x.GeometryIds.Count);
-            
+
             regions.AddRange(v.Select(item => new XbimRegion("Region " + nextRegionNumber++, item.Bound, item.GeometryIds.Count, WorldCoordinateSystem)));
             regions.ContextLabel = context.EntityLabel;
             txn.AddRegions(regions);
