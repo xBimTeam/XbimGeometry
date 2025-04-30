@@ -38,6 +38,7 @@ namespace Xbim
 			public:
 				CurveFactory(Xbim::Geometry::Services::ModelGeometryService^ modelService) : FactoryBase(modelService, new NCurveFactory())
 				{
+					attemptedEntityLabels = gcnew HashSet<int>();
 				}
 
 #pragma region Top level abstraction for building any XCurve
@@ -69,7 +70,7 @@ namespace Xbim
 				std::vector<std::pair<Handle(Geom2d_Curve), TopLoc_Location>> ProcessSegments(Ifc4x3::GeometryResource::IfcSegmentedReferenceCurve^ ifcSegmentedReferenceCurve);
 				Handle(Geom2d_Curve) TransformCurveWithLocation(const Handle(Geom2d_Curve)& curve, IIfcAxis2Placement2D^ placement);
 				Handle(Geom2d_Curve) TransformCurveWithLocation(const Handle(Geom2d_Curve)& curve, IIfcAxis2Placement3D^ placement);
-				
+				HashSet<int>^ attemptedEntityLabels; // Tracks attempted EntityLabels
 
 #pragma region Build Curves (3D)
 			public:
