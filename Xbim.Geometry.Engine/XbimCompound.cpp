@@ -831,6 +831,17 @@ namespace Xbim
 											builder.UpdateVertex(endVertex, trim2Tolerance);
 
 										BRepBuilderAPI_MakeEdge edgeMaker(sharedEdgeGeom, startVertex, endVertex, trimParam1, trimParam2);
+										/// in current official IFC documentation, the start and end can be the same, hence resulting the curve not getting trimmed
+										/// see https://standards.buildingsmart.org/IFC/RELEASE/IFC4/ADD2_TC1/HTML/schema/ifctopologyresource/lexical/ifcedge.htm
+										/// in "Attribute Definitions", for param 2 "EdgeEnd": The same vertex can be used for both EdgeStart and EdgeEnd.
+										/// this appears to be a regression comparing to older versions of this function (InitAdvancedFaces)
+										/// which uses XbimEdge to do the trimming and handled this situation
+										/// 
+										/// the fix: here we simply do not pass the trimming params to the edgeMaker and everything goes one just fine
+										if (foundP1 && foundP2 && trimParam1 == trimParam2)
+										{
+											edgeMaker = BRepBuilderAPI_MakeEdge(sharedEdgeGeom);
+										}
 										if (!edgeMaker.IsDone())
 										{
 											BRepBuilderAPI_EdgeError err = edgeMaker.Error();
