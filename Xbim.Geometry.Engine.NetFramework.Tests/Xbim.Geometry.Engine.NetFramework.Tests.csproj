@@ -28,7 +28,7 @@
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x64.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Platform)' == 'xx86'">
+  <PropertyGroup Condition="'$(Platform)' == 'x86'">
     <RunSettingsFilePath>$(MSBuildProjectDirectory)\test.x86.runsettings</RunSettingsFilePath>
   </PropertyGroup>
   <ItemGroup>
