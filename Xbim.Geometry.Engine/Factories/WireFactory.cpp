@@ -366,6 +366,13 @@ namespace Xbim
 				}
 			}
 
+			struct WireFactoryNativeStatics
+			{
+				static std::mutex execNativeMutex;
+			};
+
+			std::mutex WireFactoryNativeStatics::execNativeMutex;
+		
 			TopoDS_Wire WireFactory::BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge)
 			{
 				if (asSingleEdge)
@@ -380,11 +387,21 @@ namespace Xbim
 				{
 					if (2 == (int)ifcIndexedPolyCurve->Dim)
 					{
+						std::lock_guard<std::mutex> lock(WireFactoryNativeStatics::execNativeMutex);
 						TColGeom2d_SequenceOfBoundedCurve segments;
 						CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
+						if (segments.Length() == 0) 
+						{
+							// segments is empty
+							throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+						}
 						TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 						if (wire.IsNull())
+						{
+							// LogTrace(ifcIndexedPolyCurve, "IIfcIndexedPolyCurve Error");
 							throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+						}
+						// LogTrace(ifcIndexedPolyCurve, "IIfcIndexedPolyCurve {0} segments", segments.Length());
 						return wire;
 					}
 					else

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Xbim.Geometry.Abstractions;
 
 
 
@@ -12,14 +13,16 @@ namespace XbimRegression
     /// </summary>
     public class Params
     {
-        public int MaxThreads;
+        public int MaxThreads { get; set; }
 
         private const int DefaultTimeout = 1000 * 60 * 20; // 20 mins
         public bool Caching { get; set; } = false;
+        public string CachingExtension { get; set; } = string.Empty;
         public bool AdjustWcs = true;
         public bool ReportProgress = false;
         public List<int> WriteBreps = null;
-        public bool GeometryV1; 
+
+        public XGeometryEngineVersion EngineVersion { get; set; } = XGeometryEngineVersion.V6;
 
         public Params(string[] args)
         {
@@ -37,7 +40,7 @@ namespace XbimRegression
             if (Directory.Exists(TestFileRoot))
             {
                 var di = new DirectoryInfo(TestFileRoot);
-                FilesToProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories).Where(y=>y.Extension.ToLowerInvariant() == ".ifc");
+                FilesToProcess = di.GetFiles("*.IFC", SearchOption.AllDirectories).Where(y => y.Extension.ToLowerInvariant() == ".ifc");
                 ResultsFile = Path.Combine(TestFileRoot, string.Format("XbimRegression_{0:yyyyMMdd-hhmmss}.csv", DateTime.Now));
             }
             else if (File.Exists(TestFileRoot))
@@ -45,7 +48,7 @@ namespace XbimRegression
                 var ext = Path.GetExtension(TestFileRoot).ToLowerInvariant();
                 if (ext == ".ifc")
                 {
-                    FilesToProcess = new[] { new FileInfo(TestFileRoot) };
+                    FilesToProcess = new List<FileInfo>() { new FileInfo(TestFileRoot) };
                     ResultsFile = Path.ChangeExtension(TestFileRoot, "regression.csv");
                 }
                 else if (ext == ".txt")
@@ -77,10 +80,10 @@ namespace XbimRegression
             CompoundParameter paramType = CompoundParameter.None;
 
             var eval = args.Skip(1).ToList();
-			for (int i = 0; i < eval.Count; i++)
+            for (int i = 0; i < eval.Count; i++)
             {
-				string arg = eval[i];
-				switch (paramType)
+                string arg = eval[i];
+                switch (paramType)
                 {
                     case CompoundParameter.None:
                         switch (arg.ToLowerInvariant())
@@ -97,7 +100,7 @@ namespace XbimRegression
                             case "/writebreps":
                             case "/breps":
                             case "/brep":
-                                WriteBreps = WriteBreps ?? new List<int>();
+                                WriteBreps ??= new List<int>();
                                 paramType = CompoundParameter.Breps;
                                 break;
                             case "/timeout":
@@ -107,13 +110,17 @@ namespace XbimRegression
                                 paramType = CompoundParameter.MaxThreads;
                                 break;
                             case "/caching":
+                                paramType = CompoundParameter.CachingExtension;
                                 Caching = true;
+                                break;
+                            case "/engine":
+                                paramType = CompoundParameter.GeometryEngine;
                                 break;
                             case "/progress":
                                 ReportProgress = true;
                                 break;
                             case "/geometryv1":
-                                GeometryV1 = true;
+                                Console.WriteLine("Obsolete argument /geometryv1 ignored");
                                 break;
                             default:
                                 Console.WriteLine("Skipping un-expected argument '{0}'", arg);
@@ -121,32 +128,45 @@ namespace XbimRegression
                         }
                         break;
                     case CompoundParameter.Timeout:
-                        int timeout;
-                        if (int.TryParse(arg, out timeout))
+                        if (int.TryParse(arg, out int timeout))
                         {
                             Timeout = timeout * 1000;
                         }
                         paramType = CompoundParameter.None;
                         break;
                     case CompoundParameter.MaxThreads:
-                        int mt;
-                        if (int.TryParse(arg, out mt))
+                        if (int.TryParse(arg, out int mt))
                         {
                             MaxThreads = mt;
                         }
                         paramType = CompoundParameter.None;
                         break;
+                    case CompoundParameter.CachingExtension:
+                        if (arg.Contains('/')) // starts with or contains a /
+                            i--; // re-evaluate as parameter
+                        else
+                            CachingExtension = arg;
+                        paramType = CompoundParameter.None;
+                        break;
                     case CompoundParameter.Breps:
-                        int brepv;
-                        if (int.TryParse(arg, out brepv))
+                        if (int.TryParse(arg, out int brepv))
                         {
                             WriteBreps.Add(brepv);
                         }
                         else
-						{
+                        {
                             paramType = CompoundParameter.None;
                             i--;
                         }
+                        break;
+                    case CompoundParameter.GeometryEngine:
+                        if (arg.Equals("v5", StringComparison.OrdinalIgnoreCase))
+                            EngineVersion = XGeometryEngineVersion.V5;
+                        else if (arg.Equals("v6", StringComparison.OrdinalIgnoreCase))
+                            EngineVersion = XGeometryEngineVersion.V6;
+                        else
+                            Console.WriteLine($"Invalid geometry engine version '{arg}', expected 'v5' or 'v6'. Defaulting to v6.");
+                        paramType = CompoundParameter.None;
                         break;
                 }
             }
@@ -172,7 +192,7 @@ namespace XbimRegression
         /// Flag indicating if the parameters are valid
         /// </summary>
         public bool IsValid { get; set; }
-        public IEnumerable<FileInfo> FilesToProcess { get; private set; } = Enumerable.Empty<FileInfo>();
+        public IEnumerable<FileInfo> FilesToProcess { get; private set; } = new List<FileInfo>();
         public string ResultsFile { get; }
 
         private enum CompoundParameter
@@ -180,7 +200,8 @@ namespace XbimRegression
             None,
             Timeout,
             MaxThreads,
-            CachingOn,
+            CachingExtension,
+            GeometryEngine,
             Breps
         };
     }
