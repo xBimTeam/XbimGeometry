@@ -30,9 +30,6 @@ namespace Xbim
 				TopoDS_Wire BuildWire(IIfcRationalBSplineCurveWithKnots^ ifcRationalBSplineCurveWithKnots);
 				TopoDS_Wire BuildWire(IIfcTrimmedCurve^ ifcTrimmedCurve, bool asSingleEdge);
 
-
-				
-
 				
 				TopoDS_Wire BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam);
 				bool Fillet(const TopoDS_Wire& directrix, TopoDS_Wire& filletedDirectrix, double filletRadius);
