@@ -9,6 +9,10 @@ using Xbim.IO.Memory;
 using Xbim.Common;
 using FluentAssertions;
 using Xbim.ModelGeometry.Scene;
+using System.IO;
+using Xbim.Ifc;
+using Xbim.Tessellator;
+using Xbim.Common.XbimExtensions;
 
 namespace Xbim.Geometry.Engine.Interop.Tests
 {
@@ -770,6 +774,98 @@ namespace Xbim.Geometry.Engine.Interop.Tests
                 var face = geomEngine.CreateFace(rev);
                 Assert.IsNotNull(face as IXbimFace, "Wrong type returned");
                 Assert.IsTrue(((IXbimFace) face).IsValid, "Invalid face returned");
+            }
+        }
+
+        [TestMethod]
+        public void IfcTriangulatedFaceSetTest()
+        {
+            using (var store = IfcStore.Open("TestFiles\\Ifc4TestFiles\\BasinTessellation.ifc"))
+            {
+                var basinTess = store.Instances[501] as IIfcTriangulatedFaceSet;
+
+                var tessellator = new XbimTessellator(store, XbimGeometryType.PolyhedronBinary);
+                Assert.IsNotNull(basinTess);
+                Assert.IsTrue(tessellator.CanMesh(basinTess));
+                var geom = tessellator.Mesh(basinTess);
+                Assert.IsTrue((int)(geom.BoundingBox.Volume) == 23913891);
+
+            }
+        }
+
+
+        [TestMethod]
+        public void IfcTriangulatedFaceSetWithNormalsTest()
+        {
+            using (var store = IfcStore.Open("TestFiles\\Ifc4TestFiles\\column-straight-rectangle-tessellation.ifc"))
+            {
+                var columnTess = store.Instances[288] as IIfcTriangulatedFaceSet;
+
+                var tessellator = new XbimTessellator(store, XbimGeometryType.PolyhedronBinary);
+                Assert.IsNotNull(columnTess);
+                Assert.IsTrue(tessellator.CanMesh(columnTess));
+                var geom = tessellator.Mesh(columnTess);
+                Assert.IsTrue((int)(geom.BoundingBox.Volume) == 7680);
+
+            }
+        }
+
+        [TestMethod]
+        public void IfcTriangulatedFaceSetWithColoursTest()
+        {
+            using (var store = IfcStore.Open("TestFiles\\tessellation-with-individual-colors.ifc"))
+            {
+                var triangulatedFaceSet = store.Instances.OfType<IIfcTriangulatedFaceSet>().FirstOrDefault();
+                Assert.IsNotNull(triangulatedFaceSet);
+
+                var tessellator = new XbimTessellator(store, XbimGeometryType.PolyhedronBinary);
+                Assert.IsTrue(tessellator.CanMesh(triangulatedFaceSet));
+                var geom = tessellator.Mesh(triangulatedFaceSet);
+                Assert.IsTrue((int)(geom.BoundingBox.Volume) == 2000000000);
+            }
+        }
+
+
+        [TestMethod]
+        public void IfcTriangulatedFaceSetSimpleBinaryTest()
+        {
+            using (var store = IfcStore.Open("TestFiles\\Ifc4TestFiles\\BasinTessellation.ifc"))
+            {
+                var triangulatedFaceSet = store.Instances.OfType<IfcTriangulatedFaceSet>().FirstOrDefault();
+
+                var tessellator = new XbimTessellator(store, XbimGeometryType.PolyhedronBinary);
+                Assert.IsNotNull(triangulatedFaceSet);
+                Assert.IsTrue(tessellator.CanMesh(triangulatedFaceSet));
+                var geom = tessellator.Mesh(triangulatedFaceSet);
+                using (var ms = new MemoryStream(((IXbimShapeGeometryData)geom).ShapeData))
+                {
+                    using (var br = new BinaryReader(ms))
+                    {
+                        XbimShapeTriangulation myShapeTriangulation = br.ReadShapeTriangulation();
+                        Assert.IsTrue(myShapeTriangulation.Faces.Sum(t => t.TriangleCount) == triangulatedFaceSet.NumberOfTriangles);
+                    }
+                }
+            }
+        }
+        [TestMethod]
+        public void IfcTriangulatedFaceSetComplexBinaryTest()
+        {
+            using (var store = IfcStore.Open("TestFiles\\Ifc4TestFiles\\IFC4TessellationComplex.ifc"))
+            {
+                var triangulatedFaceSet = store.Instances[4373] as IIfcTriangulatedFaceSet;
+
+                var tessellator = new XbimTessellator(store, XbimGeometryType.PolyhedronBinary);
+                Assert.IsNotNull(triangulatedFaceSet);
+                Assert.IsTrue(tessellator.CanMesh(triangulatedFaceSet));
+                var geom = tessellator.Mesh(triangulatedFaceSet);
+                using (var ms = new MemoryStream(((IXbimShapeGeometryData)geom).ShapeData))
+                {
+                    using (var br = new BinaryReader(ms))
+                    {
+                        XbimShapeTriangulation myShapeTriangulation = br.ReadShapeTriangulation();
+                        Assert.IsTrue(myShapeTriangulation.Faces.Sum(t => t.TriangleCount) == triangulatedFaceSet.NumberOfTriangles);
+                    }
+                }
             }
         }
     }
