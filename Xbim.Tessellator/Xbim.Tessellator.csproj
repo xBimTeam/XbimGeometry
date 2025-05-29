@@ -3,17 +3,17 @@
   <PropertyGroup>
     <TargetFrameworks>net472</TargetFrameworks>
     <Title>Xbim Tessellator</Title>
+    <IsPackable>true</IsPackable>
     <Description>Provides support for tessellating mesh geometries.</Description>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Platforms>AnyCPU;x64;x86</Platforms>
-      <Version>5.1.0.0-Dev</Version>
     <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Xbim.Essentials" Version="6.0.534-develop" />
+	  <PackageReference Include="Xbim.Essentials" Version="6.0.536" />
 	</ItemGroup>
 </Project>

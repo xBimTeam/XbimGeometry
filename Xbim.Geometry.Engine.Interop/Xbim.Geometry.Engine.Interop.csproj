@@ -18,7 +18,7 @@
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
 		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-		<PackageReference Include="Xbim.Ifc" Version="6.0.534-develop" />
+		<PackageReference Include="Xbim.Ifc" Version="6.0.536" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -71,6 +71,10 @@
 	<ItemGroup>
 		<Folder Include="images\" />
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj" />
 	</ItemGroup>
 
 </Project>
