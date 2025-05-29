@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.ModelGeometry.Scene", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XbimRegression", "Xbim.Geometry.Regression\XbimRegression.csproj", "{592094B6-DA55-40BC-8030-0E9B6EFE36CC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Tessellator", "Xbim.Tessellator\Xbim.Tessellator.csproj", "{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -96,6 +98,18 @@ Global
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x64.Build.0 = Release|Any CPU
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x86.ActiveCfg = Release|Any CPU
 		{592094B6-DA55-40BC-8030-0E9B6EFE36CC}.Release|x86.Build.0 = Release|Any CPU
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|x64.ActiveCfg = Debug|x64
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|x64.Build.0 = Debug|x64
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|x86.ActiveCfg = Debug|x86
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Debug|x86.Build.0 = Debug|x86
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|x64.ActiveCfg = Release|x64
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|x64.Build.0 = Release|x64
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|x86.ActiveCfg = Release|x86
+		{B8FB12FE-C68D-429A-AACA-B8FEB3250B30}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
