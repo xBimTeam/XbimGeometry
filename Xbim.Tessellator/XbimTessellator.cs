@@ -352,10 +352,11 @@ namespace Xbim.Tessellator
             using (var ms = new MemoryStream(0x4000))
             using (TextWriter textWriter = new StreamWriter(ms))
             {
-                var faceLists = facesList.ToList();
-                var triangulations = new List<XbimTriangulatedMesh>(faceLists.Count);
-                foreach (var faceList in faceLists)
-                    triangulations.Add(TriangulateFaces(faceList, entityLabel, precision));
+                var faces = facesList.SelectMany(f => f).ToList();
+                var triangulations = new List<XbimTriangulatedMesh>()
+                {
+                    TriangulateFaces(faces, entityLabel, precision)
+                };
 
                 // Write out header
                 uint verticesCount = 0;
@@ -435,10 +436,10 @@ namespace Xbim.Tessellator
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
             {
-                var faceLists = facesList.SelectMany(f => f).ToList();
+                var faces = facesList.SelectMany(f => f).ToList();
                 var triangulatedMeshes = new List<XbimTriangulatedMesh>()
                 {
-                    TriangulateFaces(faceLists, entityLabel, precision)
+                    TriangulateFaces(faces, entityLabel, precision)
                 };
                 
                 // Write out header
