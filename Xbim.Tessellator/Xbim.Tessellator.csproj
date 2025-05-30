@@ -13,6 +13,6 @@
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.371-develop" />
+	  <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.372-develop" />
 	</ItemGroup>
 </Project>
