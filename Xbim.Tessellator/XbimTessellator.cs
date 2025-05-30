@@ -10,7 +10,6 @@ using Xbim.Ifc4.MeasureResource;
 
 namespace Xbim.Tessellator
 {
-
     public class XbimTessellator
     {
         private readonly IModel _model;
@@ -18,7 +17,11 @@ namespace Xbim.Tessellator
         private readonly bool _reduceLargeCoordinates;
         private readonly Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> _postTessellationCallback;
 
-        public XbimTessellator(IModel model, XbimGeometryType geometryType, bool reduceLargeCoordinates = true, Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> postTessellationCallback = null)
+        public XbimTessellator
+            (IModel model, 
+             XbimGeometryType geometryType, 
+             bool reduceLargeCoordinates = true, 
+             Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> postTessellationCallback = null)
         {
             _model = model;
             _geometryType = geometryType;
@@ -432,13 +435,12 @@ namespace Xbim.Tessellator
             using (var ms = new MemoryStream(0x4000))
             using (var binaryWriter = new BinaryWriter(ms))
             {
-                var faceLists = facesList.ToList();
-                var triangulatedMeshes = new List<XbimTriangulatedMesh>(faceLists.Count);
-                foreach (var faceList in faceLists)
+                var faceLists = facesList.SelectMany(f => f).ToList();
+                var triangulatedMeshes = new List<XbimTriangulatedMesh>()
                 {
-                    triangulatedMeshes.Add(TriangulateFaces(faceList, entityLabel, precision));
-                }
-
+                    TriangulateFaces(faceLists, entityLabel, precision)
+                };
+                
                 // Write out header
                 uint verticesCount = 0;
                 uint triangleCount = 0;
@@ -467,6 +469,7 @@ namespace Xbim.Tessellator
                 var vertices = isLarge ?
                     triangulatedMeshes.SelectMany(t => t.Vertices).Select(v => new Vec3(v.X - origin.X, v.Y - origin.Y, v.Z - origin.Z)):
                     triangulatedMeshes.SelectMany(t => t.Vertices);
+
                 foreach (var v in vertices)
                 {
                     binaryWriter.Write((float)v.X);
@@ -536,10 +539,8 @@ namespace Xbim.Tessellator
             var triangulatedMesh = new XbimTriangulatedMesh(faceCount, precision);
             foreach (var ifcFace in ifcFaces)
             {
-
                 //improves performance and reduces memory load
                 var tess = new Tess();
-
                 var contours = new List<ContourVertex[]>(/*Count?*/);
                 foreach (var bound in ifcFace.Bounds) //build all the loops
                 {

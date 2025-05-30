@@ -6,8 +6,6 @@ using Xbim.Tessellator;
 
 namespace Xbim.Tessellator
 {
-
-
     public class XbimTriangulatedMesh
     {
         public struct  XbimTriangle
