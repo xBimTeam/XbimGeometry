@@ -58,8 +58,8 @@ namespace Xbim
 						System::IDisposable^ scope = nullptr;
 						try
 						{
-							scope = _modelService->LoggingService->Logger->BeginScope(geomExcept->Data);
-							LoggerExtensions::LogWarning(_modelService->LoggingService->Logger, innerException, message, entity->EntityLabel);
+							scope = _modelService->LoggingService->Logger->BeginScope(geomExcept->Data);					
+							LoggerExtensions::LogWarning(_modelService->LoggingService->Logger, innerException, message + " #" + entity->EntityLabel.ToString(), entity->EntityLabel);
 						}
 						finally
 						{

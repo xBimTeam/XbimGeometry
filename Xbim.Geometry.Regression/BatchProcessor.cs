@@ -82,9 +82,9 @@ namespace XbimRegression
         {
             DirectoryInfo d = new DirectoryInfo(".");
             Console.WriteLine($"Executing in \"{d.FullName}\"");
-
             FileInfo csvFileInfo = new FileInfo(Params.ResultsFile);
-            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");
+            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");            
+            Console.WriteLine($"Using engine {Params.EngineVersion}, AdjustWcs: {Params.AdjustWcs}");
 
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
@@ -94,7 +94,6 @@ namespace XbimRegression
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
             {
-
                 //set up a  log file for this file run                 
                 _currentLogFileName = Path.ChangeExtension(file.FullName, "log");
                 var runLogFileName = _currentLogFileName;
@@ -202,8 +201,8 @@ namespace XbimRegression
                     {
                         if (model == null)
                             return null;
-						_logger.LogInformation("Model {file} parsed, schema is {schema}", ifcFile, model.Header.FileSchema.Schemas.FirstOrDefault()?.ToString() ?? "Unknown");
-						var parseTime = watch.ElapsedMilliseconds;
+                        _logger.LogInformation("Model {file} parsed, schema is {schema}", ifcFile, model.Header.FileSchema.Schemas.FirstOrDefault()?.ToString() ?? "Unknown");
+                        var parseTime = watch.ElapsedMilliseconds;
                         var xbimFilename = BuildFileName(ifcFile, ".xbim", _params.CachingExtension);
                         var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, Params.EngineVersion);
                         if (_params.MaxThreads > 0)
