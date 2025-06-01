@@ -5,3 +5,6 @@ dotnet_diagnostic.IDE0055.severity = suggestion
 indent_style = space
 indent_size = 4
 
+[*.csproj]
+indent_style = tab
+indent_size = 4

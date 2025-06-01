@@ -1,6 +1,6 @@
-﻿#region Directives
-
+﻿#nullable enable
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,10 +8,10 @@ using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Geometry.Engine.Interop.Internal;
+using Xbim.Geometry.Exceptions;
 using Xbim.Ifc4.Interfaces;
 using Xbim.ModelGeometry.Scene.Extensions;
 
-#endregion
 
 namespace Xbim.ModelGeometry.Scene
 {
@@ -21,16 +21,20 @@ namespace Xbim.ModelGeometry.Scene
         /// This function centralises the extraction of a product placement, but it needs the support of XbimPlacementTree and an XbimGeometryEngine
         /// We should probably find a conceptual place for it somewhere in the scene, where these are cached.
         /// </summary>
-        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, IXbimGeometryEngine engine)
+        public static XbimMatrix3D GetTransform(IIfcProduct product, XbimPlacementTree tree, IXbimGeometryEngine engine, ILogger? logger = null)
         {
             XbimMatrix3D placementTransform = XbimMatrix3D.Identity;
-            if (product.ObjectPlacement is IIfcLocalPlacement)
-                placementTransform = tree[product.ObjectPlacement.EntityLabel];
-            else if (product.ObjectPlacement is IIfcGridPlacement gridPlacament)
-                placementTransform = engine.ToMatrix3D(gridPlacament, null);
-            else if (product.ObjectPlacement is Ifc4x3.GeometricConstraintResource.IfcLinearPlacement linearPlacement)
-                placementTransform = engine.ToMatrix3D(linearPlacement, null);
-            return placementTransform;
+            try
+            {
+                if (tree.Nodes.TryGetValue(product.ObjectPlacement.EntityLabel, out var trsf))
+                    return trsf.Matrix;
+                return engine.ToMatrix3D(product.ObjectPlacement, logger);
+            }
+            catch (Exception)
+            {
+                logger?.LogError("Error in the creation of the placement for product #{entityId}", product);
+                return XbimMatrix3D.Identity; //return identity if we cannot get the placement
+            }
         }
 
         /// <summary>
@@ -61,6 +65,15 @@ namespace Xbim.ModelGeometry.Scene
                 try
                 {
                     placementTransform = engine.ToMatrix3D(placement, null);
+                }
+                catch (XbimGeometryFactoryException exPlace)
+                {
+                    var msg = exPlace.Message;
+                    if (exPlace.Data is not null && exPlace.Data.Contains("IfcEntityId"))
+                    {
+                        msg = $"{exPlace.Message} #{exPlace.Data["IfcEntityId"]}";
+                    }
+                    logger.LogError("Failed to create linear placement #{entityId} ({exPlace})", placement.EntityLabel, msg);
                 }
                 catch (System.Exception)
                 {
@@ -106,7 +119,7 @@ namespace Xbim.ModelGeometry.Scene
         [DebuggerDisplay("#{PlacementLabel} = {Matrix}, {HasParent} / {ChildrenCount}")]
         public class XbimPlacementNode
         {
-            private List<XbimPlacementNode> _children;
+            private List<XbimPlacementNode>? _children;
             private bool _isAdjustedToGlobal;
 
             public XbimPlacementNode(IIfcLocalPlacement placement)
@@ -141,7 +154,7 @@ namespace Xbim.ModelGeometry.Scene
                 get { return _children ?? (_children = new List<XbimPlacementNode>()); }
             }
 
-            public XbimPlacementNode Parent { get; set; }
+            public XbimPlacementNode? Parent { get; set; }
 
             internal void ToGlobalMatrix()
             {
@@ -155,3 +168,4 @@ namespace Xbim.ModelGeometry.Scene
         }
     }
 }
+#nullable restore

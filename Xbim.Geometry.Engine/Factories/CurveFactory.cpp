@@ -424,7 +424,7 @@ namespace Xbim
 					return Handle(Geom_GradientCurve)::DownCast(cached.value())->Clone();
 				}
 				if (attemptedEntityLabels->Contains(ifcGradientCurve->EntityLabel)) {
-					throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed #{label}", ifcGradientCurve);
+					throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed", ifcGradientCurve);
 				}
 				attemptedEntityLabels->Add(ifcGradientCurve->EntityLabel);
 
@@ -482,7 +482,7 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) heightFunction = EXEC_NATIVE->BuildCompositeCurve2d(segmentsSequence, ModelGeometryService->MinimumGap);
 
 				if (heightFunction.IsNull())
-					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built {entityLabel}", ifcGradientCurve);
+					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built", ifcGradientCurve);
 
 				gp_Pnt2d pnt;
 				heightFunction->D0(heightFunction->FirstParameter(), pnt);
@@ -1461,7 +1461,7 @@ namespace Xbim
 					case XCurveType::IfcSeventhOrderPolynomialSpiral:
 						throw RaiseGeometryFactoryException("Use BuildSpiral method to build spiral curve types", curve);
 					default:
-						throw RaiseGeometryFactoryException("Unsupported 2d curve type for {entityLabel}", curve);
+						throw RaiseGeometryFactoryException("Unsupported 2d curve type", curve);
 				}
 			}
 
@@ -1565,7 +1565,7 @@ namespace Xbim
 				Handle(Geom2d_BSplineCurve) bSpline = EXEC_NATIVE->BuildCompositeCurve2d(segments, ModelGeometryService->OneMeter);
 
 				if (bSpline.IsNull())
-					throw RaiseGeometryFactoryException("Composite curve could not be built {el}", ifcCompositeCurve);
+					throw RaiseGeometryFactoryException("Composite curve could not be built", ifcCompositeCurve);
 				return bSpline;
 			}
 

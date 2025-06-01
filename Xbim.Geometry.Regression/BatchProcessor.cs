@@ -55,22 +55,22 @@ namespace XbimRegression
                     fileLoggerOpts.MinLevel = LogLevel.Trace;
                 }));
             // Configure xbim services / logging & geometry
-            
-			if (Params.Caching)
-				XbimServices.Current.ConfigureServices(services => services
-				.AddXbimToolkit(opt => opt
-					.AddLoggerFactory(_loggerFactory)
-					.AddEsentModel()
-					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+
+            if (Params.Caching)
+                XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    .AddEsentModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = _params.EngineVersion))));
             else
-				XbimServices.Current.ConfigureServices(services => services
-				.AddXbimToolkit(opt => opt
-					.AddLoggerFactory(_loggerFactory)
-					// .AddHeuristicModel()
-					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+                XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    // .AddHeuristicModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = _params.EngineVersion))));
 
 
-			_logger = _loggerFactory.CreateLogger<BatchProcessor>();
+            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
         public Params Params
@@ -80,8 +80,11 @@ namespace XbimRegression
 
         public void Run()
         {
+            DirectoryInfo d = new DirectoryInfo(".");
+            Console.WriteLine($"Executing in \"{d.FullName}\"");
             FileInfo csvFileInfo = new FileInfo(Params.ResultsFile);
-            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");
+            Console.WriteLine($"Reporting to \"{csvFileInfo.FullName}\"");            
+            Console.WriteLine($"Using engine {Params.EngineVersion}, AdjustWcs: {Params.AdjustWcs}");
 
             using var writer = new StreamWriter(Params.ResultsFile);
             writer.WriteLine(ProcessResult.CsvHeader);
@@ -91,21 +94,20 @@ namespace XbimRegression
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
             {
-                
                 //set up a  log file for this file run                 
                 _currentLogFileName = Path.ChangeExtension(file.FullName, "log");
                 var runLogFileName = _currentLogFileName;
                 if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
                 Console.WriteLine($"Processing {file}");
                 ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
-                
+
                 _logger.LogInformation($"Processed {file.FullName}");
                 _currentLogFileName = "BatchProcessor.log";
                 _logger.LogInformation($"Processing {file.FullName}");
                 Console.WriteLine($"Processing run results from log file {runLogFileName}");
-               
+
                 var txt = File.ReadAllText(runLogFileName);
-                
+
                 if (string.IsNullOrEmpty(txt))
                 {
                     File.Delete(runLogFileName);
@@ -181,7 +183,7 @@ namespace XbimRegression
         {
             // var logger = loggerFactory.CreateLogger<BatchProcessor>();
 
-            RemoveFiles(ifcFile);
+            RemoveFiles(ifcFile, _params.CachingExtension);
             // using (var eventTrace = LoggerFactory.CreateEventTrace())
             {
                 var result = new ProcessResult() { Errors = -1 };
@@ -199,16 +201,16 @@ namespace XbimRegression
                     {
                         if (model == null)
                             return null;
+                        _logger.LogInformation("Model {file} parsed, schema is {schema}", ifcFile, model.Header.FileSchema.Schemas.FirstOrDefault()?.ToString() ?? "Unknown");
                         var parseTime = watch.ElapsedMilliseconds;
-                        var xbimFilename = BuildFileName(ifcFile, ".xbim");
-                        var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, XGeometryEngineVersion.V6);
+                        var xbimFilename = BuildFileName(ifcFile, ".xbim", _params.CachingExtension);
+                        var context = new Xbim3DModelContext(model, loggerFactory: loggerFactory, Params.EngineVersion);
                         if (_params.MaxThreads > 0)
                             context.MaxThreads = _params.MaxThreads;
                         // context.CustomMeshingBehaviour = CustomMeshingBehaviour;
                         if (_params.WriteBreps == null)
                         {
                             context.CreateContext(progress, adjustWCS);
-                            //}
                             var geomTime = watch.ElapsedMilliseconds - parseTime;
                             //XbimSceneBuilder sb = new XbimSceneBuilder();
                             //string xbimSceneName = BuildFileName(ifcFile, ".xbimScene");
@@ -348,7 +350,7 @@ namespace XbimRegression
                     result.Failed = true;
                     result.GeometryDuration = watch.ElapsedMilliseconds;
                 }
-                
+
 
                 return result;
             }
@@ -395,19 +397,23 @@ namespace XbimRegression
         }
 
 
-        private static string BuildFileName(string ifcFile, string extension)
+        private static string BuildFileName(string ifcFile, string extension, string cachingExtension)
         {
+            if (!string.IsNullOrEmpty(cachingExtension))
+                return string.Concat(ifcFile, ".", cachingExtension, extension);
             return string.Concat(ifcFile, extension);
+                
+
         }
 
-        private void RemoveFiles(string ifcFile)
+        private static void RemoveFiles(string ifcFile, string cachingExtension)
         {
-            DeleteFile(BuildFileName(ifcFile, ".xbim"));
-            DeleteFile(BuildFileName(ifcFile, ".xbimScene"));
-            DeleteFile(BuildFileName(ifcFile, ".log"));
+            DeleteFile(BuildFileName(ifcFile, ".xbim", cachingExtension));
+            DeleteFile(BuildFileName(ifcFile, ".xbimScene", cachingExtension));
+            DeleteFile(BuildFileName(ifcFile, ".log", cachingExtension));
         }
 
-        private void DeleteFile(string file)
+        private static void DeleteFile(string file)
         {
             try
             {
