@@ -48,6 +48,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Tests"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.NetFramework.Tests", "Xbim.Geometry.Engine.NetFramework.Tests\Xbim.Geometry.Engine.NetFramework.Tests.csproj", "{4E4BCC7D-2BCC-4D1B-AA6E-C1AC4BF67188}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Tessellator", "Xbim.Tessellator\Xbim.Tessellator.csproj", "{3A83E144-C80F-5712-2D13-93B3D5A657D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -166,6 +168,18 @@ Global
 		{4E4BCC7D-2BCC-4D1B-AA6E-C1AC4BF67188}.Release|x64.Build.0 = Release|x64
 		{4E4BCC7D-2BCC-4D1B-AA6E-C1AC4BF67188}.Release|x86.ActiveCfg = Release|x86
 		{4E4BCC7D-2BCC-4D1B-AA6E-C1AC4BF67188}.Release|x86.Build.0 = Release|x86
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|x64.ActiveCfg = Debug|x64
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|x64.Build.0 = Debug|x64
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|x86.ActiveCfg = Debug|x86
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Debug|x86.Build.0 = Debug|x86
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|x64.ActiveCfg = Release|x64
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|x64.Build.0 = Release|x64
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|x86.ActiveCfg = Release|x86
+		{3A83E144-C80F-5712-2D13-93B3D5A657D7}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

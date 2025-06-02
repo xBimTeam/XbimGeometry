@@ -151,9 +151,6 @@
     <Reference Include="Xbim.IO.MemoryModel">
       <HintPath>$(PackagesDir)Xbim.IO.MemoryModel.dll</HintPath>
     </Reference>
-    <Reference Include="Xbim.Tessellator">
-      <HintPath>$(PackagesDir)Xbim.Tessellator.dll</HintPath>
-    </Reference>
     <Reference Include="Xbim.Common">
       <HintPath>$(PackagesDir)Xbim.Common.dll</HintPath>
     </Reference>
@@ -583,6 +580,11 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
+      <Project>{3a83e144-c80f-5712-2d13-93b3d5a657d7}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="OcctLibraries">
