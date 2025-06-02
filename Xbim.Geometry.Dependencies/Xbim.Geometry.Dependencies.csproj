@@ -31,7 +31,10 @@
 	</ItemGroup>
 	<ItemGroup>
     <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.369" />
-    <PackageReference Include="Xbim.Essentials" Version="6.0.536" />
+    <PackageReference Include="Xbim.Essentials" Version="6.0.540-develop" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj" />
 	</ItemGroup>
 	
 	<Target Name="Buildx64" BeforeTargets="AfterBuild" Condition="'$(PlatformTarget)' == 'x86'">

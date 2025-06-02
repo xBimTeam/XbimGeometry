@@ -526,7 +526,7 @@
       <Version>6.2.369</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Essentials">
-      <Version>6.0.536</Version>
+      <Version>6.0.540-develop</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
       <Version>7.8.1</Version>

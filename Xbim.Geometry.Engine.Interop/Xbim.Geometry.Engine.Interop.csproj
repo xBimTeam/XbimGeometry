@@ -12,7 +12,6 @@
 		<GeometryEnginePath>../Xbim.Geometry.Engine/bin/$(Configuration)/</GeometryEnginePath>
 	</PropertyGroup>
 
-
 	<!--This creates the nuget package-->
 	<PropertyGroup>
 		<TargetsForTfmSpecificContentInPackage>GetGeometryEngineFiles;GetIjwHostFiles</TargetsForTfmSpecificContentInPackage>
@@ -38,8 +37,6 @@
 		</ItemGroup>
 	</Target>
 
-
-
 	<Target Name="GetIjwHostFiles" Condition="'$(TargetFramework)'!='net472' and '$(TargetFramework)'!=''">
 		<ItemGroup>
 			<IjwHost64Files Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Ijwhost.dll">
@@ -55,11 +52,6 @@
 		</ItemGroup>
 	</Target>
 
-	<!--<Target Name="TouchFiles" BeforeTargets="GenerateTargetFrameworkMonikerAttribute">
-		<Touch Files="XbimGeometryEngine.cs">
-			<Output TaskParameter="TouchedFiles" ItemName="FilesTouched" />
-		</Touch>
-	</Target>-->
 	<ItemGroup>
 		<None Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Ijwhost.dll" Visible="true" Condition="'$(TargetFramework)' != 'net472' And ('$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU')">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -91,19 +83,21 @@
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+	</ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
-  </ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net472' ">
+		<PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
+	</ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net472' ">
-    <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
-  </ItemGroup>
-  
-  <ItemGroup>
-		
+	<ItemGroup>
 		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.369" />
 		<PackageReference Include="Xbim.Geometry.Occt" Version="7.8.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Geometry.Dependencies\Xbim.Geometry.Dependencies.csproj" />
 	</ItemGroup>
 
 </Project>

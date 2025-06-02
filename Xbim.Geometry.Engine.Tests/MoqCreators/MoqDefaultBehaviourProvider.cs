@@ -16,22 +16,16 @@ namespace Xbim.Geometry.Engine.Tests
         private static ExpressMetaData metaData = ExpressMetaData.GetMetadata(new EntityFactoryIfc4());
         public MoqDefaultBehaviourProvider()
         {
-            //base.Register(typeof(string), (type, mock) => "?");
             base.Register(typeof(IItemSet<>), (type, mock) =>
             {
                 Type lType = typeof(ItemListMoq<>);
                 var genType = type.GetGenericArguments()[0];
                 Type constructed = lType.MakeGenericType(genType);
-                return Activator.CreateInstance(constructed);
-            }
-            );
-            //base.Register(typeof(ExpressType), (type, mock) =>
-            // {
-            //     Type t = mock.GetType().GetGenericArguments().First();
-            //     var ets = metaData.ExpressTypesImplementing(t).FirstOrDefault();
-            //     return metaData.ExpressType(ets.);
-            // }
-            //);
+                var temp = Activator.CreateInstance(constructed);
+                return temp is null
+                    ? throw new InvalidOperationException($"Cannot create instance of {constructed.FullName}")
+                    : temp;
+            });
         }
     }
    
