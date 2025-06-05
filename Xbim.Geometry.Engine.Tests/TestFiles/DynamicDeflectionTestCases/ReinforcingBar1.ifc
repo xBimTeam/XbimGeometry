@@ -1,0 +1,62 @@
+ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('ViewDefinition [DesignTransferView_V1]'),'2;1');
+FILE_NAME(
+/* name */ 'C:\\My Work\\Geometry Gym\\documents\\building smart\\github\\ifcscript\\examples\\ReinforcingBar.ifc',
+/* time_stamp */ '2017-06-27T13:32:40',
+/* author */ ('jonm'),
+/* organization */ ('Geometry Gym'),
+/* preprocessor_version */ 'GeometryGymIFC v0.0.15.0 by Geometry Gym Pty Ltd built 2017-06-27T02:48:24',
+/* originating_system */ 'IFCExamples v0.0.1.0',
+/* authorization */ 'None');
+
+FILE_SCHEMA (('IFC4'));
+ENDSEC;
+
+DATA;
+#10= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#11= IFCAXIS2PLACEMENT3D(#10,$,$);
+#12= IFCLOCALPLACEMENT($,#11);
+/* defines the default building (as required as the minimum spatial element)  */
+#13= IFCBUILDING('39t4Pu3nTC4ekXYRIHJB9W',$,'IfcBuilding',$,$,#12,$,$,$,$,$,#18);
+#14= IFCRELCONTAINEDINSPATIALSTRUCTURE('3Sa3dTJGn0H8TQIGiuGQd5',$,'Building','Building Container for Elements',(#66),#13);
+#15= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#16= IFCAXIS2PLACEMENT3D(#15,$,$);
+#18= IFCPOSTALADDRESS($,$,$,$,('Unknown'),$,'Unknown',$,'Unknown','Unknown');
+/* general entities required for all IFC  sets, defining the context for the exchange */
+#20= IFCPROJECT('0$WU4A9R19$vKWO$AdOnKA',$,'IfcProject',$,$,$,$,(#28),#21);
+#21= IFCUNITASSIGNMENT((#22,#23,#24,#25,#26));
+#22= IFCSIUNIT(*,.LENGTHUNIT.,.MILLI.,.METRE.);
+#23= IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.);
+#24= IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.);
+#25= IFCSIUNIT(*,.PLANEANGLEUNIT.,$,.RADIAN.);
+#26= IFCSIUNIT(*,.TIMEUNIT.,$,.SECOND.);
+#27= IFCRELAGGREGATES('091a6ewbvCMQ2Vyiqspa7a',$,'Project Container','Project Container for Buildings',#20,(#13));
+#28= IFCGEOMETRICREPRESENTATIONCONTEXT($,'Model',3,0.0001,#30,#31);
+#29= IFCCARTESIANPOINT((0.0,0.0,0.0));
+#30= IFCAXIS2PLACEMENT3D(#29,$,$);
+#31= IFCDIRECTION((0.0,1.0));
+#32= IFCGEOMETRICREPRESENTATIONSUBCONTEXT('Body','Model',*,*,*,*,#28,$,.MODEL_VIEW.,$);
+/* Example data for ReinforcingBar */
+#50= IFCDOCUMENTREFERENCE($,'MyCodeISO3766','MyReinforcementCode',$,$);
+#51= IFCRELASSOCIATESDOCUMENT('1R7R97$uLAAv4wci$KGwn8',$,$,$,(#20),#50);
+#52= IFCMATERIAL('ReinforcingSteel',$,$);
+#53= IFCRELASSOCIATESMATERIAL('3gfVO40P5EfQyKZ_bF0R$6',$,'MatAssoc','Material Associates',(#59),#52);
+#54= IFCCARTESIANPOINTLIST3D(((-69.0,0.0,-122.0),(-69.0,0.0,-79.0),(-54.94113,0.0,-45.05887),(-21.0,0.0,-31.0),(21.0,0.0,-31.0),(54.94113,0.0,-45.05887),(69.0,0.0,-79.0),(69.0,0.0,-321.0),(54.99398,1.21791,-354.94113),(21.18045,4.15822,-369.0),(-20.66165,7.79667,-369.0),(-54.47518,10.73697,-354.94113),(-68.4812,11.95489,-321.0),(-69.0,12.0,-79.0),(-54.94113,12.0,-45.05887),(-21.0,12.0,-31.0),(21.0,12.0,-31.0),(54.94113,12.0,-45.05887),(69.0,12.0,-79.0),(69.0,12.0,-122.0)));
+#55= IFCINDEXEDPOLYCURVE(#54,(IFCLINEINDEX((1,2)),IFCARCINDEX((2,3,4)),IFCLINEINDEX((4,5)),IFCARCINDEX((5,6,7)),IFCLINEINDEX((7,8)),IFCARCINDEX((8,9,10)),IFCLINEINDEX((10,11)),IFCARCINDEX((11,12,13)),IFCLINEINDEX((13,14)),IFCARCINDEX((14,15,16)),IFCLINEINDEX((16,17)),IFCARCINDEX((17,18,19)),IFCLINEINDEX((19,20))),$);
+#56= IFCSWEPTDISKSOLID(#55,6.0,$,$,$);
+#57= IFCREPRESENTATIONMAP(#16,#58);
+#58= IFCSHAPEREPRESENTATION(#32,'Body','SolidModel',(#56));
+#59= IFCREINFORCINGBARTYPE('0jMRtfHYXE7u4s_CQ2uVE9',$,'12 Diameter Ligature',$,$,$,(#57),$,$,.LIGATURE.,12.0,113.097335529233,1150.0,.TEXTURED.,$,$);
+#60= IFCRELDEFINESBYTYPE('1iAfl2ERbFmwi7uniy1H7j',$,'NameNotAssigned',$,(#66),#59);
+#61= IFCRELDECLARES('1Cjr05W9T0fx0M3_mdVqMd',$,$,$,#20,(#59));
+#62= IFCCARTESIANTRANSFORMATIONOPERATOR3D($,$,#15,1.0,$);
+#63= IFCMAPPEDITEM(#57,#62);
+#64= IFCSHAPEREPRESENTATION(#32,'Body','MappedRepresentation',(#63));
+#65= IFCPRODUCTDEFINITIONSHAPE($,$,(#64));
+#66= IFCREINFORCINGBAR('0WUveBtSTDbunNjDLsuRn$',$,$,$,$,#67,#65,$,$,$,$,$,$,$);
+#67= IFCLOCALPLACEMENT(#12,#16);
+ENDSEC;
+
+END-ISO-10303-21;
+
