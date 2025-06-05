@@ -37,7 +37,7 @@ namespace Xbim.ModelGeometry.Scene
     /// Represents a gemetric representation context, i.e. a 'Body' and 'Model'Representation
     /// Note a 3DModelContext may contain multiple IIfcGeometricRepresentationContexts
     /// </summary>
-    public class Xbim3DModelContext
+    public class Xbim3DModelContext : ICanLog
     {
         // private static readonly IList<XbimShapeInstance> EmptyShapeList = new List<XbimShapeInstance>(1);
 
@@ -522,105 +522,26 @@ namespace Xbim.ModelGeometry.Scene
 
         #endregion
 
-
-        private readonly ILogger _logger;
+        private readonly IfcRepresentationContextCollection _contexts;
+        private readonly IXbimGeometryEngine _engine;
+        private readonly XGeometryEngineVersion engineVersion;
+        private readonly IModel _model;
+        private readonly DynamicDeflection _dynamicDeflection;
+        
+        private IXbimGeometryEngine Engine => _engine;
 
         /// <summary>
         /// Defines the duration milliseconds that Boolean operations will be allowed to run for.
         /// </summary>
         /// <remarks>Defaults to 60 secomds if not specified in 'BooleanTimeOut' appSetting - but overideable statically</remarks>
         static public int BooleanTimeOutMilliSeconds;
-        private readonly IfcRepresentationContextCollection _contexts;
-        private readonly IXbimGeometryEngine _engine;
-        private readonly XGeometryEngineVersion engineVersion;
-
-        private IXbimGeometryEngine Engine => _engine;
-
-
+        
         static Xbim3DModelContext()
         {
             var timeOut = System.Configuration.ConfigurationManager.AppSettings["BooleanTimeOut"];
             if (!int.TryParse(timeOut, out int BooleanTimeOutSeconds))
                 BooleanTimeOutSeconds = 60;
             BooleanTimeOutMilliSeconds = BooleanTimeOutSeconds * 1000;
-        }
-        private readonly IModel _model;
-
-        internal void LogWarning(object entity, string format, params object[] args)
-        {
-            LogWarning(null, entity, format, args);
-        }
-        internal void LogWarning(Exception ex, object entity, string format, params object[] args)
-        {
-            if (_logger != null)
-            {
-                var msg = String.Format(format, args);
-                if (entity is IPersistEntity ifcEntity)
-                    _logger.LogWarning(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
-                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-                else
-                    _logger.LogWarning(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
-            }
-        }
-
-        internal void LogInfo(object entity, string format, params object[] args)
-        {
-
-            if (_logger != null)
-            {
-                var msg = String.Format(format, args);
-                if (entity is IPersistEntity ifcEntity)
-                    _logger.LogInformation("GeomScene: #{entityLabel}={entityType} [{message}]",
-                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-                else
-                    _logger.LogInformation("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
-            }
-        }
-
-        internal void LogError(object entity, string format, params object[] args)
-        {
-            LogError(null, entity, format, args);
-        }
-
-        internal void LogError(Exception ex, object entity, string format, params object[] args)
-        {
-            if (_logger != null)
-            {
-                var msg = String.Format(format, args);
-                if (entity is IPersistEntity ifcEntity)
-                    _logger.LogError(ex, "GeomScene: #{entityLabel}={entityType} [{message}]",
-                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-                else
-                    _logger.LogError(ex, "GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
-            }
-        }
-
-        internal void LogError(string msg, Exception ex = null)
-        {
-            if (_logger != null)
-            {
-                if (ex == null)
-                {
-                    _logger.LogError(msg);
-                }
-                else
-                {
-                    _logger.LogError(ex, msg);
-                }
-
-            }
-        }
-        internal void LogDebug(object entity, string format, params object[] args)
-        {
-            if (_logger != null)
-            {
-                var msg = String.Format(format, args);
-                if (entity is IPersistEntity ifcEntity)
-                    _logger.LogDebug("GeomScene: #{entityLabel}={entityType} [{message}]",
-                        ifcEntity.EntityLabel, ifcEntity.GetType().Name, msg);
-                else
-                    _logger.LogDebug("GeomScene: {entityType} [{message}]", entity.GetType().Name, msg);
-            }
         }
 
 
@@ -635,8 +556,8 @@ namespace Xbim.ModelGeometry.Scene
         public Xbim3DModelContext(IModel model, ILoggerFactory loggerFactory, XGeometryEngineVersion engineVersion, string contextType = "model", string requiredContextIdentifier = null)
             : this(model, contextType, requiredContextIdentifier, loggerFactory.CreateLogger<Xbim3DModelContext>(), engineVersion, loggerFactory)
         {
-
         }
+        
         //The maximum extent for any dimension of any products bouding box 
         //private double _maxXyz;
 
@@ -650,7 +571,7 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="engineVersion"></param>
         /// <param name="loggerFactory"></param>
         public Xbim3DModelContext(IModel model, string contextType = "model", string requiredContextIdentifier = null,
-            ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null)
+            ILogger logger = null, XGeometryEngineVersion engineVersion = XGeometryEngineVersion.V5, ILoggerFactory loggerFactory = null) : base(logger)
         {
 
             var factory = InternalServiceProvider.GetService<IXbimGeometryServicesFactory>();
@@ -665,6 +586,9 @@ namespace Xbim.ModelGeometry.Scene
             _logger = logger ?? (loggerFactory.CreateLogger<XbimGeometryEngine>());
             this.engineVersion = engineVersion;
             _engine = factory.CreateGeometryEngine(engineVersion, model, loggerFactory);
+            
+            _dynamicDeflection = new DynamicDeflection(model.ModelFactors, _engine, _logger);
+            
             if (engineVersion == XGeometryEngineVersion.V6)
                 _modelServices = ((IXGeometryEngineV6)_engine).ModelGeometryService;
             else
@@ -801,8 +725,11 @@ namespace Xbim.ModelGeometry.Scene
         /// <param name="adjustWcs">When <c>true</c> adjusts for World Coordinate System placement</param>
         /// <param name="generateBREPs">When <c>true</c> meshing is based off BREPs (slower) otherwise <c>false</c> indicates we just want a mesh, without interim BREPs (faster)</param>
         /// <param name="postTessellationCallback"></param>
+        /// <param name="dynamicDeflectionSettings"></param>
         /// <returns></returns>
-        public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true, bool generateBREPs = false, Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> postTessellationCallback = null)
+        public bool CreateContext(ReportProgressDelegate progDelegate = null, bool adjustWcs = true, bool generateBREPs = false,
+            Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> postTessellationCallback = null,
+            DynamicDeflectionSettings dynamicDeflectionSettings = null)
         {
             _logger.LogTrace("Starting creation of model scene");
             //NB we no longer support creation of  geometry storage other than binary, other code remains for reading but not writing 
@@ -843,7 +770,7 @@ namespace Xbim.ModelGeometry.Scene
                         contextHelper.ParallelOptions.MaxDegreeOfParallelism = MaxThreads;
                     }
 
-                    WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType, postTessellationCallback);
+                    WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType, postTessellationCallback, dynamicDeflectionSettings);
                     PrepareMapGeometryReferences(contextHelper, progDelegate);
 
                     // process features
@@ -1475,7 +1402,13 @@ namespace Xbim.ModelGeometry.Scene
         public int MaxThreads { get; set; }
 
 
-        private void WriteShapeGeometries(XbimCreateContextHelper contextHelper, ReportProgressDelegate progDelegate, IGeometryStoreInitialiser geometryStore, XbimGeometryType geomStorageType, Func<XbimTriangulatedMesh, int, XbimTriangulatedMesh> postTessellationCallback = null)
+        private void WriteShapeGeometries(XbimCreateContextHelper contextHelper,
+            ReportProgressDelegate progDelegate,
+            IGeometryStoreInitialiser geometryStore,
+            XbimGeometryType geomStorageType,
+            Func<XbimTriangulatedMesh, int, 
+            XbimTriangulatedMesh> postTessellationCallback = null,
+            DynamicDeflectionSettings dynamicDeflectionSettings = null)
         {
             var localPercentageParsed = contextHelper.PercentageParsed;
             var localTally = contextHelper.Tally;
@@ -1592,6 +1525,14 @@ namespace Xbim.ModelGeometry.Scene
 
                         if (geomModel != null && geomModel.IsValid)
                         {
+                            if (dynamicDeflectionSettings != null)
+                            {
+                                var def = _dynamicDeflection.GetDeflection
+                                    (shape, geomModel.BoundingBox, deflection, deflectionAngle, dynamicDeflectionSettings);
+
+                                (deflection, deflectionAngle) = (def.Linear, def.Angular);
+                            }
+                            
                             shapeGeom = Engine.CreateShapeGeometry(geomModel, precision, deflection, deflectionAngle, geomStorageType, _logger);
                             if (shapeMetaData.IsFeatureElementShape)
                             {
