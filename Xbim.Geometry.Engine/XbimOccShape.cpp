@@ -356,6 +356,9 @@ namespace Xbim
 			List<List<int>^>^ tessellations = gcnew List<List<int>^>(faceCount);
 			bool isPolyhedron = true;
 			array<bool>^ hasSeams = gcnew array<bool>(faceCount);
+
+			bool foundDegenerate = false;
+
 			//we check if the shape is a faceted poltgon, i.e. all faces are planar and all edges are linear, if so then we do not need to use OCC meshing which is general purpose and a little slower than LibMesh
 			for (int f = 1; f <= faceMap.Extent(); f++)
 			{
@@ -524,7 +527,9 @@ namespace Xbim
 						{
 							array<ContourVertex>^ outerContour = gcnew array<ContourVertex>(numberEdges);
 							BRepTools_WireExplorer exp(outerWire, face);
-							for (int j = 0; exp.More(); exp.Next())
+
+							int j = 0;
+							for (j = 0; exp.More(); exp.Next())
 							{
 								gp_Pnt p = BRep_Tool::Pnt(exp.CurrentVertex());
 								outerContour[j].Position.X = p.X();
@@ -532,7 +537,15 @@ namespace Xbim
 								outerContour[j].Position.Z = p.Z();
 								j++;
 							}
-							tess->AddContour(outerContour); //the original winding is correct as we have oriented the wire to the face in BRepTools_WireExplorer
+
+							if (j == numberEdges)
+							{
+								tess->AddContour(outerContour); //the original winding is correct as we have oriented the wire to the face in BRepTools_WireExplorer
+							}
+							else
+							{
+								foundDegenerate = true;
+							}
 						}
 
 					}
@@ -559,6 +572,13 @@ namespace Xbim
 							}
 						}
 					}
+
+					if (foundDegenerate)
+					{
+						foundDegenerate = false;
+						continue;
+					}
+
 					tess->Tessellate(Xbim::Tessellator::WindingRule::EvenOdd, Xbim::Tessellator::ElementType::Polygons, 3);
 					if (tess->ElementCount > 0) //we have some triangles
 					{
