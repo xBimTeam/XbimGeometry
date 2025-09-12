@@ -186,12 +186,19 @@ namespace Xbim.ModelGeometry.Scene
             internal ConcurrentDictionary<int, GeometryReference> ShapeLookup;
             private bool _disposed;
             private readonly Xbim3DModelContext _modelContext;
+            private ILogger _logger;
 
             public XbimCreateContextHelper(Xbim3DModelContext modelContext, IModel model, IfcRepresentationContextCollection contexts)
             {
                 _modelContext = modelContext;
                 Model = model;
                 Contexts = contexts;
+            }
+
+            public XbimCreateContextHelper(Xbim3DModelContext modelContext, IModel model, IfcRepresentationContextCollection contexts, ILogger logger)
+                : this(modelContext, model, contexts)
+            {
+                _logger = logger;
             }
 
             /// <summary>
@@ -260,25 +267,33 @@ namespace Xbim.ModelGeometry.Scene
             {
                 try
                 {
+                    _logger?.LogTrace("Initialising CreateContextHelper");
+                    _logger?.LogTrace("Initialising XbimPlacementTree");
                     PlacementTree = new XbimPlacementTree(Model, engine, adjustWcs);
                     GeometryShapeLookup = new ConcurrentDictionary<int, int>();
                     MapGeometryReferences = new ConcurrentDictionary<int, List<GeometryReference>>();
                     MapTransforms = new ConcurrentDictionary<int, XbimMatrix3D>();
+
+                    _logger?.LogTrace("Performing GetOpeningsAndProjections");
                     GetOpeningsAndProjections();
                     VoidedProductIds = new HashSet<int>();
                     VoidedShapeIds = new HashSet<int>();
                     ParallelOptions = new ParallelOptions();
                     // ParallelOptions.MaxDegreeOfParallelism = 16;
 
+                    _logger?.LogTrace("Checking VoidedProductIds");
                     CachedGeometries = new ConcurrentDictionary<int, IXbimGeometryObject>();
                     foreach (var voidedShapeId in OpeningsAndProjections.Select(op => op.Key.EntityLabel))
                         VoidedProductIds.Add(voidedShapeId);
+                    _logger?.LogTrace("Performing GetProductShapeIds");
                     GetProductShapeIds();
                     ShapeLookup = new ConcurrentDictionary<int, GeometryReference>();
                     //Get the surface styles
+                    _logger?.LogTrace("Performing GetSurfaceStyles");
                     GetSurfaceStyles();
+                    _logger?.LogTrace("Performing GetClusters");
                     GetClusters();
-                    Total = ProductShapeIds.Count() + OpeningsAndProjections.Count();
+                    Total = ProductShapeIds.Count + OpeningsAndProjections.Count;
                     Tally = 0;
                     PercentageParsed = 0;
                     InitialiseError = "";
@@ -312,7 +327,6 @@ namespace Xbim.ModelGeometry.Scene
                 //    Model.Instances.OfType<IIfcRelAggregates>()
                 //        .Where(x => x.RelatingObject is IIfcElement)
                 //        .ToDictionary(x => x.RelatingObject, y => y.RelatedObjects);
-
                 var compoundElementsDictionary = XbimMultiValueDictionary<IIfcObjectDefinition, IIfcObjectDefinition>.Create<HashSet<IIfcObjectDefinition>>();
                 foreach (var aggRel in Model.Instances.OfType<IIfcRelAggregates>())
                 {
@@ -347,7 +361,6 @@ namespace Xbim.ModelGeometry.Scene
                                 Feature = openingRelation.RelatedOpeningElement
                             }));
                     }
-
                     // process parent
                     elementsWithFeatures.Add(new ElementWithFeature()
                     {
@@ -768,11 +781,14 @@ namespace Xbim.ModelGeometry.Scene
                     _logger.LogWarning("No Transaction created. Finishing...");
                     return false;
                 }
-                using (var contextHelper = new XbimCreateContextHelper(this, _model, _contexts))
+                using (var contextHelper = new XbimCreateContextHelper(this, _model, _contexts, _logger))
                 {
                     contextHelper.CustomMeshBehaviour = CustomMeshingBehaviour;
+                    _logger.LogTrace("Starting Initialise sequence");
                     progDelegate?.Invoke(-1, "Initialise");
                     // Creation of full BREP representation is an optional V6 only feature
+                    
+
                     var createFullGeometry = engineVersion == XGeometryEngineVersion.V6 && generateBREPs == true;
                     if (!contextHelper.Initialise(adjustWcs, _engine, createFullGeometry))
                         throw new Exception("Failed to initialise geometric context, " + contextHelper.InitialiseError);
@@ -783,12 +799,16 @@ namespace Xbim.ModelGeometry.Scene
                         contextHelper.ParallelOptions.MaxDegreeOfParallelism = MaxThreads;
                     }
 
+                    _logger.LogTrace("Starting WriteShapeGeometries");
                     WriteShapeGeometries(contextHelper, progDelegate, geometryTransaction, geomStorageType, postTessellationCallback, dynamicDeflectionSettings);
+                    _logger.LogTrace("Starting PrepareMapGeometryReferences");
                     PrepareMapGeometryReferences(contextHelper, progDelegate);
 
                     // process features
+                    _logger.LogTrace("Starting WriteProductsWithFeatures");
                     var processed = WriteProductsWithFeatures(contextHelper, progDelegate, geomStorageType, geometryTransaction);
 
+                    _logger.LogTrace("Starting WriteProductShapes");
                     progDelegate?.Invoke(-1, "WriteProductShapes");
                     var productsRemaining = _model.Instances.OfType<IIfcProduct>()
                         .Where(p =>
@@ -804,6 +824,7 @@ namespace Xbim.ModelGeometry.Scene
                     int nextRegionNumber = 1;
                     //Write out the regions of the model
                     progDelegate?.Invoke(-1, "WriteRegionsToDb");
+                    _logger.LogTrace("Starting WriteRegionsToStore");
                     foreach (var cluster in contextHelper.Clusters)
                     {
                         nextRegionNumber = WriteRegionsToStore(cluster.Key, cluster.Value, geometryTransaction, contextHelper.PlacementTree.WorldCoordinateSystem, nextRegionNumber);
@@ -1224,7 +1245,7 @@ namespace Xbim.ModelGeometry.Scene
             }
 
             // transform setup
-            var placementTransform = XbimPlacementTree.GetTransform(product, contextHelper.PlacementTree, Engine);
+            var placementTransform = XbimPlacementTree.GetTransform(product, contextHelper.PlacementTree, Engine, _logger);
 
             // process the items and evaluate here
             return reps.SelectMany(r => WriteProductShapeRepresentationItems(contextHelper, product, txn, r, repType, placementTransform, r.Items)).ToList();
@@ -1564,9 +1585,9 @@ namespace Xbim.ModelGeometry.Scene
                     }
 
                     if (shapeGeom == null || shapeGeom.ShapeData == null || shapeGeom.ShapeData.Length == 0)
-                        LogDebug(_model.Instances[shapeId], "Is an empty shape");
+                        LogDebug(shape, "Is an empty shape");
                     else if (shapeGeom.BoundingBox.SizeX >= 1e100)   // Short cut for Infinite BBox
-                        LogWarning(_model.Instances[shapeId], "Is an invalid shape");
+                        LogWarning(shape, "Is an invalid shape");
                     else
                     {
                         shapeGeom.IfcShapeLabel = shapeId;

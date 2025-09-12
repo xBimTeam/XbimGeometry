@@ -59,7 +59,7 @@ namespace Xbim
 						try
 						{
 							scope = _modelService->LoggingService->Logger->BeginScope(geomExcept->Data);
-							LoggerExtensions::LogWarning(_modelService->LoggingService->Logger, innerException, message, entity->EntityLabel);
+							LoggerExtensions::LogWarning(_modelService->LoggingService->Logger, innerException, message + " #" + entity->EntityLabel.ToString(), entity->EntityLabel);
 						}
 						finally
 						{
@@ -90,6 +90,11 @@ namespace Xbim
 				void LogDebug(IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, nullptr, ifcEntity, format, args); };
 				void LogDebug(IPersistEntity^ ifcEntity, System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, exception, ifcEntity, format, args); };
 				void LogDebug(System::Exception^ exception, System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Debug, exception, nullptr, format, args); };
+
+				void LogTrace(System::String^ format, ...cli::array<System::Object^>^ args) { Log(LogLevel::Trace, nullptr, nullptr, format, args); };
+				void LogTrace(IPersistEntity ^ ifcEntity, System::String ^ format, ...cli::array<System::Object^> ^ args) { Log(LogLevel::Trace, nullptr, ifcEntity, format, args); };
+				void LogTrace(IPersistEntity ^ ifcEntity, System::Exception ^ exception, System::String ^ format, ...cli::array<System::Object^> ^ args) { Log(LogLevel::Trace, exception, ifcEntity, format, args); };
+				void LogTrace(System::Exception ^ exception, System::String ^ format, ...cli::array<System::Object^> ^ args) { Log(LogLevel::Trace, exception, nullptr, format, args); };
 
 				void Log(LogLevel logLevel, System::Exception^ exception, IPersistEntity^ ifcEntity, System::String^ format, ...cli::array<System::Object^>^ args)
 				{
