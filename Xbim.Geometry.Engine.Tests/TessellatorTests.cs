@@ -56,7 +56,7 @@ namespace Xbim.Geometry.Engine.Tests
             using (var model = IfcStore.Open("TestFiles\\Ifc4TestFiles\\polygonal-face-tessellation.ifc"))
             {
                 var xbimTessellator = new XbimTessellator(model, tp);
-                XbimShapeGeometry shapeGeom = null;
+                XbimShapeGeometry shapeGeom;
 
                 var shape = model.Instances.FirstOrDefault<IIfcPolygonalFaceSet>();
                 shapeGeom = xbimTessellator.Mesh(shape);
@@ -71,7 +71,7 @@ namespace Xbim.Geometry.Engine.Tests
             using (var model = IfcStore.Open("TestFiles\\IfcExamples\\Roof-01_BCAD.ifc"))
             {
                 var xbimTessellator = new XbimTessellator(model, tp);
-                XbimShapeGeometry shapeGeom = null;
+                XbimShapeGeometry shapeGeom;
 
                 var shape = model.Instances[1192] as IIfcGeometricRepresentationItem;
                 shapeGeom = xbimTessellator.Mesh(shape);
@@ -86,7 +86,7 @@ namespace Xbim.Geometry.Engine.Tests
             using (var model = IfcStore.Open("TestFiles\\Ifc4TestFiles\\IfcTriangulatedFaceSet.ifc"))
             {
                 var xbimTessellator = new XbimTessellator(model, tp);
-                XbimShapeGeometry shapeGeom = null;
+                XbimShapeGeometry shapeGeom;
 
                 var shape = model.Instances[48] as IIfcGeometricRepresentationItem;
                 shapeGeom = xbimTessellator.Mesh(shape);

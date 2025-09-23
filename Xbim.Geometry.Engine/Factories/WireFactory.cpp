@@ -368,10 +368,10 @@ namespace Xbim
 
 			struct WireFactoryNativeStatics
 			{
-				static std::mutex execNativeMutex;
+				static std::shared_mutex execNativeMutex;
 			};
 
-			std::mutex WireFactoryNativeStatics::execNativeMutex;
+			std::shared_mutex WireFactoryNativeStatics::execNativeMutex;
 			TopoDS_Wire WireFactory::BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge)
 			{
 				if (asSingleEdge)
@@ -386,7 +386,7 @@ namespace Xbim
 				{
 					if (2 == (int)ifcIndexedPolyCurve->Dim)
 					{
-						std::lock_guard<std::mutex> lock(WireFactoryNativeStatics::execNativeMutex);
+						std::lock_guard<std::shared_mutex> lock(WireFactoryNativeStatics::execNativeMutex);
 						TColGeom2d_SequenceOfBoundedCurve segments;
 						CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
 						if (segments.Length() == 0) 

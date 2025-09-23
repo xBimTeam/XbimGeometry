@@ -93,6 +93,6 @@ namespace Xbim.Geometry.Engine.Tests
         public long SizeAfter { get; set; }
         public uint TrianglesBefore { get; set; }
         public uint TrianglesAfter { get; set; }
-        public string FileName { get; set; }
+        public string FileName { get; set; } = string.Empty;
     }
 }

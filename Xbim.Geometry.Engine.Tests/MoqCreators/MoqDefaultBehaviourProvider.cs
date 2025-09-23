@@ -22,7 +22,7 @@ namespace Xbim.Geometry.Engine.Tests
                 Type lType = typeof(ItemListMoq<>);
                 var genType = type.GetGenericArguments()[0];
                 Type constructed = lType.MakeGenericType(genType);
-                return Activator.CreateInstance(constructed);
+                return Activator.CreateInstance(constructed)!;
             }
             );
             //base.Register(typeof(ExpressType), (type, mock) =>
