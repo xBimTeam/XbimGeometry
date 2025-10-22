@@ -248,6 +248,31 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Fact]
+        public void Github_Issue_557()
+        {
+            var ifcFile = @"TestFiles\Github\Github_issue_557.ifc";
+            // Triggers OCC Memory violation
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m, _loggerFactory, XGeometryEngineVersion.V6);
+                var result = c.CreateContext(null, true);
+
+                result.Should().BeTrue();
+
+                m.GeometryStore.IsEmpty.Should().BeFalse();
+
+                using (var reader = m.GeometryStore.BeginRead())
+                {
+                    var regions = reader.ContextRegions.Where(cr => cr.MostPopulated() != null).Select(cr => cr.MostPopulated());
+
+                    var region = regions.FirstOrDefault();
+
+                    region.Size.Length.Should().BeApproximately(13.406979, 0.001);
+                }
+            }
+        }
+
 
     }
 }

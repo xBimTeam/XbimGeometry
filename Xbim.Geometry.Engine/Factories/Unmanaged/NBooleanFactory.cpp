@@ -7,6 +7,7 @@
 #include <Standard_Type.hxx>
 #include <BOPAlgo_Alerts.hxx>
 #include <ShapeFix_Shape.hxx>
+#include <BRepCheck_Analyzer.hxx>
 
 bool NBooleanFactory::IsEmpty(const TopoDS_Shape& shape)
 {
@@ -130,7 +131,16 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 
 		if (bop.IsDone()) //work out what to do in this situation
 		{
-			bop.SimplifyResult(true, true, Precision::Angular());
+			TopoDS_Shape result = bop.Shape();
+			BRepCheck_Analyzer analyzer(result);
+			if (!analyzer.IsValid()) {
+				pLoggingService->LogWarning("Boolean resulting shape is invalid, skipping SimplifyResult().");
+			}
+			else
+			{
+				bop.SimplifyResult(true, true, Precision::Angular());
+			}
+			
 			//if we have a self intersection acquired it means one of the input shapes had a self intersection, fix up the input shapes and repeat, if we have not tried to do so before
 			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)) && !attemptingFix)
 			{
