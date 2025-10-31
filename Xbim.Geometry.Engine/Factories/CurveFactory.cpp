@@ -418,87 +418,117 @@ namespace Xbim
 
 			Handle(Geom_GradientCurve) CurveFactory::BuildCurve(Ifc4x3::GeometryResource::IfcGradientCurve^ ifcGradientCurve)
 			{
+				const int label = ifcGradientCurve->EntityLabel;
 
-				std::optional<Handle(Standard_Transient)> cached = GetCache()->Get(ifcGradientCurve->EntityLabel);
+				std::optional<Handle(Standard_Transient)> cached = GetCache()->Get(label);
 				if (cached.has_value()) {
 					return Handle(Geom_GradientCurve)::DownCast(cached.value())->Clone();
 				}
-				if (attemptedEntityLabels->Contains(ifcGradientCurve->EntityLabel)) {
-					throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed", ifcGradientCurve);
-				}
-				attemptedEntityLabels->Add(ifcGradientCurve->EntityLabel);
-
-				// The base curve is the horizontal projection
-				XCurveType curveType;
-				Handle(Geom2d_Curve) horizontalProjection = BuildCurve2d(ifcGradientCurve->BaseCurve, curveType);
-
-				if (horizontalProjection.IsNull()) {
-					throw RaiseGeometryFactoryException("IfcGradientCurve BaseCurve could not be built", ifcGradientCurve);
-				}
 				
-				// Building heigth function from the curve Segments
-				for (int i = 0; i < ifcGradientCurve->NSegments; i++)
+
+				if (_failedCurves->ContainsKey(label))
+					throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed", ifcGradientCurve);
+
+
+				SemaphoreSlim^ gate = _inFlightCurves->GetOrAdd(label, gcnew SemaphoreSlim(1, 1));
+				gate->Wait();
+
+				try
 				{
-					Ifc4x3::GeometryResource::IfcCurveSegment^ curveSegment = dynamic_cast<Ifc4x3::GeometryResource::IfcCurveSegment^>(ifcGradientCurve->Segments[i]);
-					if(curveSegment == nullptr)
-						throw RaiseGeometryFactoryException("IfcGradientCurve Segments should be of type IfcCurveSegment", ifcGradientCurve);
+
+					if (auto cached2 = GetCache()->Get(label); cached2.has_value())
+						return Handle(Geom_GradientCurve)::DownCast(cached2.value())->Clone();
+
+					if (_failedCurves->ContainsKey(label))
+						throw RaiseGeometryFactoryException("IfcGradientCurve skipped because previously failed", ifcGradientCurve);
+
+
+					// The base curve is the horizontal projection
+					XCurveType curveType;
+					Handle(Geom2d_Curve) horizontalProjection = BuildCurve2d(ifcGradientCurve->BaseCurve, curveType);
+
+					if (horizontalProjection.IsNull()) {
+						throw RaiseGeometryFactoryException("IfcGradientCurve BaseCurve could not be built", ifcGradientCurve);
+					}
+
+					// Building heigth function from the curve Segments
+					for (int i = 0; i < ifcGradientCurve->NSegments; i++)
+					{
+						Ifc4x3::GeometryResource::IfcCurveSegment^ curveSegment = dynamic_cast<Ifc4x3::GeometryResource::IfcCurveSegment^>(ifcGradientCurve->Segments[i]);
+						if (curveSegment == nullptr)
+							throw RaiseGeometryFactoryException("IfcGradientCurve Segments should be of type IfcCurveSegment", ifcGradientCurve);
+					}
+
+					std::vector<Handle(Geom2d_Curve)> heightFunctionCurves = ProcessSegments(ifcGradientCurve);
+
+					bool hasEndPoint = false;
+					gp_Pnt2d endPoint;
+
+					if (ifcGradientCurve->EndPoint != nullptr)
+					{
+						IIfcAxis2Placement2D^ axis2Placement = dynamic_cast<IIfcAxis2Placement2D^>(ifcGradientCurve->EndPoint);
+
+
+						TopLoc_Location location;
+						if (axis2Placement) {
+							hasEndPoint = GEOMETRY_FACTORY->ToLocation(axis2Placement, location);
+						}
+						if (hasEndPoint) {
+							gp_Trsf trsf = location.Transformation();
+							endPoint = gp_Pnt2d(0, 0).Transformed(trsf);
+						}
+					}
+
+					if (hasEndPoint)
+					{
+						gp_Pnt2d lastPoint;
+						Standard_Real lastParam = heightFunctionCurves.back()->LastParameter();
+						heightFunctionCurves.back()->D0(lastParam, lastPoint);
+						if (!lastPoint.IsEqual(endPoint, Precision::Confusion())) {
+							Handle(Geom2d_Line) endSegment = new Geom2d_Line(lastPoint, gp_Vec2d(lastPoint, endPoint));
+							Standard_Real length = lastPoint.Distance(endPoint);
+							Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(endSegment, 0, length);
+							heightFunctionCurves.push_back(trimmed);
+						}
+					}
+
+					TColGeom2d_SequenceOfBoundedCurve segmentsSequence = EXEC_NATIVE->GetSegmentsSequnce(heightFunctionCurves, ModelGeometryService->MinimumGap);
+					Handle(Geom2d_BSplineCurve) heightFunction = EXEC_NATIVE->BuildCompositeCurve2d(segmentsSequence, ModelGeometryService->MinimumGap);
+
+					if (heightFunction.IsNull())
+						throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built", ifcGradientCurve);
+
+					gp_Pnt2d pnt;
+					heightFunction->D0(heightFunction->FirstParameter(), pnt);
+					auto startDistAlong = pnt.X();
+					horizontalProjection->D0(horizontalProjection->FirstParameter(), pnt);
+					auto horizontalProjectionStart = pnt.X();
+
+					if (horizontalProjectionStart != 0 || startDistAlong != 0) {
+						EXEC_NATIVE->TranslateCurveStartPointToX(heightFunction, horizontalProjectionStart + startDistAlong);
+					}
+
+					Handle(Geom_GradientCurve) gradientCurve = new Geom_GradientCurve(horizontalProjection, heightFunction);
+
+					GetCache()->Insert(ifcGradientCurve->EntityLabel, gradientCurve);
+
+					char dummy;
+					_failedCurves->TryRemove(label, dummy);
+
+					return gradientCurve;
 				}
-
-				std::vector<Handle(Geom2d_Curve)> heightFunctionCurves = ProcessSegments(ifcGradientCurve);
-
-				bool hasEndPoint = false;
-				gp_Pnt2d endPoint;
-
-				if (ifcGradientCurve->EndPoint != nullptr)
+				catch (...)
 				{
-					IIfcAxis2Placement2D^ axis2Placement = dynamic_cast<IIfcAxis2Placement2D^>(ifcGradientCurve->EndPoint);
-
-
-					TopLoc_Location location;
-					if (axis2Placement) {
-						hasEndPoint = GEOMETRY_FACTORY->ToLocation(axis2Placement, location);
-					}
-					if (hasEndPoint) {
-						gp_Trsf trsf = location.Transformation();
-						endPoint = gp_Pnt2d(0, 0).Transformed(trsf);
-					}
+					// mark as failed for future fast-fail
+					(*_failedCurves)[label] = 0;
+					throw;
 				}
-
-
-				if (hasEndPoint)
+				finally
 				{
-					gp_Pnt2d lastPoint;
-					Standard_Real lastParam = heightFunctionCurves.back()->LastParameter();
-					heightFunctionCurves.back()->D0(lastParam, lastPoint);
-					if (!lastPoint.IsEqual(endPoint, Precision::Confusion())) {
-						Handle(Geom2d_Line) endSegment = new Geom2d_Line(lastPoint, gp_Vec2d(lastPoint, endPoint));
-						Standard_Real length = lastPoint.Distance(endPoint);
-						Handle(Geom2d_TrimmedCurve) trimmed = new Geom2d_TrimmedCurve(endSegment, 0, length);
-						heightFunctionCurves.push_back(trimmed);
-					}
+					// Let the next waiter through. We keep the semaphore in the dictionary
+					// (avoids races disposing while someone still holds it).
+					gate->Release();
 				}
-
-				TColGeom2d_SequenceOfBoundedCurve segmentsSequence = EXEC_NATIVE->GetSegmentsSequnce(heightFunctionCurves, ModelGeometryService->MinimumGap);
-				Handle(Geom2d_BSplineCurve) heightFunction = EXEC_NATIVE->BuildCompositeCurve2d(segmentsSequence, ModelGeometryService->MinimumGap);
-
-				if (heightFunction.IsNull())
-					throw RaiseGeometryFactoryException("IfcGradientCurve segments could not be built", ifcGradientCurve);
-
-				gp_Pnt2d pnt;
-				heightFunction->D0(heightFunction->FirstParameter(), pnt);
-				auto startDistAlong = pnt.X();
-				horizontalProjection->D0(horizontalProjection->FirstParameter(), pnt);
-				auto horizontalProjectionStart = pnt.X();
-
-				if (horizontalProjectionStart != 0 || startDistAlong != 0) {
-					EXEC_NATIVE->TranslateCurveStartPointToX(heightFunction, horizontalProjectionStart + startDistAlong);
-				}
-
-				Handle(Geom_GradientCurve) gradientCurve = new Geom_GradientCurve(horizontalProjection, heightFunction);
-				 
-				GetCache()->Insert(ifcGradientCurve->EntityLabel, gradientCurve);
-
-				return gradientCurve;
 			}
 			 
 

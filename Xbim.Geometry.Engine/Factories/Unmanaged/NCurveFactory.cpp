@@ -319,7 +319,7 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildCompositeCurve2d(const TColGeom2
 				toAdd = curveBuilder.Curve();
 			}
 			else if (IsConicLike(curve)) {
-				// This covers raw conics AND trimmed/offset conics.
+				// This covers raw conics and trimmed/offset conics.
 				toAdd = ApproximateByArcLength(curve, first, last, tolerance, 8, GeomAbs_CN);
 			}
 			else if (!compositeConverter.Add(curve, tolerance, false))
