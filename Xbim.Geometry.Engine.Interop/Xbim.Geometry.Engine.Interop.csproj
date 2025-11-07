@@ -1,11 +1,12 @@
 ﻿<Project DefaultTargets="Build" Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFrameworks>net472;net6.0</TargetFrameworks>
+		<TargetFrameworks>net472;net8.0</TargetFrameworks>
 		<Title>Xbim Geometry Engine</Title>
 		<Description>Provides support for the Ifc4 and Ifc2x3 Geometry conversion.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<PackageId>Xbim.Geometry.Engine.Interop</PackageId>
 		<Platforms>AnyCPU;x64;x86</Platforms>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -92,8 +93,8 @@
 	</ItemGroup>
 
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0' ">
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472' ">
@@ -101,9 +102,18 @@
   </ItemGroup>
   
   <ItemGroup>
-		
-		<PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.379-develop" />
 		<PackageReference Include="Xbim.Geometry.Occt" Version="7.8.1" />
 	</ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="Readme.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
 </Project>

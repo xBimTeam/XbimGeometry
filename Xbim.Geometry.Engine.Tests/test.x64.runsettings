@@ -3,7 +3,7 @@
   <RunConfiguration>
     <ResultsDirectory>.\TestResults</ResultsDirectory>
     <TargetPlatform>x64</TargetPlatform>
-    <TargetFrameworkVersion>net6.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>net8.0</TargetFrameworkVersion>
   </RunConfiguration>
   <MSTestV2>
     <DeployTestSourceDependencies>false</DeployTestSourceDependencies>

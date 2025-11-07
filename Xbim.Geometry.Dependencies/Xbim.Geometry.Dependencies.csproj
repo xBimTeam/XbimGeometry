@@ -9,6 +9,7 @@
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<RuntimeIdentifiers>win-x86;win-x64</RuntimeIdentifiers>
 		<PackageIcon>xbim-toolkit-icon.png</PackageIcon>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
@@ -30,9 +31,7 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
-    <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.379-develop" />
-	</ItemGroup>
-	<ItemGroup>
+	  <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
 	  <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj" />
 	</ItemGroup>
 	

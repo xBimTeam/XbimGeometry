@@ -1,13 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net472;net6.0</TargetFrameworks>
+		<TargetFrameworks>net472;net8.0</TargetFrameworks>
 		<Title>Xbim ModelGeometry Scene</Title>
 		<Description>Provides support for the Geometry Scene creation.</Description>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
     <NoWarn>CS1591</NoWarn>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
 	</PropertyGroup>
 
 	
@@ -20,6 +21,12 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj" />
 	  <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj" />
+	</ItemGroup>
+	<ItemGroup>
+	  <None Include="Readme.md">
+	    <PackagePath>\</PackagePath>
+	    <Pack>True</Pack>
+	  </None>
 	</ItemGroup>
 
 </Project>

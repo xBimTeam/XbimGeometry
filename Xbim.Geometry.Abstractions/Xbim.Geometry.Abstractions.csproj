@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Title>Xbim Geometry Interfaces</Title>
+    <Description>Interface classes for version 6 of the Xbim Geometry Engine</Description>
+    <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Platforms>AnyCPU</Platforms>
+    <NoWarn>CS1591</NoWarn>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <PackageTags>Xbim;BRep;Geometry;Interfaces</PackageTags>
+    <PackageReleaseNotes>This is the initial release of the Geometry Interfaces for version 6 of the Xbim Geometry Engine</PackageReleaseNotes>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+ 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="Readme.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\xbim-toolkit-icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Xbim.Essentials" Version="6.0.563" />
+  </ItemGroup>
+</Project>

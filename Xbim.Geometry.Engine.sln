@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine.net6", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Xbim.Geometry.Engine.net8", "Xbim.Geometry.Engine\Xbim.Geometry.Engine.vcxproj", "{DEFB2CD3-B35F-450A-A829-D3FE50CFC19A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xbim.Geometry.Engine.Interop", "Xbim.Geometry.Engine.Interop\Xbim.Geometry.Engine.Interop.csproj", "{F9422C17-8390-4E20-80BA-02E8C51E614B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -51,6 +51,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Tessellator", "Xbim.Tessellator\Xbim.Tessellator.csproj", "{2FF7EA98-4993-491A-9F05-3CAC1242828E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6C62ABE3-E38F-4B7C-A775-4556B3F9BD0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xbim.Geometry.Abstractions", "Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj", "{CAC335D4-CA7C-B330-54F6-749D75826453}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -182,6 +184,18 @@ Global
 		{2FF7EA98-4993-491A-9F05-3CAC1242828E}.Release|x64.Build.0 = Release|Any CPU
 		{2FF7EA98-4993-491A-9F05-3CAC1242828E}.Release|x86.ActiveCfg = Release|Any CPU
 		{2FF7EA98-4993-491A-9F05-3CAC1242828E}.Release|x86.Build.0 = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|x64.Build.0 = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Debug|x86.Build.0 = Debug|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|x64.ActiveCfg = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|x64.Build.0 = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|x86.ActiveCfg = Release|Any CPU
+		{CAC335D4-CA7C-B330-54F6-749D75826453}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

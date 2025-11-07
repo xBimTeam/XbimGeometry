@@ -1,18 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <TargetFrameworks>net472;net8.0</TargetFrameworks>
     <Title>Xbim Tessellator</Title>
     <Description>Provides support for tessellating mesh geometries.</Description>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <NoWarn>CS1591</NoWarn>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 	<ItemGroup>
 		<None Include="..\xbim-toolkit-icon.png" Pack="True" PackagePath="\" />
+		<None Include="Readme.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="Xbim.Geometry.Abstractions" Version="6.2.379-develop" />
+	  <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj" />
 	</ItemGroup>
 </Project>

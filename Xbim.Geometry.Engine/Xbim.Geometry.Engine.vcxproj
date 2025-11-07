@@ -25,10 +25,10 @@
     <Keyword>NetCoreCProj</Keyword>
     <RootNamespace>Xbim::Geometry</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <TargetFramework>net6.0</TargetFramework>
-    <OutputFolder>net6.0</OutputFolder>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputFolder>net8.0</OutputFolder>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <ProjectName>Xbim.Geometry.Engine.net6</ProjectName>
+    <ProjectName>Xbim.Geometry.Engine.net8</ProjectName>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -119,6 +119,7 @@
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/clr:ECMAParamArray </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -143,6 +144,7 @@
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/clr:ECMAParamArray </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -166,6 +168,7 @@
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/clr:ECMAParamArray </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -189,6 +192,7 @@
       <DisableSpecificWarnings>4691;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalOptions>/clr:ECMAParamArray </AdditionalOptions>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>advapi32.lib;gdi32.lib;user32.lib;comdlg32.lib;wsock32.lib;Psapi.lib</AdditionalDependencies>
@@ -451,13 +455,13 @@
     <ClCompile Include="Visual\ColourRGB.cpp" />
     <ClCompile Include="Visual\VisualMaterial.cpp" />
     <ClCompile Include="Visual\XbimShapeColour.cpp" />
-    <ClCompile Include="XbimCompound.cpp"/>
+    <ClCompile Include="XbimCompound.cpp" />
     <ClCompile Include="XbimConvert.cpp" />
     <ClCompile Include="XbimCurve.cpp" />
     <ClCompile Include="XbimCurve2D.cpp" />
-    <ClCompile Include="XbimEdge.cpp"/>
+    <ClCompile Include="XbimEdge.cpp" />
     <ClCompile Include="XbimEdgeSet.cpp" />
-    <ClCompile Include="XbimFace.cpp"/>
+    <ClCompile Include="XbimFace.cpp" />
     <ClCompile Include="XbimFaceSet.cpp" />
     <ClCompile Include="XbimGeometryCreator.cpp" />
     <ClCompile Include="XbimGeometryCreatorV6.cpp" />
@@ -471,11 +475,11 @@
     <ClCompile Include="XbimProgressMonitor.cpp" />
     <ClCompile Include="XbimShell.cpp" />
     <ClCompile Include="XbimShellSet.cpp" />
-    <ClCompile Include="XbimSolid.cpp"/>
+    <ClCompile Include="XbimSolid.cpp" />
     <ClCompile Include="XbimSolidSet.cpp" />
-    <ClCompile Include="XbimVertex.cpp"/>
+    <ClCompile Include="XbimVertex.cpp" />
     <ClCompile Include="XbimVertexSet.cpp" />
-    <ClCompile Include="XbimWire.cpp"/>
+    <ClCompile Include="XbimWire.cpp" />
     <ClCompile Include="XbimWireSet.cpp" />
     <ClCompile Include="BRep\XMatrix.cpp" />
   </ItemGroup>
@@ -490,14 +494,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xbim.Geometry.Abstractions">
-      <Version>6.2.379-develop</Version>
-    </PackageReference>
     <PackageReference Include="Xbim.Geometry.Occt">
       <Version>7.8.1</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Xbim.Geometry.Abstractions\Xbim.Geometry.Abstractions.csproj">
+      <Project>{cac335d4-ca7c-b330-54f6-749d75826453}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Xbim.Tessellator\Xbim.Tessellator.csproj">
       <Project>{2ff7ea98-4993-491a-9f05-3cac1242828e}</Project>
       <Name>Xbim.Tessellator</Name>
