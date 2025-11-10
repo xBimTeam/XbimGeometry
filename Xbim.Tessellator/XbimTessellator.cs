@@ -599,7 +599,7 @@ namespace Xbim.Tessellator
                     {
                         tess.AddContours(contours);
 
-                        tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3);
+                        tess.Tessellate(WindingRule.EvenOdd, ElementType.Polygons, 3, TessCombineCallback);
                         var faceIndices = new List<int>(tess.ElementCount * 3);
                         var elements = tess.Elements;
                         var contourVerts = tess.Vertices;
@@ -638,6 +638,10 @@ namespace Xbim.Tessellator
             return triangulatedMesh;            
         }
 
+        private static int TessCombineCallback(Vec3 position, int[] data, double[] weights)
+        {
+            return -1; // fake index to indicate that the vertex needs to be created later
+        }
 
         private XbimTriangulatedMesh Triangulate(IIfcTriangulatedFaceSet triangulation)
         {
