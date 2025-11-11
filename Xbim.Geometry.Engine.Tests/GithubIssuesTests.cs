@@ -249,6 +249,41 @@ namespace Xbim.Geometry.Engine.Tests
         }
 
         [Fact]
+        public void Github_Issue_554_inconsistentLengthTreatment()
+        {
+            var ifcFile = @"TestFiles\Github\Github_issue_554_inconsistentLengthTreatment.ifc";
+            using var m = MemoryModel.OpenRead(ifcFile);
+            var c = new Xbim3DModelContext(m, _loggerFactory, XGeometryEngineVersion.V6);
+            var result = c.CreateContext(null, true);
+            result.Should().BeTrue();
+            m.GeometryStore.IsEmpty.Should().BeFalse();
+            using var reader = m.GeometryStore.BeginRead();
+            var dist5meters = distanceOfPointsAlongCircle(250, 5); // linear distance of points along circle
+            TestLocationDistance(reader, 200445, 200449, dist5meters);
+
+            var dist02meters = distanceOfPointsAlongCircle(23.4, 0.2);
+            TestLocationDistance(reader, 200001, 200005, dist02meters); // this fails
+        }
+
+        private double distanceOfPointsAlongCircle(double circleRadius, double distanceAlongCircumference)
+        {
+            var radians = distanceAlongCircumference / circleRadius;
+            var p1 = new XbimPoint3D(circleRadius, 0, 0);
+            var p2 = new XbimPoint3D(circleRadius * Math.Cos(radians), circleRadius * Math.Sin(radians), 0);
+            return (p1 - p2).Length;
+        }
+
+        private static void TestLocationDistance(IGeometryStoreReader reader, int shapeId1, int shapeId2, double expectedDist)
+        {
+            var shape1 = reader.ShapeInstances.FirstOrDefault(si => si.IfcProductLabel == shapeId1);
+            var shape2 = reader.ShapeInstances.FirstOrDefault(si => si.IfcProductLabel == shapeId2);
+            var t1 = new XbimPoint3D(shape1.Transformation.OffsetX, shape1.Transformation.OffsetY, shape1.Transformation.OffsetZ);
+            var t2 = new XbimPoint3D(shape2.Transformation.OffsetX, shape2.Transformation.OffsetY, shape2.Transformation.OffsetZ);
+            var dist = (t1 - t2).Length;
+            dist.Should().BeApproximately(expectedDist, 0.01);
+        }
+
+        [Fact]
         public void Github_Issue_557()
         {
             var ifcFile = @"TestFiles\Github\Github_issue_557.ifc";
