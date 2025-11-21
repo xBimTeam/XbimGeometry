@@ -52,7 +52,7 @@ public:
 	Handle(Geom2d_LineWithMagnitude) BuildLine2d(const gp_Pnt2d& pnt, const gp_Vec2d& dir, double magnitude);
 	Handle(Geom2d_OffsetCurve) BuildOffsetCurve2d(const Handle(Geom2d_Curve)& basisCurve, double offset);
 	Handle(Geom2d_BSplineCurve) BuildPolyline2d(const TColgp_Array1OfPnt2d& points, double tolerance);
-	int Get3dLinearSegments(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& segments);
+	int Get3dLinearSegments(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& segments, double& totalLength);
 	Handle(Geom2d_BSplineCurve) BuildRationalBSplineCurve2d(const TColgp_Array1OfPnt2d& poles, const TColStd_Array1OfReal& weights, const TColStd_Array1OfReal& knots, const TColStd_Array1OfInteger& knotMultiplicities, int degree);
 
 

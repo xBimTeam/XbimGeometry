@@ -502,10 +502,12 @@ namespace Xbim
 				if (ifcSweptDiskSolidPolygonal->InnerRadius.HasValue && ifcSweptDiskSolidPolygonal->InnerRadius.Value >= ifcSweptDiskSolidPolygonal->Radius)
 					throw RaiseGeometryFactoryException("Inner radius is greater than outer radius", ifcSweptDiskSolidPolygonal);
 
-				auto directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSweptDiskSolidPolygonal->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->EndParam));
+				auto directrix = WIRE_FACTORY->BuildDirectrixWire
+				(ifcSweptDiskSolidPolygonal->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->EndParam));
 				
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Could not build directrix", ifcSweptDiskSolidPolygonal);
+
 
 				double filletRadius = NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->FilletRadius);
 				if (!double::IsNaN(filletRadius))
@@ -519,6 +521,7 @@ namespace Xbim
 				double innerRadius = NULLABLE_TO_DOUBLE(ifcSweptDiskSolidPolygonal->InnerRadius);
 
 				TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSweptDiskSolidPolygonal->Radius, innerRadius);
+
 				return solid;
 			}
 
@@ -534,8 +537,8 @@ namespace Xbim
 					if (ifcSweptDiskSolid->InnerRadius.HasValue && ifcSweptDiskSolid->InnerRadius.Value >= ifcSweptDiskSolid->Radius)
 						throw RaiseGeometryFactoryException("Inner radius is greater than outer radius", ifcSweptDiskSolid);
 
-					auto directrix = WIRE_FACTORY->BuildDirectrixWire(ifcSweptDiskSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->EndParam));
-
+					auto directrix = WIRE_FACTORY->BuildDirectrixWire
+					(ifcSweptDiskSolid->Directrix, NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->StartParam), NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->EndParam));
 
 					if (directrix.IsNull())
 						throw RaiseGeometryFactoryException("Could not build directrix", ifcSweptDiskSolid);
@@ -544,6 +547,14 @@ namespace Xbim
 					double innerRadius = NULLABLE_TO_DOUBLE(ifcSweptDiskSolid->InnerRadius);
 
 					TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSweptDiskSolid->Radius, innerRadius);
+
+
+					std::ostringstream oss;
+					oss << "DBRep_DrawableShape" << std::endl;
+					BRepTools::Write(solid, oss);
+					std::ofstream outFile("ex solid.brep");
+					outFile << oss.str();
+					outFile.close();
 
 					return solid;
 				}

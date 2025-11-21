@@ -44,6 +44,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
 
         }
+
         /// <summary>
         /// In the test an axis placement has a null location, this is ilegal, version V5 and V6 throw different exceptions
         /// </summary>
@@ -65,17 +66,15 @@ namespace Xbim.Geometry.Engine.Tests
 
         }
 
-        /// <summary>
-        /// Upgraded to V6 methods, trime accuracy improved, volumes updated
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="requiredVolume"></param>
+        
         [Theory]
-        [InlineData("SweptDiskSolid_1", 7725.7280894170744)] //trim was not working correctly, it is now and the volume has been reduced
-        [InlineData("SweptDiskSolid_2", 5552149.0343576306)]
+        [InlineData("SweptDiskSolid_1", 4951.174655723391)]
+        [InlineData("SweptDiskSolid_2", 5720687.83036694)]
         [InlineData("SweptDiskSolid_4", 129879.77474359272)]
-        [InlineData("rebar_isolated", 400843.7131002933)] // start/end param don't follow native curve parameter space, but normalized parmeterizaton
+        [InlineData("rebar_isolated", 400843.7131002933)]
+        [InlineData("GL_ClippedReba-stripped", 473432.87638158724)]
         [InlineData("bar.stripped", 499561.93942171149)]
+        [InlineData("bar2.stripped", 54395.84019374512)]
         public void SweptDiskSolidTest(string fileName, double requiredVolume)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
@@ -92,7 +91,7 @@ namespace Xbim.Geometry.Engine.Tests
 
 
         [Theory]
-        [InlineData("SweptDiskSolidPolygonal_1", 83575.33307798137/*, DisplayName = "IFC SweptDiskSolidPolygonal reference test"*/)]
+        [InlineData("SweptDiskSolidPolygonal_1", 93146.73219678485)]
         public void SweptDiskSolidPolygonalTest(string fileName, double requiredVolume)
         {
             using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
@@ -105,6 +104,22 @@ namespace Xbim.Geometry.Engine.Tests
                 sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
             }
         }
+
+        [Theory]
+        [InlineData("CurveParametersDegrees", 4228625577.2508564)]
+        public void ExtrudedAreaSolidTest(string fileName, double requiredVolume)
+        {
+            using (var model = MemoryModel.OpenRead($@"TestFiles\{fileName}.ifc"))
+            {
+                var geomEngine = new XbimGeometryEngine(model, _loggerFactory);
+                var sweptSolid = model.Instances.OfType<IIfcExtrudedAreaSolid>().FirstOrDefault(e => e.EntityLabel == 135);
+                sweptSolid.Should().NotBeNull();
+                var sweptDiskSolid = geomEngine.CreateSolid(sweptSolid, _logger);
+                sweptDiskSolid.Should().NotBeNull();
+                sweptDiskSolid.Volume.Should().BeApproximately(requiredVolume, 1e-7);
+            }
+        }
+
 
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
