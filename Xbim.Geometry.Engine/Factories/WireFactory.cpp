@@ -763,7 +763,9 @@ namespace Xbim
 					endParam = double::NaN; //set to max
 					LogDebug(ifcCurve, "Polyline trim (0:1) does not comply with schema. {0}. It has been expanded to the entire length of the Polyline", ModelGeometryService->Model->Header->FileName->OriginatingSystem);
 				}
-				else if (dynamic_cast<IIfcCompositeCurve^>(ifcCurve))
+				
+				
+				if (dynamic_cast<IIfcCompositeCurve^>(ifcCurve))
 				{
 					IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(ifcCurve);
 					wire = BuildWire(curve, startParam, endParam);
