@@ -463,7 +463,7 @@ namespace Xbim
 				}
 
 				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
-		
+
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
 
@@ -524,7 +524,7 @@ namespace Xbim
 						}
 						return ret;
 					}
-					catch (Exception^ e) {
+					catch (Exception^) {
 						return 1;
 					}
 				}
@@ -734,7 +734,7 @@ namespace Xbim
 				}
 
 				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
-				
+
 				if (wire.IsNull())
 					throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
 
@@ -763,8 +763,8 @@ namespace Xbim
 					endParam = double::NaN; //set to max
 					LogDebug(ifcCurve, "Polyline trim (0:1) does not comply with schema. {0}. It has been expanded to the entire length of the Polyline", ModelGeometryService->Model->Header->FileName->OriginatingSystem);
 				}
-				
-				
+
+
 				if (dynamic_cast<IIfcCompositeCurve^>(ifcCurve))
 				{
 					IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(ifcCurve);
