@@ -561,8 +561,20 @@ TopoDS_Wire NWireFactory::BuildTrimmedWire(const TopoDS_Wire& basisWire, gp_Pnt 
 		GeomAbs_Shape continuity = cc.Continuity();
 		int numIntervals = cc.NbIntervals(continuity);
 
-		//calculate the start and end parameters
-		auto [first, last] = MapIfcParametersAuto(cc, u1, u2, preferCartesian, basisWire, p1, p2, tolerance);
+		double first;
+		double last;
+		if (preferCartesian)
+		{
+			if (!GetParameter(basisWire, p1, tolerance, first))
+				Standard_Failure::Raise("Trim Point1 is not on the wire");
+			if (!GetParameter(basisWire, p2, tolerance, last))
+				Standard_Failure::Raise("Trim Point2 is not on the wire");
+		}
+		else
+		{
+			first = double::IsNaN(u1) ? 0 : u1;
+			last = double::IsNaN(u2) ? cc.LastParameter() - cc.FirstParameter() : u2;
+		}
 
 		if (numIntervals == 1)
 		{

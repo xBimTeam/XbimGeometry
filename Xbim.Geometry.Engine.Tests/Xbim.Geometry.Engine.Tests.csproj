@@ -75,6 +75,9 @@
 		<None Update="TestFiles\bar.stripped.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Update="TestFiles\bar2.stripped.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="TestFiles\BooleanClippingWithHalfSpace.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -116,6 +119,9 @@
 		</None>
 		<None Update="TestFiles\CSG_with_self_intersecting_wire_test.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\CurveParametersDegrees.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\cut_planes_within_fuzzy_tolerance.ifc">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -166,6 +172,9 @@
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\Github\Github_issue_557.ifc">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="TestFiles\GL_ClippedReba-stripped.ifc">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="TestFiles\Ifc4TestFiles\IFC4TessellationComplex.ifc">

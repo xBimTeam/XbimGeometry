@@ -71,6 +71,7 @@ namespace Xbim
 				std::vector<std::pair<Handle(Geom2d_Curve), TopLoc_Location>> ProcessSegments(Ifc4x3::GeometryResource::IfcSegmentedReferenceCurve^ ifcSegmentedReferenceCurve);
 				Handle(Geom2d_Curve) TransformCurveWithLocation(const Handle(Geom2d_Curve)& curve, IIfcAxis2Placement2D^ placement);
 				Handle(Geom2d_Curve) TransformCurveWithLocation(const Handle(Geom2d_Curve)& curve, IIfcAxis2Placement3D^ placement);
+
 				static ConcurrentDictionary<int, SemaphoreSlim^>^ _inFlightCurves =
 					gcnew ConcurrentDictionary<int, SemaphoreSlim^>();
 
@@ -140,10 +141,10 @@ namespace Xbim
 				Handle(Geom2d_Curve) BuildCompositeCurveSegment2d(IfcType ifcCurve, bool sameSense);
 
 				Handle(Geom2d_Curve) BuildCurveSegment2d(Ifc4x3::GeometryResource::IfcCurveSegment^ segment);
-				void BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments);
+				void BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments, double& totalLength);
 				void BuildPolylineSegments2d(IIfcPolyline^ ifcPolyline, TColGeom2d_SequenceOfBoundedCurve& segments);
-				void BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments);
-				void BuildCompositeCurveSegments3d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom_SequenceOfBoundedCurve& segments);
+				void BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments, double& totalLength, double& parameterizedLength);
+				void BuildCompositeCurveSegments3d(IIfcCompositeCurve^ ifcCompositeCurve, TColGeom_SequenceOfBoundedCurve& segments); 
 				//Handle(Geom_TrimmedCurve) BuildTrimmedCurve3d(const Handle(Geom_Curve)& basisCurve, double u1, double u2, bool sense);
 
 				Handle(Geom2d_TrimmedCurve) BuildLinearSegment(const gp_Pnt2d& start, const gp_Pnt2d& end);

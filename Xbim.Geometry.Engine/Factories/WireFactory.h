@@ -11,7 +11,8 @@ namespace Xbim
 			public ref class WireFactory : FactoryBase<NWireFactory>, IXWireFactory
 			{
 			private:
-				
+				double SegmentLength(IIfcCompositeCurveSegment^ segment);
+
 			internal:
 				//The distance between two points at which they are determined to be equal points
 				
@@ -21,8 +22,10 @@ namespace Xbim
 				TopoDS_Wire BuildWire(IIfcBSplineCurveWithKnots^ ifcBSplineCurveWithKnots);
 				TopoDS_Wire BuildWire(IIfcCircle^ ifcCircle);
 				TopoDS_Wire BuildWire(IIfcCompositeCurve^ ifcCompositeCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcCompositeCurve^ ifcCompositeCurve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 				TopoDS_Wire BuildWire(IIfcEllipse^ ifcEllipse);
 				TopoDS_Wire BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge);
+				TopoDS_Wire BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, System::Nullable<double> startParam, System::Nullable<double> endParam);
 				TopoDS_Wire BuildWire(IIfcLine^ ifcLine);
 				TopoDS_Wire BuildWire(IIfcOffsetCurve2D^ ifcOffsetCurve2D, bool asSingleEdge);
 				TopoDS_Wire BuildWire(IIfcOffsetCurve3D^ ifcOffsetCurve3D, bool asSingleEdge);

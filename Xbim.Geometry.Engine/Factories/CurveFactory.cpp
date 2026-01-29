@@ -984,7 +984,9 @@ namespace Xbim
 			Handle(Geom_BSplineCurve) CurveFactory::BuildCurve(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve)
 			{
 				TColGeom_SequenceOfBoundedCurve segments;
-				BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments); //this may throw exceptions
+				double length;
+				double pLength;
+				BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments, length, pLength); //this may throw exceptions
 				Handle(Geom_BSplineCurve) bspline = OccHandle().BuildIndexedPolyCurve3d(segments, ModelGeometryService->MinimumGap);
 				if (bspline.IsNull())
 					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
@@ -1959,11 +1961,11 @@ namespace Xbim
 				return curve;
 			}
 
-			void CurveFactory::BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments)
+			void CurveFactory::BuildPolylineSegments3d(IIfcPolyline^ ifcPolyline, TColGeom_SequenceOfBoundedCurve& segments, double& totalLength)
 			{
 				TColgp_Array1OfPnt points(1, ifcPolyline->Points->Count);
 				GEOMETRY_FACTORY->GetPolylinePoints3d(ifcPolyline, points);
-				EXEC_NATIVE->Get3dLinearSegments(points, ModelGeometryService->Precision, segments);
+				EXEC_NATIVE->Get3dLinearSegments(points, ModelGeometryService->Precision, segments, totalLength);
 			}
 
 			void CurveFactory::BuildPolylineSegments2d(IIfcPolyline^ ifcPolyline, TColGeom2d_SequenceOfBoundedCurve& segments)
@@ -1973,8 +1975,9 @@ namespace Xbim
 				EXEC_NATIVE->Get2dLinearSegments(points, ModelGeometryService->Precision, segments);
 			}
 
-			void CurveFactory::BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments)
+			void CurveFactory::BuildIndexPolyCurveSegments3d(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, TColGeom_SequenceOfBoundedCurve& segments, double& totalLength, double& parameterizedLength)
 			{
+				totalLength = 0.0;
 
 				IIfcCartesianPointList3D^ pointList3D = dynamic_cast<IIfcCartesianPointList3D^>(ifcIndexedPolyCurve->Points);
 				if (pointList3D == nullptr)
@@ -2006,6 +2009,7 @@ namespace Xbim
 					{
 						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
 						Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+						
 						if (arcIndex != nullptr)
 						{
 
@@ -2021,6 +2025,12 @@ namespace Xbim
 								Handle(Geom_TrimmedCurve) arcSegment = OccHandle().BuildTrimmedCurve3d(circle, start, end, ModelGeometryService->MinimumGap);
 								if (arcSegment.IsNull())
 									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
+
+								Standard_Real f = arcSegment->FirstParameter();
+								Standard_Real l = arcSegment->LastParameter();
+								parameterizedLength += Abs(l - f);
+								totalLength += circle->Radius() * parameterizedLength;
+
 								segments.Append(arcSegment);
 							}
 							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
@@ -2029,6 +2039,9 @@ namespace Xbim
 								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(start, end);
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+								parameterizedLength += 1;
+								totalLength += start.Distance(end);
+
 								segments.Append(lineSegment);
 
 							}
@@ -2042,9 +2055,16 @@ namespace Xbim
 
 							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
 							{
-								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(poles.Value((int)indices[p - 1]), poles.Value((int)indices[p]));
+								gp_Pnt p1 = poles.Value((int)indices[p - 1]);
+								gp_Pnt p2 = poles.Value((int)indices[p]);
+
+								Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(p1, p2);
+								
 								if (lineSegment.IsNull())
 									throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+								parameterizedLength += 1;
+								totalLength += p1.Distance(p2);
+
 								segments.Append(lineSegment);
 							}
 						}
@@ -2057,9 +2077,15 @@ namespace Xbim
 					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
 					for (Standard_Integer p = 1; p < pointCount; p++)
 					{
-						Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(poles.Value(p), poles.Value(p + 1));
+						gp_Pnt p1 = poles.Value(p);
+						gp_Pnt p2 = poles.Value(p + 1);
+
+						Handle(Geom_TrimmedCurve) lineSegment = OccHandle().BuildTrimmedLine3d(p1, p2);
+
 						if (lineSegment.IsNull())
 							throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+						parameterizedLength += 1;
+						totalLength += p1.Distance(p2);
 						segments.Append(lineSegment);
 					}
 				}
@@ -2130,11 +2156,14 @@ namespace Xbim
 					auto indexPolyCurveSegment = dynamic_cast<IIfcIndexedPolyCurve^>(segment->ParentCurve);
 					if (polylineSegment != nullptr)
 					{
-						BuildPolylineSegments3d(polylineSegment, segments);
+						double length;
+						BuildPolylineSegments3d(polylineSegment, segments, length);
 					}
 					else if (indexPolyCurveSegment != nullptr)
 					{
-						BuildIndexPolyCurveSegments3d(indexPolyCurveSegment, segments);
+						double length;
+						double pLength;
+						BuildIndexPolyCurveSegments3d(indexPolyCurveSegment, segments, length, pLength);
 					}
 					else
 					{
@@ -2149,6 +2178,8 @@ namespace Xbim
 					}
 				}
 			}
+
+
 
 			Handle(Geom2d_TrimmedCurve) CurveFactory::BuildLinearSegment(const gp_Pnt2d& start, const gp_Pnt2d& end)
 			{

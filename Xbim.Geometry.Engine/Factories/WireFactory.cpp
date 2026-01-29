@@ -62,8 +62,6 @@ namespace Xbim
 					return BuildWire(static_cast<IIfcCircle^>(ifcCurve));
 				case XCurveType::IfcCompositeCurve:
 					return BuildWire(static_cast<IIfcCompositeCurve^>(ifcCurve), asSingleEdge);
-					/*case XCurveType::IfcCompositeCurveOnSurface:
-						return BuildWire2d(static_cast<IIfcCompositeCurveOnSurface^>(ifcCurve), asSingleEdge);*/
 				case XCurveType::IfcEllipse:
 					return BuildWire(static_cast<IIfcEllipse^>(ifcCurve));
 				case XCurveType::IfcIndexedPolyCurve:
@@ -366,12 +364,182 @@ namespace Xbim
 				}
 			}
 
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcCompositeCurve^ ifcCompositeCurve, System::Nullable<double> startParam, System::Nullable<double> endParam)
+			{
+
+				TColGeom_SequenceOfBoundedCurve segments;
+				double occStart = 0;
+				double occEnd = 0;
+				double totCurveLen = 0;
+				double firstParameterizedLength = 0;
+				double startPar = 0;
+				double endPar = double::PositiveInfinity;
+
+				if (startParam.HasValue && !double::IsNaN(startParam.Value))
+					startPar = startParam.Value;
+				if (endParam.HasValue && !double::IsNaN(endParam.Value))
+					endPar = endParam.Value;
+
+				int i = 0;
+				for each (IIfcCompositeCurveSegment ^ segment in ifcCompositeCurve->Segments)
+				{
+
+					if (startPar <= 0 && endPar <= 0) // terminating cuz we don't need to build segments any further
+						continue;
+
+					IIfcReparametrisedCompositeCurveSegment^ reparameterisedSegment = dynamic_cast<IIfcReparametrisedCompositeCurveSegment^>(segment);
+					if (reparameterisedSegment != nullptr && (double)reparameterisedSegment->ParamLength != 1.)
+						throw RaiseGeometryFactoryException("IIfcReparametrisedCompositeCurveSegment is currently unsupported", segment);
+					if (!CURVE_FACTORY->IsBoundedCurve(segment->ParentCurve))
+						throw RaiseGeometryFactoryException("Composite curve is invalid, only curve segments that are bounded curves are permitted");
+
+					double segmentParameterizedLength = SegmentLength(segment);
+					double length = 0.0;
+
+					if (i == 0)
+						firstParameterizedLength = segmentParameterizedLength;
+
+					//if the segment is a polyline or an indexedpolycurve we need to add in the individual edge
+					auto polylineSegment = dynamic_cast<IIfcPolyline^>(segment->ParentCurve);
+					auto indexPolyCurveSegment = dynamic_cast<IIfcIndexedPolyCurve^>(segment->ParentCurve);
+					if (polylineSegment != nullptr)
+					{
+						CURVE_FACTORY->BuildPolylineSegments3d(polylineSegment, segments, length);
+						totCurveLen += length;
+						segmentParameterizedLength = polylineSegment->Points->Count - 1;
+					}
+					else if (indexPolyCurveSegment != nullptr)
+					{
+						double pLength;
+						CURVE_FACTORY->BuildIndexPolyCurveSegments3d(indexPolyCurveSegment, segments, length, pLength);
+						totCurveLen += length;
+						segmentParameterizedLength = pLength;
+					}
+					else
+					{
+						Handle(Geom_Curve) hSegment = CURVE_FACTORY->BuildCompositeCurveSegment3d(segment->ParentCurve, segment->SameSense);
+
+						if (hSegment.IsNull())
+							continue;//this will throw an exception if badly defined, a zero length segment (IsNull) is tolerated
+
+						Handle(Geom_BoundedCurve) boundedCurve = Handle(Geom_BoundedCurve)::DownCast(hSegment);
+						if (boundedCurve.IsNull())
+							throw RaiseGeometryFactoryException("Compound curve segments must be bounded curves", segment);
+
+
+						GeomAdaptor_Curve adaptor(hSegment);
+						Standard_Real f = hSegment->FirstParameter();
+						Standard_Real l = hSegment->LastParameter();
+						length = GCPnts_AbscissaPoint::Length(adaptor, f, l);
+						totCurveLen += length;
+						segments.Append(boundedCurve);
+					}
+
+
+					if (startPar > 0)
+					{
+						double ratio = Math::Min(startPar / segmentParameterizedLength, 1.0);
+						startPar -= ratio * segmentParameterizedLength;
+						occStart += ratio * length;
+					}
+
+					if (endPar > 0)
+					{
+						if (endPar <= firstParameterizedLength && endParam.HasValue && endParam.Value == 1 && startParam.HasValue && startParam.Value == 0)
+						{
+							occEnd += length;
+						}
+						else
+						{
+							double ratio = Math::Min(endPar / segmentParameterizedLength, 1.0);
+							endPar -= ratio * segmentParameterizedLength;
+							occEnd += ratio * length;
+						}
+					}
+
+					i++;
+
+				}
+
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcCompositeCurve could not be built as a wire", ifcCompositeCurve);
+
+				if (Math::Abs(occStart - 0.0) < ModelGeometryService->Precision && Math::Abs(occEnd - totCurveLen) < ModelGeometryService->Precision)
+					return wire;
+
+				wire = EXEC_NATIVE->BuildTrimmedWire(wire, occStart, occEnd, true, ModelGeometryService->Precision, ModelGeometryService->RadianFactor);
+
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcCompositeCurve could not be trimmed", ifcCompositeCurve);
+
+				return wire;
+			}
+
+
+			double WireFactory::SegmentLength(IIfcCompositeCurveSegment^ segment)
+			{
+				IIfcLine^ line = dynamic_cast<IIfcLine^>(segment->ParentCurve);
+				IIfcTrimmedCurve^ trimmedCurve = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+				if (line != nullptr)
+				{
+					return 1;
+				}
+				else if (trimmedCurve != nullptr)
+				{
+					try {
+						IIfcTrimmedCurve^ tc = dynamic_cast<IIfcTrimmedCurve^>(segment->ParentCurve);
+						double valTrim1 = 0;
+						double valTrim2 = 1;
+						// search for parameter values
+						Xbim::Ifc4::MeasureResource::IfcParameterValue^ t;
+
+						for (int i = 0; i < tc->Trim1->Count; i++)
+						{
+							t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim1[i]);
+							if (t && t->Value)
+							{
+								valTrim1 = (double)t->Value;
+								break;
+							}
+						}
+						for (int i = 0; i < tc->Trim2->Count; i++)
+						{
+							t = dynamic_cast<Xbim::Ifc4::MeasureResource::IfcParameterValue^>(tc->Trim2[i]);
+							if (t && t->Value)
+							{
+								valTrim2 = (double)t->Value;
+								break;
+							}
+						}
+						double ret = valTrim2 - valTrim1;
+
+						if (ret < 0 && (dynamic_cast<IIfcConic^>(tc->BasisCurve) != nullptr)) //params will be periodic so take the abs length
+							ret = Math::Abs(ret);
+						if (ret < 0)
+						{
+							return 1;
+						}
+						return ret;
+					}
+					catch (Exception^) {
+						return 1;
+					}
+				}
+				return 1;
+			}
+
+
 			struct WireFactoryNativeStatics
 			{
 				static std::shared_mutex execNativeMutex;
 			};
 
 			std::shared_mutex WireFactoryNativeStatics::execNativeMutex;
+
+
 			TopoDS_Wire WireFactory::BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, bool asSingleEdge)
 			{
 				if (asSingleEdge)
@@ -389,7 +557,7 @@ namespace Xbim
 						std::lock_guard<std::shared_mutex> lock(WireFactoryNativeStatics::execNativeMutex);
 						TColGeom2d_SequenceOfBoundedCurve segments;
 						CURVE_FACTORY->BuildIndexPolyCurveSegments2d(ifcIndexedPolyCurve, segments);
-						if (segments.Length() == 0) 
+						if (segments.Length() == 0)
 						{
 							// segments is empty
 							throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
@@ -402,7 +570,9 @@ namespace Xbim
 					else
 					{
 						TColGeom_SequenceOfBoundedCurve segments;
-						CURVE_FACTORY->BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments);
+						double length;
+						double pLength;
+						CURVE_FACTORY->BuildIndexPolyCurveSegments3d(ifcIndexedPolyCurve, segments, length, pLength);
 						TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
 						if (wire.IsNull())
 							throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
@@ -411,28 +581,219 @@ namespace Xbim
 				}
 			}
 
+
+			TopoDS_Wire WireFactory::BuildWire(IIfcIndexedPolyCurve^ ifcIndexedPolyCurve, System::Nullable<double> startParam, System::Nullable<double> endParam)
+			{
+				TColGeom_SequenceOfBoundedCurve segments;
+
+				double totalLength = 0.0;
+				double occStart = 0;
+				double occEnd = 0;
+				double startPar = 0;
+				double endPar = double::PositiveInfinity;
+
+				if (startParam.HasValue && !double::IsNaN(startParam.Value))
+					startPar = startParam.Value;
+				if (endParam.HasValue && !double::IsNaN(endParam.Value))
+					endPar = endParam.Value;
+
+				IIfcCartesianPointList3D^ pointList3D = dynamic_cast<IIfcCartesianPointList3D^>(ifcIndexedPolyCurve->Points);
+				if (pointList3D == nullptr)
+					throw RaiseGeometryFactoryException("IIfcIndexedPolyCurve point list is not 3D", ifcIndexedPolyCurve->Points);
+
+
+				int pointCount = pointList3D->CoordList->Count;
+				TColgp_Array1OfPnt poles(1, pointCount);
+				int i = 1;
+				for each (IItemSet<Ifc4::MeasureResource::IfcLengthMeasure> ^ coll in pointList3D->CoordList)
+				{
+					IEnumerator<Ifc4::MeasureResource::IfcLengthMeasure>^ enumer = coll->GetEnumerator();
+					enumer->MoveNext();
+					gp_Pnt p;
+					p.SetX((double)enumer->Current);
+					enumer->MoveNext();
+					p.SetY((double)enumer->Current);
+					enumer->MoveNext();
+					p.SetZ((double)enumer->Current);
+					poles.SetValue(i, p);
+					i++;
+				}
+
+				if (ifcIndexedPolyCurve->Segments != nullptr && Enumerable::Any(ifcIndexedPolyCurve->Segments))
+				{
+					for each (IIfcSegmentIndexSelect ^ segment in  ifcIndexedPolyCurve->Segments)
+					{
+						if (startPar <= 0 && endPar <= 0)
+							continue;
+
+						Ifc4::GeometryResource::IfcArcIndex^ arcIndex = dynamic_cast<Ifc4::GeometryResource::IfcArcIndex^>(segment);
+						Ifc4::GeometryResource::IfcLineIndex^ lineIndex = dynamic_cast<Ifc4::GeometryResource::IfcLineIndex^>(segment);
+						double segmentParameterizedLength = 0;
+						double length = 0;
+
+						if (arcIndex != nullptr)
+						{
+
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)arcIndex->Value;
+							if (indices->Count != 3)
+								throw RaiseGeometryFactoryException("There should be three indices in an arc index segment", ifcIndexedPolyCurve);
+							gp_Pnt start = poles.Value((int)indices[0]);
+							gp_Pnt mid = poles.Value((int)indices[1]);
+							gp_Pnt end = poles.Value((int)indices[2]);
+							Handle(Geom_Circle) circle = CURVE_FACTORY->Ptr()->BuildCircle3d(start, mid, end);
+							if (!circle.IsNull()) //it is a valid arc
+							{
+								Handle(Geom_TrimmedCurve) arcSegment = CURVE_FACTORY->Ptr()->BuildTrimmedCurve3d(circle, start, end, ModelGeometryService->MinimumGap);
+								if (arcSegment.IsNull())
+									throw RaiseGeometryFactoryException("Failed to trim Arc Index segment", ifcIndexedPolyCurve);
+
+								Standard_Real f = arcSegment->FirstParameter();
+								Standard_Real l = arcSegment->LastParameter();
+								segmentParameterizedLength = Abs(l - f);
+								length = circle->Radius() * segmentParameterizedLength;
+								totalLength += length;
+								segments.Append(arcSegment);
+							}
+							else //most likley the three points are in a line it should be treated as a polyline segment according the the docs
+							{
+								LogInformation(ifcIndexedPolyCurve, "An ArcIndex of an IfcIndexedPolyCurve has been handled as a LineIndex");
+								Handle(Geom_TrimmedCurve) lineSegment = CURVE_FACTORY->Ptr()->BuildTrimmedLine3d(start, end);
+								if (lineSegment.IsNull())
+									throw RaiseGeometryFactoryException("A LineIndex of an IfcIndexedPolyCurve could not be built", ifcIndexedPolyCurve);
+								length = start.Distance(end);
+								totalLength += length;
+								segmentParameterizedLength = 1;
+								segments.Append(lineSegment);
+
+							}
+						}
+						else if (lineIndex != nullptr)
+						{
+							List<Ifc4::MeasureResource::IfcPositiveInteger>^ indices = (List<Ifc4::MeasureResource::IfcPositiveInteger>^)lineIndex->Value;
+
+							if (indices->Count < 2)
+								throw RaiseGeometryFactoryException("There should be at least two indices in a line index segment", ifcIndexedPolyCurve);
+
+							for (Standard_Integer p = 1; p <= indices->Count - 1; p++)
+							{
+								gp_Pnt p1 = poles.Value((int)indices[p - 1]);
+								gp_Pnt p2 = poles.Value((int)indices[p]);
+
+								Handle(Geom_TrimmedCurve) lineSegment = CURVE_FACTORY->Ptr()->BuildTrimmedLine3d(p1, p2);
+
+								if (lineSegment.IsNull())
+									throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+								length += p1.Distance(p2);
+								segments.Append(lineSegment);
+							}
+
+							segmentParameterizedLength = indices->Count - 1;
+							totalLength += length;
+
+						}
+
+
+						if (startPar > 0)
+						{
+							double ratio = Math::Min(startPar / segmentParameterizedLength, 1.0);
+							startPar -= ratio * segmentParameterizedLength;
+							occStart += ratio * length;
+						}
+
+						if (endPar > 0)
+						{
+							double ratio = Math::Min(endPar / segmentParameterizedLength, 1.0);
+							endPar -= ratio * segmentParameterizedLength;
+							occEnd += ratio * length;
+						}
+
+					}
+				}
+				else
+				{
+					// To be compliant with:
+					// "In the case that the list of Segments is not provided, all points in the IfcCartesianPointList are connected by straight line segments in the order they appear in the IfcCartesianPointList."
+					// http://www.buildingsmart-tech.org/ifc/IFC4/Add1/html/schema/ifcgeometryresource/lexical/ifcindexedpolycurve.htm
+					for (Standard_Integer p = 1; p < pointCount; p++)
+					{
+						gp_Pnt p1 = poles.Value(p);
+						gp_Pnt p2 = poles.Value(p + 1);
+
+						Handle(Geom_TrimmedCurve) lineSegment = CURVE_FACTORY->Ptr()->BuildTrimmedLine3d(p1, p2);
+
+						if (lineSegment.IsNull())
+							throw RaiseGeometryFactoryException("A line index segment was invalid", ifcIndexedPolyCurve);
+
+						totalLength += p1.Distance(p2);
+
+						segments.Append(lineSegment);
+					}
+
+					occStart = startPar;
+					occEnd = endPar;
+				}
+
+				TopoDS_Wire wire = EXEC_NATIVE->BuildWire(segments, ModelGeometryService->Precision, ModelGeometryService->MinimumGap);
+
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be built as a wire", ifcIndexedPolyCurve);
+
+				if (Math::Abs(occStart - 0.0) < ModelGeometryService->Precision && Math::Abs(occEnd - totalLength) < ModelGeometryService->Precision)
+					return wire;
+
+				wire = EXEC_NATIVE->BuildTrimmedWire(wire, occStart, occEnd, true, ModelGeometryService->Precision, ModelGeometryService->RadianFactor);
+
+				if (wire.IsNull())
+					throw RaiseGeometryFactoryException("IfcIndexedPolyCurve could not be trimmed", ifcIndexedPolyCurve);
+
+				return wire;
+			}
+
+
 			TopoDS_Wire WireFactory::BuildDirectrixWire(IIfcCurve^ ifcCurve, double startParam, double endParam)
 			{
-				TopoDS_Wire wire = BuildWire(ifcCurve, false); //throws exception
 
-				if (double::IsNaN(startParam) && double::IsNaN(endParam)) 
-					return wire; //no trimming required
-				
+				TopoDS_Wire wire;
+
 				if (dynamic_cast<IIfcPolyline^>(ifcCurve) &&
 					startParam == 0. &&
 					endParam == 1. &&
 					BIM_WORKAROUNDS->ShouldApplyPolylineTrimLengthOneForEntireLine()) //consider work around for incorrectly set trims
-				{	
+				{
 					endParam = double::NaN; //set to max
 					LogDebug(ifcCurve, "Polyline trim (0:1) does not comply with schema. {0}. It has been expanded to the entire length of the Polyline", ModelGeometryService->Model->Header->FileName->OriginatingSystem);
 				}
+
+
+				if (dynamic_cast<IIfcCompositeCurve^>(ifcCurve))
+				{
+					IIfcCompositeCurve^ curve = (IIfcCompositeCurve^)(ifcCurve);
+					wire = BuildWire(curve, startParam, endParam);
+					return wire;
+				}
+				else if (dynamic_cast<IIfcIndexedPolyCurve^>(ifcCurve))
+				{
+					IIfcIndexedPolyCurve^ curve = (IIfcIndexedPolyCurve^)(ifcCurve);
+					wire = BuildWire(curve, startParam, endParam);
+					return wire;
+				}
+				else {
+					wire = BuildWire(ifcCurve, false);
+				}
+
+
+				if (double::IsNaN(startParam) && double::IsNaN(endParam))
+					return wire;
+
 				//nb, at this point we have made no attempt to convert the params to radians, the BuildTrimmedWire will do this if we pass the radian conversion factor through
-				TopoDS_Wire directrix = EXEC_NATIVE->BuildTrimmedWire(wire, startParam , endParam , true, ModelGeometryService->Precision, ModelGeometryService->RadianFactor);
-				
+				TopoDS_Wire directrix = EXEC_NATIVE->BuildTrimmedWire(wire, startParam, endParam, true, ModelGeometryService->Precision, ModelGeometryService->RadianFactor);
+
 				if (directrix.IsNull())
 					throw RaiseGeometryFactoryException("Directrix could not be built", ifcCurve);
+
 				return directrix;
 			}
+
 
 			bool WireFactory::Fillet(const TopoDS_Wire& directrix, TopoDS_Wire& filletedDirectrix, double filletRadius)
 			{

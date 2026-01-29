@@ -690,22 +690,36 @@ Handle(Geom2d_BSplineCurve) NCurveFactory::BuildPolyline2d(const TColgp_Array1Of
 	}
 }
 
-int NCurveFactory::Get3dLinearSegments(const TColgp_Array1OfPnt& points, double tolerance, TColGeom_SequenceOfBoundedCurve& segments)
+int NCurveFactory::Get3dLinearSegments(
+	const TColgp_Array1OfPnt& points,
+	double tolerance,
+	TColGeom_SequenceOfBoundedCurve& segments,
+	double& totalLength 
+)
 {
 	int pointCount = points.Length();
 	int lastPointIdx = 1;
+	totalLength = 0.0;
+
 	for (Standard_Integer i = 1; i < pointCount; i++)
 	{
 		const gp_Pnt& start = points.Value(lastPointIdx);
 		const gp_Pnt& end = points.Value(i + 1);
-		if (!start.IsEqual(end, tolerance)) //ignore very small segments
+
+		if (!start.IsEqual(end, tolerance)) // ignore very small segments
 		{
 			Handle(Geom_TrimmedCurve) lineSeg = BuildTrimmedLine3d(start, end);
-			//move the lastIndex on
+
+			// accumulate length for this segment
+			totalLength += start.Distance(end);
+
+			// move the lastIndex on
 			lastPointIdx++;
 			segments.Append(lineSeg);
-		} //else if we skip a segment because it is small lastPointIdx remains the same
+		}
+		// else if we skip a segment because it is small lastPointIdx remains the same
 	}
+
 	return lastPointIdx - 1;
 }
 
