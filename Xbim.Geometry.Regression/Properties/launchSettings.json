@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Users\\Steve\\Source\\Repos\\xBimTeam\\XbimGeometry\\Xbim.Geometry.Engine.Tests\\TestFiles\\assembly_is_processed.ifc\" /MaxThreads 0",
+      "commandLineArgs": "\"C:\\Data\\Ifc\\_NDA\\2025 08 0 1- TS - CRASH MOTORE GEOMETRICO\\MI-CT-SP ARCHITETTURA_18_7_2017.ifc\" /caching",
       "nativeDebugging": true
     }
   }
