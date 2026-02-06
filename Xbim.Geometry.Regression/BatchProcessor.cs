@@ -60,7 +60,7 @@ namespace XbimRegression
 				XbimServices.Current.ConfigureServices(services => services
 				.AddXbimToolkit(opt => opt
 					.AddLoggerFactory(_loggerFactory)
-					.AddEsentModel()
+					.AddEsentModel(Xbim.IO.Esent.EngineFormatVersion.JET_efvSynchronousLVCleanup)
 					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
             else
 				XbimServices.Current.ConfigureServices(services => services
@@ -68,8 +68,6 @@ namespace XbimRegression
 					.AddLoggerFactory(_loggerFactory)
 					// .AddHeuristicModel()
 					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
-
-
 			_logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
