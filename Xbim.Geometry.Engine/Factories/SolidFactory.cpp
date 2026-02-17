@@ -548,14 +548,6 @@ namespace Xbim
 
 					TopoDS_Solid solid = EXEC_NATIVE->BuildSweptDiskSolid(directrix, ifcSweptDiskSolid->Radius, innerRadius);
 
-
-					std::ostringstream oss;
-					oss << "DBRep_DrawableShape" << std::endl;
-					BRepTools::Write(solid, oss);
-					std::ofstream outFile("ex solid.brep");
-					outFile << oss.str();
-					outFile.close();
-
 					return solid;
 				}
 
