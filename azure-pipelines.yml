@@ -160,7 +160,6 @@ jobs:
       codeCoverageEnabled: false
       platform: '$(BuildPlatform)'
       configuration: '$(BuildConfiguration)'
-      testFiltercriteria: Category!=Performance
       rerunFailedTests: true
   
   - task: PublishSymbols@1

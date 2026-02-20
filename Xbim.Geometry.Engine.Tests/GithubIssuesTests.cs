@@ -75,7 +75,7 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
-        [Trait("Category", "Performance")]
+        [Trait("Category", "ExcludeFromCI")]
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
