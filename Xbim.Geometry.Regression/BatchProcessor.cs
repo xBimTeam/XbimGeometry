@@ -11,6 +11,7 @@ using Xbim.Geometry.Abstractions;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO.Esent;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 
@@ -55,20 +56,20 @@ namespace XbimRegression
                     fileLoggerOpts.MinLevel = LogLevel.Trace;
                 }));
             // Configure xbim services / logging & geometry
-            
-			if (Params.Caching)
-				XbimServices.Current.ConfigureServices(services => services
-				.AddXbimToolkit(opt => opt
-					.AddLoggerFactory(_loggerFactory)
-					.AddEsentModel(Xbim.IO.Esent.EngineFormatVersion.JET_efvSynchronousLVCleanup)
-					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+
+            if (Params.Caching)
+                XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    .AddEsentModel(cfg => cfg.SetFormat(EngineFormatVersion.JET_efvSynchronousLVCleanup))
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
             else
-				XbimServices.Current.ConfigureServices(services => services
-				.AddXbimToolkit(opt => opt
-					.AddLoggerFactory(_loggerFactory)
-					// .AddHeuristicModel()
-					.AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
-			_logger = _loggerFactory.CreateLogger<BatchProcessor>();
+                XbimServices.Current.ConfigureServices(services => services
+                .AddXbimToolkit(opt => opt
+                    .AddLoggerFactory(_loggerFactory)
+                    // .AddHeuristicModel()
+                    .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
+            _logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
 
         public Params Params

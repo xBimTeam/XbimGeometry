@@ -356,12 +356,6 @@ namespace Xbim
 				throw except;
 			}*/
 			TopoDS_Shape shape = InitFaces(faceList, faceSet, logger);
-			std::ostringstream oss;
-			oss << "DBRep_DrawableShape" << std::endl;
-			BRepTools::Write(shape, oss);
-			std::ofstream outFile("C:\\Users\\ibrah\\OneDrive\\Desktop\\XbimCompound 2.brep");
-			outFile << oss.str();
-			outFile.close();
 
 			pCompound = new TopoDS_Compound();
 			BRep_Builder builder;
