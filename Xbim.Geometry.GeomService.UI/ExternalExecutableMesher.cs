@@ -72,7 +72,7 @@ namespace Xbim.Geometry.GeomService.UI
         int iIteration = 0;
 
         int iProcessId = -1;
-        
+
         string fileProcessDump = "";
 
         public List<AttemptConfiguration> AttemptSequence { get; set; } = [
@@ -85,7 +85,7 @@ namespace Xbim.Geometry.GeomService.UI
         private async Task<string> ConvertItAsync(FileInfo ifcfile, bool adjustWcs, bool singleThread, XGeometryEngineVersion engineVer,
             CancellationToken cancellationToken, ReportProgressDelegate? progressDelegate, LogLevel logLevel)
         {
-            summaryExecution = new List<string>();
+            summaryExecution = [];
             reportProgressUp = progressDelegate;
             var xbimFileName = new FileInfo(Path.ChangeExtension(ifcfile.FullName, "xbim"));
             if (xbimFileName.Exists)
@@ -171,8 +171,18 @@ namespace Xbim.Geometry.GeomService.UI
                     }
                 }
 
-                // Retrieve the exit code
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    if (!process.HasExited)
+                    {
+                        process.Kill();
+                    }
+                    summaryExecution.Add($"{attempt}, CANCELLED");
+                    iProcessId = -1;
+                    return string.Empty;
+                }
                 var exitCode = (ExitCodes)process.ExitCode;
+                
                 var ret = $"{attempt}, {exitCode}, meshed";
                 if (exitCode == ExitCodes.ExitCodeOK)
                 {

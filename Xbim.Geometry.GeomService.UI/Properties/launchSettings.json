@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Xbim.Geometry.GeomService.UI": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Data\\Ifc\\_TeamSystem\\testing JS\\**.ifc"
+    }
+  }
+}

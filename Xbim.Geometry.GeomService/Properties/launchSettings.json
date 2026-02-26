@@ -2,7 +2,7 @@
   "profiles": {
     "Xbim.Sunshine.GeomService": {
       "commandName": "Project",
-      "commandLineArgs": "\"/in:C:\\Data\\Ifc\\SmallModels\\OneWallTwoWindows.ifc\" /adjust:False /st:True /eng:V6 /log:True /progress:True /ll:Trace /overwrite:true"
+      "commandLineArgs": "\"/in:C:\\Data\\Ifc\\SmallModels\\CPM.ifc\" /adjust:False /st:True /eng:V6 /log:True /progress:True /ll:Debug /overwrite:true"
     }
   }
 }

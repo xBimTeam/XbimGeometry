@@ -6,7 +6,7 @@ namespace Xbim.Geometry.GeomService.UI
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string[] args)
         {
 #if NET8_0_OR_GREATER
             ApplicationConfiguration.Initialize();
@@ -14,7 +14,7 @@ namespace Xbim.Geometry.GeomService.UI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 #endif
-            Application.Run(new GeomServiceUI());
+            Application.Run(new GeomServiceUI(args));
         }
     }
 }

@@ -16,14 +16,22 @@ namespace Xbim.Geometry.GeomService
         ExitCodeNotFoundError = 2,
         ExitCodeXbimAlreadyFound = 3,
         ExitCodeErrorCopying = 4,
+        ExitCodeUndefinedError = 5
     }
 
     internal class Program
     {
         static int Main(string[] args)
         {
+            if (args.Length == 1 && 
+                    (
+                        args[0] == "/help"|| 
+                        args[0] == "/?"
+                    )
+                )
+                return PrintHelp();
             FileInfo? ifcfile = null;
-            XGeometryEngineVersion engineVer = XGeometryEngineVersion.V5;
+            XGeometryEngineVersion engineVer = XGeometryEngineVersion.V6;
             bool singleThread = false;
             bool adjustWcs = false;
             bool progress = false;
@@ -220,9 +228,27 @@ namespace Xbim.Geometry.GeomService
             return CloseAndReturn(tlog, ExitCodes.ExitCodeOK);
         }
 
+        private static int PrintHelp()
+        {
+            Console.WriteLine(
+                """
+                Usage: Xbim.Geometry.GeomService.exe 
+                   /in:<inputfile>                                      - IFC file to process (required)
+                   [/eng:V5|V6]                                         - geometry engine version (default: V6)
+                   [/st:true|false]                                     - single thread mode
+                   [/adjust:true|false]                                 - adjust WCS
+                   [/progress:true|false]                               - show progress in console
+                   [/log:true|false]                                    - enable logging 
+                   [/overwrite:true|false]                              - overwrite existing xbim file if it exists
+                   [/ll:Debug|Information|Warning|Error|Critical|Trace] - Defines the log level
+                """
+                );
+            return 0;
+        }
+
         private static void ReportProgress(int percentProgress, object userState)
         {
-            Console.WriteLine($"{percentProgress} {userState}");
+            Console.WriteLine($"{ percentProgress} {userState}");
         }
 
         private static int CloseAndReturn(StreamWriter? tlog, ExitCodes exitCode)

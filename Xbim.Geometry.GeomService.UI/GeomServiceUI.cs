@@ -1,21 +1,21 @@
-﻿using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
+﻿using Humanizer;
 using Microsoft.Extensions.FileSystemGlobbing;
+using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
+using Microsoft.Extensions.Logging;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Diagnostics;
-using System.Threading;
-using System.Text.RegularExpressions;
-using Serilog;
-using Humanizer;
-using Microsoft.Extensions.Logging;
 using Xbim.Geometry.GeomService.UI; // (if you put the extension in this namespace)
 
 namespace Xbim.Geometry.GeomService.UI
@@ -28,10 +28,14 @@ namespace Xbim.Geometry.GeomService.UI
         /// <summary>
         /// Default constructor providing UI Initialization
         /// </summary>
-        public GeomServiceUI()
+        public GeomServiceUI(string[] arguments)
         {
             InitializeComponent();
             txtSources.Text = @"C:\Data\Ifc\GeomRegressionTest.glob";
+            if (arguments.Length > 0)
+            {
+                txtSources.Text = string.Join(" ", arguments);
+            }
             _meshHelper = new ExternalExecutableMesher();
             AddLogEntry("Syntax of glob files:");
             AddLogEntry("**/*.ifc -> All ifc files, including subdirectories");
@@ -61,7 +65,34 @@ namespace Xbim.Geometry.GeomService.UI
 
         private IEnumerable<FileInfo> GetIfcFiles(string text)
         {
-            var fi = new FileInfo(txtSources.Text);
+            FileInfo? fi = null;
+            try
+            {
+                fi = new FileInfo(txtSources.Text); // if it's a file then ok.
+            }
+            catch (Exception)
+            {
+            }
+            if (fi is null)
+            {
+                var matcher = new Matcher();
+                var t = Regex.Match(txtSources.Text, @"^(?<drive>[a-zA-Z]):\\(?<rest>.*)$");
+                if (t.Success)
+                {
+                    matcher.AddInclude(t.Groups["rest"].Value);
+                    var dir = new DirectoryInfo($"{t.Groups["drive"].Value}:\\");
+                    var result = matcher.Execute(new DirectoryInfoWrapper(dir));
+                    foreach (var file in result.Files)
+                    {
+                        var comb = Path.Combine(dir.FullName, file.Path);
+                        FileInfo f = new FileInfo(comb);
+                        yield return f;
+                    }
+                }
+                
+                yield break;
+            }
+                
             if (!fi.Exists)
                 yield break;
             if (fi.Extension.ToLower() == ".ifc" || fi.Extension.ToLower() == ".ifczip")
@@ -73,8 +104,9 @@ namespace Xbim.Geometry.GeomService.UI
             {
                 if (fi.Directory is null)
                     yield break;
+                var lines  = File.ReadLines(txtSources.Text);
                 var matcher = new Matcher();
-                foreach (var line in File.ReadLines(txtSources.Text))
+                foreach (var line in lines)
                 {
                     if (line.StartsWith("#") || string.IsNullOrWhiteSpace(line))
                         continue; // skip comments and empty lines
@@ -189,6 +221,7 @@ namespace Xbim.Geometry.GeomService.UI
                 return;
             var cnt = 0;
             string execLog = GetLogFilePath();
+            LogMessageOnListBox($"Logging at {execLog}", _logEntries, listBoxLog, MaxLogEntries);
             var ll = GetLogLevel(cmbLoggingLevel.Text);
 
             cmdConvertGeometry.Enabled = false;
@@ -225,6 +258,8 @@ namespace Xbim.Geometry.GeomService.UI
                         AddLogEntry(msg);
                     }
                     cnt++;
+                    if (_cts.IsCancellationRequested)
+                        break;
                 }
                 progFiles.Value = 0;
                 ReportProgressInBar(0, "Processing files completed");
@@ -271,7 +306,17 @@ namespace Xbim.Geometry.GeomService.UI
 
         private string GetLogFilePath()
         {
-            return Path.ChangeExtension(txtSources.Text, ".log");
+            var t = Path.ChangeExtension(txtSources.Text, ".log");
+            try
+            {
+                var t2 = new FileInfo(t);
+                return t;
+            }
+            catch (Exception)
+            {
+                var t3 = Guid.NewGuid();
+                return Path.Combine(Path.GetTempPath(), $"{t3}.log");
+            }
         }
 
         string lastUserState = string.Empty;
@@ -323,6 +368,7 @@ namespace Xbim.Geometry.GeomService.UI
         private void cmdCancelConvertGeometry_Click(object sender, EventArgs e)
         {
             _cts?.Cancel();
+            AddLogEntry("Cancellation Request logged");
         }
 
         private void listBoxLog_MouseDoubleClick(object sender, MouseEventArgs e)
