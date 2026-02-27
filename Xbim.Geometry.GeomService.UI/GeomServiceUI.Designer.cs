@@ -42,6 +42,9 @@
             button1 = new Button();
             cmdCancelConvertGeometry = new Button();
             groupBox1 = new GroupBox();
+            label8 = new Label();
+            nudMemoryLimit = new NumericUpDown();
+            label9 = new Label();
             label7 = new Label();
             cmbLoggingLevel = new ComboBox();
             cmdMoveDown = new Button();
@@ -54,9 +57,13 @@
             label4 = new Label();
             button2 = new Button();
             cmdRequestDump = new Button();
+            chkSkipMeshed = new CheckBox();
+            groupBox2 = new GroupBox();
             grpProgress.SuspendLayout();
             groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudMemoryLimit).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudTimeoutMinutes).BeginInit();
+            groupBox2.SuspendLayout();
             SuspendLayout();
             // 
             // txtSources
@@ -81,12 +88,12 @@
             // 
             // cmdConvertGeometry
             // 
-            cmdConvertGeometry.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            cmdConvertGeometry.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             cmdConvertGeometry.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            cmdConvertGeometry.Location = new Point(636, 412);
+            cmdConvertGeometry.Location = new Point(5, 21);
             cmdConvertGeometry.Margin = new Padding(2);
             cmdConvertGeometry.Name = "cmdConvertGeometry";
-            cmdConvertGeometry.Size = new Size(290, 35);
+            cmdConvertGeometry.Size = new Size(280, 35);
             cmdConvertGeometry.TabIndex = 2;
             cmdConvertGeometry.Text = "Evaluate Geometry";
             cmdConvertGeometry.UseVisualStyleBackColor = true;
@@ -113,7 +120,7 @@
             listBoxLog.Margin = new Padding(4, 3, 4, 3);
             listBoxLog.Name = "listBoxLog";
             listBoxLog.ScrollAlwaysVisible = true;
-            listBoxLog.Size = new Size(912, 199);
+            listBoxLog.Size = new Size(912, 274);
             listBoxLog.TabIndex = 5;
             listBoxLog.KeyUp += listBoxLog_KeyUp;
             listBoxLog.MouseDoubleClick += listBoxLog_MouseDoubleClick;
@@ -126,11 +133,11 @@
             grpProgress.Controls.Add(label3);
             grpProgress.Controls.Add(label2);
             grpProgress.Controls.Add(progSingleFile);
-            grpProgress.Location = new Point(14, 262);
+            grpProgress.Location = new Point(14, 343);
             grpProgress.Margin = new Padding(4, 3, 4, 3);
             grpProgress.Name = "grpProgress";
             grpProgress.Padding = new Padding(4, 3, 4, 3);
-            grpProgress.Size = new Size(290, 215);
+            grpProgress.Size = new Size(290, 243);
             grpProgress.TabIndex = 6;
             grpProgress.TabStop = false;
             grpProgress.Text = "Progress";
@@ -144,7 +151,7 @@
             actionLog.Margin = new Padding(4, 3, 4, 3);
             actionLog.Name = "actionLog";
             actionLog.ScrollAlwaysVisible = true;
-            actionLog.Size = new Size(272, 139);
+            actionLog.Size = new Size(272, 154);
             actionLog.TabIndex = 6;
             // 
             // progFiles
@@ -186,7 +193,7 @@
             // button1
             // 
             button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            button1.Location = new Point(636, 382);
+            button1.Location = new Point(636, 433);
             button1.Margin = new Padding(2);
             button1.Name = "button1";
             button1.Size = new Size(140, 25);
@@ -200,7 +207,7 @@
             cmdCancelConvertGeometry.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             cmdCancelConvertGeometry.Enabled = false;
             cmdCancelConvertGeometry.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            cmdCancelConvertGeometry.Location = new Point(636, 451);
+            cmdCancelConvertGeometry.Location = new Point(636, 560);
             cmdCancelConvertGeometry.Margin = new Padding(2);
             cmdCancelConvertGeometry.Name = "cmdCancelConvertGeometry";
             cmdCancelConvertGeometry.Size = new Size(140, 25);
@@ -212,6 +219,9 @@
             // groupBox1
             // 
             groupBox1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            groupBox1.Controls.Add(label8);
+            groupBox1.Controls.Add(nudMemoryLimit);
+            groupBox1.Controls.Add(label9);
             groupBox1.Controls.Add(label7);
             groupBox1.Controls.Add(cmbLoggingLevel);
             groupBox1.Controls.Add(cmdMoveDown);
@@ -221,19 +231,51 @@
             groupBox1.Controls.Add(label5);
             groupBox1.Controls.Add(nudTimeoutMinutes);
             groupBox1.Controls.Add(label4);
-            groupBox1.Location = new Point(321, 262);
+            groupBox1.Location = new Point(321, 343);
             groupBox1.Margin = new Padding(4, 3, 4, 3);
             groupBox1.Name = "groupBox1";
             groupBox1.Padding = new Padding(4, 3, 4, 3);
-            groupBox1.Size = new Size(290, 215);
+            groupBox1.Size = new Size(290, 243);
             groupBox1.TabIndex = 9;
             groupBox1.TabStop = false;
             groupBox1.Text = "Settings";
             // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(223, 47);
+            label8.Margin = new Padding(4, 0, 4, 0);
+            label8.Name = "label8";
+            label8.Size = new Size(25, 15);
+            label8.TabIndex = 11;
+            label8.Text = "Mb";
+            // 
+            // nudMemoryLimit
+            // 
+            nudMemoryLimit.Location = new Point(140, 44);
+            nudMemoryLimit.Margin = new Padding(4, 3, 4, 3);
+            nudMemoryLimit.Maximum = new decimal(new int[] { 8192, 0, 0, 0 });
+            nudMemoryLimit.Minimum = new decimal(new int[] { 128, 0, 0, 0 });
+            nudMemoryLimit.Name = "nudMemoryLimit";
+            nudMemoryLimit.Size = new Size(78, 23);
+            nudMemoryLimit.TabIndex = 10;
+            nudMemoryLimit.TextAlign = HorizontalAlignment.Right;
+            nudMemoryLimit.Value = new decimal(new int[] { 4096, 0, 0, 0 });
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(7, 47);
+            label9.Margin = new Padding(4, 0, 4, 0);
+            label9.Name = "label9";
+            label9.Size = new Size(82, 15);
+            label9.TabIndex = 9;
+            label9.Text = "Memory limit:";
+            // 
             // label7
             // 
             label7.AutoSize = true;
-            label7.Location = new Point(7, 48);
+            label7.Location = new Point(8, 76);
             label7.Margin = new Padding(4, 0, 4, 0);
             label7.Name = "label7";
             label7.Size = new Size(57, 15);
@@ -245,7 +287,7 @@
             cmbLoggingLevel.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbLoggingLevel.FormattingEnabled = true;
             cmbLoggingLevel.Items.AddRange(new object[] { "Trace", "Debug", "Information", "Warning", "Error", "Critical" });
-            cmbLoggingLevel.Location = new Point(140, 45);
+            cmbLoggingLevel.Location = new Point(140, 73);
             cmbLoggingLevel.Margin = new Padding(4, 3, 4, 3);
             cmbLoggingLevel.Name = "cmbLoggingLevel";
             cmbLoggingLevel.Size = new Size(132, 23);
@@ -255,7 +297,7 @@
             // 
             cmdMoveDown.Font = new Font("Microsoft Sans Serif", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             cmdMoveDown.ForeColor = SystemColors.ActiveCaptionText;
-            cmdMoveDown.Location = new Point(100, 168);
+            cmdMoveDown.Location = new Point(100, 194);
             cmdMoveDown.Margin = new Padding(4, 3, 4, 3);
             cmdMoveDown.Name = "cmdMoveDown";
             cmdMoveDown.Size = new Size(33, 39);
@@ -268,7 +310,7 @@
             // 
             cmdMoveUp.Font = new Font("Microsoft Sans Serif", 15.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             cmdMoveUp.ForeColor = SystemColors.ActiveCaptionText;
-            cmdMoveUp.Location = new Point(100, 128);
+            cmdMoveUp.Location = new Point(100, 149);
             cmdMoveUp.Margin = new Padding(4, 3, 4, 3);
             cmdMoveUp.Name = "cmdMoveUp";
             cmdMoveUp.Size = new Size(33, 39);
@@ -283,7 +325,7 @@
             lstSequence.Columns.AddRange(new ColumnHeader[] { columnHeader1 });
             lstSequence.FullRowSelect = true;
             lstSequence.GridLines = true;
-            lstSequence.Location = new Point(140, 76);
+            lstSequence.Location = new Point(141, 102);
             lstSequence.Margin = new Padding(4, 3, 4, 3);
             lstSequence.MultiSelect = false;
             lstSequence.Name = "lstSequence";
@@ -300,7 +342,7 @@
             // label6
             // 
             label6.AutoSize = true;
-            label6.Location = new Point(7, 76);
+            label6.Location = new Point(7, 106);
             label6.Margin = new Padding(4, 0, 4, 0);
             label6.Name = "label6";
             label6.Size = new Size(105, 15);
@@ -327,7 +369,7 @@
             nudTimeoutMinutes.Size = new Size(78, 23);
             nudTimeoutMinutes.TabIndex = 1;
             nudTimeoutMinutes.TextAlign = HorizontalAlignment.Right;
-            nudTimeoutMinutes.Value = new decimal(new int[] { 30, 0, 0, 0 });
+            nudTimeoutMinutes.Value = new decimal(new int[] { 10, 0, 0, 0 });
             // 
             // label4
             // 
@@ -342,7 +384,7 @@
             // button2
             // 
             button2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            button2.Location = new Point(786, 382);
+            button2.Location = new Point(786, 433);
             button2.Margin = new Padding(2);
             button2.Name = "button2";
             button2.Size = new Size(140, 25);
@@ -356,7 +398,7 @@
             cmdRequestDump.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             cmdRequestDump.Enabled = false;
             cmdRequestDump.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            cmdRequestDump.Location = new Point(786, 451);
+            cmdRequestDump.Location = new Point(786, 560);
             cmdRequestDump.Margin = new Padding(2);
             cmdRequestDump.Name = "cmdRequestDump";
             cmdRequestDump.Size = new Size(140, 25);
@@ -365,11 +407,34 @@
             cmdRequestDump.UseVisualStyleBackColor = true;
             cmdRequestDump.Click += button3_Click;
             // 
+            // chkSkipMeshed
+            // 
+            chkSkipMeshed.AutoSize = true;
+            chkSkipMeshed.Location = new Point(64, 63);
+            chkSkipMeshed.Name = "chkSkipMeshed";
+            chkSkipMeshed.Size = new Size(158, 19);
+            chkSkipMeshed.TabIndex = 12;
+            chkSkipMeshed.Text = "skip previously evaluated";
+            chkSkipMeshed.UseVisualStyleBackColor = true;
+            // 
+            // groupBox2
+            // 
+            groupBox2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            groupBox2.Controls.Add(cmdConvertGeometry);
+            groupBox2.Controls.Add(chkSkipMeshed);
+            groupBox2.Location = new Point(636, 463);
+            groupBox2.Name = "groupBox2";
+            groupBox2.Size = new Size(290, 92);
+            groupBox2.TabIndex = 13;
+            groupBox2.TabStop = false;
+            groupBox2.Text = "Execute";
+            // 
             // GeomServiceUI
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(938, 490);
+            ClientSize = new Size(938, 599);
+            Controls.Add(groupBox2);
             Controls.Add(cmdRequestDump);
             Controls.Add(button2);
             Controls.Add(groupBox1);
@@ -378,7 +443,6 @@
             Controls.Add(grpProgress);
             Controls.Add(listBoxLog);
             Controls.Add(btnSearchGlob);
-            Controls.Add(cmdConvertGeometry);
             Controls.Add(label1);
             Controls.Add(txtSources);
             Margin = new Padding(2);
@@ -389,7 +453,10 @@
             grpProgress.PerformLayout();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudMemoryLimit).EndInit();
             ((System.ComponentModel.ISupportInitialize)nudTimeoutMinutes).EndInit();
+            groupBox2.ResumeLayout(false);
+            groupBox2.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
 
@@ -423,5 +490,10 @@
 		private System.Windows.Forms.ComboBox cmbLoggingLevel;
 		private System.Windows.Forms.Label label7;
         private Button cmdRequestDump;
+        private Label label8;
+        private NumericUpDown nudMemoryLimit;
+        private Label label9;
+        private CheckBox chkSkipMeshed;
+        private GroupBox groupBox2;
     }
 }

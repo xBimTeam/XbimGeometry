@@ -2,7 +2,7 @@
   "profiles": {
     "Xbim.Geometry.GeomService.UI": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Data\\Ifc\\_TeamSystem\\testing JS\\**.ifc"
+      "commandLineArgs": "C:\\Data\\Ifc\\_NDA\\_TS\\2026 02 27 - CONDIVISA BENGHI 2026\\"
     }
   }
 }

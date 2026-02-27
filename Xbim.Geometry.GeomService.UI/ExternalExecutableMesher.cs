@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Humanizer;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -44,8 +45,10 @@ namespace Xbim.Geometry.GeomService.UI
             }
         }
 
-        public async Task<string> EnsureGeometryAsync(FileInfo f, bool adjustWcs, bool singleThread, XGeometryEngineVersion engineVer,
-            CancellationToken cancellationToken = default, ReportProgressDelegate? progressDelegate = null, LogLevel logLevel = LogLevel.Debug)
+        public async Task<string> EnsureGeometryAsync(
+            FileInfo f, bool adjustWcs, CancellationToken cancellationToken = default,
+            ReportProgressDelegate? progressDelegate = null, LogLevel logLevel = LogLevel.Debug,
+            int maxMemMb = 1024)
         {
             if (ExecutableFullPath == null)
             {
@@ -54,7 +57,7 @@ namespace Xbim.Geometry.GeomService.UI
             if (f.Extension.ToLowerInvariant() == ".ifc" || f.Extension.ToLowerInvariant() == ".ifczip")
             {
                 // needs conversion
-                return await ConvertItAsync(f, adjustWcs, singleThread, engineVer, cancellationToken, progressDelegate, logLevel);
+                return await ConvertItAsync(f, adjustWcs, cancellationToken, progressDelegate, logLevel, maxMemMb);
             }
             return f.FullName;
         }
@@ -82,9 +85,10 @@ namespace Xbim.Geometry.GeomService.UI
                 (true, XGeometryEngineVersion.V5),
                 ];
 
-        private async Task<string> ConvertItAsync(FileInfo ifcfile, bool adjustWcs, bool singleThread, XGeometryEngineVersion engineVer,
-            CancellationToken cancellationToken, ReportProgressDelegate? progressDelegate, LogLevel logLevel)
+        private async Task<string> ConvertItAsync(FileInfo ifcfile, bool adjustWcs,
+            CancellationToken cancellationToken, ReportProgressDelegate? progressDelegate, LogLevel logLevel, int maxMemMb)
         {
+            var maxMemBytes = maxMemMb * 1024L * 1024L;
             summaryExecution = [];
             reportProgressUp = progressDelegate;
             var xbimFileName = new FileInfo(Path.ChangeExtension(ifcfile.FullName, "xbim"));
@@ -133,28 +137,52 @@ namespace Xbim.Geometry.GeomService.UI
                 try
                 {
                     // we start two tasks, one performs the computation, another for timeout check
-                    using var ctsTimeout = new CancellationTokenSource();
+                    using var ctsControlTasksCancellation = new CancellationTokenSource();
                     int timeoutMilliseconds = TimeOutMilliseconds;
                     var waitForExitTask = Task.Run(() => process.WaitForExit(), cancellationToken);
-                    var timeoutTask = Task.Delay(timeoutMilliseconds, ctsTimeout.Token);
-                    var completedTask = await Task.WhenAny(waitForExitTask, timeoutTask);
-
-                    if (completedTask == timeoutTask)
+                    var timeoutTask = Task.Delay(timeoutMilliseconds, ctsControlTasksCancellation.Token);
+                    var memoryCheckTask = Task.Run(() =>
                     {
-                        // Timeout occurred, kill the process
+                        while (!process.HasExited)
+                        {
+                            try
+                            {
+                                process.Refresh();
+                                DebugMem(process);
+                                if (process.WorkingSet64 > maxMemBytes)
+                                {
+                                    summaryExecution.Add($"{attempt}, cancelling for memory limit, using {process.WorkingSet64.Bytes().Humanize()}");
+                                    Debug.WriteLine($"Process {process.Id} is using too much memory: {process.WorkingSet64} bytes. Killing it.");
+                                    process.Kill();
+                                    break;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Error checking memory usage for process {process.Id}: {ex.Message}");
+                                break;
+                            }
+                            Thread.Sleep(1000); // Check every second
+                        }
+                    }, ctsControlTasksCancellation.Token);
+                    var completedTask = await Task.WhenAny(waitForExitTask, timeoutTask, memoryCheckTask);
+
+                    if (completedTask == waitForExitTask)
+                    {
+                        // Process exited - no timeout, but possible crash
+                        isMainCompleted = true;
+                        ctsControlTasksCancellation.Cancel(); // Cancel the timeout task and the memory check task
+                    }
+                    else
+                    {
+                        // stop occurred, kill the process
                         if (!process.HasExited)
                         {
                             process.Kill();
                             await waitForExitTask; // Ensure process resources are released
                         }
-                        summaryExecution.Add($"{attempt}, TIMEOUT");
+                        summaryExecution.Add($"{attempt}, CANCELLED");
                         continue;
-                    }
-                    else
-                    {
-                        // Process exited - no timeout, but possible crash
-                        isMainCompleted = true;
-                        ctsTimeout.Cancel(); // Cancel the timeout task
                     }
                 }
                 catch (Exception)
@@ -181,8 +209,14 @@ namespace Xbim.Geometry.GeomService.UI
                     iProcessId = -1;
                     return string.Empty;
                 }
-                var exitCode = (ExitCodes)process.ExitCode;
+                ExitCodes exitCode = ExitCodes.ExitCodeUndefinedError;
+                try
+                {
+                    exitCode = (ExitCodes)process.ExitCode;
+                }
+                catch { }
                 
+
                 var ret = $"{attempt}, {exitCode}, meshed";
                 if (exitCode == ExitCodes.ExitCodeOK)
                 {
@@ -208,9 +242,19 @@ namespace Xbim.Geometry.GeomService.UI
                 }
                 summaryExecution.Add($"{attempt}, {exitCode}, CRASH");
             }
-            summaryExecution.Add("TOTALCRASH");
+            summaryExecution.Add($"TOTALCRASH {ifcfile.FullName}");
             iProcessId = -1;
             return string.Empty;
+        }
+
+        private void DebugMem(Process process)
+        {
+            string[] t = [
+                process.WorkingSet64.Bytes().Humanize(),
+                process.PrivateMemorySize64.Bytes().Humanize(),
+                process.VirtualMemorySize64.Bytes().Humanize()
+                ];
+            Debug.WriteLine($"mem: {t[0]}, prvt: {t[1]}, vrt: {t[2]}");
         }
 
         private readonly Regex regExProgressString = new Regex(@"^(?<percent>[+-]?\d+)(?<description>.*)$", RegexOptions.Compiled);

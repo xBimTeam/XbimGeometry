@@ -89,10 +89,9 @@ namespace Xbim.Geometry.GeomService.UI
                         yield return f;
                     }
                 }
-                
                 yield break;
             }
-                
+
             if (!fi.Exists)
                 yield break;
             if (fi.Extension.ToLower() == ".ifc" || fi.Extension.ToLower() == ".ifczip")
@@ -194,7 +193,7 @@ namespace Xbim.Geometry.GeomService.UI
         private async void cmdConvertGeometry_Click(object sender, EventArgs e)
         {
             _meshHelper.TimeOutMilliseconds = (int)nudTimeoutMinutes.Value * 60 * 1000;
-
+            var memoryMax = (int)nudMemoryLimit.Value;
             var actions = new List<AttemptConfiguration>();
             foreach (ListViewItem item in lstSequence.Items)
             {
@@ -209,16 +208,27 @@ namespace Xbim.Geometry.GeomService.UI
                 return;
             }
             _meshHelper.AttemptSequence = actions;
-
             if (firstLaunch)
             {
                 _logEntries.Clear();
                 firstLaunch = false;
             }
             var files = GetIfcFiles(txtSources.Text).ToList();
+            if (chkSkipMeshed.Checked)
+            {
+                // reducing files to those that do not have .xbim meshed files already present, to avoid unnecessary processing
+                files = files.Where(f =>
+                {
+                    var rep = Path.ChangeExtension(f.FullName, ".xbim");
+                    return (!File.Exists(rep)); // skip if .xbim exists for the file
+                }).ToList();
+            }
             var tot = files.Count;
             if (tot == 0)
+            {
+                LogMessageOnListBox($"No files to process.", _logEntries, listBoxLog, MaxLogEntries);
                 return;
+            }
             var cnt = 0;
             string execLog = GetLogFilePath();
             LogMessageOnListBox($"Logging at {execLog}", _logEntries, listBoxLog, MaxLogEntries);
@@ -239,10 +249,10 @@ namespace Xbim.Geometry.GeomService.UI
                 {
                     progFiles.Value = (int)((cnt / (double)tot) * 100);
                     Stopwatch sw = Stopwatch.StartNew();
-                    AddLogEntry($"Processing file: {file.FullName}", fileLogger);
+                    var fileSize = file.Length.Bytes().Humanize();
+                    AddLogEntry($"Processing file: {file.FullName}, {fileSize}", fileLogger);
                     _meshHelper.RequestLog = true;
-                    var meshedFile = await _meshHelper.EnsureGeometryAsync(file, false, false,
-                        Xbim.Geometry.Abstractions.XGeometryEngineVersion.V6, _cts.Token, ReportProgressInBar, ll);
+                    var meshedFile = await _meshHelper.EnsureGeometryAsync(file, false, _cts.Token, ReportProgressInBar, ll, memoryMax);
                     ReportProgressInBar(0, "File completed");
                     foreach (var logEntry in _meshHelper.SummaryExecution)
                     {
@@ -250,7 +260,6 @@ namespace Xbim.Geometry.GeomService.UI
                     }
                     if (!string.IsNullOrEmpty(meshedFile))
                     {
-                        var fileSize = file.Length.Bytes().Humanize();
                         var meshedFileSize = new FileInfo(meshedFile).Length.Bytes().Humanize();
                         var sec = sw.Elapsed.TotalSeconds;
                         var speed = Convert.ToInt64(file.Length / sec).Bytes().Humanize();
@@ -286,22 +295,15 @@ namespace Xbim.Geometry.GeomService.UI
 
         private LogLevel GetLogLevel(string text)
         {
-            switch (text)
+            return text switch
             {
-                case "Information":
-                    return LogLevel.Information;
-                case "Warning":
-                    return LogLevel.Warning;
-                case "Error":
-                    return LogLevel.Error;
-                case "Critical":
-                    return LogLevel.Critical;
-                case "Trace":
-                    return LogLevel.Trace;
-                case "Debug":
-                default:
-                    return LogLevel.Debug;
-            }
+                "Information" => LogLevel.Information,
+                "Warning" => LogLevel.Warning,
+                "Error" => LogLevel.Error,
+                "Critical" => LogLevel.Critical,
+                "Trace" => LogLevel.Trace,
+                _ => LogLevel.Debug,
+            };
         }
 
         private string GetLogFilePath()
