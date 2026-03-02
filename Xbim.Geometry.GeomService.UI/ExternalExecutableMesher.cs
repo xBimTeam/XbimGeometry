@@ -224,6 +224,12 @@ namespace Xbim.Geometry.GeomService.UI
                     iProcessId = -1;
                     return xbimFileName.FullName;
                 }
+                else if (exitCode == ExitCodes.ExitCodeInvalidIFC)
+                {
+                    summaryExecution.Add($"INVALIDFILE PARSING {ifcfile.FullName}");
+                    iProcessId = -1;
+                    return string.Empty;
+                }
                 // check that the process is completed
                 if (exitCode == ExitCodes.ExitCodeErrorCopying) // problem copying, we can try to wait a bit longer
                 {

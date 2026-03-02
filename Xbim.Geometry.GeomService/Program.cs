@@ -16,7 +16,8 @@ namespace Xbim.Geometry.GeomService
         ExitCodeNotFoundError = 2,
         ExitCodeXbimAlreadyFound = 3,
         ExitCodeErrorCopying = 4,
-        ExitCodeUndefinedError = 5
+        ExitCodeUndefinedError = 5,
+        ExitCodeInvalidIFC = 6,
     }
 
     internal class Program
@@ -187,7 +188,19 @@ namespace Xbim.Geometry.GeomService
             tlog?.Flush();
 
             var sCopy = Stopwatch.StartNew();
-            using (var model = IfcStore.Open(ifcfile.FullName, null, null, ReportProgress))
+            IfcStore? model = null;
+            try
+            {
+                model = IfcStore.Open(ifcfile.FullName, null, null, ReportProgress);
+            }
+            catch (Exception)
+            {
+                // if the model cannot be parsed, we return a different error code,
+                // so that the caller can decide what to do (e.g. retry, skip, etc.)
+                return CloseAndReturn(tlog, ExitCodes.ExitCodeInvalidIFC);
+            }
+
+            using (model)
             {
                 var geomContext = new Xbim3DModelContext(model, loggerFactory, engineVersion: engineVer);
                 tlog?.WriteLine($"context initialised at {sCopy.ElapsedMilliseconds}msec");

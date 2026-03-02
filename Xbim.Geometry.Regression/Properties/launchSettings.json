@@ -2,7 +2,7 @@
   "profiles": {
     "XbimRegression": {
       "commandName": "Project",
-      "commandLineArgs": "\"C:\\Data\\Ifc\\SmallModels\\CPM.ifc\" /caching",
+      "commandLineArgs": "\"C:\\Data\\Ifc\\_TeamSystem\\testing JS\\MI-CT-SP ARCHITETTURA_18_7_2017.ifc\" /caching /asinglethread",
       "nativeDebugging": true
     }
   }

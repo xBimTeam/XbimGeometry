@@ -133,18 +133,20 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 		{
 			TopoDS_Shape result = bop.Shape();
 			BRepCheck_Analyzer analyzer(result);
+
 			if (!analyzer.IsValid()) {
 				pLoggingService->LogWarning("Boolean resulting shape is invalid, skipping SimplifyResult().");
 			}
 			else
 			{
+				// bop.SimplifyResult(true, false, Precision::Angular());
+				// bop.SimplifyResult(false, true, Precision::Angular());
 				bop.SimplifyResult(true, true, Precision::Angular());
 			}
 			
 			//if we have a self intersection acquired it means one of the input shapes had a self intersection, fix up the input shapes and repeat, if we have not tried to do so before
 			if (bop.DSFiller()->HasWarning(STANDARD_TYPE(BOPAlgo_AlertAcquiredSelfIntersection)) && !attemptingFix)
 			{
-				
 				TopoDS_ListOfShape fixedArguments;
 				TopoDS_ListOfShape fixedTools;
 				bool fixPossible = false;
