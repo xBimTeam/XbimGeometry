@@ -139,8 +139,6 @@ TopoDS_Shape NBooleanFactory::PerformBoolean(const TopoDS_ListOfShape& arguments
 			}
 			else
 			{
-				// bop.SimplifyResult(true, false, Precision::Angular());
-				// bop.SimplifyResult(false, true, Precision::Angular());
 				bop.SimplifyResult(true, true, Precision::Angular());
 			}
 			

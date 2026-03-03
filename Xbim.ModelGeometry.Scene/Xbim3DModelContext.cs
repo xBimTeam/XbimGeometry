@@ -442,7 +442,7 @@ namespace Xbim.ModelGeometry.Scene
                         }
                         catch (Exception ex)
                         {
-                            _modelContext.LogWarning(item, "Exception thrown getting representation for product. {exceptionMessage}.", ex);
+                            _modelContext.LogWarning(ex, item, "Exception thrown getting representation for product.");
                         }
                     }
                 }
