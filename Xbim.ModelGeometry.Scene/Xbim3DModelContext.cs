@@ -434,15 +434,15 @@ namespace Xbim.ModelGeometry.Scene
                     {
                         try
                         {
-                            var t = item.Representation;
+                            var t = item.Representation; // on invalid schema files, this throws an exception.
                             if (item != null)
                             {
                                 products.Add(item);
                             }
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
-                            _modelContext.LogWarning(item, "Exception thrown getting representation for product.");
+                            _modelContext.LogWarning(ex, item, "Exception thrown getting representation for product.");
                         }
                     }
                 }
