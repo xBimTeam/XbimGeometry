@@ -61,9 +61,9 @@ namespace Xbim
 
 #pragma region Creators
 
-		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, ILogger^)
+		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, ILogger^ logger)
 		{
-			return Create(geomRep, nullptr, nullptr);
+			return Create(geomRep, nullptr, logger);
 		}
 
 		IXShape^ XbimGeometryCreatorV6::Build(IIfcGeometricRepresentationItem^ geomRep)
@@ -73,7 +73,7 @@ namespace Xbim
 			return XbimGeometryObject::ToXShape(geomObj);
 		}
 
-		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^)
+		IXbimGeometryObject^ XbimGeometryCreatorV6::Create(IIfcGeometricRepresentationItem^ geomRep, IIfcAxis2Placement3D^ objectLocation, ILogger^ logger)
 		{
 			try
 			{
@@ -84,7 +84,14 @@ namespace Xbim
 				TopLoc_Location location;
 				if (objectLocation != nullptr)
 				{
+					if (logger != nullptr)
+						Microsoft::Extensions::Logging::LoggerExtensions::LogTrace(logger, "Creating geometry for IfcGeometricRepresentationItem #{0} with location #{1}", geomRep->EntityLabel, objectLocation->EntityLabel);
 					location = GetGeometryFactory()->BuildAxis2PlacementLocation(objectLocation);
+				}
+				else
+				{
+					if (logger != nullptr)
+						Microsoft::Extensions::Logging::LoggerExtensions::LogTrace(logger, "Creating geometry for IfcGeometricRepresentationItem #{0} with no location", geomRep->EntityLabel);
 				}
 				IIfcSolidModel^ solidModel = dynamic_cast<IIfcSolidModel^>(geomRep);
 				if (solidModel != nullptr)
@@ -233,7 +240,6 @@ namespace Xbim
 			{
 				throw RaiseGeometryServiceException("Error building geometry shape: " + e->Message, geomRep, e);
 			}
-
 		}
 
 
