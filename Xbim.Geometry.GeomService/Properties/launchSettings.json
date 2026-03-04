@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Xbim.Sunshine.GeomService": {
+      "commandName": "Project",
+      "commandLineArgs": "\"/in:C:\\Data\\Ifc\\SmallModels\\CPM.ifc\" /adjust:False /st:True /eng:V6 /log:True /progress:True /ll:Debug /overwrite:true"
+    },
+    "parsingerror": {
+      "commandName": "Project",
+      "commandLineArgs": "\"/in:C:\\Data\\Ifc\\_TeamSystem\\testing JS\\19i097-x-cvp-xx-xx-m3-a-1000-windows.ifc\" /adjust:False /st:False /eng:V5 /log:True /progress:True /ll:Debug"
+    }
+  }
+}

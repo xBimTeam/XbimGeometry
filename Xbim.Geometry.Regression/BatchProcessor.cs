@@ -67,7 +67,6 @@ namespace XbimRegression
                 XbimServices.Current.ConfigureServices(services => services
                 .AddXbimToolkit(opt => opt
                     .AddLoggerFactory(_loggerFactory)
-                    // .AddHeuristicModel()
                     .AddGeometryServices(builder => builder.Configure(c => c.GeometryEngineVersion = XGeometryEngineVersion.V6))));
             _logger = _loggerFactory.CreateLogger<BatchProcessor>();
         }
@@ -93,21 +92,20 @@ namespace XbimRegression
             // Parallel.ForEach<FileInfo>(toProcess, opts, file =>
             foreach (var file in Params.FilesToProcess)
             {
-                
                 //set up a  log file for this file run                 
                 _currentLogFileName = Path.ChangeExtension(file.FullName, "log");
                 var runLogFileName = _currentLogFileName;
                 if (File.Exists(_currentLogFileName)) File.Delete(runLogFileName); //clear previous run Log file 
                 Console.WriteLine($"Processing {file}");
                 ProcessResult result = ProcessFile(file.FullName, writer, Params.AdjustWcs, _loggerFactory);
-                
+
                 _logger.LogInformation($"Processed {file.FullName}");
                 _currentLogFileName = "BatchProcessor.log";
                 _logger.LogInformation($"Processing {file.FullName}");
                 Console.WriteLine($"Processing run results from log file {runLogFileName}");
-               
+
                 var txt = File.ReadAllText(runLogFileName);
-                
+
                 if (string.IsNullOrEmpty(txt))
                 {
                     File.Delete(runLogFileName);
@@ -402,8 +400,6 @@ namespace XbimRegression
             if (!string.IsNullOrEmpty(cachingExtension))
                 return string.Concat(ifcFile, ".", cachingExtension, extension);
             return string.Concat(ifcFile, extension);
-                
-
         }
 
         private static void RemoveFiles(string ifcFile, string cachingExtension)
