@@ -59,6 +59,7 @@
             cmdRequestDump = new Button();
             chkSkipMeshed = new CheckBox();
             groupBox2 = new GroupBox();
+            cmdEnumerateFiles = new Button();
             grpProgress.SuspendLayout();
             groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudMemoryLimit).BeginInit();
@@ -410,7 +411,7 @@
             // chkSkipMeshed
             // 
             chkSkipMeshed.AutoSize = true;
-            chkSkipMeshed.Location = new Point(64, 63);
+            chkSkipMeshed.Location = new Point(6, 65);
             chkSkipMeshed.Name = "chkSkipMeshed";
             chkSkipMeshed.Size = new Size(158, 19);
             chkSkipMeshed.TabIndex = 12;
@@ -420,6 +421,7 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            groupBox2.Controls.Add(cmdEnumerateFiles);
             groupBox2.Controls.Add(cmdConvertGeometry);
             groupBox2.Controls.Add(chkSkipMeshed);
             groupBox2.Location = new Point(636, 463);
@@ -428,6 +430,17 @@
             groupBox2.TabIndex = 13;
             groupBox2.TabStop = false;
             groupBox2.Text = "Execute";
+            // 
+            // cmdEnumerateFiles
+            // 
+            cmdEnumerateFiles.Location = new Point(169, 59);
+            cmdEnumerateFiles.Margin = new Padding(2);
+            cmdEnumerateFiles.Name = "cmdEnumerateFiles";
+            cmdEnumerateFiles.Size = new Size(116, 28);
+            cmdEnumerateFiles.TabIndex = 13;
+            cmdEnumerateFiles.Text = "Enumerate files";
+            cmdEnumerateFiles.UseVisualStyleBackColor = true;
+            cmdEnumerateFiles.Click += cmdEnumerateFiles_Click;
             // 
             // GeomServiceUI
             // 
@@ -495,5 +508,6 @@
         private Label label9;
         private CheckBox chkSkipMeshed;
         private GroupBox groupBox2;
+        private Button cmdEnumerateFiles;
     }
 }

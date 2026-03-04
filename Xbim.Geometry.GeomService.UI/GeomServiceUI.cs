@@ -103,7 +103,7 @@ namespace Xbim.Geometry.GeomService.UI
             {
                 if (fi.Directory is null)
                     yield break;
-                var lines  = File.ReadLines(txtSources.Text);
+                var lines = File.ReadLines(txtSources.Text);
                 var matcher = new Matcher();
                 foreach (var line in lines)
                 {
@@ -213,16 +213,7 @@ namespace Xbim.Geometry.GeomService.UI
                 _logEntries.Clear();
                 firstLaunch = false;
             }
-            var files = GetIfcFiles(txtSources.Text).ToList();
-            if (chkSkipMeshed.Checked)
-            {
-                // reducing files to those that do not have .xbim meshed files already present, to avoid unnecessary processing
-                files = files.Where(f =>
-                {
-                    var rep = Path.ChangeExtension(f.FullName, ".xbim");
-                    return (!File.Exists(rep)); // skip if .xbim exists for the file
-                }).ToList();
-            }
+            var files = GetFiles();
             var tot = files.Count;
             if (tot == 0)
             {
@@ -291,6 +282,22 @@ namespace Xbim.Geometry.GeomService.UI
                 cmdRequestDump.Enabled = cmdCancelConvertGeometry.Enabled;
                 Cursor = tmpCursor;
             }
+        }
+
+        private List<FileInfo> GetFiles()
+        {
+            var files = GetIfcFiles(txtSources.Text).ToList();
+            if (chkSkipMeshed.Checked)
+            {
+                // reducing files to those that do not have .xbim meshed files already present, to avoid unnecessary processing
+                files = files.Where(f =>
+                {
+                    var rep = Path.ChangeExtension(f.FullName, ".xbim");
+                    return (!File.Exists(rep)); // skip if .xbim exists for the file
+                }).ToList();
+            }
+
+            return files;
         }
 
         private LogLevel GetLogLevel(string text)
@@ -455,6 +462,16 @@ namespace Xbim.Geometry.GeomService.UI
         private void button3_Click(object sender, EventArgs e)
         {
             _meshHelper.RequestDumpStack();
+        }
+
+        private void cmdEnumerateFiles_Click(object sender, EventArgs e)
+        {
+            var t = GetFiles();
+            LogMessageOnListBox($"{t.Count} files to process.", _logEntries, listBoxLog, MaxLogEntries);
+            foreach (var item in t)
+            {
+                LogMessageOnListBox($"{item.FullName}", _logEntries, listBoxLog, MaxLogEntries);
+            }
         }
     }
 
