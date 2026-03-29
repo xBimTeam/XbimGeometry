@@ -31,6 +31,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xbim.Essentials" Version="6.0.578" />
+    <PackageReference Include="Xbim.Essentials" Version="6.0.587" />
   </ItemGroup>
 </Project>

@@ -173,7 +173,9 @@ jobs:
     displayName: 'Copy Nuget packages to: $(build.artifactstagingdirectory)'
     inputs:
       SourceFolder: '$(build.sourcesdirectory)'
-      Contents: '**\bin\$(BuildConfiguration)\*.nupkg'
+      Contents: |
+        **\bin\$(BuildConfiguration)\*.nupkg
+        **\bin\$(BuildConfiguration)\*.snupkg
       TargetFolder: '$(build.artifactstagingdirectory)'
     condition: succeededOrFailed()
   

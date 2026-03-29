@@ -3,7 +3,6 @@
     <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests')) OR $(MSBuildProjectName.EndsWith('Regression'))">true</IsTestProject>
   </PropertyGroup>
   <PropertyGroup>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <GenerateDocumentationFile Condition=" '$(IsTestProject)' != 'true' ">true</GenerateDocumentationFile>
   </PropertyGroup>
 
@@ -27,6 +26,8 @@
     <AssemblyOriginatorKeyFile>..\XbimOpenSourceKeyFile.snk</AssemblyOriginatorKeyFile>
     <DelaySign>false</DelaySign><DelaySign>false</DelaySign>
     <LangVersion>10.0</LangVersion>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>symbols.nupkg</SymbolPackageFormat>
   </PropertyGroup>
 
 </Project>

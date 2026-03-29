@@ -21,12 +21,19 @@
 
 	<Target Name="GetGeometryEngineFiles">
 		<ItemGroup>
-			<GeomEngine64 Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.pdb">
+			<GeomEngine64 Condition="'$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.dll">
 				<WinPlatform>lib/$(TargetFramework)/win-x64</WinPlatform>
 			</GeomEngine64>
-			<GeomEngine86 Condition="'$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.dll;$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.pdb">
+			<GeomEngine86 Condition="'$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.dll">
 				<WinPlatform>lib/$(TargetFramework)/win-x86</WinPlatform>
 			</GeomEngine86>
+
+      <GeomEngine64 Condition="('$(Platform)' == 'x64' Or '$(Platform)' == 'AnyCPU') And '$(Configuration)' == 'Debug'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x64\Xbim.Geometry.Engine.pdb">
+        <WinPlatform>lib/$(TargetFramework)/win-x64</WinPlatform>
+      </GeomEngine64>
+      <GeomEngine86 Condition="('$(Platform)' == 'x86' Or '$(Platform)' == 'AnyCPU') And '$(Configuration)' == 'Debug'" Include="$(GeometryEnginePath)$(TargetFramework)\win-x86\Xbim.Geometry.Engine.pdb">
+        <WinPlatform>lib/$(TargetFramework)/win-x86</WinPlatform>
+      </GeomEngine86>
 
 			<BuildTransitives Include="buildTransitive\$(TargetFramework)\Xbim.Geometry.Engine.Interop.targets">
 				<WinPlatform>buildTransitive/$(TargetFramework)</WinPlatform>
