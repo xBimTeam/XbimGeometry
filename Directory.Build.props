@@ -27,7 +27,7 @@
     <DelaySign>false</DelaySign><DelaySign>false</DelaySign>
     <LangVersion>10.0</LangVersion>
     <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>symbols.nupkg</SymbolPackageFormat>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
 </Project>
