@@ -10,6 +10,7 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO.Memory;
 using Xbim.ModelGeometry.Scene;
 using Xunit;
+using Xunit.Abstractions;
 namespace Xbim.Geometry.Engine.Tests
 
 {
@@ -19,12 +20,15 @@ namespace Xbim.Geometry.Engine.Tests
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly IXbimGeometryServicesFactory _geometryfactory;
+        private readonly ITestOutputHelper output;
 
-        public GithubIssuesTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory geometryfactory)
+        public GithubIssuesTests(ILoggerFactory loggerFactory, IXbimGeometryServicesFactory geometryfactory, ITestOutputHelper output)
         {
             _loggerFactory = loggerFactory;
             _geometryfactory = geometryfactory;
+            this.output = output;
         }
+
         [Theory]
         [InlineData(XGeometryEngineVersion.V5)]
         [InlineData(XGeometryEngineVersion.V6)]
@@ -274,6 +278,30 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Fact]
+        public void Github_Issue_666()
+        {
+            var file = @"TestFiles\Github\wall_door_columnt_rgb4x3.ifc";
 
+            using (IfcStore store = IfcStore.Open(file))
+            {
+                var modelContext = new Xbim3DModelContext(store);
+                modelContext.MaxThreads = 1;
+                modelContext.CreateContext();
+
+                using (IGeometryStoreReader reader = store.GeometryStore.BeginRead())
+                {
+                    output.WriteLine("Styles count: " + reader.StyleIds.Count); ;
+
+                    foreach (var shape in reader.ShapeInstances)
+                    {
+                        output.WriteLine(string.Format("Shape {0}, has style: {1}, style label {2}", shape.ShapeGeometryLabel, shape.HasStyle, shape.StyleLabel));
+                    }
+
+                    reader.ShapeInstances.Where(c => c.HasStyle).Should().HaveCount(9);
+                }
+            }
+
+        }
     }
 }
