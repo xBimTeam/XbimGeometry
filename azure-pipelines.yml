@@ -16,7 +16,7 @@ pr:
     - '*' 
 
 pool:
-  name: Default
+  #  name: Default
   demands:
   - msbuild
   - visualstudio
