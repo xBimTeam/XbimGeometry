@@ -4,6 +4,7 @@ trigger:
     - master
     - develop
     - feature/netcore
+    - feature/netcore-build 
   paths:
     exclude:
     - README.md
