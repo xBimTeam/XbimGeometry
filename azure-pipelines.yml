@@ -4,6 +4,7 @@ trigger:
     - master
     - develop
     - feature/netcore
+    - feature/netcore-build 
   paths:
     exclude:
     - README.md
@@ -16,7 +17,7 @@ pr:
     - '*' 
 
 pool:
-  name: Default
+  #  name: Default
   demands:
   - msbuild
   - visualstudio
@@ -66,7 +67,7 @@ jobs:
   - task: NuGetToolInstaller@0
     displayName: 'Use a new NuGet'
     inputs:
-      versionSpec: '6.7.0'
+      versionSpec: '7.6.0'
 
   - task: VisualStudioTestPlatformInstaller@1
     displayName: 'Visual Studio Test Platform Installer'
