@@ -67,7 +67,7 @@ jobs:
   - task: NuGetToolInstaller@0
     displayName: 'Use a new NuGet'
     inputs:
-      versionSpec: '6.7.0'
+      versionSpec: '7.6.0'
 
   - task: VisualStudioTestPlatformInstaller@1
     displayName: 'Visual Studio Test Platform Installer'
