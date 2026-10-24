@@ -278,6 +278,48 @@ namespace Xbim.Geometry.Engine.Tests
             }
         }
 
+        [Theory]
+        [InlineData(XGeometryEngineVersion.V5)]
+        [InlineData(XGeometryEngineVersion.V6)]
+        public void Github_Issue_579(XGeometryEngineVersion engineVersion)
+        {
+            var ifcFile = @"TestFiles\Github\Github_issue_579.ifc";
+
+            using (var m = MemoryModel.OpenRead(ifcFile))
+            {
+                var c = new Xbim3DModelContext(m, _loggerFactory, engineVersion);
+                var result = c.CreateContext(null, false);
+
+                result.Should().BeTrue();
+
+                var walls = m.Instances.OfType<IIfcWall>().ToList();
+                walls.Should().HaveCount(2);
+
+                var wallWithOpening = walls.Single(w => w.HasOpenings.Any());
+                var wallWithoutOpening = walls.Single(w => !w.HasOpenings.Any());
+
+                XbimShapeInstance GetShapeInstance(IIfcWall wall, XbimGeometryRepresentationType representation)
+                {
+                    var shape = c.ShapeInstances().FirstOrDefault(s =>
+                        s.IfcProductLabel == wall.EntityLabel &&
+                        s.RepresentationType == representation);
+
+                    shape.Should().NotBeNull();
+                    return shape!;
+                }
+
+                var noOpeningIncludedInstance = GetShapeInstance(wallWithoutOpening, XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded);
+                var withOpeningIncludedInstance = GetShapeInstance(wallWithOpening, XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded);
+
+                var noOpeningWorldBounds = noOpeningIncludedInstance.BoundingBox.Transform(noOpeningIncludedInstance.Transformation);
+                var withOpeningWorldBounds = withOpeningIncludedInstance.BoundingBox.Transform(withOpeningIncludedInstance.Transformation);
+
+                withOpeningWorldBounds.SizeX.Should().BeApproximately(noOpeningWorldBounds.SizeX, 1);
+                withOpeningWorldBounds.SizeY.Should().BeApproximately(noOpeningWorldBounds.SizeY, 1);
+                withOpeningWorldBounds.SizeZ.Should().BeApproximately(noOpeningWorldBounds.SizeZ, 1);
+            }
+        }
+
         [Fact]
         public void Github_Issue_666()
         {

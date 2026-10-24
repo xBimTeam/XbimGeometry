@@ -49,17 +49,19 @@ namespace Xbim.ModelGeometry.Scene
             private readonly int _styleId;
             private readonly int _productLabel;
             private readonly int _productType;
+            private readonly XbimMatrix3D _productTransform;
             private IXbimGeometryObjectSet _productGeometries;
             private IXbimSolidSet _cutGeometries;
             private IXbimSolidSet _projectGeometries;
 
 
 
-            public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId)
+            public XbimProductBooleanInfo(Xbim3DModelContext modelContext, XbimCreateContextHelper contextHelper, IXbimGeometryEngine engine, IModel model, ConcurrentDictionary<int, bool> shapeIdsUsedMoreThanOnce, IList<XbimShapeInstance> productShapes, IList<XbimShapeInstance> cutToolIds, IList<XbimShapeInstance> projectToolIds, int context, int styleId, XbimMatrix3D productTransform)
             {
                 _modelContext = modelContext;
                 _contextId = context;
                 _styleId = styleId;
+                _productTransform = productTransform;
 
                 // all the productShapes belong to the same product, take the first to identify it.
                 XbimShapeInstance shape = productShapes.FirstOrDefault();
@@ -130,6 +132,14 @@ namespace Xbim.ModelGeometry.Scene
                 get
                 {
                     return _styleId;
+                }
+            }
+
+            public XbimMatrix3D ProductTransform
+            {
+                get
+                {
+                    return _productTransform;
                 }
             }
 
@@ -946,6 +956,24 @@ namespace Xbim.ModelGeometry.Scene
                 }
                 if (productShapes.Count > 0)
                 {
+                    // Normalize product/feature operands into a shared product-local frame
+                    // so feature booleans follow the same bbox contract as regular products.
+                    var productTransform = productShapes[0].Transformation;
+                    var inverseProductTransform = productTransform;
+                    var canNormaliseToProductLocal = true;
+                    try
+                    {
+                        inverseProductTransform.Invert();
+                    }
+                    catch (Exception)
+                    {
+                        canNormaliseToProductLocal = false;
+                        productTransform = XbimMatrix3D.Identity;
+                    }
+
+                    if (canNormaliseToProductLocal)
+                        NormalizeShapeTransforms(productShapes, inverseProductTransform);
+
                     var cutTools = new List<XbimShapeInstance>();
                     var projectTools = new List<XbimShapeInstance>();
                     foreach (var feature in elementToFeatureGroup)
@@ -962,6 +990,9 @@ namespace Xbim.ModelGeometry.Scene
                             // Seems to break all openings. Reversed 1/9/23. Se GH #444.  One for SRL 
                             //if (featureShape.RepresentationType != XbimGeometryRepresentationType.OpeningsAndAdditionsOnly) //skip if the geometry of the feature is for reference only
                             //{
+                            if (canNormaliseToProductLocal)
+                                featureShape.Transformation = XbimMatrix3D.Multiply(featureShape.Transformation, inverseProductTransform);
+
                             if (isCut)
                                 cutTools.Add(featureShape);
                             else
@@ -971,7 +1002,7 @@ namespace Xbim.ModelGeometry.Scene
                         processed.TryAdd(feature.EntityLabel, 0);
 
                     }
-                    var boolOp = new XbimProductBooleanInfo(this, contextHelper, Engine, Model, shapeIdsUsedMoreThanOnce, productShapes, cutTools, projectTools, context, styleId);
+                    var boolOp = new XbimProductBooleanInfo(this, contextHelper, Engine, Model, shapeIdsUsedMoreThanOnce, productShapes, cutTools, projectTools, context, styleId, productTransform);
                     openingAndProjectionOps.Add(boolOp);
                 }
             });
@@ -1099,7 +1130,8 @@ namespace Xbim.ModelGeometry.Scene
                                 RepresentationType = XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded,
                                 RepresentationContext = openingAndProjectionOp.ContextId,
                                 IfcTypeId = (short)typeId,
-                                Transformation = XbimMatrix3D.Identity,
+                                // Store result as local bbox + product transform (not world bbox + identity).
+                                Transformation = openingAndProjectionOp.ProductTransform,
                                 BoundingBox = elementGeom.BoundingBox
                             };
 
@@ -1122,6 +1154,14 @@ namespace Xbim.ModelGeometry.Scene
 
             // return hash set for high efficiency of subsequent Contains() calls.
             return new HashSet<int>(processed.Keys);
+        }
+
+        private static void NormalizeShapeTransforms(IList<XbimShapeInstance> shapes, XbimMatrix3D inverseTransform)
+        {
+            foreach (var shape in shapes)
+            {
+                shape.Transformation = XbimMatrix3D.Multiply(shape.Transformation, inverseTransform);
+            }
         }
 
         private XbimMatrix3D ApplyShapeDisplacement(GeometryReference shape, XbimMatrix3D transformation)
