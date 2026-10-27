@@ -372,6 +372,10 @@ namespace Xbim.Tessellator
                     new[] { w0, w1, w2, w3 }
                 );
             }
+            else
+            {
+                isect._data = -1;
+            }
         }
 
         /// <summary>
